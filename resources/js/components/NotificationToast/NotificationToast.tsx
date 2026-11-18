@@ -1,0 +1,135 @@
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import Button from '@/components/Button/Button';
+import { joinClassNames } from '@/utils/joinClassNames';
+import './NotificationToast.css';
+
+export type NotificationToastTone = 'custom' | 'info' | 'success' | 'warning' | 'error' | 'black' | 'white';
+export type NotificationToastPosition =
+  | 'top-left'
+  | 'top-right'
+  | 'top-center'
+  | 'bottom-left'
+  | 'bottom-right'
+  | 'bottom-center'
+  | 'left-middle'
+  | 'right-middle';
+
+export interface NotificationToastItem {
+  id: number;
+  tone: NotificationToastTone;
+  position: NotificationToastPosition;
+  title: string;
+  text?: string;
+  confirm?: boolean;
+  autoHideDelay?: number;
+  clickToHide?: boolean;
+}
+
+interface NotificationToastProps {
+  notification: NotificationToastItem;
+  onClose: (id: number) => void;
+}
+
+const iconByTone: Record<NotificationToastTone, string> = {
+  custom: 'md md-album',
+  info: 'fa fa-question',
+  success: 'fa fa-check',
+  warning: 'fa fa-warning',
+  error: 'fa fa-exclamation',
+  black: 'fa fa-adjust',
+  white: 'fa fa-adjust'
+};
+
+export default function NotificationToast({ notification, onClose }: NotificationToastProps): JSX.Element {
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const paused = hovered || focused;
+  const remaining = useRef(notification.autoHideDelay ?? 0);
+
+  useEffect(() => {
+    if (!notification.autoHideDelay || paused || closing) return;
+
+    const startedAt = performance.now();
+    const timer = window.setTimeout(() => setClosing(true), remaining.current);
+
+    return () => {
+      window.clearTimeout(timer);
+      remaining.current = Math.max(0, remaining.current - (performance.now() - startedAt));
+    };
+  }, [notification.autoHideDelay, paused, closing]);
+
+  useEffect(() => {
+    if (!closing) return;
+    const timer = window.setTimeout(() => onClose(notification.id), 320);
+    return () => window.clearTimeout(timer);
+  }, [closing, notification.id, onClose]);
+
+  function handleClick(): void {
+    if (notification.clickToHide !== false) {
+      setClosing(true);
+    }
+  }
+
+  function handleConfirmYes(event: React.MouseEvent<HTMLButtonElement>): void {
+    event.stopPropagation();
+    window.alert('Sim clicado!');
+    setClosing(true);
+  }
+
+  function handleConfirmNo(event: React.MouseEvent<HTMLButtonElement>): void {
+    event.stopPropagation();
+    setClosing(true);
+  }
+
+  return (
+    <div
+      className={joinClassNames(
+        'notificationToast',
+        `notificationToast--${notification.tone}`,
+        paused && 'notificationToast--paused',
+        closing && 'notificationToast--closing',
+        notification.clickToHide !== false && 'notificationToast--clickable',
+      )}
+      role={notification.confirm ? 'alertdialog' : notification.tone === 'error' ? 'alert' : 'status'}
+      style={notification.autoHideDelay ? { '--notification-toast-duration': `${notification.autoHideDelay}ms` } as CSSProperties : undefined}
+      onClick={handleClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
+    >
+      <div className="notificationToast__image">
+        <i className={iconByTone[notification.tone]} aria-hidden="true" />
+      </div>
+
+      <div className="notificationToast__textWrapper">
+        <div className="notificationToast__title">{notification.title}</div>
+        {notification.confirm ? (
+          <div className="notificationToast__text">
+            Tem certeza de que deseja não fazer nada?
+            <div className="notificationToast__clearfix" />
+            <br />
+            <Button tone="white" size="sm" className="notificationToast__confirmButton" onClick={handleConfirmYes}>
+              Sim
+            </Button>
+            <Button tone="danger" size="sm" className="notificationToast__confirmButton" onClick={handleConfirmNo}>
+              Não
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="notificationToast__text">{notification.text}</div>
+            <button type="button" className="notificationToast__dismiss" aria-label="Fechar notificação"
+              onClick={(event) => { event.stopPropagation(); setClosing(true); }}>×</button>
+          </>
+        )}
+      </div>
+      {!!notification.autoHideDelay && (
+        <div className="notificationToast__progress" aria-hidden="true"><div className="notificationToast__progressBar" /></div>
+      )}
+    </div>
+  );
+}

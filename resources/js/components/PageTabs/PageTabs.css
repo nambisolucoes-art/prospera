@@ -1,0 +1,49 @@
+.page-tabs {
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.page-tabs__list {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  min-width: 100%;
+  border-bottom: 1px solid var(--bold-color-border);
+}
+
+.page-tabs__link {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 10px 18px;
+  color: var(--bold-color-text);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.page-tabs__link:is(:hover, [aria-current="page"]) {
+  color: var(--bold-color-primary);
+}
+
+.page-tabs__link:focus-visible {
+  outline: 2px solid var(--bold-color-border-focus);
+  outline-offset: -2px;
+}
+
+.page-tabs__indicator {
+  position: absolute;
+  bottom: -1px;
+  height: 2px;
+  background: var(--bold-color-primary);
+  pointer-events: none;
+  transition: left 280ms cubic-bezier(.22, .61, .36, 1), right 280ms cubic-bezier(.22, .61, .36, 1);
+}
+
+@media (max-width: 767px) {
+  .page-tabs__link { padding-inline: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-tabs__indicator { transition: none; }
+}

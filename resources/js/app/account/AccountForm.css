@@ -1,0 +1,54 @@
+.prospera-account-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.prospera-form-error {
+  color: #a92c2c;
+}
+
+.prospera-account-action {
+  margin-top: 12px;
+}
+
+.prospera-account-form__submit {
+  margin-top: 15px;
+}
+
+.accountCard .prospera-account-form__submit {
+  width: 100%;
+}
+
+.prospera-account-logo {
+  display: block;
+  width: min(260px, 100%);
+  height: auto;
+  margin-inline: auto;
+}
+
+.prospera-account-links a {
+  color: var(--bold-color-primary);
+}
+
+.prospera-account-form--compact .formField__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.prospera-forgot-link {
+  margin-top: 24px;
+}
+
+.prospera-forgot-link a {
+  color: var(--bold-color-legacy-text);
+}
+
+.prospera-forgot-link i {
+  margin-right: 5px;
+}

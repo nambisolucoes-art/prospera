@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="32 87 560 560">
+  <title>Prospera</title>
+  <defs>
+    <linearGradient id="navy-icon" x1="0" y1="0" x2="0.45" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#082f58" />
+      <stop offset="0.65" stop-color="#00325c" />
+      <stop offset="1" stop-color="#052e51" />
+    </linearGradient>
+    <linearGradient id="growth-top" x1="0" y1="1" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#006d4a" />
+      <stop offset="0.34" stop-color="#069b3b" />
+      <stop offset="0.74" stop-color="#4dc915" />
+      <stop offset="1" stop-color="#95e000" />
+    </linearGradient>
+    <linearGradient id="growth-bottom" x1="0" y1="1" x2="1" y2="0" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#006e4b" />
+      <stop offset="0.45" stop-color="#0ea043" />
+      <stop offset="0.79" stop-color="#3cbf26" />
+      <stop offset="1" stop-color="#83d60e" />
+    </linearGradient>
+  </defs>
+  <g>
+    <path id="navy-1" fill="url(#navy-icon)" fill-rule="evenodd" d="M497,216 L488,203 L476,191 L454,175 L429,163 L396,154 L378,152 L129,154 L123,157 L115,168 L69,422 L94,397 L130,371 L163,354 L194,342 L222,334 L235,260 L361,260 L371,263 L383,270 L395,283 L401,295 L402,302 L404,302 L433,286 L456,269 L483,240 Z" />
+    <path id="navy-3" fill="url(#navy-icon)" fill-rule="evenodd" d="M537,264 L524,290 L498,327 L477,348 L449,370 L373,419 L332,451 L317,466 L301,486 L292,500 L283,521 L387,520 L428,512 L451,504 L477,491 L492,481 L513,463 L536,434 L547,414 L554,395 L560,368 L561,340 L557,314 L551,293 Z" />
+  </g>
+  <g>
+    <path id="growth-1" fill="url(#growth-top)" fill-rule="evenodd" d="M587,91 L559,110 L532,125 L456,163 L492,173 L513,177 L514,180 L505,204 L498,216 L495,212 L498,217 L484,240 L456,270 L439,283 L396,307 L366,319 L322,333 L246,353 L189,372 L145,393 L124,406 L104,421 L75,452 L65,468 L59,484 L53,511 L47,553 L43,605 L43,629 L48,616 L65,583 L81,556 L100,529 L122,503 L146,479 L179,451 L226,420 L258,403 L292,388 L342,371 L413,353 L447,340 L464,331 L486,315 L510,288 L524,266 L536,242 L551,205 L563,225 L573,246 L578,224 L584,169 L587,120 Z" />
+    <path id="growth-2" fill="url(#growth-bottom)" fill-rule="evenodd" d="M504,318 L480,337 L462,347 L430,360 L356,385 L316,402 L280,420 L229,451 L180,490 L134,538 L100,584 L81,615 L68,643 L235,643 L246,638 L253,627 L266,566 L280,522 L282,521 L282,518 L294,495 L309,474 L332,450 L351,434 L465,357 L477,347 Z" />
+  </g>
+</svg>

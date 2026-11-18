@@ -1,0 +1,40 @@
+.saas-content {
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  display: grid;
+  gap: 20px;
+}
+
+.saas-content .card-box {
+  margin-bottom: 0;
+}
+
+.saas-content h2,
+.saas-content h3,
+.saas-content h4 {
+  color: var(--bold-color-heading);
+}
+
+.saas-content h2 { font-size: 19px; }
+.saas-content h3 { font-size: 17px; }
+
+.saas-content details { margin-block: 14px; }
+.saas-content summary { cursor: pointer; color: var(--bold-color-primary); font-weight: 600; }
+.saas-content details[open] > summary { margin-bottom: 14px; }
+
+
+.saas-point {
+  padding: 10px 0;
+  border-top: 1px solid var(--bold-color-border);
+}
+
+.saas-point > details { margin-bottom: 0; }
+
+.saas-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.saas-search .inputGroup { max-width: 420px; }

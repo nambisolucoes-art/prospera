@@ -1,0 +1,48 @@
+.account-preview .modalLayer__header h4 {
+  font-size: 17px;
+}
+
+.account-preview .modalLayer__close {
+  opacity: .6;
+}
+
+.account-preview .modalLayer__close:hover,
+.account-preview .modalLayer__close:focus {
+  opacity: 1;
+}
+
+.account-preview__section + .account-preview__section {
+  margin-top: 22px;
+}
+
+.account-preview__section h3 {
+  margin: 0 0 16px;
+  color: var(--bold-color-text);
+  font: 700 15px/1.3 var(--bold-font-ui);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.account-preview__section dl {
+  display: grid;
+  grid-template-columns: minmax(112px, 160px) minmax(0, 1fr);
+  gap: 2px 20px;
+  margin: 0;
+}
+
+.account-preview__section dt {
+  font-weight: 700;
+  text-align: end;
+}
+
+.account-preview__section dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .account-preview__section dl {
+    grid-template-columns: minmax(84px, 1fr) minmax(0, 2fr);
+    gap: 3px 12px;
+  }
+}

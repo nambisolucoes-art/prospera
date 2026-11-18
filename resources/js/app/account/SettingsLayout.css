@@ -1,0 +1,53 @@
+.settings-card > .business-form__section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-card .business-form__section-body > p,
+.settings-card .business-form__section-body > div > p {
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.settings-identity {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: clamp(20px, 4vw, 55px) 10px;
+  text-align: center;
+}
+
+.settings-identity > h2,
+.settings-identity > p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.settings-identity > h2 {
+  margin-top: 5px;
+  color: var(--bold-color-heading);
+  font-size: 18px;
+}
+
+.settings-identity > p {
+  font-size: 13px;
+}
+
+.settings-identity > .button {
+  margin-top: 5px;
+}
+
+.settings-qr-instructions {
+  margin: 0 0 14px;
+  font-size: 13px;
+}
+
+.settings-qr {
+  margin-bottom: 12px;
+}
+
+.settings-qr img {
+  display: block;
+  width: min(192px, 100%);
+  height: auto;
+}

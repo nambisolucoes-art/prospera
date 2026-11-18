@@ -1,0 +1,46 @@
+:root {
+  --bold-font-body: "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --bold-font-ui: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --bold-color-text: #36404a;
+  --bold-color-text-muted: #828282;
+  --bold-color-legacy-text: #797979;
+  --bold-color-legacy-muted: #98a6ad;
+  --bold-color-heading: #505458;
+  --bold-color-surface: #ffffff;
+  --bold-color-surface-alt: #ebeff2;
+  --bold-color-border: #ced4da;
+  --bold-color-border-focus: #aaa;
+  --bold-color-border-soft: #edf0f0;
+  --bold-color-border-subtle: rgba(0, 0, 0, 0.1);
+  --bold-color-shadow: rgba(0, 0, 0, 0.15);
+  --bold-radius: 0px;
+  --bold-checkbox-radius: 3px;
+  --bold-checkbox-primary: #5d9cec;
+  --bold-checkbox-custom: #5fbeaa;
+  --bold-button-pressed-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.5);
+  --bold-button-press-transition: background-color 300ms ease-out, box-shadow 300ms ease-out;
+
+  --prospera-navy: #061f3f;
+  --prospera-blue: #082f58;
+  --prospera-green: #006d4a;
+  --prospera-lime: #95e000;
+
+  --bold-color-custom: var(--prospera-green);
+  --bold-color-primary: var(--prospera-blue);
+  --bold-color-navigation: var(--prospera-navy);
+  --bold-color-navigation-accent: var(--prospera-lime);
+  --bold-color-danger: #f05050;
+  --bold-validation-message-color: #f6504d;
+  --bold-validation-message-size: 12px;
+  --bold-color-info: #34d3eb;
+  --bold-color-success: #81c868;
+  --bold-color-pink: #fb6d9d;
+  --bold-color-purple: #7266ba;
+  --bold-color-warning: #ffbd4a;
+
+  --bold-topbar-height: 60px;
+  --bold-sidebar-width: 240px;
+  --bold-sidebar-small-width: 180px;
+  --bold-sidebar-collapsed-width: 70px;
+}
