@@ -28,7 +28,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
       <BusinessFormSection as="section" title="Informações pessoais" tourTarget="profile-details">
         <AccountForm
           key={JSON.stringify([user.id, user.name, user.email])}
-          business wideLabels inlineActions action="/settings/profile" method="patch" submit="Salvar perfil" fields={[
+          business wideLabels inlineActions action="/settings/profile" method="patch" fields={[
             { name: 'name', label: 'Nome', autoComplete: 'name', value: user.name },
             { name: 'email', label: 'E-mail', type: 'email', autoComplete: 'email', value: user.email },
           ]}
@@ -43,7 +43,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
 
       <BusinessFormSection as="section" title="Excluir conta" tourTarget="profile-delete">
         <p>Confirme sua senha para excluir sua conta de usuário.</p>
-        <AccountForm business wideLabels inlineActions action="/settings/profile" method="delete" submit="Excluir minha conta" submitTone="danger" fields={[
+        <AccountForm business wideLabels inlineActions action="/settings/profile" method="delete" submitTone="danger" fields={[
           { name: 'password', label: 'Senha atual', type: 'password', autoComplete: 'current-password' },
         ]} />
       </BusinessFormSection>

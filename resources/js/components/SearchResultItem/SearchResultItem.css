@@ -14,3 +14,25 @@
   margin-bottom: 10px;
   overflow-wrap: anywhere;
 }
+.searchResultItem {
+  overflow-wrap: anywhere;
+}
+.searchResultItem:last-child {
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+.searchResultItem h3 {
+  margin-top: 0;
+  line-height: 1.4;
+}
+.searchResultItem p {
+  color: var(--bold-color-legacy-text);
+  line-height: 1.6;
+}
+.searchResultItem h3 a:hover,
+.searchResultItem h3 a:focus-visible {
+  text-decoration: underline;
+}
+.searchResultItem h3 a {
+  color: var(--bold-color-primary);
+}

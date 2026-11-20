@@ -1,0 +1,5 @@
+@media (max-width: 480px) {
+  .access-header .pageHeader__actions { grid-area: 2 / 1 / auto / -1; }
+}
+
+.access-preview__permission + .access-preview__permission { margin-top: 4px; }

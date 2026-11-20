@@ -8,12 +8,12 @@
   margin-left: var(--bold-sidebar-width);
   overflow: clip;
   position: relative;
+  padding-top: var(--bold-topbar-height);
   min-height: 100vh;
 }
 
 .app-content-placeholder__inner {
   flex: 1 0 auto;
-  margin-top: var(--bold-topbar-height);
   padding: 20px 20px 15px;
 }
 

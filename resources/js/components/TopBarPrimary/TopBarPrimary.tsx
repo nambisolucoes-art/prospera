@@ -2,6 +2,7 @@ import { useApiPage as usePage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
 import { useEffect, useRef, useState } from 'react';
 import './TopBarPrimary.css';
+import GuidedTour, { type TourDefinition } from '@/components/GuidedTour/GuidedTour';
 import TopBarNotificationsDropdown from './TopBarNotificationsDropdown';
 import TopBarProfileDropdown from './TopBarProfileDropdown';
 import { useFullscreenToggle } from './useFullscreenToggle';
@@ -11,9 +12,12 @@ interface TopBarPrimaryProps {
   onToggleSidebar: () => void;
   sidebarExpanded: boolean;
   smallMenu?: boolean;
+  tour?: TourDefinition;
 }
 
-export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onToggleSidebar, smallMenu = false }: TopBarPrimaryProps): JSX.Element {
+export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onToggleSidebar, smallMenu = false, tour }: TopBarPrimaryProps): JSX.Element {
+  const [tourOpen,setTourOpen]=useState(false);
+  useEffect(()=>setTourOpen(false),[tour?.id]);
   const { name } = usePage<SessionProps>().props;
   const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
   const [profileOpen, setProfileOpen] = useState<boolean>(false);
@@ -57,6 +61,7 @@ export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onTog
   }
 
   return (
+    <>
     <header className={`topbar ${sidebarCollapsed ? 'topbar--collapsed' : ''} ${smallMenu ? 'topbar--small' : ''}`}>
       <div className="topbar__left">
         <div className="topbar__leftInner">
@@ -92,6 +97,7 @@ export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onTog
           </form>
 
           <ul className="topbar__navList nav navbar-nav navbar-right pull-right">
+            {tour && <li className="topbar__navItem"><button type="button" className="topbar__navLink waves-effect topbar__tour" aria-label="Tutorial desta tela" title="Tutorial desta tela" onClick={()=>{setNotificationsOpen(false);setProfileOpen(false);setTourOpen(true);}}><i className="icon-info" aria-hidden="true"/></button></li>}
             <TopBarNotificationsDropdown
               ref={notificationsRef}
               isOpen={notificationsOpen}
@@ -120,5 +126,7 @@ export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onTog
         </div>
       </div>
     </header>
+    {tourOpen && tour && <GuidedTour definition={tour} onClose={()=>setTourOpen(false)}/>}
+    </>
   );
 }

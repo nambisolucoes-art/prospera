@@ -69,7 +69,7 @@ export default function TwoFactorSettings({ enabled, pending }: { enabled: boole
             </div>
             <Field name="code" label="Código do autenticador" inputMode="numeric" autoComplete="one-time-code"
               maxLength={6} error={errors.code} required />
-            <BusinessFormActions inline submit="Confirmar configuração" processing={processing || disable.processing}>
+            <BusinessFormActions inline processing={processing || disable.processing}>
               {deactivateButton(processing)}
             </BusinessFormActions>
           </>

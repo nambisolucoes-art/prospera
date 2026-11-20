@@ -13,4 +13,6 @@ fi
 ln -sfn "$environment_file" .env
 
 php artisan migrate --force --no-interaction
+php artisan permissions:sync --no-interaction
+php artisan audit:check --no-interaction
 exec "$@"

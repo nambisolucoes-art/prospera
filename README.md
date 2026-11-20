@@ -20,6 +20,9 @@ A raiz encaminha para o login ou para o painel correspondente ao usuário. O cad
 
 - `resources/js/app/` contém o layout, o roteamento visual e a integração de conta com o Laravel. Os módulos das telas são carregados sob demanda.
 - `resources/js/pages/` organiza as telas do Bold por recurso. Os componentes reutilizáveis ficam em `resources/js/components/`, com seus estilos locais.
+- Formulários e modais usam **Salvar** para gravar e **Excluir** para confirmar exclusões, sem acrescentar o nome do recurso. Os componentes de formulário oferecem esses textos como padrão.
+- Badges de situação usam `StatusLabel`: Ativa em verde e Inativa em vermelho.
+- Badges e etiquetas usam os tokens `--bold-label-*`, medidos na tabela de ordens de serviço da referência Visdom: fonte de 10,5 px e altura aproximada de 20 px em uma linha, inclusive em modais e seletores.
 - `resources/js/styles/` mantém os estilos e tokens compartilhados. Imagens, fontes de ícones e plugins do tema ficam em `public/assets/`.
 - `npm run check` valida a arquitetura e os tipos. `npm run build` também gera a distribuição do frontend.
 - As rotas de tela retornam HTML no acesso direto pelo navegador e dados quando a aplicação solicita `Accept: application/json`. As requisições de escrita usam a sessão e a proteção CSRF do Laravel. Erros de validação retornam HTTP 422 com mensagens por campo.
@@ -29,7 +32,7 @@ Após editar a aplicação, use `docker compose up --build --wait` para reconstr
 
 ```sh
 docker compose logs -f app
-docker compose exec -e APP_ENV=testing -e DB_CONNECTION=sqlite app php artisan test
+docker compose exec app php artisan test
 ```
 
 `docker compose down` para o ambiente e preserva os volumes.
@@ -46,9 +49,23 @@ docker compose exec app php artisan auth:create-user --role=platform-admin
 
 Entre em [localhost:8000/login](http://localhost:8000/login). No painel **Contas**, use **Cadastrar conta** para informar CPF ou CNPJ, plano, contatos e endereço. Defina uma senha inicial para o administrador da conta ou envie um link para ele escolher a senha. A tabela permite buscar, visualizar e editar contas.
 
-O comando é genérico. Para criar um usuário vinculado a uma conta no terminal, informe `--role=account-admin` ou `--role=account-member` com `--account=ID`. Nas telas, o cadastro **Usuários** assume o contexto da plataforma ou da conta autenticada.
+O comando é genérico. Para criar um usuário vinculado a uma conta no terminal, informe `--role=account-admin` ou `--role=account-member` com `--account=ID`. Na plataforma, use **Usuários**; dentro da conta, use **Pessoas** e selecione a etiqueta **Usuário** para conceder acesso.
 
 O administrador da conta entra na mesma tela de login e é encaminhado para **Minha conta**. A própria conta representa o estabelecimento. Nesse painel, o administrador pode editar os dados do estabelecimento e gerenciar seus pontos. Cada usuário possui uma pessoa vinculada, incluindo os usuários que já existiam antes da migração.
+
+### Pessoas e etiquetas da conta
+
+Usuários autorizados da conta encontram **Pessoas** e **Etiquetas** no menu, conforme as permissões de seu cargo. Em Pessoas, cadastre os contatos e selecione etiquetas. Selecionar **Usuário** abre a seção de acesso por convite ou senha inicial. Para uma pessoa existente, use a edição para conceder acesso sem duplicar o cadastro.
+
+O cadastro e a edição de etiquetas abrem em modais na listagem, com situação Ativa ou Inativa. Inativar preserva os vínculos existentes e impede novas seleções. A ação de exclusão usa uma borracha e só permite excluir etiquetas sem vínculos; etiquetas especiais são protegidas. Cada etiqueta mantém sua cor nas listas, visualizações e no seletor de pessoas. Etiquetas pertencem à conta e ao módulo; inicialmente está disponível Pessoas. A etiqueta especial **Usuário** cria acesso. Retirá-la na edição revoga o acesso ao salvar, com a permissão Revogar acesso de Usuários. Consulte [Pessoas](docs/ajuda/pessoas.md) e [Etiquetas](docs/ajuda/etiquetas.md).
+
+### Pessoas e seus papéis
+
+Identificação (tipo de pessoa, nome ou razão social, CPF/CNPJ, nome fantasia e inscrições), endereço principal e contatos pertencem a Pessoas e são preenchidos uma única vez, mesmo quando a pessoa recebe várias etiquetas. Telefone e WhatsApp reutilizam máscaras e ícones do formulário da conta. Pessoas também permite até 20 telefones e 20 e-mails adicionais pelos mesmos botões de adicionar e remover da conta, sem alterar o e-mail principal de acesso. Documento é opcional, validado quando informado e único por conta; CNPJ alfanumérico é aceito.
+
+A etiqueta especial **Fornecedor** identifica um papel da mesma pessoa e não repete os campos comuns. O filtro Fornecedores mostra os ativos. Retirar a etiqueta e salvar inativa o vínculo, preservando pessoa, dados e histórico. Não é criado acesso de usuário. Cadastrar, visualizar, listar, ativar e inativar fornecedores têm permissões próprias; os dados comuns são editados pela permissão de Pessoas. Consulte [Fornecedores](docs/ajuda/fornecedores.md) e o [levantamento dos campos](docs/pesquisas/cadastro-fornecedores.md).
+
+A etiqueta especial **Cliente** também representa um papel da pessoa, podendo coexistir com Fornecedor e Usuário. O filtro Clientes mostra os vínculos ativos. Retirar a etiqueta e salvar inativa o vínculo; selecionar novamente reativa o mesmo registro. Não repete identidade nem contatos e não cria acesso. Clientes têm permissões próprias de cadastrar, visualizar, listar, ativar e inativar. Consulte [Clientes](docs/ajuda/clientes.md).
 
 ### Recuperação de senha
 
@@ -68,3 +85,27 @@ O código de negócio se organiza em `app/Domains/{Dominio}`.
 - As consultas de listagem ficam em `Application/Queries` e recebem os filtros normalizados.
 
 O cadastro de pontos é uma referência curta. O controller cria `SavePointData`, `SavePointAction` monta `PointConfigurationDTO` e o model `Point` aplica o estado.
+
+## Cargos e catálogo de permissões
+
+O acesso da conta é definido por cargos persistidos e permissões por ação. O item **Cargos** aparece conforme o acesso; as permissões são selecionadas em seu formulário, sem tela ou cadastro próprio; em Pessoas, **Papel na conta** busca os cargos cadastrados. As migrações preservam os usuários existentes, atribuindo os cargos iniciais conforme o acesso anterior.
+
+```sh
+docker compose exec app php artisan permissions:sync
+```
+
+O comando descobre as verificações no PHP e sincroniza o catálogo preservando os vínculos dos cargos. As permissões são definidas pelos módulos no código; não existe cadastro manual de permissões. Também roda na inicialização Docker. Todo módulo novo deve declarar e verificar as permissões específicas de suas ações; veja a [convenção de permissões](docs/convencoes/permissoes.md) e a [ajuda de cargos](docs/ajuda/cargos-permissoes.md).
+
+## Auditoria, ajuda e tutorial
+
+**Auditoria** aparece no menu da plataforma e da conta conforme a permissão de listar. A consulta tem filtros por autor, tipo, ação e período; na plataforma há filtro por conta. O detalhe mostra os valores anteriores e novos. A permissão de detalhes técnicos é independente. O servidor limita todos os dados e opções à conta autorizada.
+
+Toda alteração de negócio é auditada pelo contrato `Auditable` e pelo observer compartilhado. Relacionamentos e eventos de acesso são registrados explicitamente. Operações revertidas não geram histórico concluído. Dados protegidos são substituídos por marcadores, sem senhas, segredos ou imagens. `docker compose exec app php artisan audit:check` verifica a cobertura e também roda na inicialização. Consulte a [convenção de auditoria](docs/convencoes/auditoria.md).
+
+A **Central de Ajuda** está no menu e usa os artigos de `docs/ajuda/`, filtrados no servidor por contexto e permissão. O botão **Tutorial desta tela**, com ícone de informação na barra superior, inicia os passos da página, inclusive no celular. O tour respeita os controles disponíveis, não modifica os dados digitados e pode ser fechado com Esc. As configurações estão em `resources/js/app/guidance.ts` e seus roteiros em `docs/tours/`.
+
+A suíte impõe SQLite em memória em `tests/bootstrap.php`, antes de carregar o Laravel, para impedir que as variáveis do Docker direcionem os testes ao PostgreSQL da aplicação.
+
+Após uma atualização, a aplicação recupera uma falha de carregamento dos arquivos de tela com uma única navegação GET, sem reenviar formulários. O HTML não fica armazenado em cache. Falhas persistentes oferecem Recarregar tela; a tentativa automática é limitada para evitar loops. Consulte a [verificação de recuperação](docs/convencoes/recuperacao-assets-etiquetas-entrega.md).
+
+A listagem da Central de Ajuda segue a busca do Ubold e do GNAI: campo centralizado, abas com contadores por categoria e resultados em lista com título, caminho e resumo. SearchInput, SearchResults, SearchResultItem, Tabs e Badge são reutilizados; categorias e contagens usam somente os artigos autorizados retornados pelo servidor.

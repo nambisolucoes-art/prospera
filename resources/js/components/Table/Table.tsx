@@ -26,6 +26,7 @@ export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   hover?: boolean;
   condensed?: boolean;
   appearance?: 'standard' | 'inherit';
+  headerTone?: 'default' | 'primary';
 }
 const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
   {
@@ -35,6 +36,7 @@ const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
     hover,
     condensed,
     appearance = 'standard',
+    headerTone = 'default',
     children,
     ...props
   },
@@ -44,7 +46,7 @@ const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
     <table
       {...props}
       ref={ref}
-      className={`${appearance === 'standard' ? 'boldTable ' : ''}table ${striped ? 'table-striped' : ''} ${bordered ? 'table-bordered' : ''} ${hover ? 'table-hover' : ''} ${condensed ? 'table-condensed' : ''} ${className}`}
+      className={`${appearance === 'standard' ? 'boldTable ' : ''}table ${headerTone === 'primary' ? 'table--primary-header' : ''} ${striped ? 'table-striped' : ''} ${bordered ? 'table-bordered' : ''} ${hover ? 'table-hover' : ''} ${condensed ? 'table-condensed' : ''} ${className}`}
     >
       {children}
     </table>

@@ -1,0 +1,91 @@
+.audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+.audit-filters > .saas-search {
+  flex: 1 1 240px;
+}
+.audit-filters > .selectControl {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+.audit-filters > input {
+  max-width: 170px;
+  min-width: 0;
+}
+.audit-changes {
+  margin: 24px 0;
+}
+.audit-changes h3 {
+  font-size: 16px;
+}
+.audit-changes__scroll {
+  overflow: auto;
+}
+.audit-changes table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+}
+.audit-changes th,
+.audit-changes td {
+  text-align: left;
+  vertical-align: top;
+  padding: 12px;
+  border-bottom: 1px solid var(--bold-color-border-soft);
+  overflow-wrap: anywhere;
+}
+.audit-technical pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 16px;
+  background: var(--bold-color-surface-alt);
+  font-size: 12px;
+}
+.help-empty {
+  padding: 20px 0;
+  text-align: center;
+}
+.help-article {
+  max-width: 900px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+.help-article h2 {
+  font-size: 21px;
+  margin-top: 28px;
+  scroll-margin-top: 90px;
+}
+.help-article h3 {
+  font-size: 18px;
+}
+.help-article a {
+  color: var(--bold-color-primary);
+}
+.help-summary {
+  font-size: 16px;
+}
+.help-article table {
+  display: block;
+  overflow: auto;
+}
+.help-article pre {
+  white-space: pre-wrap;
+}
+@media (max-width: 480px) {
+  .audit-filters > * {
+    width: 100%;
+  }
+  .audit-filters > input {
+    flex: 1 1 110px;
+    max-width: none;
+  }
+  .audit-changes th,
+  .audit-changes td {
+    padding: 8px;
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Domains\Etiquetas\Application\Data;
+
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
+final readonly class SaveTagData
+{
+    /** @param array<string,mixed> $values */
+    public function __construct(public array $values) {}
+
+    /** @param array<string,mixed> $input */
+    public static function fromInput(array $input, int $accountId, ?int $id): self
+    {
+        if (is_string($input['name'] ?? null)) {
+            $input['name'] = trim($input['name']);
+        }
+
+        return new self(Validator::validate($input, ['active' => ['sometimes', 'boolean'], 'name' => ['required', 'string', 'max:100', Rule::unique('tags')->where('account_id', $accountId)->where('module', 'people')->ignore($id)], 'module' => ['required', Rule::in(['people'])], 'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/']], [
+            'active.boolean' => 'Selecione uma situação válida.',
+            'name.required' => 'Informe o nome da etiqueta.',
+            'name.string' => 'Informe um nome válido.',
+            'name.max' => 'O nome deve ter até 100 caracteres.',
+            'name.unique' => 'Já existe uma etiqueta com este nome no módulo.',
+            'module.required' => 'Selecione o módulo.',
+            'module.in' => 'Selecione um módulo válido.',
+            'color.required' => 'Informe a cor.',
+            'color.regex' => 'Informe uma cor hexadecimal válida.',
+        ]));
+    }
+}

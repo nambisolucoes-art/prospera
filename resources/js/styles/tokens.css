@@ -15,6 +15,11 @@
   --bold-color-border-subtle: rgba(0, 0, 0, 0.1);
   --bold-color-shadow: rgba(0, 0, 0, 0.15);
   --bold-radius: 0px;
+  --bold-label-font-size: 10.5px;
+  --bold-label-line-height: 14px;
+  --bold-label-padding: 3px 6px;
+  --bold-label-font-weight: 600;
+  --bold-label-letter-spacing: 0.05em;
   --bold-checkbox-radius: 3px;
   --bold-checkbox-primary: #5d9cec;
   --bold-checkbox-custom: #5fbeaa;
@@ -38,6 +43,10 @@
   --bold-color-pink: #fb6d9d;
   --bold-color-purple: #7266ba;
   --bold-color-warning: #ffbd4a;
+
+  --prospera-inspection-background: #fff3d6;
+  --prospera-inspection-text: #664400;
+  --prospera-inspection-border: #edcf8b;
 
   --bold-topbar-height: 60px;
   --bold-sidebar-width: 240px;

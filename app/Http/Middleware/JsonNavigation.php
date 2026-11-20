@@ -15,6 +15,10 @@ final class JsonNavigation
     {
         $response = $next($request);
         if (! $request->expectsJson()) {
+            if (str_contains((string) $response->headers->get('Content-Type'), 'text/html')) {
+                $response->headers->set('Cache-Control', 'private, no-store');
+            }
+
             return $response;
         }
 

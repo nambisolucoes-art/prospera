@@ -64,3 +64,53 @@
   margin-right: 0;
 }
 @media(max-width:991px) { .searchResults__heading h3 { margin-top:0; } }
+.searchResults__heading h3 {
+  overflow-wrap: anywhere;
+}
+.searchResults__summary {
+  color: var(--bold-color-text-muted);
+  font-size: 13px;
+}
+.searchResults .tabs__nav {
+  flex-wrap: wrap;
+  box-shadow: none;
+}
+.searchResults .tabs__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.searchResults .tabs__label .badge {
+  margin-left: 0;
+}
+.searchResults .tabs__button {
+  height: auto;
+  min-height: 50px;
+  line-height: 1.5;
+  padding-block: 12px;
+}
+.searchResults .tabs__label b {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767px) {
+  .searchResults .tabs__nav > li {
+    max-width: 100%;
+  }
+  .searchResults .tabs__button {
+    padding-inline: 14px;
+    font-size: 13px;
+  }
+  .searchResults .tabs__content {
+    padding: 20px 16px 1px;
+  }
+}
+.searchResults .tabs--framed .tabs__nav {
+  flex-wrap: nowrap;
+}
+.searchResults .tabs--framed .tabs__nav > li {
+  max-width: none;
+  margin: 0;
+}
+.searchResults .tabs--framed .tabs__label {
+  white-space: nowrap;
+}

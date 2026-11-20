@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Middleware\EnforceAccountInspection;
+use App\Http\Middleware\EnforceAudit;
 use App\Http\Middleware\JsonNavigation;
+use App\Http\Middleware\SelfServicePermissions;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,8 +19,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
 
         $middleware->web(append: [
+            \App\Http\Middleware\EnsureUserAccessEnabled::class,
             JsonNavigation::class,
             EnforceAccountInspection::class,
+            EnforceAudit::class,
+            SelfServicePermissions::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
     })

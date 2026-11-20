@@ -1,12 +1,13 @@
 import { useApiPage as usePage } from '@/hooks/useApiPage';
 import BusinessList, { type BusinessColumn, type PageSummary } from '@/components/BusinessList/BusinessList';
+import Link from '@/components/ApiLink/ApiLink';
 import Button from '@/components/Button/Button';
 import ProfileAvatar from '@/components/ProfileAvatar/ProfileAvatar';
 import type { SessionProps } from '@/types/Session.types';
 import SaasLayout from './SaasLayout';
 import './UserDirectory.css';
 
-type UserRow = { id: number; name: string; email: string; is_account_admin: boolean; photo_url: string | null };
+type UserRow = { id: number; person_id: number; role_name: string; name: string; email: string; is_account_admin: boolean; photo_url: string | null };
 
 export default function Users({ users, tenant }: { users: PageSummary & { data: UserRow[] }; tenant: boolean }) {
   const readOnly = usePage<SessionProps>().props.auth.inspection_mode === 'read-only';
@@ -15,12 +16,12 @@ export default function Users({ users, tenant }: { users: PageSummary & { data: 
     { id: 'name', label: 'Nome', width: 220, compact: true, render: (user) => (
       <span className="user-directory__identity">
         <ProfileAvatar name={user.name} photoUrl={user.photo_url} small lazy />
-        <span className="user-directory__name" title={user.name}>{user.name}</span>
+        <span className="user-directory__name" title={user.name}>{tenant ? <Link href={`/conta/pessoas/${user.person_id}/editar`}>{user.name}</Link> : user.name}</span>
       </span>
     ) },
     { id: 'email', label: 'E-mail', width: 255, compact: true, render: (user) => user.email },
     { id: 'role', label: 'Papel', width: 190,
-      render: (user) => tenant ? (user.is_account_admin ? 'Administrador da conta' : 'Usuário') : 'Administrador da plataforma' },
+      render: (user) => tenant ? user.role_name : 'Administrador da plataforma' },
   ];
 
   return (

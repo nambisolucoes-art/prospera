@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Domains\Auditoria\Domain\Concerns;
+
+use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Auditoria\Infrastructure\Observers\AuditObserver;
+use Illuminate\Database\Eloquent\Model;
+
+/** @phpstan-require-extends Model */
+trait AuditsChanges
+{
+    public static function bootAuditsChanges(): void
+    {
+        foreach (['created', 'updated', 'deleted'] as $event) {
+            static::registerModelEvent($event, fn ($model) => app(AuditObserver::class)->{$event}($model));
+        }
+    }
+
+    /** @return array<string,string> */
+    public static function unauditedFields(): array
+    {
+        return [];
+    }
+
+    public function auditAccountId(): ?int
+    {
+        $id = $this->getAttribute('account_id') ?? $this->getAttribute('client_id');
+
+        return $id === null ? null : (int) $id;
+    }
+
+    /** @param array<string,mixed> $options */
+    public function save(array $options = []): bool
+    {
+        return (bool) AuditLog::transaction(fn () => parent::save($options));
+    }
+
+    public function delete(): ?bool
+    {
+        return AuditLog::transaction(fn () => parent::delete());
+    }
+}

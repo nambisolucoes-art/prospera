@@ -2,7 +2,7 @@ import './Label.css';
 import React from "react";
 import { joinClassNames } from '@/utils/joinClassNames';
 
-type LabelVariant = 'default' | 'primary' | 'danger' | 'success' | 'pink' | 'purple' | 'warning' | 'info' | 'inverse';
+export type LabelVariant = 'default' | 'primary' | 'danger' | 'success' | 'pink' | 'purple' | 'warning' | 'info' | 'inverse';
 
 interface LabelProps {
   children: React.ReactNode;

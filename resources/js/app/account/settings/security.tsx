@@ -15,7 +15,7 @@ export default function Security({ canManageTwoFactor, twoFactorEnabled = false,
   return (
     <>
       <BusinessFormSection as="section" title="Alterar senha" tourTarget="security-password">
-        <AccountForm business wideLabels inlineActions action="/settings/password" method="put" submit="Atualizar senha" fields={[
+        <AccountForm business wideLabels inlineActions action="/settings/password" method="put" fields={[
           { name: 'current_password', label: 'Senha atual', type: 'password', autoComplete: 'current-password' },
           { name: 'password', label: 'Nova senha', type: 'password', autoComplete: 'new-password' },
           { name: 'password_confirmation', label: 'Confirme a nova senha', type: 'password', autoComplete: 'new-password' },

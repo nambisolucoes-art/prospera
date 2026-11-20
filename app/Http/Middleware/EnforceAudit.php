@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Domains\Auditoria\Application\Actions\AuditContext;
+use App\Domains\Auditoria\Application\Actions\AuditLog;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+final class EnforceAudit
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $context = app(AuditContext::class);
+        $context->begin($request);
+        try {
+            if ($request->isMethodSafe()) {
+                return $next($request);
+            }
+
+            return AuditLog::transaction(function () use ($request, $next) {
+                $response = $next($request);
+                if ($response->getStatusCode() >= 400 || (property_exists($response, 'exception') && $response->exception instanceof \Throwable)) {
+                    throw new AuditResponseRollback($response);
+                }
+                if ($request->routeIs('passkey.store', 'passkey.destroy') && $request->user()) {
+                    $user = $request->user();
+                    AuditLog::record('user', $user->id, $user->account_id, 'updated', $user->name, ['passkeys' => ['label' => 'Chaves de acesso', 'before' => null, 'after' => $request->routeIs('passkey.store') ? 'Chave cadastrada' : 'Chave excluída']]);
+                }
+
+                return $response;
+            });
+        } catch (AuditResponseRollback $rollback) {
+            return $rollback->response;
+        } finally {
+            $context->clear();
+        }
+    }
+}
+final class AuditResponseRollback extends \RuntimeException
+{
+    public function __construct(public readonly Response $response)
+    {
+        parent::__construct('Operação revertida.');
+    }
+}

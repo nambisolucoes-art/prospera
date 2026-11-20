@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Tabs, { type TabItem } from "@/components/Tabs/Tabs";
 import Badge from "@/components/Badge/Badge";
 import MediaObject from "@/components/MediaObject/MediaObject";
@@ -6,8 +7,15 @@ import SearchInput from "@/components/SearchInput/SearchInput";
 import SearchResultItem from "@/components/SearchResultItem/SearchResultItem";
 import { searchData } from "./SearchResults.data";
 import "./SearchResults.css";
-export default function SearchResults(): JSX.Element {
-  const items: TabItem[] = [
+export default function SearchResults({ search, heading, summary, items, tabsTourTarget, tabsVariant = 'bootstrap' }: {
+  search?: ReactNode;
+  heading?: ReactNode;
+  summary?: ReactNode;
+  items?: TabItem[];
+  tabsTourTarget?: string;
+  tabsVariant?: 'bootstrap' | 'framed';
+} = {}): JSX.Element {
+  const demoItems: TabItem[] = [
     {
       id: "all",
       accessibleLabel: "Todos os resultados",
@@ -91,14 +99,15 @@ export default function SearchResults(): JSX.Element {
   return (
     <div className="searchResults">
       <div className="searchResults__search">
-        <SearchInput />
+        {search ?? <SearchInput />}
       </div>
       <div className="searchResults__heading">
         <h3>
-          <b>Resultados da busca por "Painel administrativo"</b>
+          <b>{heading ?? 'Resultados da busca por "Painel administrativo"'}</b>
         </h3>
+        {summary && <p className="searchResults__summary" role="status">{summary}</p>}
       </div>
-      <Tabs items={items} variant="bootstrap" />
+      <div data-tour={tabsTourTarget}><Tabs items={items ?? demoItems} variant={tabsVariant} /></div>
     </div>
   );
 }

@@ -1,15 +1,16 @@
 .tableLabel {
-  display: inline;
-  padding: 0.3em 0.6em;
-  font-size: 75%;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--bold-label-padding);
+  font-size: var(--bold-label-font-size);
+  font-weight: var(--bold-label-font-weight);
+  line-height: var(--bold-label-line-height);
+  letter-spacing: var(--bold-label-letter-spacing);
   color: white;
   text-align: center;
   white-space: nowrap;
-  vertical-align: baseline;
-  border-radius: 0.25em;
+  vertical-align: middle;
+  border-radius: var(--bold-radius);
 }
 .tableLabel--success {
   background: var(--bold-color-success, #81c868);

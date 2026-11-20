@@ -2,6 +2,8 @@
 
 namespace App\Domains\Plataforma\Application\Actions;
 
+use App\Domains\Auditoria\Application\Actions\AuditContext;
+use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Application\Data\StartAccountInspectionData;
 use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
 use App\Domains\Plataforma\Domain\DTOs\AccountInspectionDTO;
@@ -33,6 +35,8 @@ final readonly class StartAccountInspectionAction
         Auth::guard('web')->login($target);
         AccountInspectionSession::start($session, $inspection);
 
+        app(AuditContext::class)->begin(request());
+        AuditLog::record('account', $account->id, $account->id, 'inspection-started', $account->name, ['mode' => ['label' => 'Modo de inspeção', 'before' => null, 'after' => $data->mode->value], 'represented' => ['label' => 'Usuário representado', 'before' => null, 'after' => $target->name]]);
         Log::notice('Inspeção de conta iniciada.', AccountInspectionSession::context($inspection));
     }
 }

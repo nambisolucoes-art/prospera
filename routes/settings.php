@@ -10,24 +10,24 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', '/settings/profile');
 
-    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('settings/profile/photo', [ProfilePhotoController::class, 'store'])->name('profile.photo.store');
+    Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit')->middleware('can:self.profile.view');
+    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update')->middleware('can:self.profile.update');
+    Route::post('settings/profile/photo', [ProfilePhotoController::class, 'store'])->name('profile.photo.store')->middleware('can:self.profile.photo');
     Route::get('settings/profile/photo/{version}', [ProfilePhotoController::class, 'show'])->whereUuid('version')->name('profile.photo.show');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy')->middleware('can:self.profile.delete');
 
     Route::get('settings/security', [SecurityController::class, 'edit'])
         ->middleware(RequirePassword::class)
-        ->name('security.edit');
+        ->name('security.edit')->middleware('can:self.security.view');
 
     Route::put('settings/password', [SecurityController::class, 'update'])
         ->middleware('throttle:6,1')
-        ->name('user-password.update');
+        ->name('user-password.update')->middleware('can:self.security.password');
 
-    Route::get('settings/appearance', fn () => ApiPage::respond())->name('appearance.edit');
+    Route::get('settings/appearance', fn () => ApiPage::respond())->name('appearance.edit')->middleware('can:self.appearance.view');
 
 });
 Route::get('.well-known/passkey-endpoints', function () {

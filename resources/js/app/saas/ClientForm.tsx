@@ -84,7 +84,7 @@ export default function ClientForm({ client, tenant = false }: { client?: Client
               <UserFields errors={errors} prefix="administrator" />
             </BusinessFormSection>
           )}
-          <BusinessFormActions submit={tenant ? 'Salvar estabelecimento' : client ? 'Salvar conta' : 'Cadastrar conta'}
+          <BusinessFormActions
             processing={processing} cancelHref={tenant ? '/conta' : '/dashboard'} />
         </>
       )}

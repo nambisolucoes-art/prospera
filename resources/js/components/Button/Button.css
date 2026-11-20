@@ -92,6 +92,7 @@
   background-color: #4c5667 !important;
   border-color: #4c5667 !important;
   color: #ffffff !important;
+  border-radius: var(--bold-radius);
 }
 
 .button--purple,

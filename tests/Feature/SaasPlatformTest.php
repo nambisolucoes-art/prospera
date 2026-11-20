@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -179,7 +180,7 @@ class SaasPlatformTest extends TestCase
         $this->post('/conta/usuarios', [
             'name' => 'Colaborador', 'email' => 'member@example.test', 'mode' => 'manual',
             'password' => 'SenhaForte123!', 'password_confirmation' => 'SenhaForte123!',
-            'role' => 'account-member', 'account_id' => $other->id, 'is_saas_admin' => true,
+            'role_id' => Role::where('account_id', $account->id)->where('system_key', 'member')->value('id'), 'account_id' => $other->id, 'is_saas_admin' => true,
         ])->assertRedirect(route('account.users.index'));
         $member = User::query()->where('email', 'member@example.test')->sole();
         $this->assertSame($account->id, $member->account_id);

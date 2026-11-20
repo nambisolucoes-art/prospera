@@ -12,7 +12,7 @@ export interface TabItem {
 interface TabsProps {
   items: TabItem[];
   initialActiveId?: string;
-  variant?: 'standard' | 'material' | 'bootstrap' | 'justified' | 'vertical' | 'vertical-reverse' | 'pills';
+  variant?: 'standard' | 'material' | 'bootstrap' | 'justified' | 'vertical' | 'vertical-reverse' | 'pills' | 'framed';
 }
 
 export default function Tabs({ items, initialActiveId, variant = 'standard' }: TabsProps): JSX.Element {
@@ -28,7 +28,7 @@ export default function Tabs({ items, initialActiveId, variant = 'standard' }: T
 
   const navigation = (
     <ul
-      className={`tabs__nav ${isVertical ? 'tabs__nav--vertical' : ''} ${variant === 'material' ? 'tabs__nav--material' : ''} ${variant === 'bootstrap' ? 'tabs__nav--bootstrap' : ''} ${variant === 'justified' ? 'tabs__nav--justified' : ''} ${variant === 'pills' ? 'tabs__nav--pills' : ''} ${variant === 'standard' || variant === 'material' ? 'tabs__nav--animated' : ''} ${hasMobileIcons ? 'tabs__nav--mobileIcons' : ''}`}
+      className={`tabs__nav ${isVertical ? 'tabs__nav--vertical' : ''} ${variant === 'material' ? 'tabs__nav--material' : ''} ${variant === 'bootstrap' || variant === 'framed' ? 'tabs__nav--bootstrap' : ''} ${variant === 'justified' ? 'tabs__nav--justified' : ''} ${variant === 'pills' ? 'tabs__nav--pills' : ''} ${variant === 'standard' || variant === 'material' ? 'tabs__nav--animated' : ''} ${hasMobileIcons ? 'tabs__nav--mobileIcons' : ''}`}
       role="tablist"
     >
       {items.map((item: TabItem) => (
@@ -70,7 +70,7 @@ export default function Tabs({ items, initialActiveId, variant = 'standard' }: T
   }
 
   return (
-    <div className="tabs">
+    <div className={`tabs ${variant === 'framed' ? 'tabs--framed' : ''}`}>
       {navigation}
       <div className="tabs__content" role="tabpanel">{activeItem?.content}</div>
     </div>

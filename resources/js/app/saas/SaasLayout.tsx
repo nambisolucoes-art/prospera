@@ -8,17 +8,17 @@ import type { SessionProps } from '@/types/Session.types';
 import { accountNavigation } from './accountNavigation';
 import './SaasLayout.css';
 
-export default function SaasLayout({ title, children, tenant = false, actions, userPage = false, breadcrumb }: {
-  title: string; children: ReactNode; tenant?: boolean; actions?: ReactNode; userPage?: boolean; breadcrumb?: PageBreadcrumbItem[];
+export default function SaasLayout({ title, children, tenant = false, actions, userPage = false, breadcrumb, headerClassName }: {
+  title: string; children: ReactNode; tenant?: boolean; actions?: ReactNode; userPage?: boolean; breadcrumb?: PageBreadcrumbItem[]; headerClassName?: string;
 }) {
-  const mayManageUsers = usePage<SessionProps>().props.auth.user?.is_account_admin;
-  const navigation = accountNavigation(tenant, mayManageUsers);
+  const permissions = usePage<SessionProps>().props.auth.permissions;
+  const navigation = accountNavigation(tenant, permissions);
   const root = tenant ? { label: 'Minha conta', href: '/conta' } : { label: 'Início', href: '/' };
   const path = breadcrumb ?? (tenant && !userPage ? [] : [{ label: title }]);
   return (
-    <Theme navigation={{ entries: navigation, currentKey: userPage ? 'users' : tenant ? 'tenant' : 'saas-clients' }}>
+    <Theme navigation={{ entries: navigation, currentKey: window.location.pathname.startsWith('/ajuda') ? 'help' : window.location.pathname.includes('/auditoria') ? 'audit' : window.location.pathname.startsWith('/conta/cargos') ? 'roles' : window.location.pathname.startsWith('/conta/pessoas') ? 'people' : window.location.pathname.startsWith('/conta/etiquetas') ? 'tags' : userPage ? 'users' : tenant ? 'tenant' : 'saas-clients' }}>
       <Head title={title} />
-      <PageHeader title={title} breadcrumbItems={[root, ...path]} breadcrumbPosition="right" actions={actions} />
+      <div className={headerClassName}><PageHeader title={title} breadcrumbItems={[root, ...path]} breadcrumbPosition="right" actions={actions} /></div>
       <div className="saas-content">{children}</div>
     </Theme>
   );

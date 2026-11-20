@@ -8,25 +8,28 @@ use Illuminate\Validation\Rule;
 
 final readonly class ProvisionUserData
 {
-    private function __construct(public CreateUserData $user, public UserRole $role) {}
+    private function __construct(public CreateUserData $user, public UserRole $role, public ?int $roleId = null) {}
 
     /** @param array<string, mixed> $input */
-    public static function fromInput(#[\SensitiveParameter] array $input, bool $tenant): self
+    public static function fromInput(#[\SensitiveParameter] array $input, bool $tenant, ?int $accountId = null): self
     {
         $rules = CreateUserData::rules();
         if ($tenant) {
-            $rules['role'] = ['required', Rule::in([UserRole::AccountAdministrator->value, UserRole::AccountMember->value])];
+            $rules['role_id'] = ['required', 'integer', Rule::exists('roles', 'id')->where('account_id', $accountId)];
         }
 
         $data = Validator::validate(CreateUserData::normalize($input), $rules, [
             ...CreateUserData::messages(),
-            'role.required' => 'Informe o papel na conta.',
+            'role_id.required' => 'Selecione o cargo na conta.',
+            'role_id.exists' => 'Selecione um cargo desta conta.',
+            'role_id.integer' => 'Selecione um cargo válido.',
             'role.in' => 'Informe um papel válido para a conta.',
         ]);
 
         return new self(
             CreateUserData::fromValidated($data),
-            $tenant ? UserRole::from($data['role']) : UserRole::PlatformAdministrator,
+            $tenant ? UserRole::AccountMember : UserRole::PlatformAdministrator,
+            $tenant ? (int) $data['role_id'] : null,
         );
     }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Domains\Plataforma\Application\Actions;
 
+use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Contracts\Session\Session;
@@ -15,6 +17,7 @@ final class EndAccountInspectionAction
         $inspection = AccountInspectionSession::current($session);
         abort_unless($inspection !== null && $inspection->userId === $inspectedUser->id, 403);
 
+        AuditLog::record('account', $inspection->accountId, $inspection->accountId, 'inspection-ended', Client::whereKey($inspection->accountId)->value('name') ?? 'Conta #'.$inspection->accountId);
         $administrator = User::query()->find($inspection->administratorId);
         $session->invalidate();
         $session->regenerateToken();

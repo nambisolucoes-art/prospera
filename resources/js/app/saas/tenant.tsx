@@ -11,7 +11,7 @@ type Point = { id: number; name: string; active: boolean };
 function PointForm({ point }: { point?: Point }) {
   return (
     <AccountForm business action={point ? `/conta/pontos/${point.id}` : '/conta/pontos'}
-      method={point ? 'patch' : 'post'} submit={point ? 'Salvar ponto' : 'Cadastrar ponto'}
+      method={point ? 'patch' : 'post'} submit="Salvar"
      
       fields={[{ name: 'name', label: 'Nome do ponto', value: point?.name }]}>
       <Select label="Situação" name="active" defaultValue={point?.active === false ? '0' : '1'}
@@ -22,20 +22,21 @@ function PointForm({ point }: { point?: Point }) {
 
 export default function Tenant({ account, points }: { account: { name: string }; points: Point[] }) {
   const { auth } = usePage<SessionProps>().props;
-  const mayManage = auth.user?.is_account_admin === true && auth.inspection_mode !== 'read-only';
+  const writable = auth.inspection_mode !== 'read-only';
+  const mayManage = writable && auth.permissions.includes('account.establishment.update');
   return (
     <SaasLayout tenant title={account.name}
       actions={mayManage && <Button href="/conta/editar" tone="primary" leftIconClass="fa fa-pencil">Editar estabelecimento</Button>}>
-      <CardBox>
+      <CardBox data-tour="tenant-points">
         <h2>Pontos do estabelecimento</h2>
         {!points.length && <p>Nenhum ponto cadastrado.</p>}
         {points.map((point) => (
           <div className="saas-point" key={point.id}>
             <strong>{point.name}</strong> · {point.active ? 'Ativo' : 'Inativo'}
-            {mayManage && <details><summary>Editar ponto</summary><PointForm key={`${point.name}-${point.active}`} point={point} /></details>}
+            {writable && auth.permissions.includes('account.points.update') && <details><summary>Editar ponto</summary><PointForm key={`${point.name}-${point.active}`} point={point} /></details>}
           </div>
         ))}
-        {mayManage && <details><summary>Novo ponto</summary><PointForm /></details>}
+        {writable && auth.permissions.includes('account.points.create') && <details><summary>Novo ponto</summary><PointForm /></details>}
       </CardBox>
     </SaasLayout>
   );

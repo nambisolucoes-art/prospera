@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import Button from '@/components/Button/Button';
 import BusinessList, { type BusinessColumn, type PageSummary } from '@/components/BusinessList/BusinessList';
 import InputGroup from '@/components/InputGroup/InputGroup';
-import TableLabel from '@/components/TableLabel/TableLabel';
+import StatusLabel from '@/components/StatusLabel/StatusLabel';
 import TextInput from '@/components/TextInput/TextInput';
 import AccountPreview from './AccountPreview';
 import AccountInspection from './AccountInspection';
@@ -36,12 +36,12 @@ export default function Accounts({ accounts, search }: { accounts: PageSummary &
     ) },
     { id: 'name', label: 'Conta', width: 210, compact: true, render: (account) => <strong title={account.name}>{account.name}</strong> },
     { id: 'email', label: 'E-mail', width: 220,
-      render: (account) => account.email ? <span title={account.email}>{account.email}</span> : '—' },
+      render: (account) => account.email ? <span title={account.email}>{account.email}</span> : 'Não informado' },
     { id: 'document', label: 'CPF/CNPJ', width: 160,
-      render: (account) => formatMasked(account.document ?? '', account.person_type === 'company' ? 'cnpj' : 'cpf') || '—' },
-    { id: 'plan', label: 'Plano', width: 130, render: (account) => account.plan || '—' },
+      render: (account) => formatMasked(account.document ?? '', account.person_type === 'company' ? 'cnpj' : 'cpf') || 'Não informado' },
+    { id: 'plan', label: 'Plano', width: 130, render: (account) => account.plan || 'Não informado' },
     { id: 'status', label: 'Status', width: 110, compact: true,
-      render: (account) => <TableLabel tone={account.active ? 'success' : 'danger'}>{account.active ? 'Ativa' : 'Inativa'}</TableLabel> },
+      render: (account) => <StatusLabel active={account.active} /> },
     { id: 'users', label: 'Usuários', width: 105, render: (account) => account.users_count },
   ];
 

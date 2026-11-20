@@ -29,6 +29,7 @@ final class ClientController
             return to_route('verification.notice');
         }
 
+        abort_unless($request->user()->can('platform.accounts.list'), 403);
         $filters = AccountFiltersData::fromInput($request->query());
 
         return ApiPage::respond(['accounts' => $directory->list($filters), 'search' => $filters->search]);
@@ -60,13 +61,21 @@ final class ClientController
         ]);
     }
 
-    public function accountDashboard(Request $request): JsonResponse|View
+    public function accountDashboard(Request $request): JsonResponse|View|RedirectResponse
     {
+        if (! $request->user()->can('account.dashboard.view')) {
+            foreach (['account.people.list' => '/conta/pessoas', 'account.tags.list' => '/conta/etiquetas', 'account.roles.list' => '/conta/cargos', 'account.people.create' => '/conta/pessoas/cadastrar', 'account.tags.create' => '/conta/etiquetas/cadastrar', 'account.roles.create' => '/conta/cargos/cadastrar', 'self.profile.view' => '/settings/profile'] as $ability => $path) {
+                if ($request->user()->can($ability)) {
+                    return redirect($path);
+                }
+            }
+            abort(403);
+        }
         $account = $this->currentAccount($request);
 
         return ApiPage::respond([
             'account' => $account->only(['name']),
-            'points' => $account->points()->orderBy('name')->orderBy('id')->get(['id', 'name', 'active']),
+            'points' => $request->user()->can('account.points.list') ? $account->points()->orderBy('name')->orderBy('id')->get(['id', 'name', 'active']) : [],
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Plataforma\Application\Actions;
 
+use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Application\Data\SaveAccountData;
 use App\Domains\Plataforma\Domain\DTOs\AccountDetailsDTO;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -20,7 +21,7 @@ final class SaveAccountAction
     {
         $administrator = $client->exists ? null : $data->administrator;
         $details = new AccountDetailsDTO($data->name, $data->attributes);
-        $user = $client->getConnection()->transaction(function () use ($client, $details, $administrator) {
+        $user = AuditLog::transaction(function () use ($client, $details, $administrator) {
             try {
                 $client->applyDetails($details);
                 $client->saveOrFail();

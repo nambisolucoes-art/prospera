@@ -32,14 +32,14 @@ export default function PasskeySettings({ passkeys }: { passkeys: Passkey[] }) {
         }}>
           <Field name="name" label="Nome da chave" value={name} error={fieldError} required
             onChange={(event) => { setName(event.target.value); setMissingName(false); }} />
-          <BusinessFormActions inline submit="Adicionar chave" processing={isLoading} />
+          <BusinessFormActions inline processing={isLoading} />
         </form>
       )}
       {!isSupported && <p>Este navegador não permite cadastrar chaves de acesso.</p>}
       {passkeys.map((passkey) => (
         <div className="prospera-account-action" key={passkey.id}>
           <p>{passkey.name}</p>
-          <AccountForm action={`/user/passkeys/${encodeURIComponent(passkey.id)}`} method="delete" submit="Remover chave" />
+          <AccountForm action={`/user/passkeys/${encodeURIComponent(passkey.id)}`} method="delete" />
         </div>
       ))}
     </BusinessFormSection>

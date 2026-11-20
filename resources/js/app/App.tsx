@@ -1,3 +1,6 @@
+import { tourFor } from './guidance';
+import { useApiPage } from '@/hooks/useApiPage';
+import type { SessionProps } from '@/types/Session.types';
 import { Suspense, useEffect, type ReactNode } from 'react';
 import { usePathname } from '@/hooks/usePathname';
 import { useSidebarState, type SidebarState } from './useSidebarState';
@@ -22,6 +25,7 @@ import { markAppPageTransitionReady } from '@/utils/appPageTransition';
 import AccountInspectionBanner from '@/app/saas/AccountInspectionBanner';
 
 export default function App({ children, navigation }: { children?: ReactNode | ((sidebar: SidebarState) => ReactNode); navigation?: { entries: SidebarEntry[]; currentKey?: string } }): JSX.Element {
+  const { props } = useApiPage<SessionProps>();
   const sidebar = useSidebarState();
   const pathname = usePathname();
   const layout = layouts[pathname.split('/').pop() ?? ''];
@@ -60,7 +64,7 @@ export default function App({ children, navigation }: { children?: ReactNode | (
       <RouteReady pathname={pathname} />
       {standalone ? routeContent : (
         <div key={layout?.key ?? 'primary'} className={`app-page ${activeSidebarCollapsed ? 'app-page--sidebarCollapsed' : ''} ${mobileSidebarOpen ? 'app-page--mobile-sidebar-open' : ''} ${layout ? 'app-page--layout' : ''} ${layout?.sidebar === 'small' ? 'app-page--menuSmall' : ''}`}>
-          <TopBarPrimary sidebarCollapsed={activeSidebarCollapsed} sidebarExpanded={sidebar.mobile ? mobileSidebarOpen : !activeSidebarCollapsed}
+          <TopBarPrimary tour={tourFor(pathname,props.auth.permissions)} sidebarCollapsed={activeSidebarCollapsed} sidebarExpanded={sidebar.mobile ? mobileSidebarOpen : !activeSidebarCollapsed}
             onToggleSidebar={sidebar.mobile || !layout ? sidebar.toggle : layoutSidebar.toggle} smallMenu={!sidebar.mobile && layout?.sidebar === 'small'} />
           {mobileSidebarOpen && <button type="button" className="app-page__sidebar-backdrop" aria-label="Fechar menu lateral"
             onClick={() => { closeMobile(); document.getElementById('primary-sidebar-toggle')?.focus(); }} />}
@@ -69,8 +73,8 @@ export default function App({ children, navigation }: { children?: ReactNode | (
             onNavigate={sidebar.mobile ? closeMobile : undefined} />
 
           <main className="app-content-placeholder" aria-label="Conteúdo principal">
+            <AccountInspectionBanner />
             <div className="app-content-placeholder__inner">
-              <AccountInspectionBanner />
               {typeof children === 'function' ? children(sidebar) : children ?? routeContent}
             </div>
             <AppFooter />

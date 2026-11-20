@@ -2,6 +2,10 @@
 
 namespace App\Domains\Usuarios\Application\Actions;
 
+use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Pessoas\Application\Actions\DirectoryAudit;
+use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Data\CreateUserData;
 use App\Domains\Usuarios\Domain\DTOs\UserIdentityDTO;
@@ -19,38 +23,56 @@ final class CreateUserAction
         #[\SensitiveParameter] CreateUserData $data,
         UserRole $role,
         ?Client $account = null,
+        ?Person $person = null,
+        ?int $roleId = null,
     ): User {
-        if ($role->requiresAccount() !== ($account !== null)) {
-            throw new InvalidArgumentException('O contexto da conta não corresponde ao papel do usuário.');
-        }
+        return AuditLog::transaction(function () use ($data, $role, $account, $person, $roleId): User {
+            if ($role->requiresAccount() !== ($account !== null)) {
+                throw new InvalidArgumentException('O contexto da conta não corresponde ao papel do usuário.');
+            }
 
-        if (User::query()->whereRaw('lower(email) = ?', [$data->email])->exists()) {
-            throw $this->duplicateEmail();
-        }
+            if (User::query()->whereRaw('lower(email) = ?', [$data->email])->exists()) {
+                throw $this->duplicateEmail();
+            }
 
-        $password = $data->setup === PasswordSetup::Invite ? Str::random(48) : $data->password;
+            $password = $data->setup === PasswordSetup::Invite ? Str::random(48) : $data->password;
 
-        if ($password === null || $password === '') {
-            throw ValidationException::withMessages(['password' => 'Informe a senha inicial.']);
-        }
+            if ($password === null || $password === '') {
+                throw ValidationException::withMessages(['password' => 'Informe a senha inicial.']);
+            }
 
-        $user = new User(['password' => $password]);
-        $user->applyIdentity(new UserIdentityDTO($data->name, $data->email));
-        $user->account()->associate($account);
+            $user = new User(['password' => $password]);
+            $user->applyIdentity(new UserIdentityDTO($data->name, $data->email));
+            $user->account()->associate($account);
+            if ($person) {
+                if ($person->account_id !== $account?->id || $person->user()->exists()) {
+                    throw new InvalidArgumentException('Pessoa indisponível para este acesso.');
+                }
+                $user->person()->associate($person);
+            }
 
-        $user->forceFill([
-            'is_saas_admin' => $role === UserRole::PlatformAdministrator,
-            'is_account_admin' => $role === UserRole::AccountAdministrator,
-            'email_verified_at' => now(),
-        ]);
+            if ($roleId !== null) {
+                $assignedRole = Role::where('account_id', $account?->id)->findOrFail($roleId);
+                $user->role_id = $assignedRole->id;
+            }
+            $user->forceFill([
+                'is_saas_admin' => $role === UserRole::PlatformAdministrator,
+                'is_account_admin' => $roleId !== null ? $assignedRole->system_key === 'administrator' : $role === UserRole::AccountAdministrator,
+                'email_verified_at' => now(),
+            ]);
 
-        try {
-            $user->saveOrFail();
-        } catch (UniqueConstraintViolationException) {
-            throw $this->duplicateEmail();
-        }
+            try {
+                $user->saveOrFail();
+            } catch (UniqueConstraintViolationException) {
+                throw $this->duplicateEmail();
+            }
 
-        return $user;
+            if ($account) {
+                DirectoryAudit::record($account->id, 'user.created', 'user', $user->id, ['person_id' => $user->person_id, 'role_id' => $user->role_id]);
+            }
+
+            return $user;
+        });
     }
 
     private function duplicateEmail(): ValidationException

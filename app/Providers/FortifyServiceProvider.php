@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Domains\Usuarios\UI\Fortify\ConfirmTwoFactorSetup;
 use App\Domains\Usuarios\UI\Fortify\ResetUserPassword;
+use App\Models\User;
 use App\Support\ApiPage;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -40,6 +42,11 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureActions(): void
     {
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->input('email'))->where('access_enabled', true)->first();
+
+            return $user && Hash::check($request->input('password'), $user->password) ? $user : null;
+        });
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
     }
 

@@ -24,7 +24,7 @@ type FormProps = {
   action: string;
   method?: ComponentProps<typeof Form>['method'];
   fields?: Field[];
-  submit: string;
+  submit?: string;
   submitTone?: ButtonTone;
   children?: ReactNode;
   afterSubmit?: ReactNode;
@@ -34,8 +34,10 @@ type FormProps = {
   inlineActions?: boolean;
 };
 
-export function AccountForm({ action, method = 'post', fields = [], submit, submitTone = 'primary', children, afterSubmit, compact = false, business = false, wideLabels = false, inlineActions = false }: FormProps) {
+export function AccountForm({ action, method = 'post', fields = [], submit, submitTone, children, afterSubmit, compact = false, business = false, wideLabels = false, inlineActions = false }: FormProps) {
   const formId = useId();
+  const submitLabel = submit ?? (method === 'delete' ? 'Excluir' : 'Salvar');
+  const defaultTone = method === 'delete' ? 'danger' : business ? 'success' : 'primary';
   const FormComponent = business ? BusinessForm : Form;
   const formClass = [
     'prospera-account-form',
@@ -70,8 +72,8 @@ export function AccountForm({ action, method = 'post', fields = [], submit, subm
           {Object.entries(errors).filter(([name]) => name !== '_form' && !fields.some((field) => field.name === name))
             .map(([name, message]) => <p key={name} className="prospera-form-error" role="alert">{message}</p>)}
           {recentlySuccessful && <p role="status">Alterações enviadas.</p>}
-          {business ? <BusinessFormActions submit={submit} processing={processing} tone={submitTone} inline={inlineActions} />
-            : <div><Button type="submit" tone={submitTone} className="prospera-account-form__submit" disabled={processing}>{submit}</Button></div>}
+          {business ? <BusinessFormActions submit={submitLabel} processing={processing} tone={submitTone ?? defaultTone} inline={inlineActions} />
+            : <div><Button type="submit" tone={submitTone ?? defaultTone} className="prospera-account-form__submit" disabled={processing}>{submitLabel}</Button></div>}
           {afterSubmit}
         </>
       )}

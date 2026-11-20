@@ -44,7 +44,7 @@ const stateOptions = [
 
 type Municipality = [code: string, name: string, state: string];
 
-export function AddressFields({ initial, errors }: { initial?: Address; errors: Errors }) {
+export function AddressFields({ initial, errors, namePrefix = 'details[address]', errorPrefix = 'details.address', title = 'Informações de endereço', tourTarget }: { initial?: Address; errors: Errors; namePrefix?: string; errorPrefix?: string; title?: string; tourTarget?: string }) {
   const [address, setAddress] = useState<Address>(initial ?? {});
   const [loading, setLoading] = useState(false);
   const [lookupError, setLookupError] = useState('');
@@ -100,29 +100,29 @@ export function AddressFields({ initial, errors }: { initial?: Address; errors: 
   }
 
   const field = (key: keyof Address, label: string, inputMode?: 'numeric', action?: ReactNode) => (
-    <Field name={`details[address][${key}]`} label={label} value={key === 'postal_code' ? formatMasked(address[key] ?? '', 'cep') : address[key] ?? ''} inputMode={inputMode}
+    <Field name={`${namePrefix}[${key}]`} label={label} value={key === 'postal_code' ? formatMasked(address[key] ?? '', 'cep') : address[key] ?? ''} inputMode={inputMode}
       action={action} compact={key === 'postal_code'} autoComplete={key === 'postal_code' ? 'postal-code' : undefined}
-      error={errors[`details.address.${key}`] || (key === 'postal_code' ? lookupError : undefined)}
+      error={errors[`${errorPrefix}.${key}`] || (key === 'postal_code' ? lookupError : undefined)}
       onChange={(event) => update(key, event.target.value)} />
   );
 
   return (
-    <BusinessFormSection title="Informações de endereço">
+    <BusinessFormSection title={title} tourTarget={tourTarget}>
       {field('postal_code', 'CEP', 'numeric',
         <LookupButton label="Buscar CEP" loading={loading} onClick={() => void lookup()} />
       )}
       <div>
         <BusinessFormRow>
-          <Select label="Estado" name="details[address][state]" searchable options={stateOptions} value={address.state ?? ''}
-            error={errors['details.address.state']} onChange={(value) => {
+          <Select label="Estado" name={`${namePrefix}[state]`} searchable options={stateOptions} value={address.state ?? ''}
+            error={errors[`${errorPrefix}.state`]} onChange={(value) => {
               version.current++;
               setAddress((current) => ({ ...current, state: value, city: current.state === value ? current.city : '' }));
             }} />
           {cityOptions ? <>
-            <input type="hidden" name="details[address][city]" value={address.city ?? ''} />
+            <input type="hidden" name={`${namePrefix}[city]`} value={address.city ?? ''} />
             <Select label="Cidade" searchable maxVisible={100}
               options={[{ value: '', label: 'Selecione a cidade' }, ...(address.city && !cityCode ? [{ value: 'legacy', label: address.city }] : []), ...cityOptions]}
-              value={cityCode ?? (address.city ? 'legacy' : '')} error={errors['details.address.city']}
+              value={cityCode ?? (address.city ? 'legacy' : '')} error={errors[`${errorPrefix}.city`]}
               onChange={(value) => {
                 if (value === 'legacy') return;
                 version.current++;

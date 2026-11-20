@@ -20,6 +20,7 @@ final class AccountInspectionController
 
         $options = $users->list($client)->map(fn (User $user): array => [
             ...$user->only(['id', 'name', 'email', 'is_account_admin']),
+            'role_name' => $user->role?->name,
             'photo_url' => $user->profile_photo ? route('saas.accounts.inspection.photo', [
                 'client' => $client, 'userId' => $user->id, 'version' => $user->profile_photo,
             ], absolute: false) : null,

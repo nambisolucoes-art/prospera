@@ -12,7 +12,7 @@ final class UserDirectoryQuery
     /** @return LengthAwarePaginator<int, User> */
     public function list(?Client $account, int $pageSize): LengthAwarePaginator
     {
-        return $this->scope($account)->select(['users.id', 'users.name', 'users.email', 'users.is_account_admin', 'users.profile_photo'])
+        return $this->scope($account)->select(['users.id', 'users.person_id', 'users.name', 'users.email', 'users.is_account_admin', 'users.profile_photo', 'users.role_id'])->with('role:id,name')
             ->orderBy('users.name')->orderBy('users.id')->paginate($pageSize)->withQueryString();
     }
 

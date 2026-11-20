@@ -7,7 +7,7 @@ import ProfileAvatar from '@/components/ProfileAvatar/ProfileAvatar';
 import '@/components/BusinessForm/BusinessForm.css';
 import './AccountInspection.css';
 
-type InspectionUser = { id: number; name: string; email: string; is_account_admin: boolean; photo_url: string | null };
+type InspectionUser = { role_name: string; id: number; name: string; email: string; is_account_admin: boolean; photo_url: string | null };
 
 const modes = [
   { value: 'read-only', label: 'Somente leitura' },
@@ -35,7 +35,7 @@ export default function AccountInspection({ id, name, onClose }: { id: number; n
   }, [url]);
 
   const options = users?.map((user) => {
-    const role = user.is_account_admin ? 'Administrador da conta' : 'Usuário';
+    const role = user.role_name;
     return { value: String(user.id), label: user.name, searchText: `${user.email} ${role}`, role, photoUrl: user.photo_url };
   });
 

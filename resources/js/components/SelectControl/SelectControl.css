@@ -136,3 +136,42 @@
     min-width: min(max(100%, 160px), var(--select-menu-max-width));
   }
 }
+
+.selectControl__menu {
+  transform-origin: top;
+  animation: select-control-open 250ms ease both;
+}
+
+@keyframes select-control-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+
+.selectControl__menu--closing {
+  pointer-events: none;
+  animation-name: select-control-close;
+}
+
+@keyframes select-control-close {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selectControl__menu {
+    animation: none;
+  }
+}

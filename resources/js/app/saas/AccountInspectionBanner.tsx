@@ -1,6 +1,5 @@
 import { useApiForm as useForm } from '@/hooks/useApiForm';
 import { useApiPage as usePage } from '@/hooks/useApiPage';
-import Button from '@/components/Button/Button';
 import type { SessionProps } from '@/types/Session.types';
 import './AccountInspection.css';
 
@@ -11,13 +10,19 @@ export default function AccountInspectionBanner() {
   if (!auth.inspection_mode) return null;
 
   return (
-    <aside className="account-inspection-banner" aria-label="Inspeção de conta">
-      <div>
-        <strong>Inspecionando como {auth.user?.name}</strong>
-        <span>{auth.inspection_mode === 'edit' ? 'Leitura e edição' : 'Somente leitura'}</span>
+    <aside className="account-inspection-banner" aria-label="Inspeção de conta" data-tour="account-inspection-banner">
+      <div className="account-inspection-banner__context">
+        <i className="fa fa-eye account-inspection-banner__icon" aria-hidden="true" />
+        <div className="account-inspection-banner__identity">
+          <strong>Inspecionando como {auth.user?.name}</strong>
+          <span className="account-inspection-banner__mode">{auth.inspection_mode === 'edit' ? 'Leitura e edição' : 'Somente leitura'}</span>
+        </div>
       </div>
-      <Button type="button" tone="white" disabled={exit.processing}
-        onClick={() => exit.post('/conta/inspecao/encerrar')}>Voltar ao SaaS</Button>
+      <button type="button" className="account-inspection-banner__exit"
+        title="Voltar ao SaaS" aria-label="Voltar ao SaaS" disabled={exit.processing}
+        onClick={() => exit.post('/conta/inspecao/encerrar')}>
+        <i className="icon-logout" aria-hidden="true" />
+      </button>
     </aside>
   );
 }

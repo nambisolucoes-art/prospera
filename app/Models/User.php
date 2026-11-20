@@ -2,6 +2,13 @@
 
 namespace App\Models;
 
+use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
+use App\Domains\Acessos\Domain\Models\Permission;
+use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
+use App\Domains\Auditoria\Domain\Contracts\Auditable;
+use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Domain\DTOs\UserIdentityDTO;
@@ -37,8 +44,29 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'profile_photo'])]
-class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
+class User extends Authenticatable implements Auditable, MustVerifyEmail, PasskeyUser
 {
+    protected $attributes = ['access_enabled' => true];
+
+    use AuditsChanges;
+
+    public static function auditType(): string
+    {
+        return 'user';
+    }
+
+    /** @return array<string,string> */
+    public static function auditedFields(): array
+    {
+        return ['access_enabled' => 'Acesso habilitado', 'name' => 'Nome', 'email' => 'E-mail', 'person_id' => 'Pessoa', 'account_id' => 'Conta', 'role_id' => 'Cargo', 'is_saas_admin' => 'Acesso à plataforma', 'is_account_admin' => 'Administrador inicial', 'password' => 'Senha', 'profile_photo' => 'Foto do perfil', 'email_verified_at' => 'Verificação do e-mail', 'two_factor_secret' => 'Segundo fator', 'two_factor_recovery_codes' => 'Códigos de recuperação', 'two_factor_confirmed_at' => 'Confirmação do segundo fator'];
+    }
+
+    /** @return array<string,string> */
+    public static function unauditedFields(): array
+    {
+        return ['remember_token' => 'Token de sessão, nunca armazenado no histórico.'];
+    }
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
@@ -54,8 +82,34 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             'is_saas_admin' => 'boolean',
             'is_account_admin' => 'boolean',
             'password' => 'hashed',
+            'access_enabled' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /** @return BelongsTo<Role, $this> */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    /** @return array<int,string> */
+    public function permissionSlugs(): array
+    {
+        if (! $this->access_enabled) {
+            return [];
+        }
+        if ($this->is_saas_admin) {
+            return Permission::where('is_system', true)->whereNull('account_id')->whereIn('scope', ['platform', 'self'])->pluck('slug')->map(fn ($slug): string => (string) $slug)->all();
+        }
+        if (! $this->account_id) {
+            return Permission::where('is_system', true)->whereNull('account_id')->where('scope', 'self')->pluck('slug')->map(fn ($slug): string => (string) $slug)->all();
+        }
+        if (! $this->account()->where('active', true)->exists()) {
+            return [];
+        }
+
+        return Permission::where('is_system', true)->whereHas('roles', fn ($q) => $q->where('roles.id', $this->role_id)->where('roles.account_id', $this->account_id))->whereIn('scope', ['account', 'self'])->where(fn ($q) => $q->whereNull('account_id')->orWhere('account_id', $this->account_id))->pluck('slug')->map(fn ($slug): string => (string) $slug)->all();
     }
 
     public function applyIdentity(UserIdentityDTO $identity): void
@@ -87,17 +141,37 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     /** @param array<string, mixed> $options */
     public function save(array $options = []): bool
     {
-        if ($this->getAttribute('person_id') && ! $this->isDirty(['name', 'email'])) {
+        return (bool) AuditLog::transaction(fn () => $this->saveIdentity($options));
+    }
+
+    /** @param array<string,mixed> $options */
+    private function saveIdentity(array $options = []): bool
+    {
+        if ($this->account_id && ! $this->role_id) {
+            [$admin,$member] = app(DefaultRolesAction::class)->execute($this->account_id);
+            $this->role_id = $this->is_account_admin ? $admin->id : $member->id;
+        }
+
+        if ($this->getAttribute('person_id') && ! $this->isDirty(['name', 'email', 'account_id'])) {
             return parent::save($options);
         }
 
         return $this->getConnection()->transaction(function () use ($options): bool {
             $person = $this->person()->first() ?? $this->person()->make();
-            $person->fill(['name' => $this->name, 'email' => $this->email])->saveOrFail();
+            $person->fill(['name' => $this->name, 'email' => $this->email, 'account_id' => $this->account_id])->saveOrFail();
             $this->person()->associate($person);
 
             if (! parent::save($options)) {
                 throw new \RuntimeException('Não foi possível salvar o usuário e sua pessoa.');
+            }
+
+            if ($this->account_id) {
+                Tag::supplierTag($this->account_id);
+                Tag::customerTag($this->account_id);
+                $tag = Tag::userTag($this->account_id);
+                $beforeTags = $person->tags()->pluck('tags.id')->all();
+                $person->tags()->syncWithoutDetaching([$tag->id]);
+                AuditLog::relationship($person, 'tag_ids', $beforeTags, $person->tags()->pluck('tags.id')->all(), 'Etiquetas');
             }
 
             return true;

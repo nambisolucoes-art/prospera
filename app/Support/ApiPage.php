@@ -24,6 +24,7 @@ final class ApiPage
             ...$data,
             'name' => config('app.name'),
             'auth' => [
+                'permissions' => $user?->permissionSlugs() ?? [],
                 'inspection_mode' => AccountInspectionSession::current($request->session())?->mode->value,
                 'user' => $user ? [
                     ...$user->only(['id', 'name', 'email', 'email_verified_at', 'is_account_admin', 'is_saas_admin']),

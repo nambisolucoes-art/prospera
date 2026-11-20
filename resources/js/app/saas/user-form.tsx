@@ -15,7 +15,7 @@ export default function UserForm({ tenant }: { tenant: boolean }) {
               <BusinessFormSection title="Dados do usuário">
                 <UserFields errors={errors} accountRoles={tenant} />
               </BusinessFormSection>
-              <BusinessFormActions submit="Cadastrar usuário" processing={processing} cancelHref={action} />
+              <BusinessFormActions processing={processing} cancelHref={action} />
             </>
           )}
         </BusinessForm>

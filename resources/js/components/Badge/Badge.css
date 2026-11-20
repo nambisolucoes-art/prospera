@@ -1,10 +1,11 @@
 .badge {
   display: inline-block;
   min-width: 10px;
-  padding: 3px 5px;
+  padding: var(--bold-label-padding);
   color: #fff;
-  font-weight: 600;
-  line-height: 1;
+  font-weight: var(--bold-label-font-weight);
+  line-height: var(--bold-label-line-height);
+  letter-spacing: var(--bold-label-letter-spacing);
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;
@@ -13,11 +14,12 @@
 }
 
 .badge--md {
-  font-size: 12px;
+  font-size: var(--bold-label-font-size);
 }
 
 .badge--xs {
   font-size: 9px;
+  line-height: 1;
   transform: translateY(-2px);
 }
 

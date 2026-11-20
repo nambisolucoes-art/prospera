@@ -5,12 +5,14 @@ import { MaskedField } from './ClientFormFields';
 import { contactNumber, type ClientData } from './ClientForm.types';
 import './ContactFields.css';
 
-function AdditionalContacts({ kind, initial = [], errors }: { kind: 'phone' | 'email'; initial?: string[]; errors: Errors }) {
+export function AdditionalContacts({ kind, initial = [], errors, namePrefix = 'details', errorPrefix = 'details' }: { kind: 'phone' | 'email'; initial?: string[]; errors: Errors; namePrefix?: string; errorPrefix?: string }) {
   const [rows, setRows] = useState(() => initial.map((value, id) => ({ id, value })));
   const nextId = useRef(initial.length);
   const phone = kind === 'phone';
   const label = phone ? 'Telefone' : 'E-mail';
   const field = phone ? 'additional_phones' : 'additional_emails';
+  const name = namePrefix ? `${namePrefix}[${field}]` : field;
+  const errorName = errorPrefix ? `${errorPrefix}.${field}` : field;
 
   function add() {
     const id = nextId.current++;
@@ -19,14 +21,14 @@ function AdditionalContacts({ kind, initial = [], errors }: { kind: 'phone' | 'e
 
   return (
     <>
-      {rows.length === 0 && <input type="hidden" name={`details[${field}][]`} value="" />}
+      {rows.length === 0 && <input type="hidden" name={`${name}[]`} value="" />}
       {rows.map(({ id, value }, index) => {
         const description = `${label} ${index + 2}`;
         const props = {
           label: description,
-          name: `details[${field}][]`,
+          name: `${name}[]`,
           defaultValue: value,
-          error: errors[`details.${field}.${index}`],
+          error: errors[`${errorName}.${index}`],
           action: (
             <button type="button" className="inputGroup__button contact-fields__remove waves-effect waves-light" aria-label={`Remover ${description.toLowerCase()}`}
               onClick={() => setRows((current) => current.filter((row) => row.id !== id))}>
@@ -44,7 +46,7 @@ function AdditionalContacts({ kind, initial = [], errors }: { kind: 'phone' | 'e
           disabled={rows.length >= 20} onClick={add}>
           <span aria-hidden="true"><i className="fa fa-plus" /></span>{label}
         </button>
-        {errors[`details.${field}`] && <span className="formField__error" role="alert">{errors[`details.${field}`]}</span>}
+        {errors[errorName] && <span className="formField__error" role="alert">{errors[errorName]}</span>}
       </div>
     </>
   );

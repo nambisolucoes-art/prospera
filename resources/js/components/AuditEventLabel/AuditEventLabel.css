@@ -1,0 +1,6 @@
+.audit-event-label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  box-sizing: border-box;
+}

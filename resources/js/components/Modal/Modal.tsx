@@ -61,10 +61,10 @@ export default function Modal({ open, title, children, footer, size = 'default',
     const elements = () => Array.from(dialog.querySelectorAll<HTMLElement>(
       'button:not(:disabled), a[href], input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]'
     )).filter((element) => element.getClientRects().length > 0);
-    elements()[0]?.focus({ preventScroll: true });
+    if (!document.querySelector('.guided-tour')) elements()[0]?.focus({ preventScroll: true });
 
     function trapTab(event: KeyboardEvent) {
-      if (event.key !== 'Tab') return;
+      if (document.querySelector('.guided-tour') || event.key !== 'Tab') return;
       const items = elements();
       const first = items[0];
       const last = items[items.length - 1];
@@ -212,7 +212,7 @@ export default function Modal({ open, title, children, footer, size = 'default',
     if (!isMounted || isClosing) return undefined;
 
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') requestClose();
+      if (event.key === 'Escape' && !document.querySelector('.guided-tour')) requestClose();
     };
     document.addEventListener('keydown', handleKeyDown);
 

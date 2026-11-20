@@ -67,3 +67,11 @@
   color: #23527c;
   text-decoration: underline;
 }
+
+.table.table--primary-header > thead > tr > th {
+  background: var(--bold-color-primary);
+  color: var(--bold-color-surface);
+  border-bottom: 0;
+  font-size: 13px;
+  vertical-align: middle;
+}

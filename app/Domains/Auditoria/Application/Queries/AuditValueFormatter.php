@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Domains\Auditoria\Application\Queries;
+
+use App\Domains\Auditoria\Domain\Models\AuditRecord;
+use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
+
+final class AuditValueFormatter
+{
+    /** @return array<int,array{label:string,before:mixed,after:mixed}> */
+    public function changes(AuditRecord $record): array
+    {
+        $changes = [];
+        foreach ($record->changes as $field => $change) {
+            $changes[] = [
+                'label' => $change['label'],
+                'before' => $this->value($record->entity_type, $field, $change['before']),
+                'after' => $this->value($record->entity_type, $field, $change['after']),
+            ];
+        }
+
+        return $changes;
+    }
+
+    private function value(string $entity, string $field, mixed $value): mixed
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+        if (in_array($field, ['phone', 'whatsapp', 'additional_phones', 'details.phone', 'details.whatsapp', 'details.additional_phones'], true)) {
+            $format = static fn (mixed $phone): mixed => is_string($phone) && preg_match('/^\d{10,11}$/', $phone)
+                ? preg_replace('/^(\d{2})(\d{4,5})(\d{4})$/', '($1) $2-$3', $phone)
+                : $phone;
+
+            return is_array($value) ? array_map($format, $value) : $format($value);
+        }
+        if ($entity === 'account' && $field === 'mode' && is_string($value)) {
+            return AccountInspectionMode::tryFrom($value)?->label() ?? $value;
+        }
+        $labels = match ($entity.'.'.$field) {
+            'tag.module' => ['people' => 'Pessoas'],
+            'account.person_type', 'person.person_type', 'supplier.person_type' => ['company' => 'Pessoa jurídica', 'individual' => 'Pessoa física'],
+            'tag.system_key' => ['user' => 'Usuário', 'supplier' => 'Fornecedor', 'customer' => 'Cliente'],
+            'role.system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário'],
+            default => [],
+        };
+        if (is_string($value) && isset($labels[$value])) {
+            return $labels[$value];
+        }
+        if (is_bool($value)) {
+            return match ($field) {
+                'active' => $entity === 'point' ? ($value ? 'Ativo' : 'Inativo') : ($value ? 'Ativa' : 'Inativa'),
+                'access_enabled' => $value ? 'Habilitado' : 'Revogado',
+                default => $value ? 'Sim' : 'Não',
+            };
+        }
+
+        return $value;
+    }
+}

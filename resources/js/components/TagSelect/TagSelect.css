@@ -1,0 +1,72 @@
+.tag-select {
+  max-width: 640px;
+}
+.tag-select__control {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--business-control-height, 34px);
+  padding: 4px 6px;
+  border: 1px solid var(--input-border, var(--bold-color-border));
+  border-radius: var(--bold-radius);
+  background: var(--bold-color-surface);
+  cursor: text;
+}
+.tag-select__control:focus-within {
+  border-color: var(--input-focus-border, var(--bold-color-border-focus));
+}
+.tag-select__control--invalid {
+  border-color: var(--bold-color-danger);
+}
+.tag-select__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: var(--bold-label-padding);
+  font-size: var(--bold-label-font-size);
+  font-weight: var(--bold-label-font-weight);
+  line-height: var(--bold-label-line-height);
+  letter-spacing: var(--bold-label-letter-spacing);
+}
+.tag-select__tag button {
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: var(--bold-label-line-height);
+}
+.tag-select__control > input {
+  flex: 1;
+  min-width: 100px;
+  width: 100px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--bold-color-text);
+  font: inherit;
+  font-size: 13px;
+  padding: 2px;
+}
+.tag-select .selectControl__checklist {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.tag-select__notice {
+  max-width: 640px;
+  margin-top: 4px;
+  color: var(--bold-validation-message-color);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.tag-select__notice p {
+  margin: 0;
+}
+.tag-select__notice p + p {
+  margin-top: 4px;
+}

@@ -33,6 +33,7 @@
 .account-preview__section dt {
   font-weight: 700;
   text-align: end;
+  overflow-wrap: anywhere;
 }
 
 .account-preview__section dd {

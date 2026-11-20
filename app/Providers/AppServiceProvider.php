@@ -2,10 +2,15 @@
 
 namespace App\Providers;
 
+use App\Domains\Auditoria\Application\Actions\AuditContext;
+use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -17,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(AuditContext::class);
     }
 
     /**
@@ -26,10 +31,33 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        foreach ([Login::class => 'login', Logout::class => 'logout'] as $event => $action) {
+            Event::listen($event, function ($event) use ($action) {
+                if (request()->routeIs('saas.accounts.inspection.start', 'account.inspection.end')) {
+                    return;
+                }
+                $user = $event->user;
+                if (! $user instanceof User) {
+                    return;
+                }
+                $context = app(AuditContext::class);
+                if ($context->actorId === null) {
+                    $context->actorId = $user->id;
+                    $context->actorName = $user->name;
+                    $context->context = $user->is_saas_admin ? 'platform' : 'account';
+                }
+                AuditLog::record('user', $user->id, $user->account_id, $action, $user->name);
+            });
+        }
+
         Gate::define('access-saas', fn (User $user): bool => $user->is_saas_admin === true);
-        Gate::define('manage-account', fn (User $user): bool => $user->is_account_admin === true
-            && $user->account()->where('active', true)->exists());
-        Gate::define('manage-account-users', fn (User $user): bool => $user->can('manage-account'));
+        Gate::before(function (User $user, string $ability): ?bool {
+            if (! preg_match('/^(account|platform|self)\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$/', $ability)) {
+                return null;
+            }
+
+            return in_array($ability, $user->permissionSlugs(), true);
+        });
     }
 
     /**

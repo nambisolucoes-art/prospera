@@ -1,4 +1,4 @@
-import { forwardRef, useLayoutEffect, useRef, type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import { forwardRef, useLayoutEffect, useRef, useState, type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import '@/components/TextInput/TextInput.css';
 
 export const SelectTrigger = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement>>(
@@ -12,7 +12,21 @@ export const SelectTrigger = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<
   },
 );
 
-export function SelectMenu({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function SelectMenu({ open, children, className = '', ...props }: HTMLAttributes<HTMLDivElement> & { open: boolean }) {
+  const [present, setPresent] = useState(open);
+  const rendered = open || present;
+
+  useLayoutEffect(() => {
+    if (open) {
+      setPresent(true);
+      return;
+    }
+    if (!present) return;
+    const duration = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 250;
+    const timer = window.setTimeout(() => setPresent(false), duration);
+    return () => window.clearTimeout(timer);
+  }, [open, present]);
+
   const menuRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -40,7 +54,10 @@ export function SelectMenu({ children, ...props }: HTMLAttributes<HTMLDivElement
       resizeObserver.disconnect();
       window.removeEventListener('resize', updatePosition);
     };
-  }, []);
+  }, [rendered]);
 
-  return <div {...props} ref={menuRef} className="selectControl__menu">{children}</div>;
+  if (!rendered) return null;
+
+  return <div {...props} ref={menuRef} inert={!open} aria-hidden={!open || undefined}
+    className={`selectControl__menu ${!open ? 'selectControl__menu--closing' : ''} ${className}`}>{children}</div>;
 }

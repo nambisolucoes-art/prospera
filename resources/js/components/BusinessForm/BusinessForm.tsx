@@ -6,11 +6,27 @@ import Button, { type ButtonTone } from '@/components/Button/Button';
 import { navigateAfterWave } from '@/utils/initWaves';
 import './BusinessForm.css';
 
-export default function BusinessForm({ className, ...props }: ComponentProps<typeof Form>) {
-  return <Form {...props} noValidate className={className ? `business-form ${className}` : 'business-form'} />;
+export default function BusinessForm({
+  className,
+  ...props
+}: ComponentProps<typeof Form>) {
+  return (
+    <Form
+      data-tour="business-form"
+      {...props}
+      noValidate
+      className={className ? `business-form ${className}` : 'business-form'}
+    />
+  );
 }
 
-export function BusinessFormSection({ title, note, children, as = 'fieldset', tourTarget }: {
+export function BusinessFormSection({
+  title,
+  note,
+  children,
+  as = 'fieldset',
+  tourTarget,
+}: {
   title: string;
   note?: ReactNode;
   children: ReactNode;
@@ -32,10 +48,19 @@ export function BusinessFormRow({ children }: { children: ReactNode }) {
   return <div className="business-form__row">{children}</div>;
 }
 
-export function BusinessFormActions({ submit, processing, cancelHref, tone = 'primary', inline = false, children }: {
-  submit: string;
+export function BusinessFormActions({
+  submit = 'Salvar',
+  processing,
+  cancelHref,
+  onCancel,
+  tone = 'success',
+  inline = false,
+  children,
+}: {
+  submit?: string;
   processing: boolean;
   cancelHref?: string;
+  onCancel?: () => void;
   tone?: ButtonTone;
   inline?: boolean;
   children?: ReactNode;
@@ -43,14 +68,33 @@ export function BusinessFormActions({ submit, processing, cancelHref, tone = 'pr
   const { navigate } = useApiPage();
   const Container = inline ? 'div' : 'footer';
   return (
-    <Container className={inline ? 'business-form__actions-inline business-form__control-start' : 'business-form__actions'}>
+    <Container
+      data-tour="form-actions"
+      className={
+        inline
+          ? 'business-form__actions-inline business-form__control-start'
+          : 'business-form__actions'
+      }
+    >
       {cancelHref && (
-        <Link href={cancelHref} className="button button--white waves-effect"
-          onClick={(event) => navigateAfterWave(event, () => void navigate(cancelHref))}>
+        <Link
+          href={cancelHref}
+          className="button button--white waves-effect"
+          onClick={(event) =>
+            navigateAfterWave(event, () => void navigate(cancelHref))
+          }
+        >
           Cancelar
         </Link>
       )}
-      <Button type="submit" tone={tone} disabled={processing}>{submit}</Button>
+      {!cancelHref && onCancel && (
+        <Button tone="white" disabled={processing} onClick={onCancel}>
+          Cancelar
+        </Button>
+      )}
+      <Button type="submit" tone={tone} disabled={processing}>
+        {submit}
+      </Button>
       {children}
     </Container>
   );

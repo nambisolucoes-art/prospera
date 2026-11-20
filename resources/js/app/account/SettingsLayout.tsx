@@ -24,7 +24,7 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
   const category = component === 'settings/confirm-security' ? 'settings/security' : component;
   const current = tabs.find((tab) => tab.component === category) ?? tabs[0];
   const tenant = !auth.user?.is_saas_admin;
-  const entries = accountNavigation(tenant, auth.user?.is_account_admin);
+  const entries = accountNavigation(tenant, auth.permissions);
   const root = tenant ? { label: 'Minha conta', href: '/conta' } : { label: 'Início', href: '/dashboard' };
 
   return (

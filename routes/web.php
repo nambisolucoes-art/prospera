@@ -10,3 +10,5 @@ Route::get('/api/localidades/municipios', fn () => response()->file(
 
 require __DIR__.'/settings.php';
 require __DIR__.'/saas.php';
+
+require __DIR__.'/guidance.php';

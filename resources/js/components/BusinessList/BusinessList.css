@@ -42,8 +42,6 @@
   position: relative;
   padding: 8px 10px;
   border-bottom: 0;
-  background: var(--bold-color-primary);
-  color: var(--bold-color-surface);
   font-size: 13px;
   vertical-align: middle;
   white-space: nowrap;
