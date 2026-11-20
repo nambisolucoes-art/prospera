@@ -7,8 +7,11 @@ As [orientações do projeto](AGENTS.md) indicam quando documentar ajuda, tours 
 ## Rodar com Docker
 
 ```sh
-docker compose up --build --wait
+make up
+# Equivale a docker compose up --build --wait
 ```
+
+`make help` lista os atalhos: `make migrate`, `make logs`, `make test`, `make update` (git pull e make up), `make fresh` (apaga o banco local, com confirmação) e outros. A imagem só recompila os assets quando o código muda.
 
 Abra [http://localhost:8000](http://localhost:8000). O Laravel aguarda o PostgreSQL 18 ficar pronto e executa as migrações na inicialização. Os dados do banco ficam no volume `postgres-data`, e a chave da aplicação fica no volume `app-data`.
 
