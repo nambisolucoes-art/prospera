@@ -14,13 +14,17 @@
   background: #e3e7ec;
 }
 
+/* Page title in the Visdom pattern: uppercase with an accent stripe on the left. */
 .pageHeader__title {
   margin: 7px 0 0;
+  padding-left: 15px;
+  border-left: 4px solid var(--prospera-title-accent);
   color: #505458;
   font-family: var(--bold-font-ui);
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 22px;
+  text-transform: uppercase;
 }
 
 .pageHeader__subtitle {
@@ -42,7 +46,11 @@
 .pageHeader--right .pageHeader__title {
   grid-area: 1 / 1;
   margin: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 480px) {
+  .pageHeader__title { padding-left: 10px; font-size: 17px; line-height: 20px; }
 }
 
 .pageHeader__breadcrumb {
