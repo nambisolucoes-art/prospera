@@ -36,3 +36,7 @@ Use **Tutorial desta tela** na barra superior. O tutorial apresenta o cadastro q
 Em **Abrangência**, escolha **Toda a conta** ou **Restrita a empresas ou estabelecimentos selecionados**. A disponibilidade indica onde o cargo pode ser usado. A atribuição em **Usuários** concede o cargo a um vínculo no local escolhido. As permissões do cargo são avaliadas sobre o recurso da ação e seguem o alcance do local da atribuição.
 
 Ao restringir um cargo existente, selecione os locais e escolha **Verificar impacto**. Revise a lista e confirme a remoção das atribuições que ficarem fora da abrangência antes de escolher **Salvar**. Se a lista mudar desde a conferência, faça a verificação novamente. Cargos de sistema abrangem toda a conta.
+
+## Orientações nos campos
+
+As dicas de Disponibilidade e dos grupos de permissões explicam a abrangência do cargo e a seleção independente de cada ação. Só é possível conceder permissões que o operador possui. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

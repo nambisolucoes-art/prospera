@@ -11,6 +11,8 @@ Abra **Usuários** no menu lateral. Na coluna **Nome**, a foto aparece ao lado d
 
 ## Acesso de usuários da conta
 
+Nos cadastros com senha inicial, use o ícone de olho para **Mostrar senha** e clique novamente para **Ocultar senha**. A senha e a confirmação têm controles independentes.
+
 Em **Usuários**, pesquise por nome ou e-mail de acesso. A coluna **Atribuições** lista cada cargo e o local em que ele vale, conforme o seu acesso. Use **Editar atribuições** para adicionar um cargo ou marcar os cargos que deseja remover. Em **Onde**, selecione conta, empresa ou estabelecimento. O campo **Cargo** mostra os cargos disponíveis e que você pode conceder naquele local. Escolha **Salvar** para aplicar as mudanças juntas.
 
 Ao cadastrar um usuário, escolha o local e o cargo da primeira atribuição. O sistema apresenta a mesma confirmação quando a solicitação usa um e-mail já existente. Até a seleção de múltiplas contas ser disponibilizada, um endereço existente em outra conta não recebe um vínculo novo.
@@ -22,3 +24,7 @@ Um operador autorizado na conta pode usar **Suspender acesso** ou **Reativar ace
 ## Orientação na tela
 
 Use **Tutorial desta tela** na barra superior. O tutorial apresenta o cadastro quando permitido, os filtros, as colunas, as ações e a paginação. Ele abre opções e demonstra a largura das colunas no desktop, restaurando as preferências ao sair. **Ver todos os passos** permite escolher um assunto. Esc fecha o tutorial.
+
+## Orientações nos campos
+
+As dicas de Forma de acesso e Confirmar senha explicam o envio do convite e a necessidade de repetir exatamente a senha inicial. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

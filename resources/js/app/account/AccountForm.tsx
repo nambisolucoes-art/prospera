@@ -13,6 +13,7 @@ import './AccountForm.css';
 export type Field = {
   name: string;
   label: string;
+  info?: string;
   type?: string;
   autoComplete?: string;
   value?: string;
@@ -49,11 +50,11 @@ export function AccountForm({ action, method = 'post', fields = [], submit, subm
     <FormComponent noValidate action={action} method={method} className={formClass} resetOnSuccess={fields.filter(({ type }) => type === 'password').map(({ name }) => name)}>
       {({ errors, processing, recentlySuccessful }) => (
         <>
-          {fields.map(({ name, label, type = 'text', autoComplete, value, placeholder, required = true }) => business ? (
-            <BusinessField key={name} name={name} label={label} type={type} autoComplete={autoComplete}
+          {fields.map(({ name, label, info, type = 'text', autoComplete, value, placeholder, required = true }) => business ? (
+            <BusinessField key={name} name={name} label={label} info={info} type={type} autoComplete={autoComplete}
               defaultValue={value} placeholder={placeholder} required={required} error={errors[name]} />
           ) : (
-            <FormField key={name} id={`${formId}-${name}`} label={label} error={errors[name]} passiveLabel>
+            <FormField key={name} id={`${formId}-${name}`} label={label} info={info} error={errors[name]} passiveLabel>
               <TextInput
                 id={`${formId}-${name}`}
                 name={name}

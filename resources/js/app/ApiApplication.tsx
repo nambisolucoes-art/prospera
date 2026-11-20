@@ -12,7 +12,11 @@ import SettingsLayout from '@/app/account/SettingsLayout';
 import { ApiPageContext, type NavigationOptions } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
 import { ApiError, apiRequest } from '@/utils/apiRequest';
-import { markAppPageTransitionReady } from '@/utils/appPageTransition';
+import {
+  appLoaderPreviewEnabled,
+  markAppPageTransitionReady,
+  startAppPageTransition,
+} from '@/utils/appPageTransition';
 import {
   clearPageAssetRetry,
   isPageAssetError,
@@ -69,6 +73,7 @@ type Page = {
   Component: ComponentType;
   url: string;
   props: SessionProps;
+  transitionId?: number;
 };
 type PageData = SessionProps & { redirect?: string };
 
@@ -77,12 +82,17 @@ export default function ApiApplication(): JSX.Element {
   const [error, setError] = useState('');
   const [failedAssetUrl, setFailedAssetUrl] = useState('');
   const request = useRef<AbortController>(null);
+  const currentPageUrl = useRef<string | undefined>(undefined);
 
   const navigate = useCallback(
     async (url: string, options: NavigationOptions = {}) => {
       request.current?.abort();
       const pending = new AbortController();
       request.current = pending;
+      const changesPage = !currentPageUrl.current
+        || new URL(url, location.origin).pathname !== new URL(currentPageUrl.current, location.origin).pathname;
+      const transitionId = changesPage || appLoaderPreviewEnabled ? startAppPageTransition() : undefined;
+      let committed = false;
       setError('');
       setFailedAssetUrl('');
 
@@ -152,7 +162,9 @@ export default function ApiApplication(): JSX.Element {
             else history.pushState(null, '', nextUrl);
             if (!options.preserveScroll) scrollTo(0, 0);
           }
-          setPage({ component, Component, url: nextUrl, props });
+          currentPageUrl.current = nextUrl;
+          setPage({ component, Component, url: nextUrl, props, transitionId });
+          committed = true;
           return true;
         }
         throw new Error('Não foi possível abrir a página.');
@@ -165,12 +177,17 @@ export default function ApiApplication(): JSX.Element {
           );
         return false;
       } finally {
-        if (!pending.signal.aborted)
-          requestAnimationFrame(markAppPageTransitionReady);
+        if (!committed) markAppPageTransitionReady(transitionId);
       }
     },
     [],
   );
+
+  useEffect(() => {
+    if (!page?.component.startsWith('auth/')) return;
+    const frame = requestAnimationFrame(() => markAppPageTransitionReady(page.transitionId));
+    return () => cancelAnimationFrame(frame);
+  }, [page]);
 
   useEffect(() => {
     const restore = () =>

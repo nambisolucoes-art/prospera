@@ -28,7 +28,7 @@ export function usePageScrollbar(belowTopBar: boolean): PageScrollMetrics {
 
     function update(): void {
       frame = 0;
-      const nextHeader = belowTopBar ? document.querySelector<HTMLElement>('.topbar') : null;
+      const nextHeader = belowTopBar ? document.querySelector<HTMLElement>('.app-page__header, .topbar') : null;
       if (nextHeader !== header) {
         if (header) resizeObserver.unobserve(header);
         header = nextHeader;

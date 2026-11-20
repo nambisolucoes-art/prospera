@@ -34,17 +34,17 @@
 }
 
 .label--inverse {
-  background-color: #4c5667;
+  background-color: var(--bold-color-inverse);
 }
 
 .label--purple {
-  background-color: #7266ba;
+  background-color: var(--bold-color-purple);
 }
 
 .label--warning {
-  background-color: #ffbd4a;
+  background-color: var(--bold-color-warning);
 }
 
 .label--info {
-  background-color: #34d3eb;
+  background-color: var(--bold-color-info);
 }

@@ -11,6 +11,8 @@ Na plataforma SaaS, abra **Contas**. Listar, visualizar, cadastrar e editar têm
 
 Use a lupa à direita ou pressione Enter para buscar. A busca também atualiza automaticamente ao digitar. Use as ações da tabela para visualizar em modal ou editar o cadastro. As alterações ficam na [Auditoria](auditoria.md).
 
+Nas listagens, os botões de **Ações** ficam na última coluna. A primeira e a última coluna têm largura fixa. No computador, arraste os separadores entre as colunas intermediárias para ajustar a largura ou selecione um separador e use as setas do teclado. O menu **Colunas** permite escolher os dados visíveis.
+
 ## Preencher o endereço
 
 1. Informe o **CEP** e use **Buscar CEP** para preencher os dados disponíveis.
@@ -27,8 +29,14 @@ A plataforma pode iniciar uma inspeção a partir da conta, com permissão espec
 
 ## Tutorial
 
+Nos campos de senha inicial do administrador, use o ícone de olho para **Mostrar senha** e clique novamente para **Ocultar senha**. Cada campo tem seu próprio controle.
+
 O botão **Tutorial desta tela** na barra superior apresenta os controles de listagem, cadastro e edição.
 
 ## Orientação na tela
 
 Use **Tutorial desta tela** na barra superior. O tutorial apresenta o cadastro quando permitido, os filtros, as colunas, as ações e a paginação. Ele abre opções e demonstra a largura das colunas no desktop, restaurando as preferências ao sair. **Ver todos os passos** permite escolher um assunto. Esc fecha o tutorial.
+
+## Orientações nos campos
+
+O ícone de informação ao lado de CPF ou CNPJ explica o documento esperado. A consulta de CNPJ exige um número completo e preenche somente os nomes que estiverem vazios. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

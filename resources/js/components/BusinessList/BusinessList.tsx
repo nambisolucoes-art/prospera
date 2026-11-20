@@ -72,14 +72,27 @@ export default function BusinessList<Row>({ label, preferenceKey, filters, page,
     ? columns.filter((column) => !column.compact && !column.locked).map((column) => column.id)
     : [];
   const hidden = compact ? preferences.compactHidden ?? defaultCompactHidden : preferences.hidden;
-  const visible = columns.filter((column) => column.locked || !hidden.includes(column.id));
-  const lockedWidthOf = (column: BusinessColumn<Row>) => compact ? column.compactWidth ?? Math.min(78, column.width) : column.width;
-  const lockedWidth = visible.reduce((total, column) => total + (column.locked ? lockedWidthOf(column) : 0), 0);
+  const orderedColumns = [
+    ...columns.filter((column) => column.id !== 'actions'),
+    ...columns.filter((column) => column.id === 'actions'),
+  ];
+  const visible = orderedColumns.filter((column) => column.locked || !hidden.includes(column.id));
+  const hasFixedWidth = (column: BusinessColumn<Row>) =>
+    column.locked || column === visible[0] || column === visible[visible.length - 1];
+  const fixedWidthOf = (column: BusinessColumn<Row>) =>
+    compact ? column.compactWidth ?? Math.min(78, column.width) : column.width;
+  const fixedWidth = visible.reduce(
+    (total, column) => total + (hasFixedWidth(column) ? fixedWidthOf(column) : 0),
+    0,
+  );
   const weightOf = (column: BusinessColumn<Row>) => {
     const saved = demoWeights?.[column.id] ?? preferences.columnWeights[column.id];
     return !compact && Number.isFinite(saved) && saved > 0 ? saved : column.width;
   };
-  const availableWeight = visible.reduce((total, column) => total + (column.locked ? 0 : weightOf(column)), 0);
+  const availableWeight = visible.reduce(
+    (total, column) => total + (hasFixedWidth(column) ? 0 : weightOf(column)),
+    0,
+  );
 
   useLayoutEffect(() => {
     const viewport = tableViewport.current;
@@ -194,7 +207,7 @@ export default function BusinessList<Row>({ label, preferenceKey, filters, page,
       <div className="business-list__summary">
         <span>{page.total} {page.total === 1 ? 'registro' : 'registros'}</span>
         <div className="business-list__columns" data-tour="business-columns">
-          <SelectChecklist label="Colunas" options={columns.map((column) => ({
+          <SelectChecklist label="Colunas" options={orderedColumns.map((column) => ({
             id: column.id,
             label: column.label,
             checked: column.locked || !hidden.includes(column.id),
@@ -209,8 +222,10 @@ export default function BusinessList<Row>({ label, preferenceKey, filters, page,
       <div ref={tableViewport} className="business-list__table" data-tour="business-table" role="region" aria-label={label}>
         <Table hover condensed headerTone="primary">
           <colgroup>{visible.map((column) => {
-            const share = weightOf(column) / availableWeight;
-            const width = column.locked ? lockedWidthOf(column) : `calc(${share * 100}cqw - ${share * lockedWidth}px)`;
+            const share = availableWeight > 0 ? weightOf(column) / availableWeight : 0;
+            const width = hasFixedWidth(column)
+              ? fixedWidthOf(column)
+              : `calc(${share * 100}cqw - ${share * fixedWidth}px)`;
             return <col key={column.id} style={{ width }} />;
           })}</colgroup>
           <thead>
@@ -219,7 +234,7 @@ export default function BusinessList<Row>({ label, preferenceKey, filters, page,
               return (
                 <th key={column.id} scope="col" data-column={column.id}>
                   <span className="business-list__heading" title={column.label}>{column.label}</span>
-                  {!compact && !column.locked && neighbor && !neighbor.locked && (
+                  {!compact && !hasFixedWidth(column) && neighbor && !hasFixedWidth(neighbor) && (
                     <span className="business-list__resize" data-tour="business-resize" role="separator" tabIndex={0} aria-orientation="vertical"
                       aria-label={`Redimensionar colunas ${column.label} e ${neighbor.label}`}
                       aria-valuenow={Math.round(100 * weightOf(column) / (weightOf(column) + weightOf(neighbor)))}

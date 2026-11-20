@@ -1,0 +1,16 @@
+.infoTooltip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--bold-color-primary);
+  font-size: 14px;
+  cursor: help;
+  vertical-align: middle;
+}
+.infoTooltip:focus-visible { outline: 2px solid var(--bold-color-primary); outline-offset: 1px; }
+@media (pointer: coarse) { .infoTooltip { width: 32px; height: 32px; } }

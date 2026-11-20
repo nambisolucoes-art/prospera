@@ -56,31 +56,31 @@
 }
 
 .progressBar__bar--success {
-  background-color: #81c868;
+  background-color: var(--bold-color-success);
 }
 
 .progressBar__bar--info {
-  background-color: #34d3eb;
+  background-color: var(--bold-color-info);
 }
 
 .progressBar__bar--warning {
-  background-color: #ffbd4a;
+  background-color: var(--bold-color-warning);
 }
 
 .progressBar__bar--danger {
-  background-color: #f05050;
+  background-color: var(--bold-color-danger);
 }
 
 .progressBar__bar--inverse {
-  background-color: #4c5667;
+  background-color: var(--bold-color-inverse);
 }
 
 .progressBar__bar--purple {
-  background-color: #7266ba;
+  background-color: var(--bold-color-purple);
 }
 
 .progressBar__bar--pink {
-  background-color: #fb6d9d;
+  background-color: var(--bold-color-pink);
 }
 
 .progressBar__bar--striped {

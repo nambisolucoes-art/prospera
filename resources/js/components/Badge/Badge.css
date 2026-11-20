@@ -57,11 +57,11 @@
 }
 
 .badge--inverse {
-  background-color: #4c5667;
+  background-color: var(--bold-color-inverse);
 }
 
 .badge--warning {
-  background-color: #ffbd4a;
+  background-color: var(--bold-color-warning);
 }
 
 .badge--danger {
@@ -69,7 +69,7 @@
 }
 
 .badge--purple {
-  background-color: #7266ba;
+  background-color: var(--bold-color-purple);
 }
 
 .badge--pink {

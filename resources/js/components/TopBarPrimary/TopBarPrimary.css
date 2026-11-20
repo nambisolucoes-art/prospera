@@ -340,3 +340,5 @@ button.topbarDropdown__profileLink {
 }
 
 .topbar__tour{border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:inherit;min-width:44px;}
+
+.topbar__left { transition: width var(--bold-sidebar-transition); }

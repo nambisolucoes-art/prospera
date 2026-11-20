@@ -63,6 +63,7 @@ export function businessListTourSteps({
       'Largura das colunas',
       [
         'Arraste a linha entre os títulos para ajustar a largura de duas colunas.',
+        'A primeira e a última coluna têm largura fixa. A coluna Ações fica sempre no final da tabela.',
         'Pelo teclado, selecione a linha e use as setas. No próximo passo, vamos demonstrar.',
       ],
       'Tabela',
@@ -98,7 +99,7 @@ export function businessListTourSteps({
       ...at(
         'business-row-actions',
         'Ações de cada registro',
-        'Use os botões para visualizar ou editar o registro. As ações disponíveis dependem das suas permissões.',
+        'Na última coluna, use os botões para visualizar ou editar o registro. As ações disponíveis dependem das suas permissões.',
         'Tabela',
       ),
       availableWith:

@@ -2,13 +2,22 @@
   min-height: 100vh;
 }
 
+.app-page__header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 999;
+}
+
+.app-page__header > .topbar { position: relative; }
+
 .app-content-placeholder {
   display: flex;
   flex-direction: column;
   margin-left: var(--bold-sidebar-width);
+  transition: margin-left var(--bold-sidebar-transition);
   overflow: clip;
   position: relative;
-  padding-top: var(--bold-topbar-height);
+  padding-top: var(--bold-header-height, var(--bold-topbar-height));
   min-height: 100vh;
 }
 
@@ -36,7 +45,7 @@
   .app-page__sidebar-backdrop {
     position: fixed;
     z-index: 55;
-    inset: var(--bold-topbar-height) 0 0;
+    inset: var(--bold-header-height, var(--bold-topbar-height)) 0 0;
     width: 100%;
     padding: 0;
     border: 0;

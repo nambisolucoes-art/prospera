@@ -127,4 +127,8 @@ A suíte impõe SQLite em memória em `tests/bootstrap.php`, antes de carregar o
 
 Após uma atualização, a aplicação recupera uma falha de carregamento dos arquivos de tela com uma única navegação GET, sem reenviar formulários. O HTML não fica armazenado em cache. Falhas persistentes oferecem Recarregar tela; a tentativa automática é limitada para evitar loops. Consulte a [verificação de recuperação](docs/convencoes/recuperacao-assets-etiquetas-entrega.md).
 
+O preloader aparece somente quando uma troca de tela ultrapassa 300 ms e sai assim que o conteúdo fica pronto, sem duração mínima de exibição. Navegações rápidas e atualizações de filtros ou paginação na mesma tela não mostram a sobreposição. O indicador usa o favicon Prospera com oito pontos verdes e azuis sobre um desfoque discreto, respeitando a preferência por movimento reduzido. Os dados da API continuam sendo consultados no servidor a cada navegação.
+
+O modo normal está ativo com `appLoaderPreviewEnabled = false` em `resources/js/utils/appPageTransition.ts`. Para conferir a animação temporariamente, altere a chave para `true` e execute `make up`: toda navegação mostrará o indicador imediatamente por pelo menos 500 ms, além da transição de saída. Retorne a chave para `false` e execute `make up` para restaurar o modo normal.
+
 A listagem da Central de Ajuda segue a busca do Ubold e do GNAI: campo centralizado, abas com contadores por categoria e resultados em lista com título, caminho e resumo. SearchInput, SearchResults, SearchResultItem, Tabs e Badge são reutilizados; categorias e contagens usam somente os artigos autorizados retornados pelo servidor.

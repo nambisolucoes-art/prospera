@@ -14,7 +14,7 @@ export default function AccountInspectionBanner() {
       <div className="account-inspection-banner__context">
         <i className="fa fa-eye account-inspection-banner__icon" aria-hidden="true" />
         <div className="account-inspection-banner__identity">
-          <strong>Inspecionando como {auth.user?.name}</strong>
+          <strong>Acessando como {auth.user?.name}</strong>
           <span className="account-inspection-banner__mode">{auth.inspection_mode === 'edit' ? 'Leitura e edição' : 'Somente leitura'}</span>
         </div>
       </div>

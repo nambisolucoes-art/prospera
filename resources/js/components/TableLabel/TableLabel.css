@@ -13,23 +13,23 @@
   border-radius: var(--bold-radius);
 }
 .tableLabel--success {
-  background: var(--bold-color-success, #81c868);
+  background: var(--bold-color-success);
 }
 .tableLabel--primary {
   background: var(--bold-color-primary, var(--bold-color-primary));
 }
 .tableLabel--inverse {
-  background: #4c5667;
+  background: var(--bold-color-inverse);
 }
 .tableLabel--danger {
-  background: var(--bold-color-danger, #f05050);
+  background: var(--bold-color-danger);
 }
 .tableLabel--warning {
-  background: #ffbd4a;
+  background: var(--bold-color-warning);
 }
 .tableLabel--info {
-  background: var(--bold-color-info, #34d3eb);
+  background: var(--bold-color-info);
 }
 .tableLabel--purple {
-  background: var(--bold-color-purple, #7266ba);
+  background: var(--bold-color-purple);
 }

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import InfoTooltip from '@/components/InfoTooltip/InfoTooltip';
 import { joinClassNames } from '@/utils/joinClassNames';
 import './FormField.css';
 
@@ -8,6 +9,7 @@ export interface FormFieldProps {
   children: ReactNode;
   layout?: 'stacked' | 'horizontal';
   hint?: string;
+  info?: string;
   error?: string;
   className?: string;
   requiredIndicator?: boolean;
@@ -15,7 +17,7 @@ export interface FormFieldProps {
 }
 
 export default function FormField({
-  id, label, children, layout = 'stacked', hint, error, className, requiredIndicator = false, passiveLabel = false,
+  id, label, children, layout = 'stacked', hint, info, error, className, requiredIndicator = false, passiveLabel = false,
 }: FormFieldProps): JSX.Element {
   const labelText = <>
     {requiredIndicator && <span className="formField__required" aria-hidden="true">*</span>}
@@ -24,11 +26,14 @@ export default function FormField({
 
   return (
     <div className={joinClassNames('formField', `formField--${layout}`, className)}>
-      {passiveLabel ? (
-        <span id={`${id}-label`} className="formField__label" onPointerDown={(event) => event.preventDefault()}>
-          {labelText}
-        </span>
-      ) : <label className="formField__label" htmlFor={id}>{labelText}</label>}
+      <div className="formField__labelRow">
+        {passiveLabel ? (
+          <span id={`${id}-label`} className="formField__label" onPointerDown={(event) => event.preventDefault()}>
+            {labelText}
+          </span>
+        ) : <label className="formField__label" htmlFor={id}>{labelText}</label>}
+        {info && <InfoTooltip text={info} label={label} />}
+      </div>
       <div className="formField__control">
         {children}
         {hint ? <span id={`${id}-hint`} className="formField__hint">{hint}</span> : null}

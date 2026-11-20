@@ -5,6 +5,7 @@ export type NavigationOptions = { preserveScroll?: boolean; replace?: boolean };
 type ApiPage = {
   url: string;
   component: string;
+  transitionId?: number;
   props: SessionProps;
   navigate: (url: string, options?: NavigationOptions) => Promise<boolean>;
 };

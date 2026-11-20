@@ -25,6 +25,7 @@
 .business-form .formField { margin-bottom: 10px; }
 .business-form .formField__label { color: var(--bold-color-text); font-size: 13px; line-height: 1.4; }
 .business-form .textInput { height: var(--business-control-height); padding: 5px 10px; font-size: 13px; max-width: 640px; }
+.business-form .textInputPassword { max-width: 640px; }
 .business-form .business-form__short-control { max-width: 240px; }
 .business-form__control-start { margin-inline: 10px; }
 .business-form__actions-inline {
@@ -59,13 +60,13 @@ html:has(.business-form > .business-form__actions) { scroll-padding-bottom: calc
   }
   .business-form .formField::before,
   .business-form .formField::after { display: none; }
-  .business-form .formField--horizontal > .formField__label,
+  .business-form .formField--horizontal > .formField__labelRow,
   .business-form .formField--horizontal > .formField__control {
     float: none;
     width: auto;
     padding: 0;
   }
-  .business-form .formField--horizontal > .formField__label { padding: 7px 14px 0 0; }
+  .business-form .formField--horizontal > .formField__labelRow { padding: 7px 14px 0 0; }
 }
 
 
@@ -84,8 +85,12 @@ html:has(.business-form > .business-form__actions) { scroll-padding-bottom: calc
     container-type: inline-size;
     --business-label-width: clamp(155px, 16.6667cqw, 310px);
   }
-  .business-form--wide-labels .formField--horizontal > .formField__label {
+  .business-form--wide-labels .formField--horizontal > .formField__labelRow {
     padding-inline: 0 20px;
     text-align: end;
   }
+}
+
+@media (min-width: 992px) {
+  .business-form--wide-labels .formField__labelRow { justify-content: flex-end; }
 }

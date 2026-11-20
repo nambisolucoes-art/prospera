@@ -31,26 +31,33 @@
   --prospera-green: #006d4a;
   --prospera-lime: #95e000;
   --prospera-title-accent: #5d9bec;
+  --prospera-loader-overlay: rgba(6, 31, 63, .12);
 
   --bold-color-custom: var(--prospera-green);
   --bold-color-primary: var(--prospera-blue);
   --bold-color-navigation: var(--prospera-navy);
   --bold-color-navigation-accent: var(--prospera-lime);
-  --bold-color-danger: #f05050;
-  --bold-validation-message-color: #f6504d;
+  /* Referência GNAI2 com tons auxiliares atualizados, independentes da marca Prospera. */
+  --bold-color-list-action: #2e5cb8;
+  --bold-color-danger: #ef4444;
+  --bold-validation-message-color: var(--bold-color-danger);
   --bold-validation-message-size: 12px;
-  --bold-color-info: #34d3eb;
-  --bold-color-success: #81c868;
-  --bold-color-pink: #fb6d9d;
-  --bold-color-purple: #7266ba;
-  --bold-color-warning: #ffbd4a;
+  --bold-color-info: #0284c7;
+  --bold-color-success: #16a34a;
+  --bold-color-pink: #db2777;
+  --bold-color-purple: #7c3aed;
+  --bold-color-warning: #f59e0b;
+  --bold-color-inverse: #475569;
 
   --prospera-inspection-background: #fff3d6;
   --prospera-inspection-text: #664400;
   --prospera-inspection-border: #edcf8b;
 
   --bold-topbar-height: 60px;
+  --bold-sidebar-transition: 220ms ease-in-out;
   --bold-sidebar-width: 240px;
   --bold-sidebar-small-width: 180px;
   --bold-sidebar-collapsed-width: 70px;
 }
+
+@media (prefers-reduced-motion: reduce) { :root { --bold-sidebar-transition: 0ms; } }

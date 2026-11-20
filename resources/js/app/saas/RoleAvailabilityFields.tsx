@@ -66,7 +66,7 @@ export default function RoleAvailabilityFields({ role, organization, errors }: {
       </FormHelp>
       {role?.system_key ? <FormHelp className="business-form__control-start">Cargos de sistema abrangem toda a conta.</FormHelp> : (
         <fieldset disabled={reviewing} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-          <Select label="Disponibilidade" name="availability" value={mode} error={errors.availability}
+          <Select label="Disponibilidade" info="Define onde o cargo pode ser atribuído. Selecionar toda a conta inclui empresas e estabelecimentos futuros. Para conceder acesso, atribua o cargo a um vínculo." name="availability" value={mode} error={errors.availability}
             onChange={(value) => { setMode(value as 'tenant' | 'restricted'); clearReview(); }}
             options={[
               { value: 'tenant', label: 'Toda a conta (inclui empresas e estabelecimentos futuros)' },

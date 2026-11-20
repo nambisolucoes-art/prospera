@@ -47,7 +47,7 @@ export default function ClientForm({
               updateDocument(nextType === client?.person_type ? client.document ?? '' : '');
             }} error={errors.person_type} />}
             <Field label={company ? 'Razão social' : 'Nome'} name="name" value={name} onChange={(event) => setName(event.target.value)} error={errors.name} required />
-            {!tenant && <Field label={company ? 'CNPJ' : 'CPF'} name="document" compact inputMode={company ? 'text' : 'numeric'} maxLength={18}
+            {!tenant && <Field label={company ? 'CNPJ' : 'CPF'} name="document" info={company ? "Informe um CNPJ válido. Buscar CNPJ exige um CNPJ numérico completo e preenche os nomes que ainda estiverem vazios." : "Informe um CPF válido para identificar o contratante."} compact inputMode={company ? 'text' : 'numeric'} maxLength={18}
               value={document ? formatTaxDocument(document, company ? 'company' : 'individual') : ''} onChange={(event) => updateDocument(event.target.value)}
               action={company && <LookupButton label="Buscar CNPJ" loading={cnpjLookup.loading} onClick={() => void cnpjLookup.lookup(document)} />}
               error={cnpjLookup.error || errors.document} required={required} />}

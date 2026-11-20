@@ -44,27 +44,27 @@
 }
 
 .inlineAlert--success {
-  border-color: rgba(95, 190, 170, 0.4);
-  background-color: rgba(95, 190, 170, 0.3);
-  color: var(--bold-color-custom);
+  border-color: color-mix(in srgb, var(--bold-color-success) 40%, transparent);
+  background-color: color-mix(in srgb, var(--bold-color-success) 15%, white);
+  color: color-mix(in srgb, var(--bold-color-success) 55%, black);
 }
 
 .inlineAlert--info {
-  border-color: rgba(52, 211, 235, 0.3);
-  background-color: rgba(52, 211, 235, 0.2);
-  color: #34d3eb;
+  border-color: color-mix(in srgb, var(--bold-color-info) 40%, transparent);
+  background-color: color-mix(in srgb, var(--bold-color-info) 15%, white);
+  color: color-mix(in srgb, var(--bold-color-info) 55%, black);
 }
 
 .inlineAlert--warning {
-  border-color: rgba(255, 189, 74, 0.3);
-  background-color: rgba(255, 189, 74, 0.2);
-  color: #ffbd4a;
+  border-color: color-mix(in srgb, var(--bold-color-warning) 40%, transparent);
+  background-color: color-mix(in srgb, var(--bold-color-warning) 15%, white);
+  color: color-mix(in srgb, var(--bold-color-warning) 55%, black);
 }
 
 .inlineAlert--danger {
-  border-color: rgba(240, 80, 80, 0.3);
-  background-color: rgba(240, 80, 80, 0.2);
-  color: #f05050;
+  border-color: color-mix(in srgb, var(--bold-color-danger) 40%, transparent);
+  background-color: color-mix(in srgb, var(--bold-color-danger) 15%, white);
+  color: color-mix(in srgb, var(--bold-color-danger) 55%, black);
 }
 
 .inlineAlertLink {

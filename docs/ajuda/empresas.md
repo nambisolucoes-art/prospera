@@ -18,3 +18,7 @@ Preencha os dados da unidade inicial e escolha **Salvar**. A empresa e sua unida
 ## Editar a empresa ou alterar sua situação
 
 Use **Editar** e escolha **Salvar** após revisar os campos. A situação pode ser alterada com permissões específicas para ativar ou inativar. Uma empresa inativa fica indisponível para cadastro de unidades e troca da unidade principal. Empresas migradas sem documento confirmado aparecem como pendência no **Início** para quem pode consultar a organização.
+
+## Orientações nos campos
+
+O ícone de informação do documento explica a raiz de CNPJ, o CNPJ completo e a consulta cadastral. A consulta exige CNPJ numérico completo e preenche somente os nomes vazios. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

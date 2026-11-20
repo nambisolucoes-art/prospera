@@ -13,6 +13,8 @@ No menu do usuário, abra **Perfil** e escolha a aba **Segurança**. Se a tela s
 
 Preencha **Senha atual**, **Nova senha** e **Confirme a nova senha**. Clique em **Salvar**.
 
+Os campos de senha começam com os caracteres ocultos. Use o ícone de olho para **Mostrar senha** e clique novamente para **Ocultar senha**. Cada campo tem seu próprio controle. O mesmo recurso está disponível no login, na confirmação de acesso, na redefinição de senha e nos cadastros com senha inicial.
+
 ## Configurar a verificação em duas etapas
 
 Em **Verificação em duas etapas**, clique em **Ativar** para mostrar o código QR. Leia-o com um aplicativo autenticador, informe o **Código do autenticador** e use **Salvar**. Depois, você poderá consultar os códigos de recuperação na mesma seção.
@@ -26,3 +28,7 @@ Em um navegador compatível, informe um **Nome da chave** e clique em **Salvar**
 ## Permissões do cargo
 
 Dentro da conta, visualizar e executar cada ação desta tela dependem das permissões pessoais do cargo. Alterar dados, foto, senha, chaves de acesso, segundo fator ou códigos de recuperação são operações distintas; o servidor verifica a autorização específica. Consulte [Cargos e permissões](cargos-permissoes.md).
+
+## Orientações nos campos
+
+As dicas de Senha atual e Confirme a nova senha explicam a autorização da alteração e a confirmação exata do novo valor. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

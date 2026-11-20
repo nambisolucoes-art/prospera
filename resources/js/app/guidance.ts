@@ -25,6 +25,11 @@ export function tourFor(
   const form = (targets: TourStep[]) => [
     ...targets,
     at(
+      'password-visibility',
+      'Conferir a senha',
+      'Use o ícone de olho para mostrar a senha deste campo. Clique novamente para ocultar. O tutorial não altera a visibilidade.',
+    ),
+    at(
       'form-actions',
       'Salvar alterações',
       'Revise os dados e salve. Campos obrigatórios e mensagens de validação orientam o preenchimento.',
@@ -37,7 +42,7 @@ export function tourFor(
       at(
         'security-confirm',
         'Confirmar sua identidade',
-        'Informe sua senha atual para abrir as configurações de segurança.',
+        'Informe sua senha atual para abrir as configurações de segurança. Use o ícone de olho para mostrar ou ocultar a senha.',
       ),
     ];
   } else if (path === '/dashboard' || path === '/saas/contas') {
@@ -266,7 +271,7 @@ export function tourFor(
     title = 'Segurança';
     help = 'seguranca';
     steps = [
-      at('security-password', 'Senha', 'Defina uma senha segura.'),
+      at('security-password', 'Senha', 'Defina uma senha segura. Use o ícone de olho de cada campo para mostrar ou ocultar a senha.'),
       at(
         'security-passkeys',
         'Chaves de acesso',
@@ -334,7 +339,15 @@ export function tourFor(
   return {
     id: path,
     title,
-    steps: [...pageHeaderTourSteps(title), ...steps],
+    steps: [
+      at(
+        'account-inspection-banner',
+        'Acessando como outro usuário',
+        'Acima da barra superior, confira o usuário e o modo da inspeção. Use Voltar ao SaaS para encerrar e retornar à plataforma.',
+      ),
+      ...pageHeaderTourSteps(title),
+      ...steps,
+    ],
     help:
       help && permissions.includes('self.help.view')
         ? '/ajuda/' + help

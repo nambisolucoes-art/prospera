@@ -11,7 +11,6 @@ import { hasActiveDescendant, isSectionTitle } from './SidebarPrimary.helpers';
 import SidebarMenu from './SidebarMenu';
 import SidebarCollapsedFlyout from './SidebarCollapsedFlyout';
 import SidebarScrollbar from './SidebarScrollbar';
-import { startAppPageTransition } from '@/utils/appPageTransition';
 
 interface SidebarPrimaryProps {
   collapsed: boolean;
@@ -30,8 +29,6 @@ export default function SidebarPrimary({ collapsed, currentItemKey, entries = de
   const [thumbTop, setThumbTop] = useState<number>(0);
   const [hoveredCollapsedItem, setHoveredCollapsedItem] = useState<SidebarItem | null>(null);
   const [hoveredCollapsedItemTop, setHoveredCollapsedItemTop] = useState<number>(0);
-  const [hoveredCollapsedItemHeight, setHoveredCollapsedItemHeight] = useState<number>(0);
-  const [hoveredCollapsedFlyoutWidth, setHoveredCollapsedFlyoutWidth] = useState<number>(190);
   const sidebarRef = useRef<HTMLElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
   const collapsedFlyoutRef = useRef<HTMLDivElement | null>(null);
@@ -48,35 +45,6 @@ export default function SidebarPrimary({ collapsed, currentItemKey, entries = de
       setHoveredCollapsedItem(null);
     }
   }, [collapsed]);
-
-  useEffect(() => {
-    if (!collapsed || !hoveredCollapsedItem || !collapsedFlyoutRef.current) {
-      return;
-    }
-
-    const element = collapsedFlyoutRef.current;
-
-    function updateWidth(): void {
-      const nextWidth = Math.max(190, element.getBoundingClientRect().width);
-      setHoveredCollapsedFlyoutWidth(nextWidth);
-    }
-
-    updateWidth();
-
-    if (typeof ResizeObserver === 'undefined') {
-      return;
-    }
-
-    const observer = new ResizeObserver(() => {
-      updateWidth();
-    });
-
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [collapsed, hoveredCollapsedItem]);
 
   useEffect(() => {
     const element = innerRef.current;
@@ -194,7 +162,6 @@ export default function SidebarPrimary({ collapsed, currentItemKey, entries = de
       return;
     }
 
-    startAppPageTransition();
     void navigate(nextPath);
   }
 
@@ -225,7 +192,6 @@ export default function SidebarPrimary({ collapsed, currentItemKey, entries = de
 
     setHoveredCollapsedItem(item);
     setHoveredCollapsedItemTop(itemRect.top - sidebarRect.top + itemRect.height);
-    setHoveredCollapsedItemHeight(itemRect.height);
   }
 
   function queueCollapsedFlyoutHide(): void {
@@ -255,21 +221,6 @@ export default function SidebarPrimary({ collapsed, currentItemKey, entries = de
         </div>
         <div className="clearfix" />
       </div>
-      {collapsed && hoveredCollapsedItem ? (
-        <div
-          className="sidebarPrimary__collapsedProjection"
-          style={{
-            top: `${hoveredCollapsedItemTop - hoveredCollapsedItemHeight}px`,
-            height: `${hoveredCollapsedItemHeight}px`,
-            width: `${hoveredCollapsedFlyoutWidth}px`
-          }}
-          aria-hidden="true"
-          onMouseEnter={clearCollapsedFlyoutHideTimer}
-          onMouseLeave={queueCollapsedFlyoutHide}
-        >
-          <span>{hoveredCollapsedItem.label}</span>
-        </div>
-      ) : null}
       {collapsed && hoveredCollapsedItem?.children?.length ? (
         <SidebarCollapsedFlyout
           item={hoveredCollapsedItem}

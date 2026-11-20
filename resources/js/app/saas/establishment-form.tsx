@@ -97,9 +97,11 @@ export default function EstablishmentForm({
                   <Field label="Nome fantasia" name="trade_name" defaultValue={establishment?.trade_name ?? ''} error={errors.trade_name} />
                   {establishment ? (
                     <Field label="Código" value={establishment.code} readOnly compact
-                      title="O código identifica o estabelecimento nos endereços e não muda depois do cadastro." />
+                      info="O código identifica o estabelecimento nos endereços e não muda depois do cadastro." />
                   ) : (
-                    <Field label="Código" name="code" compact maxLength={40} error={errors.code}
+                    <Field label="Código" name="code"
+                      info="Identifica o estabelecimento nos endereços e não pode ser alterado depois. Se ficar vazio, será gerado pelo nome. Use de 2 a 40 letras minúsculas sem acento, números ou hífen, sem palavras reservadas."
+                      compact maxLength={40} error={errors.code}
                       placeholder="Gerado pelo nome" />
                   )}
                   {establishment && (
@@ -134,7 +136,7 @@ export default function EstablishmentForm({
                     </>
                   )}
                   {legalEntity && classification !== 'unregistered' && (
-                    <Field label="CNPJ" name="tax_document" compact required maxLength={18}
+                    <Field label="CNPJ" info="Informe um CNPJ completo e válido, com a mesma raiz da empresa proprietária." name="tax_document" compact required maxLength={18}
                       placeholder={company?.document_label ? `${company.document_label}/0000-00` : undefined}
                       value={document ? formatTaxDocument(document, 'company') : ''}
                       onChange={(event) => setDocument(event.target.value)} error={errors.tax_document} />

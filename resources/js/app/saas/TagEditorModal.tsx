@@ -63,6 +63,7 @@ export default function TagEditorModal({
                   />
                   <Select
                     label="Módulo"
+                    info="Define onde a etiqueta pode ser utilizada. Atualmente, as etiquetas estão disponíveis no módulo Pessoas."
                     name="module"
                     defaultValue={tag?.module ?? 'people'}
                     options={[{ value: 'people', label: 'Pessoas' }]}
@@ -70,6 +71,7 @@ export default function TagEditorModal({
                   />
                   <Select
                     label="Situação"
+                    info="Etiquetas inativas mantêm os vínculos existentes, mas não podem ser selecionadas em novos vínculos."
                     name="active"
                     required
                     defaultValue={tag?.active === false ? '0' : '1'}

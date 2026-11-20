@@ -19,6 +19,8 @@ Selecione **Usuário** no campo Etiquetas para exibir **Acesso de usuário**. In
 
 Para conceder acesso a uma pessoa existente, use **Editar cadastro** e selecione **Usuário**.
 
+Ao definir uma senha inicial, use o ícone de olho para **Mostrar senha** e clique novamente para **Ocultar senha**. Senha e confirmação têm controles independentes.
+
 ## Editar uma pessoa com acesso
 
 Para suspender o vínculo com a conta, retire a etiqueta **Usuário** e salve. É necessária a permissão **Revogar acesso**. O cadastro de Pessoas e o histórico são preservados, e o acesso à conta é bloqueado na próxima requisição. O último administrador integral ativo não pode ser suspenso. Para reativar o vínculo, selecione novamente a etiqueta com a permissão **Reativar acesso**. A situação da identidade global fica independente.
@@ -52,3 +54,7 @@ Selecione a etiqueta especial Cliente para identificar um cliente da conta. Os d
 ## Editar atribuições
 
 No cadastro de uma pessoa com vínculo, use **Editar atribuições** para gerir os cargos nos locais que você administra. **E-mail de acesso** é somente leitura. Alterações no nome, no e-mail de contato e nos outros dados de Pessoas ficam no cadastro da conta. Consulte [Cargos e permissões](cargos-permissoes.md).
+
+## Orientações nos campos
+
+A dica de CPF ou CNPJ explica que o documento é opcional e, quando informado, deve ser válido e único na conta. CNPJ numérico ou alfanumérico é aceito. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

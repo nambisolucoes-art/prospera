@@ -16,3 +16,7 @@ Use **Cadastrar estabelecimento**, o botão de adição na linha da empresa ativ
 ## Trocar o estabelecimento principal
 
 Abra a ação **Tornar estabelecimento principal** para uma unidade ativa e confirme. O selo **Principal** indica a unidade padrão. A classificação jurídica é independente dessa escolha. Antes de inativar a unidade principal, promova outra unidade ativa. Ativar, inativar e promover exigem permissões próprias.
+
+## Orientações nos campos
+
+A dica de Código explica o identificador usado nos endereços, suas regras e a geração pelo nome quando não informado. O código não muda após o cadastro. A dica ao lado de CNPJ lembra que o documento deve ser completo, válido e ter a mesma raiz da empresa proprietária. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

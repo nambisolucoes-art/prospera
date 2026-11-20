@@ -1,43 +1,32 @@
-.legacyTooltip__trigger {
-  display: inline-block;
-  vertical-align: middle;
-}
+.legacyTooltip__trigger { display: inline-block; vertical-align: middle; }
 .legacyTooltip {
   position: fixed;
-  z-index: 1070;
-  transform: translate(-50%, -100%);
+  z-index: 10000002;
   display: block;
-  max-width: 200px;
-  padding: 5px 0;
-  font: 400 12px/1.42857143 var(--bold-font-body);
-  text-align: center;
-  opacity: 0.9;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  font: 400 12px/1.5 var(--bold-font-body);
+  color: #fff;
   pointer-events: none;
-  animation: legacyTooltipFade 0.15s linear;
+  animation: legacyTooltipFade 120ms ease-out;
+  transition: opacity 120ms ease-out;
 }
 .legacyTooltip__inner {
   display: block;
-  padding: 6px 10px;
-  color: #fff;
-  background: #000;
-  border-radius: 1px;
+  padding: 8px 12px;
+  background: var(--bold-color-navigation);
+  border-radius: 6px;
+  box-shadow: 0 3px 12px var(--bold-color-shadow);
+  overflow-wrap: anywhere;
 }
-.legacyTooltip__arrow {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  margin-left: -5px;
-  width: 0;
-  height: 0;
-  border-width: 5px 5px 0;
-  border-style: solid;
-  border-color: #000 transparent transparent;
-}
-@keyframes legacyTooltipFade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 0.9;
-  }
-}
+.legacyTooltip__arrow { position: absolute; width: 8px; height: 8px; background: var(--bold-color-navigation); }
+.legacyTooltip[data-side='top'] .legacyTooltip__arrow { bottom: -4px; left: var(--tooltip-arrow); transform: translateX(-50%) rotate(45deg); }
+.legacyTooltip[data-side='bottom'] .legacyTooltip__arrow { top: -4px; left: var(--tooltip-arrow); transform: translateX(-50%) rotate(45deg); }
+.legacyTooltip[data-side='right'] .legacyTooltip__arrow { left: -4px; top: var(--tooltip-arrow); transform: translateY(-50%) rotate(45deg); }
+.legacyTooltip[data-side='left'] .legacyTooltip__arrow { right: -4px; top: var(--tooltip-arrow); transform: translateY(-50%) rotate(45deg); }
+@keyframes legacyTooltipFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .legacyTooltip { animation: none; } }
+
+.legacyTooltip[data-open="false"] { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .legacyTooltip { transition: none; } }

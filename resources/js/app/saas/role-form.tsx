@@ -76,6 +76,7 @@ export default function RoleForm({
                       key={module}
                       id={`role-module-${module}`}
                       label={modules[module] ?? module}
+                      info="Cada ação exige sua própria permissão. Você só pode conceder as permissões que possui."
                       layout="horizontal"
                       passiveLabel
                     >

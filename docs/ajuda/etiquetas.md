@@ -42,3 +42,7 @@ Fornecedor identifica um papel da mesma pessoa, sem repetir CPF/CNPJ, contatos o
 ## Etiqueta especial Cliente
 
 Cliente também é uma etiqueta especial protegida. Selecionar essa etiqueta em Pessoas cria ou reativa o papel de cliente; retirar e salvar inativa esse papel sem apagar a pessoa. A estrela permanece exclusiva da listagem de Etiquetas. Consulte [Clientes](clientes.md).
+
+## Orientações nos campos
+
+As dicas de Módulo e Situação explicam onde a etiqueta pode ser utilizada e que inativar preserva vínculos existentes, mas impede novas seleções. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.

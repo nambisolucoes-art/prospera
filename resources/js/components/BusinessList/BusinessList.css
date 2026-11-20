@@ -116,7 +116,7 @@
 .business-list__actions {
   display: flex;
   gap: 4px;
-  --bold-color-primary: #1684e3;
+  --bold-color-primary: var(--bold-color-list-action);
 }
 
 .business-list__actions .button {

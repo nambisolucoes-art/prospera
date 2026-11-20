@@ -1,3 +1,4 @@
+import Tooltip from '@/components/Tooltip/Tooltip';
 import Label from '@/components/Label/Label';
 import type { SidebarItem } from './SidebarPrimary.types';
 import { joinClassNames } from '@/utils/joinClassNames';
@@ -42,12 +43,16 @@ export default function SidebarMenuItem({
           onTopLevelHoverStart?.(item, event.currentTarget);
         }
       }}
+      onFocus={(event) => {
+        if (collapsed && depth === 0 && hasChildren) onTopLevelHoverStart?.(item, event.currentTarget);
+      }}
       onMouseLeave={() => {
         if (collapsed && depth === 0 && hasChildren) {
           onTopLevelHoverEnd?.();
         }
       }}
     >
+      <Tooltip text={item.label} side="right" disabled={!collapsed || depth !== 0} asChild>
       <a
         href={item.href ?? '#'}
         className={joinClassNames((depth === 0 || item.waves) && 'waves-effect waves-light', isActive && depth === 0 && 'active', isOpen && 'subdrop')}
@@ -66,6 +71,7 @@ export default function SidebarMenuItem({
 
         <span>{depth === 0 ? ` ${item.label} ` : item.label}</span>
       </a>
+      </Tooltip>
 
       {hasChildren ? children : null}
     </li>

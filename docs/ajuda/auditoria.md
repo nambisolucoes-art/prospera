@@ -29,7 +29,9 @@ Se houver uma operação visível com permissão de visualizar, os passos finais
 
 ## Cores das ações
 
-As badges identificam a ação na listagem e no detalhe: cadastro em verde, alteração em amarelo e exclusão em vermelho. Entrada usa ciano, saída usa cinza, inspeção iniciada usa roxo e inspeção encerrada usa cinza. Sincronizações usam amarelo. O nome da ação continua visível para que a identificação não dependa somente da cor.
+As badges identificam a ação na listagem e no detalhe: cadastro em verde, alteração em âmbar e exclusão em vermelho. Entrada usa azul, saída usa cinza, inspeção iniciada usa roxo e inspeção encerrada usa cinza. Sincronizações usam âmbar. O nome da ação continua visível para que a identificação não dependa somente da cor.
+
+Os tons seguem a paleta auxiliar compartilhada do sistema, também usada em situações e botões. A identidade de cores da marca permanece a mesma.
 
 ## Valores apresentados
 

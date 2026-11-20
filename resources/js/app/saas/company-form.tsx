@@ -66,7 +66,7 @@ export default function CompanyForm({
                       setDocument(value === company?.person_type ? company.document ?? '' : '');
                       cnpjLookup.reset();
                     }} />
-                  <Field label={legalEntity ? 'CNPJ' : 'CPF'} name="document" compact required maxLength={18}
+                  <Field label={legalEntity ? 'CNPJ' : 'CPF'} name="document" info={legalEntity ? "Informe a raiz de 8 posições ou o CNPJ completo de 14 posições. A consulta cadastral exige o CNPJ numérico completo e preenche os nomes que ainda estiverem vazios." : "Informe um CPF válido para identificar a empresa."} compact required maxLength={18}
                     inputMode={legalEntity ? 'text' : 'numeric'}
                     placeholder={legalEntity ? 'CNPJ completo ou raiz' : '000.000.000-00'}
                     value={document ? formatTaxDocument(document, type) : ''}
