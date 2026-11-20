@@ -1,0 +1,15 @@
+.nestable-row,
+.nestable-row.dd-handle {
+  height: auto;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 3px;
+  background: #f4f8fb;
+  background-clip: padding-box;
+  color: #979898;
+  font: 600 13px/20px var(--bold-font-body);
+}
+
+.nestable-row.dd-handle:hover {
+  color: var(--bold-color-custom);
+}

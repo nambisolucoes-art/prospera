@@ -60,8 +60,13 @@ final class HelpCatalog
             'contas' => $user->is_saas_admin && $can('platform.accounts'),
             'usuarios' => $user->is_saas_admin && $can('platform.users'),
             'inspecao-de-contas' => $user->is_saas_admin && $user->can('platform.inspection.start'),
-            'minha-conta' => ! $user->is_saas_admin
-                && ($can('account.dashboard') || $can('account.establishment') || $can('account.points')),
+            'dados-da-conta' => ! $user->is_saas_admin
+                && ($can('account.dashboard') || $can('account.account-data')),
+            'organizacao' => ! $user->is_saas_admin
+                && ($user->can('account.account-data.update') || $user->can('account.companies.list')
+                    || $user->can('account.companies.create') || $user->can('account.establishments.list')),
+            'empresas' => ! $user->is_saas_admin && $can('account.companies'),
+            'estabelecimentos' => ! $user->is_saas_admin && $can('account.establishments'),
             'clientes' => ! $user->is_saas_admin && $can('account.customers'),
             'fornecedores' => ! $user->is_saas_admin && $can('account.suppliers'),
             'pessoas' => ! $user->is_saas_admin && $can('account.people'),

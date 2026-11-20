@@ -3,6 +3,7 @@
 namespace App\Domains\Pessoas\Application\Data;
 
 use App\Domains\Pessoas\Domain\Models\Person;
+use App\Support\TaxDocument;
 use Closure;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -42,7 +43,7 @@ final readonly class SavePersonDetailsData
         }
 
         if (is_string($values['document'] ?? null)) {
-            $values['document'] = strtoupper(preg_replace('/[.\/\s-]/', '', $values['document'])) ?: null;
+            $values['document'] = TaxDocument::normalize($values['document']) ?: null;
         }
 
         if (is_string($values['whatsapp'] ?? null)) {
@@ -87,7 +88,13 @@ final readonly class SavePersonDetailsData
 
         $company = ($values['person_type'] ?? null) === 'company';
         $documentRule = function (string $attribute, mixed $value, Closure $fail) use ($company): void {
-            if (! is_string($value) || ! self::validDocument($value, $company)) {
+            $document = match (true) {
+                ! is_string($value) => null,
+                $company => TaxDocument::cnpj($value),
+                default => TaxDocument::cpf($value),
+            };
+
+            if ($document === null) {
                 $fail($company ? 'Informe um CNPJ válido.' : 'Informe um CPF válido.');
             }
         };
@@ -153,54 +160,5 @@ final readonly class SavePersonDetailsData
         }
 
         return new self($data);
-    }
-
-    private static function validDocument(string $value, bool $company): bool
-    {
-        if ($company) {
-            $validFormat = preg_match('/^[A-Z0-9]{12}\d{2}$/', $value);
-            $repeatedDigits = preg_match('/^(\d)\1{13}$/', $value);
-
-            if (! $validFormat || $repeatedDigits) {
-                return false;
-            }
-
-            // CNPJ alfanumérico: cada caractere vale o código ASCII menos 48.
-            $base = substr($value, 0, 12);
-            $weightSets = [
-                [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
-                [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2],
-            ];
-
-            foreach ($weightSets as $weights) {
-                $sum = 0;
-
-                foreach ($weights as $index => $weight) {
-                    $sum += (ord($base[$index]) - 48) * $weight;
-                }
-
-                $rest = $sum % 11;
-                $base .= (string) ($rest < 2 ? 0 : 11 - $rest);
-            }
-
-            return $base === $value;
-        }
-
-        if (! preg_match('/^\d{11}$/', $value) || preg_match('/^(\d)\1{10}$/', $value)) {
-            return false;
-        }
-
-        for ($length = 9; $length < 11; $length++) {
-            $sum = 0;
-            for ($i = 0; $i < $length; $i++) {
-                $sum += (int) $value[$i] * ($length + 1 - $i);
-            }
-            $digit = (10 * $sum) % 11;
-            if ((int) $value[$length] !== ($digit === 10 ? 0 : $digit)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

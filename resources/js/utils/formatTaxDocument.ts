@@ -7,5 +7,9 @@ export function formatTaxDocument(value: string | null, personType: string): str
   if (personType === 'company' && /^[A-Z0-9]{12}\d{2}$/.test(normalized)) {
     return normalized.replace(/^(.{2})(.{3})(.{3})(.{4})(.{2})$/, '$1.$2.$3/$4-$5');
   }
+  // Raiz do CNPJ, usada pelas empresas cujos estabelecimentos têm CNPJ próprio.
+  if (personType === 'company' && /^[A-Z0-9]{8}$/.test(normalized)) {
+    return normalized.replace(/^(.{2})(.{3})(.{3})$/, '$1.$2.$3');
+  }
   return value;
 }

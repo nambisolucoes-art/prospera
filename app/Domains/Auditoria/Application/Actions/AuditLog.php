@@ -41,6 +41,8 @@ final class AuditLog
         string $event,
         string $label,
         array $changes = [],
+        ?int $companyId = null,
+        ?int $establishmentId = null,
     ): void {
         if (! Schema::hasTable('audit_records')) {
             // Migrations antigas da instalação são anteriores à tabela central de histórico.
@@ -109,6 +111,15 @@ final class AuditLog
             'created_at' => $existing ? $existing->created_at : now(),
         ];
 
+        // Eventos sem empresa omitem as colunas, gravadas desde a E04, para não depender delas em migrações antigas.
+        if ($companyId !== null) {
+            $values['company_id'] = $companyId;
+        }
+
+        if ($establishmentId !== null) {
+            $values['establishment_id'] = $establishmentId;
+        }
+
         if ($existing) {
             $existing->fill($values)->saveOrFail();
         } else {
@@ -153,6 +164,8 @@ final class AuditLog
             'updated',
             (string) ($model->getAttribute('name') ?? '#'.$model->getKey()),
             [$field => ['label' => $label, 'before' => $names($before), 'after' => $names($after)]],
+            $model->auditCompanyId(),
+            $model->auditEstablishmentId(),
         );
     }
 }

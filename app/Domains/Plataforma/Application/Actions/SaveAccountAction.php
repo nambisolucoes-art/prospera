@@ -3,6 +3,8 @@
 namespace App\Domains\Plataforma\Application\Actions;
 
 use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\SaveCompanyData;
 use App\Domains\Plataforma\Application\Data\SaveAccountData;
 use App\Domains\Plataforma\Domain\DTOs\AccountDTO;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -18,6 +20,7 @@ final readonly class SaveAccountAction
     public function __construct(
         private CreateUserAction $createUser,
         private SendUserInvitationAction $invite,
+        private CreateCompanyAction $createCompany,
     ) {}
 
     public function execute(Client $client, #[\SensitiveParameter] SaveAccountData $data): string
@@ -34,7 +37,7 @@ final readonly class SaveAccountAction
             details: $data->details,
         );
 
-        $user = AuditLog::transaction(function () use ($client, $accountDTO, $administrator) {
+        $user = AuditLog::transaction(function () use ($client, $accountDTO, $administrator, $data) {
             if ($client->exists) {
                 $client->revise($accountDTO);
             } else {
@@ -50,6 +53,10 @@ final readonly class SaveAccountAction
             if ($administrator === null) {
                 return null;
             }
+
+            // Toda conta nasce com a primeira empresa e a unidade principal (seção 6.5).
+            $companyData = SaveCompanyData::forProvisioning($client, $data->contractorIsCompany);
+            $this->createCompany->execute($client->id, $companyData);
 
             try {
                 return $this->createUser->execute($administrator, UserRole::AccountAdministrator, $client);

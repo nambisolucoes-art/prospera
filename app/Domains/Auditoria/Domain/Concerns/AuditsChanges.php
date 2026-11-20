@@ -29,6 +29,20 @@ trait AuditsChanges
         return $id === null ? null : (int) $id;
     }
 
+    public function auditCompanyId(): ?int
+    {
+        $id = $this->getAttribute('company_id');
+
+        return $id === null ? null : (int) $id;
+    }
+
+    public function auditEstablishmentId(): ?int
+    {
+        $id = $this->getAttribute('establishment_id');
+
+        return $id === null ? null : (int) $id;
+    }
+
     /**
      * Registra a mudança de um relacionamento, que não dispara os eventos do Eloquent.
      *

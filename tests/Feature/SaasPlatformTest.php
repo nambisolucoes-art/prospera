@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -25,7 +26,7 @@ class SaasPlatformTest extends TestCase
         $this->assertDatabaseCount('clients', 0);
     }
 
-    public function test_the_platform_provisions_accounts_and_the_owner_manages_the_establishment(): void
+    public function test_the_platform_provisions_accounts_and_the_owner_manages_the_account_data(): void
     {
         $this->actingAs(User::factory()->create(['is_saas_admin' => true]));
 
@@ -66,7 +67,6 @@ class SaasPlatformTest extends TestCase
             ->assertJsonPath('client.details.whatsapp', '11999991111');
 
         $otherClient = Client::query()->create(['name' => 'Outro cliente', 'active' => true]);
-        $otherPoint = $otherClient->points()->create(['name' => 'Outro ponto', 'active' => true]);
         $this->getJson("$path/visualizar")->assertOk()
             ->assertJsonPath('administrator.email', 'owner@example.test')
             ->assertJsonPath('details.additional_phones', ['11988881111', '11988882222'])
@@ -95,7 +95,7 @@ class SaasPlatformTest extends TestCase
         $this->assertTrue(Hash::check('SenhaForte123!', $owner->password));
         $member = User::factory()->create(['account_id' => $client->id]);
         $this->actingAs($member)->patch('/conta', ['name' => 'Inválido'])->assertForbidden();
-        $this->post('/conta/pontos', ['name' => 'Inválido', 'active' => true])->assertForbidden();
+        $this->post('/conta/empresas', ['name' => 'Inválida'])->assertForbidden();
         $this->actingAs($owner)->get('/dashboard')->assertRedirect(route('account.dashboard'));
         $this->getJson('/conta/editar')->assertJsonPath('tenant', true)->assertJsonPath('client.id', $client->id);
         $this->patch('/conta', [
@@ -115,17 +115,16 @@ class SaasPlatformTest extends TestCase
         $this->assertSame('Campinas', $client->details['address']['city']);
         $this->assertSame('01001000', $client->details['address']['postal_code']);
         $this->assertSame('Outro cliente', $otherClient->refresh()->name);
-        $this
-            ->post('/conta/pontos', ['name' => 'Recepção', 'active' => '1'])
-            ->assertRedirect(route('account.dashboard'));
-        $point = $client->points()->sole();
-        $this
-            ->patch("/conta/pontos/{$point->id}", ['name' => 'Caixa', 'active' => '0'])
-            ->assertRedirect(route('account.dashboard'));
-        $this->patch("/conta/pontos/{$otherPoint->id}", ['name' => 'Inválido', 'active' => '1'])->assertNotFound();
+        // O provisionamento cria a empresa e a unidade principal sem copiar o documento do contratante.
+        $company = Company::query()->sole();
+        $this->assertSame($client->id, $company->account_id);
+        $this->assertSame('Cliente', $company->name);
+        $this->assertNull($company->tax_root);
+        $this->assertTrue($company->primaryEstablishment()->sole()->active);
         $this->getJson('/conta')->assertJsonPath('account.name', 'Estabelecimento atualizado')
-            ->assertJsonPath('points.0.name', 'Caixa')
-            ->assertJsonPath('points.0.active', false);
+            ->assertJsonPath('organization.companies', 1)
+            ->assertJsonPath('organization.establishments', 1)
+            ->assertJsonPath('organization.incomplete.0.id', $company->id);
         $this->getJson("/saas/contas/{$otherClient->id}/visualizar")->assertForbidden();
     }
 

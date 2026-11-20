@@ -1102,10 +1102,7 @@ Início                       (/conta, hoje rotulado "Minha conta")
 Cadastros
 ├── Pessoas
 └── Etiquetas
-Organização
-├── Dados da conta           (/conta/editar)
-├── Empresas                 (novo; oculto quando há uma só empresa, exibindo o atalho para os dados dela)
-└── Estabelecimentos         (novo)
+Organização                  (/conta/organizacao, conta, empresas e estabelecimentos na mesma árvore)
 Controle de acesso
 ├── Usuários                 (/conta/usuarios, hoje fora da sidebar)
 └── Cargos
@@ -1121,6 +1118,8 @@ URLs atuais preservadas. Os grupos usam o suporte a títulos de seção que `Sid
 
 ### 18.2 Empresas (E04)
 
+**Navegação.** Organização exibe a conta contratante acima das empresas. A seta abre os estabelecimentos da empresa. O botão de adição fica no nível que recebe o cadastro, e o lápis abre o formulário existente. Ao salvar ou cancelar, o usuário volta ao ramo correspondente. As URLs de listagem e edição continuam disponíveis.
+
 - **Listagem:**
   - colunas: razão social, nome fantasia, CNPJ ou raiz formatados (ou "Não informado"), quantidade de estabelecimentos (`withCount`), situação e ações;
   - filtros: busca e situação.
@@ -1130,7 +1129,7 @@ URLs atuais preservadas. Os grupos usam o suporte a títulos de seção que `Sid
   - Unidade principal: nome, endereço, CNPJ completo, matriz. Aparece só no cadastro e provisiona a unidade (6.5);
   - Situação.
 - **Visualização:** modal com dados e a lista de estabelecimentos.
-- **Com uma empresa:** o menu leva direto à edição dela.
+- **Com uma empresa:** Organização mostra a empresa com seus estabelecimentos abertos. A listagem direta de Empresas também exibe o registro.
 
 ### 18.3 Estabelecimentos (E04)
 
@@ -2010,7 +2009,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E01 | Concluída | 19/11/2026 | 19/11/2026 | Seção 03, linha de base 15.2, revisões 2 a 4 | Arquitetura e PD-01 a PD-06 aprovadas; refinamentos DA-24 e DA-25 registrados para a E02 |
 | E02 | Concluída | 20/11/2026 | 20/11/2026 | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registros abaixo) | DA-26 a DA-30 aprovadas; I1 e I2 atribuídas à E05 |
 | E03 | Concluída | 20/11/2026 | 20/11/2026 | Registro E03 e relatório de medições | Concorrência e custos de migrations em bases maiores ficam para trabalho futuro |
-| E04 | Pendente | | | | |
+| E04 | Em validação | 20/11/2026 | | Registro da E04 na seção 26 | Estrutura validada em ambiente isolado. Identificação fiscal legada a confirmar |
 | E05 | Pendente | | | | |
 | E06 | Pendente | | | | |
 | E07 | Pendente | | | | |
@@ -2130,6 +2129,53 @@ Cada etapa acrescenta aqui um bloco com:
 - pendências.
 
 ---
+
+### Registro da E04 em 20/11/2026
+
+**Estado: Em validação.** A retomada encontrou a E03 versionada em `00f04d6`, com staging vazio. A E04 foi continuada na árvore de trabalho existente, sem commit.
+
+**Implementação e arquivos.**
+
+- `app/Domains/Organizacao/` reúne Models, DTOs, Data, Actions, Queries e Controllers. As rotas em `routes/saas.php` usam `AccountContext` e `EffectivePermissions`. Empresa e unidade têm permissões por ação. Alterar situação exige a permissão dessa transição e promover tem operação própria. `config/permissions.php` e `DefaultRolesAction` declaram os novos acessos do RBAC por conta.
+- O cadastro de empresa provisiona a unidade principal ativa na mesma transação. As escritas de empresa e unidade serializam na linha da empresa, preservam a raiz fiscal e impedem inativar a unidade principal antes de uma substituição. A classificação jurídica é explícita, independente de principal. O CHECK da principal ativa e os índices parciais garantem condições locais. O comando somente leitura `organization:check` verifica os invariantes entre linhas e lista pendências fiscais.
+- `app/Support/TaxDocument.php` normaliza e formata CPF, CNPJ numérico ou alfanumérico e raiz. Valida os dígitos verificadores de documentos completos e compara empresas pela raiz. Conta, Pessoas, Empresas e Estabelecimentos reutilizam o validador. A compatibilidade com o módulo 11 e a conversão ASCII menos 48 foi conferida com a [documentação técnica da Receita Federal](https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/documentos-tecnicos/cnpj).
+- `Auditable`, `AuditsChanges`, `AuditObserver`, `AuditLog`, o formatador, a configuração e `audit:check` cobrem os novos eventos. Empresa grava `company_id`. Estabelecimento grava os dois IDs. O provisionamento compartilha `operation_id`. A inspeção mantém o autor SaaS e a representação. Eventos anteriores continuam com IDs organizacionais nulos e `directory_audit_events` é preservada.
+- `resources/js/app/saas/` traz Início, Empresas, Estabelecimentos, formulários, visualizações e confirmação de promoção. Dados da conta mantém `/conta/editar` e usa cadastro do contratante. O acesso pessoal fica no menu de perfil e segurança. Com uma empresa, a edição abre diretamente para quem tem acesso e o filtro de empresa fica oculto. Foram reutilizados `BusinessList`, `BusinessListSearch`, `BusinessForm`, `PageHeader`, `SelectControl`, `Modal`, `PreviewSection`, `StatusLabel` e os campos de endereço e contatos. `guidance.ts`, `HelpCatalog`, `docs/ajuda/` e `docs/tours/` integram os artigos e passos existentes.
+- Cobertura em `OrganizationTest`, `OrganizationMigrationTest`, `TaxDocumentTest`, `AccountInspectionTest` e `SaasPlatformTest`. `tests/Performance/e04-check.sh` reproduz medições, planos, isolamento e concorrência em PostgreSQL descartável. `e04-stack.sh` prepara o ambiente visual.
+
+**Banco e migração.**
+
+| Migration | Resultado |
+| --- | --- |
+| `000002_remove_points` | Remove Pontos quando a tabela está vazia, audita a remoção do catálogo e troca a listagem do cargo inicial Usuário por Estabelecimentos. Com dados, a migração exige análise e exportação prévias. A reversão recria a tabela e os acessos iniciais. Atribuições de cargos personalizados exigem backup para restauração exata. |
+| `000003_create_organization_structure` | Cria `companies` sob `clients` e substitui o esquema vazio de `establishments`, com FK de `(company_id, account_id)`. Se houver estabelecimentos legados, interrompe antes de substituí-los. |
+| `000004_add_organization_to_audit_records` | Adiciona os dois IDs opcionais. A reversão do esquema retira os IDs das linhas históricas, mantendo os eventos. |
+| `000005_rename_account_data_permission` | Renomeia a edição dos dados contratuais para `account.account-data.update`, preserva os vínculos e audita a mudança. |
+| `000006_provision_account_companies` | Provisiona por conta de forma idempotente. Reversão bloqueada quando existem cadastros além do inicial ou alterações organizacionais auditadas. O procedimento seguro para preservar histórico contextual e permissões personalizadas é restaurar o backup anterior à E04 ou corrigir para frente. |
+
+A cópia local da E03 tinha 1 conta, 2 usuários e zero linhas em `establishments`, `points` e `directory_audit_events`. A migração, reversão das cinco migrations e reaplicação passaram em PostgreSQL 18.7 descartável. A conta recebeu empresa inicial e unidade principal ativa. O nome da conta serviu como identificação inicial, e os dados fiscais, endereço e contatos ficaram pendentes quando a identidade com o contratante não estava comprovada. `clients.document` conserva a unicidade global. Em novo tenant, a plataforma confirma explicitamente a eventual identidade fiscal entre empresa e contratante.
+
+**Índices e performance.** As chaves únicas de código por conta e de `companies(id, account_id)` garantem a identidade e a FK. Os índices únicos parciais cobrem raiz e CPF de empresa por conta, CNPJ de estabelecimento por conta, matriz por empresa e principal por empresa. O índice `establishments(company_id, active, name)` atende contagem, seleção de unidades e busca por estado da unidade. Cada índice acrescenta manutenção em inserções e na alteração de suas chaves. A auditoria recebeu apenas colunas.
+
+Em 74 unidades sintéticas, o PostgreSQL preferiu a varredura sequencial para o filtro por empresa, situação e conta. Em uma tabela temporária com 74.000 unidades de 5.000 contas, a contagem de 10 unidades por empresa passou de 3,347 ms por varredura sequencial a 0,026 ms com o índice. A listagem filtrada passou de 0,047 ms a 0,025 ms com bitmap combinado. A prova usou `EXPLAIN (ANALYZE, BUFFERS)` após `ANALYZE`. O custo de escrita em volume e o impacto sob carga sustentada seguem sem medição.
+
+Medições HTTP sequenciais com PostgreSQL 18.7 e FrankenPHP 1.13.6, 10 amostras por rota e cenário após aquecimento. Empresas usa `withCount`, 7 queries. Estabelecimentos usa eager loading e paginação SQL, 9 queries. Ambos mantiveram 1 consulta de slugs e zero duplicatas nas amostras de listagem.
+
+| Empresas / unidades | Empresas: linhas, HTTP 1/2 workers (ms) | Estabelecimentos: linhas, HTTP 1/2 workers (ms) | Banco, pico PHP em Estabelecimentos com 2 workers |
+| --- | --- | --- | --- |
+| 1 / 1 | 1, 5,42 / 5,01 | 1, 5,91 / 6,20 | 2,29 ms, 98.808 bytes |
+| 1 / 3 | 1, 5,22 / 4,54 | 3, 5,98 / 5,19 | 2,04 ms, 100.240 bytes |
+| 3 / 10 | 3, 7,30 / 6,21 | 10, 7,31 / 5,71 | 1,99 ms, 129.200 bytes |
+| 10 / 10 | 10, 4,83 / 4,94 | 10, 6,41 / 6,25 | 2,15 ms, 148.368 bytes |
+| 5 / 50 | 5, 5,66 / 4,86 | 50, 9,13 / 7,74 | 2,09 ms, 318.128 bytes |
+
+Na conta com 50 unidades, filtrar uma empresa devolveu 10 linhas em 9 consultas, 5,72 ms HTTP e 128.824 bytes de pico PHP com dois workers. O SQL de slugs ficou em 1 consulta assim como na E03. Na comparação indicativa com a E03, que usou fixtures diferentes, `/conta` foi de 6 para 7 consultas com o novo resumo. `/ajuda` manteve 5 consultas e passou de aproximadamente 255 KB a 282 KB de pico PHP com os artigos adicionais. Em uma instância de worker, 300 requisições alternaram duas contas após respostas 403, 404 e 422. A memória no início das últimas quatro requisições válidas foi 9.134.704 bytes. Com dois workers, ambas as promoções concorrentes aguardaram a trava da empresa e concluíram com uma única principal ativa e dois IDs de operação. No conflito entre promoção e inativação da mesma unidade, uma requisição concluiu e a outra recebeu 422. Em dois cadastros concorrentes com o mesmo documento, somente um concluiu e deixou uma empresa com sua unidade principal ativa. A autoria de inspeção foi verificada nos testes funcionais.
+
+**Validação visual.** Chrome em 1440, 390 e 320 px. Conferidos Início, Dados da conta, listagens, visualizações, cadastro, edição, erros de validação e confirmação de promoção, além do redirecionamento e ocultação do filtro com uma empresa. O percurso dos tours incluiu Início, Dados da conta, listagens e cadastros nas três larguras. As capturas da organização e os logs de interação estão em `/tmp/e04/recheck`, `/tmp/e04-visual.log` e `/tmp/e04-tours.log`. O navegador confirmou a promoção após o salvamento e validou os filtros de empresa e situação. Também foram conferidos os artigos, o cadastro SaaS com a confirmação de identidade do contratante e as telas pessoais de Perfil e Segurança.
+
+**Testes e verificações.** A suíte SQLite isolada em container com GD passou com 156 testes e 1.420 asserções. O teste dedicado de performance da E03 passou com 45 asserções e manteve uma consulta de permissões nas rotas medidas. PHPStan, build com checagem de arquitetura e TypeScript, `permissions:sync`, `audit:check` e Pint no escopo da E04 passaram. O Pint global sinalizou a ordem de imports e um nome qualificado já presentes em `bootstrap/app.php` no checkpoint da E03.
+
+**Pendências para validação.** Confirmar o documento e os dados da empresa inicial legada. Fazer as contagens de pré-implantação em ambiente oficial com autorização própria e guardar backup recuperável, incluindo as permissões personalizadas. O ensaio de migração usou somente a cópia local. Nenhuma implantação foi executada.
 
 ## 27. Contrato para módulos futuros
 

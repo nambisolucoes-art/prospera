@@ -19,7 +19,7 @@ O histórico é somente leitura. Não há cadastro, edição ou exclusão de eve
 
 ## Cobertura
 
-Contas, pontos, pessoas, usuários, etiquetas, cargos e suas permissões têm histórico. Entrada, saída, chaves de acesso, início e encerramento de inspeção e sincronização do catálogo também são registrados. Leituras, pesquisas, cache e sessões não criam eventos de mudança. Eventos anteriores à central são importados com os dados disponíveis; valores que não foram guardados no histórico anterior não podem ser reconstruídos.
+Contas, empresas, estabelecimentos, pessoas, usuários, etiquetas, cargos e suas permissões têm histórico. Os eventos organizacionais registram a empresa afetada e, quando aplicável, o estabelecimento. Entrada, saída, chaves de acesso, início e encerramento de inspeção e sincronização do catálogo também são registrados. Leituras, pesquisas, cache e sessões não criam eventos de mudança. Eventos anteriores à central são importados com os dados disponíveis; valores que não foram guardados no histórico anterior não podem ser reconstruídos.
 
 ## Tutorial
 

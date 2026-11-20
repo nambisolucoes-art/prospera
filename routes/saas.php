@@ -1,6 +1,9 @@
 <?php
 
 use App\Domains\Acessos\UI\Controllers\AccessController;
+use App\Domains\Organizacao\UI\Controllers\CompanyController;
+use App\Domains\Organizacao\UI\Controllers\EstablishmentController;
+use App\Domains\Organizacao\UI\Controllers\OrganizationController;
 use App\Domains\Pessoas\UI\Controllers\DirectoryController;
 use App\Domains\Plataforma\UI\Controllers\AccountInspectionController;
 use App\Domains\Plataforma\UI\Controllers\ClientController;
@@ -20,22 +23,15 @@ Route::middleware('auth')->group(function () {
         ->name('account.dashboard');
 
     Route::middleware(['verified'])->prefix('conta')->name('account.')->group(function () {
+        Route::get('organizacao', OrganizationController::class)->name('organization');
+
         Route::get('editar', [ClientController::class, 'editTenant'])
             ->name('edit')
-            ->middleware('can:account.establishment.update');
+            ->middleware('can:account.account-data.update');
 
         Route::patch('/', [ClientController::class, 'updateTenant'])
             ->name('update')
-            ->middleware('can:account.establishment.update');
-
-        Route::post('pontos', [ClientController::class, 'savePoint'])
-            ->name('points.store')
-            ->middleware('can:account.points.create');
-
-        Route::patch('pontos/{pointId}', [ClientController::class, 'savePoint'])
-            ->whereNumber('pointId')
-            ->name('points.update')
-            ->middleware('can:account.points.update');
+            ->middleware('can:account.account-data.update');
     });
     Route::middleware(['verified'])->prefix('conta/usuarios')->name('account.users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])
@@ -223,4 +219,67 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.access.'
         ->whereNumber('roleId')
         ->middleware('can:account.roles.update')
         ->name('roles.update');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.companies.')->group(function () {
+    Route::get('empresas', [CompanyController::class, 'index'])
+        ->name('index')
+        ->middleware('can:account.companies.list');
+
+    Route::get('empresas/cadastrar', [CompanyController::class, 'form'])
+        ->name('create')
+        ->middleware('can:account.companies.create');
+
+    Route::get('empresas/{companyId}/editar', [CompanyController::class, 'form'])
+        ->whereNumber('companyId')
+        ->name('edit')
+        ->middleware('can:account.companies.update');
+
+    Route::get('empresas/{companyId}/visualizar', [CompanyController::class, 'preview'])
+        ->whereNumber('companyId')
+        ->name('view')
+        ->middleware('can:account.companies.view');
+
+    Route::post('empresas', [CompanyController::class, 'save'])
+        ->name('store')
+        ->middleware('can:account.companies.create');
+
+    Route::patch('empresas/{companyId}', [CompanyController::class, 'save'])
+        ->whereNumber('companyId')
+        ->name('update')
+        ->middleware('can:account.companies.update');
+});
+
+Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.establishments.')->group(function () {
+    Route::get('estabelecimentos', [EstablishmentController::class, 'index'])
+        ->name('index')
+        ->middleware('can:account.establishments.list');
+
+    Route::get('estabelecimentos/cadastrar', [EstablishmentController::class, 'form'])
+        ->name('create')
+        ->middleware('can:account.establishments.create');
+
+    Route::get('estabelecimentos/{establishmentId}/editar', [EstablishmentController::class, 'form'])
+        ->whereNumber('establishmentId')
+        ->name('edit')
+        ->middleware('can:account.establishments.update');
+
+    Route::get('estabelecimentos/{establishmentId}/visualizar', [EstablishmentController::class, 'preview'])
+        ->whereNumber('establishmentId')
+        ->name('view')
+        ->middleware('can:account.establishments.view');
+
+    Route::post('estabelecimentos', [EstablishmentController::class, 'save'])
+        ->name('store')
+        ->middleware('can:account.establishments.create');
+
+    Route::patch('estabelecimentos/{establishmentId}', [EstablishmentController::class, 'save'])
+        ->whereNumber('establishmentId')
+        ->name('update')
+        ->middleware('can:account.establishments.update');
+
+    Route::post('estabelecimentos/{establishmentId}/principal', [EstablishmentController::class, 'promote'])
+        ->whereNumber('establishmentId')
+        ->name('promote')
+        ->middleware('can:account.establishments.promote');
 });

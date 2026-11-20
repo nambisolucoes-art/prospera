@@ -54,7 +54,7 @@ Entre em [localhost:8000/login](http://localhost:8000/login). No painel **Contas
 
 O comando é genérico. Para criar um usuário vinculado a uma conta no terminal, informe `--role=account-admin` ou `--role=account-member` com `--account=ID`. Na plataforma, use **Usuários**; dentro da conta, use **Pessoas** e selecione a etiqueta **Usuário** para conceder acesso.
 
-O administrador da conta entra na mesma tela de login e é encaminhado para **Minha conta**. A própria conta representa o estabelecimento. Nesse painel, o administrador pode editar os dados do estabelecimento e gerenciar seus pontos. Cada usuário possui uma pessoa vinculada, incluindo os usuários que já existiam antes da migração.
+O administrador da conta entra na mesma tela de login e é encaminhado para **Início**. No menu **Organização**, o administrador pode editar os dados do contratante, cadastrar empresas e gerenciar seus estabelecimentos. Cada usuário possui uma pessoa vinculada, incluindo os usuários que já existiam antes da migração.
 
 ### Pessoas e etiquetas da conta
 
@@ -87,7 +87,7 @@ O código de negócio se organiza em `app/Domains/{Dominio}`.
 - A `Action` coordena o caso de uso e a persistência. Para operações com vários valores de domínio, ela monta um DTO imutável em `Domain/DTOs` e entrega ao model.
 - As consultas de listagem ficam em `Application/Queries` e recebem os filtros normalizados.
 
-O cadastro de pontos é uma referência curta. O controller cria `SavePointData`, `SavePointAction` monta `PointConfigurationDTO` e o model `Point` aplica o estado.
+O cadastro de estabelecimentos é uma referência. O controller cria `SaveEstablishmentData`, `SaveEstablishmentAction` monta `EstablishmentDTO` e o model `Establishment` aplica o estado.
 
 ## Cargos e catálogo de permissões
 

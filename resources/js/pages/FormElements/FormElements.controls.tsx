@@ -1,3 +1,4 @@
+import FormHelp from '@/components/FormHelp/FormHelp';
 import { useState, type ReactNode } from 'react';
 import Button from '@/components/Button/Button';
 import { joinClassNames } from '@/utils/joinClassNames';
@@ -78,7 +79,7 @@ export function FormField({ field }: { field: FormFieldConfig }): JSX.Element {
           />
         ) : null}
         {field.feedbackIcon ? <span className={joinClassNames(field.feedbackIcon, 'form-control-feedback')} /> : null}
-        {field.helpText ? <span className="help-block"><small>{field.helpText}</small></span> : null}
+        {field.helpText ? <FormHelp>{field.helpText}</FormHelp> : null}
       </div>
     </div>
   );

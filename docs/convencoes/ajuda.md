@@ -13,7 +13,7 @@ A Central de Ajuda explica como operar o Prospera. O [tour guiado](tour-guiado.m
 
 A busca deve encontrar artigos por título, palavras-chave e conteúdo, com links para a seção relevante. A listagem, a busca e o acesso direto devem respeitar as permissões do usuário e o contexto de plataforma ou conta.
 
-Os primeiros fluxos do Prospera são **Contas** no painel SaaS, **Minha conta** para o estabelecimento e **Usuários** nos dois contextos. A ajuda de Contas deve cobrir o acesso inicial do administrador, incluindo quando a senha é definida no cadastro e quando o usuário recebe um convite.
+Os primeiros fluxos do Prospera são **Contas** no painel SaaS, **Dados da conta**, **Empresas** e **Estabelecimentos** no menu **Organização** e **Usuários** nos dois contextos. A ajuda de Contas deve cobrir o acesso inicial do administrador, incluindo quando a senha é definida no cadastro e quando o usuário recebe um convite.
 
 Referências consultadas no Controle Bar em `CLAUDE.md` e `docs/sessoes/2026-10-27-central-de-ajuda-completa.md`, e no GenAI em `docs/ai-conventions/content/help-articles.md`.
 

@@ -61,8 +61,8 @@ class AccountInspectionTest extends TestCase
             ->assertJsonPath('auth.user.id', $owner->id)
             ->assertJsonPath('account.name', 'Conta ativa');
         $this->getJson(route('two-factor.secret-key'))->assertForbidden();
-        $this->post(route('account.points.store'), ['name' => 'Ponto de teste', 'active' => '1'])->assertForbidden();
-        $this->assertDatabaseMissing('points', ['name' => 'Ponto de teste']);
+        $this->patch(route('account.update'), ['name' => 'Conta renomeada'])->assertForbidden();
+        $this->assertDatabaseMissing('clients', ['name' => 'Conta renomeada']);
         $this->get(route('saas.users.index'))->assertForbidden();
 
         $this
@@ -83,13 +83,13 @@ class AccountInspectionTest extends TestCase
         $end = route('account.inspection.end');
 
         $this->actingAs($platform)->post($start, ['user_id' => $member->id, 'mode' => 'edit'])->assertRedirect();
-        $this->post(route('account.points.store'), ['name' => 'Ponto de membro', 'active' => '1'])->assertForbidden();
+        $this->patch(route('account.update'), ['name' => 'Renomeada pelo membro'])->assertForbidden();
         $this->post($end)->assertRedirect(route('dashboard'));
 
         $this->post($start, ['user_id' => $owner->id, 'mode' => 'edit'])->assertRedirect();
-        $this->post(route('account.points.store'), ['name' => 'Ponto de administrador', 'active' => '1'])
+        $this->patch(route('account.update'), ['name' => 'Renomeada pelo administrador'])
             ->assertRedirect(route('account.dashboard'));
-        $this->assertSame('Ponto de administrador', $account->points()->sole()->name);
+        $this->assertSame('Renomeada pelo administrador', $account->refresh()->name);
         $this->patch(route('profile.update'), ['name' => 'Alterado', 'email' => $owner->email])->assertForbidden();
 
         $platform->forceFill(['is_saas_admin' => false])->saveOrFail();

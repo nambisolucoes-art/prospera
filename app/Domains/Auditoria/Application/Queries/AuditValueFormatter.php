@@ -3,6 +3,7 @@
 namespace App\Domains\Auditoria\Application\Queries;
 
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
+use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 
 final class AuditValueFormatter
@@ -51,12 +52,13 @@ final class AuditValueFormatter
 
         $labels = match ($entity.'.'.$field) {
             'tag.module' => ['people' => 'Pessoas'],
-            'account.person_type', 'person.person_type', 'supplier.person_type' => [
+            'account.person_type', 'person.person_type', 'supplier.person_type', 'company.person_type' => [
                 'company' => 'Pessoa jurídica',
                 'individual' => 'Pessoa física',
             ],
             'tag.system_key' => ['user' => 'Usuário', 'supplier' => 'Fornecedor', 'customer' => 'Cliente'],
             'role.system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário'],
+            'company.tax_regime' => Company::TAX_REGIMES,
             default => [],
         };
         if (is_string($value) && isset($labels[$value])) {
@@ -64,7 +66,10 @@ final class AuditValueFormatter
         }
         if (is_bool($value)) {
             return match ($field) {
-                'active' => $entity === 'point' ? ($value ? 'Ativo' : 'Inativo') : ($value ? 'Ativa' : 'Inativa'),
+                // Pontos ficam no histórico anterior à E04; estabelecimentos usam o masculino.
+                'active' => in_array($entity, ['point', 'establishment'], true)
+                    ? ($value ? 'Ativo' : 'Inativo')
+                    : ($value ? 'Ativa' : 'Inativa'),
                 'access_enabled' => $value ? 'Habilitado' : 'Revogado',
                 default => $value ? 'Sim' : 'Não',
             };

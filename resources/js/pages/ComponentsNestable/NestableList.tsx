@@ -1,3 +1,4 @@
+import NestableRow from '@/components/NestableRow/NestableRow';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import { joinClassNames } from '@/utils/joinClassNames';
 import type { NestableItem, NestableVariant } from './ComponentsNestable.types';
@@ -53,7 +54,7 @@ function NestableNode({ item, variant }: { item: NestableItem; variant: Nestable
           <div className="dd3-content">Item {item.id}</div>
         </>
       ) : (
-        <div className="dd-handle">Item {item.id}</div>
+        <NestableRow className="dd-handle">Item {item.id}</NestableRow>
       )}
       {hasChildren ? (
         <ol className="dd-list">

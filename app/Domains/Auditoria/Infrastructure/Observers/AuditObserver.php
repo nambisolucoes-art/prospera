@@ -51,7 +51,7 @@ final class AuditObserver
             return $before ? 'Foto anterior' : 'Foto atualizada';
         }
 
-        if ($field === 'document') {
+        if ($field === 'document' || $field === 'individual_document') {
             return $before ? 'Documento anterior' : 'Documento informado';
         }
 
@@ -105,6 +105,8 @@ final class AuditObserver
             $event,
             (string) ($entity->getAttribute('name') ?? '#'.$entity->getKey()),
             $changes,
+            $entity->auditCompanyId(),
+            $entity->auditEstablishmentId(),
         );
     }
 }

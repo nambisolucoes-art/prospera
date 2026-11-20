@@ -1,21 +1,32 @@
+import Link from '@/components/ApiLink/ApiLink';
 import './DashboardTwoStatCard.css';
 
 interface DashboardTwoStatCardProps {
   iconClass: string;
   title: string;
   value: string;
+  href?: string;
 }
 
 export default function DashboardTwoStatCard({
   iconClass,
   title,
-  value
+  value,
+  href,
 }: DashboardTwoStatCardProps): JSX.Element {
-  return (
-    <div className="dashboardTwoStatCard widget-panel widget-style-2 bg-white">
-      <i className={iconClass} aria-hidden="true" />
-      <h2 className="dashboardTwoStatCard__value m-0 text-dark counter font-600">{value}</h2>
-      <div className="dashboardTwoStatCard__title text-muted m-t-5">{title}</div>
-    </div>
+  const content = (
+    <>
+      <div className="dashboardTwoStatCard__content">
+        <div className="dashboardTwoStatCard__value">{value}</div>
+        <div className="dashboardTwoStatCard__title">{title}</div>
+      </div>
+      <span className="dashboardTwoStatCard__icon" aria-hidden="true">
+        <i className={iconClass} />
+      </span>
+    </>
   );
+
+  return href
+    ? <Link className="dashboardTwoStatCard" href={href}>{content}</Link>
+    : <div className="dashboardTwoStatCard">{content}</div>;
 }

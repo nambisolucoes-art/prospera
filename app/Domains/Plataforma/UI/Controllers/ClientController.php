@@ -3,11 +3,12 @@
 namespace App\Domains\Plataforma\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
+use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
+use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Plataforma\Application\Actions\SaveAccountAction;
-use App\Domains\Plataforma\Application\Actions\SavePointAction;
 use App\Domains\Plataforma\Application\Data\AccountFiltersData;
 use App\Domains\Plataforma\Application\Data\SaveAccountData;
-use App\Domains\Plataforma\Application\Data\SavePointData;
 use App\Domains\Plataforma\Application\Queries\AccountDirectoryQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Support\ApiPage;
@@ -79,13 +80,18 @@ final class ClientController
         ]);
     }
 
-    public function accountDashboard(Request $request): JsonResponse|View|RedirectResponse
-    {
+    public function accountDashboard(
+        Request $request,
+        CompanyDirectoryQuery $companies,
+        EstablishmentDirectoryQuery $establishments,
+    ): JsonResponse|View|RedirectResponse {
         if (! $request->user()->can('account.dashboard.view')) {
-            // Sem acesso ao painel, a pessoa vai para a primeira tela que pode abrir.
+            // Sem acesso ao Início, a pessoa vai para a primeira tela que pode abrir.
             $fallbacks = [
                 'account.people.list' => '/conta/pessoas',
                 'account.tags.list' => '/conta/etiquetas',
+                'account.companies.list' => '/conta/organizacao',
+                'account.establishments.list' => '/conta/organizacao?nivel=estabelecimentos',
                 'account.roles.list' => '/conta/cargos',
                 'account.people.create' => '/conta/pessoas/cadastrar',
                 'account.tags.create' => '/conta/etiquetas/cadastrar',
@@ -104,13 +110,25 @@ final class ClientController
 
         $account = app(AccountContext::class)->requireAccount();
 
-        $points = $request->user()->can('account.points.list')
-            ? $account->points()->orderBy('name')->orderBy('id')->get(['id', 'name', 'active'])
-            : [];
+        $companyList = $request->user()->can('account.companies.list')
+            ? $companies->options($account->id)
+            : null;
+
+        $establishmentCount = $request->user()->can('account.establishments.list')
+            ? $establishments->count($account->id)
+            : null;
 
         return ApiPage::respond([
             'account' => $account->only(['name']),
-            'points' => $points,
+            'organization' => [
+                'companies' => $companyList?->count(),
+                'establishments' => $establishmentCount,
+                // Empresas sem identificação fiscal precisam de revisão manual (provisionamento da E04).
+                'incomplete' => $companyList
+                    ?->filter(fn (Company $company) => $company->taxDocument() === null)
+                    ->map(fn (Company $company) => ['id' => $company->id, 'name' => $company->name])
+                    ->values(),
+            ],
         ]);
     }
 
@@ -123,7 +141,11 @@ final class ClientController
     {
         $account = app(AccountContext::class)->requireAccount();
         $save->execute($account, SaveAccountData::fromTenantInput($request->all(), $account));
-        ApiPage::toast('Dados do estabelecimento salvos.');
+        ApiPage::toast('Dados da conta salvos.');
+
+        if ($request->query('origem') === 'organizacao') {
+            return to_route('account.organization', ['nivel' => 'conta']);
+        }
 
         return to_route('account.dashboard');
     }
@@ -136,17 +158,5 @@ final class ClientController
         ApiPage::toast($message);
 
         return to_route('dashboard');
-    }
-
-    public function savePoint(Request $request, SavePointAction $save, ?int $pointId = null): RedirectResponse
-    {
-        $account = app(AccountContext::class)->requireAccount();
-        $point = $pointId === null ? null : $account->points()->findOrFail($pointId);
-        $data = SavePointData::fromInput($request->all());
-        $save->execute($account, $point, $data);
-
-        ApiPage::toast('Ponto salvo.');
-
-        return to_route('account.dashboard');
     }
 }

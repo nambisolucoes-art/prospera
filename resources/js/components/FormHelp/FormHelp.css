@@ -1,0 +1,10 @@
+.form-help {
+  display: block;
+  margin-block: 5px 10px;
+  color: #737373;
+  font: 14px/1.42857143 var(--bold-font-body);
+}
+
+.form-help small {
+  font-size: 85%;
+}

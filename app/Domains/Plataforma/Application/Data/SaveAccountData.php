@@ -4,6 +4,7 @@ namespace App\Domains\Plataforma\Application\Data;
 
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Data\CreateUserData;
+use App\Support\TaxDocument;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
@@ -21,6 +22,7 @@ final readonly class SaveAccountData
         public bool $active,
         public ?array $details,
         public ?CreateUserData $administrator,
+        public bool $contractorIsCompany = false,
     ) {}
 
     /** @param array<string, mixed> $input */
@@ -59,6 +61,10 @@ final readonly class SaveAccountData
             active: array_key_exists('active', $validated) ? (bool) $validated['active'] : ($client->active ?? true),
             details: $validated['details'] ?? null,
             administrator: $administrator,
+            contractorIsCompany: $client === null && filter_var(
+                $input['contractor_is_company'] ?? false,
+                FILTER_VALIDATE_BOOLEAN,
+            ),
         );
     }
 
@@ -76,7 +82,7 @@ final readonly class SaveAccountData
     {
         $normalize = static fn (string $value): string => preg_replace('/[.\/()\s-]+/', '', $value) ?? $value;
         if (is_string($input['document'] ?? null)) {
-            $input['document'] = $normalize($input['document']);
+            $input['document'] = TaxDocument::normalize($input['document']);
         }
 
         if ($client !== null) {
@@ -153,7 +159,9 @@ final readonly class SaveAccountData
                 'nullable',
                 'string',
                 static function (string $attribute, string $value, Closure $fail) use ($company): void {
-                    if (! self::validDocument($value, $company)) {
+                    $document = $company ? TaxDocument::cnpj($value) : TaxDocument::cpf($value);
+
+                    if ($document === null) {
                         $fail('Informe um CPF ou CNPJ válido para o tipo de pessoa selecionado.');
                     }
                 },
@@ -211,29 +219,5 @@ final readonly class SaveAccountData
             'details.additional_emails.*.email' => 'Informe um e-mail válido.',
             'administrator.required' => 'Preencha os dados do administrador da conta.',
         ];
-    }
-
-    private static function validDocument(string $value, bool $company): bool
-    {
-        if (
-            ! ctype_digit($value)
-            || strlen($value) !== ($company ? 14 : 11)
-            || count(array_unique(str_split($value))) === 1
-        ) {
-            return false;
-        }
-
-        $base = substr($value, 0, -2);
-        for ($digit = 0; $digit < 2; $digit++) {
-            $sum = 0;
-            foreach (str_split(strrev($base)) as $index => $number) {
-                $weight = $company ? 2 + $index % 8 : 2 + $index;
-                $sum += (int) $number * $weight;
-            }
-            $remainder = $sum % 11;
-            $base .= (string) ($remainder < 2 ? 0 : 11 - $remainder);
-        }
-
-        return $base === $value;
     }
 }

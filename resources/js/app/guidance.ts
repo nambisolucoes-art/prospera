@@ -51,33 +51,101 @@ export function tourFor(
       at(
         'business-form',
         'Dados da conta',
-        'Preencha os dados do estabelecimento, contato, endereço e acesso inicial do administrador.',
+        'Preencha os dados do contratante, endereço, contatos e o acesso inicial do administrador. Na seção Primeira empresa, confirme a identidade com o contratante somente quando estiver comprovada.',
       ),
     ]);
   } else if (path === '/conta') {
-    title = 'Minha conta';
-    help = 'minha-conta';
+    title = 'Início';
+    help = 'dados-da-conta';
     steps = [
       at(
-        'page-title',
-        'Minha conta',
-        'Consulte os dados do estabelecimento. As ações disponíveis dependem das suas permissões.',
+        'home-pending',
+        'Pendências da organização',
+        'Empresas sem CNPJ ou CPF aparecem aqui. Abra a empresa para completar a identificação fiscal.',
       ),
       at(
-        'tenant-points',
-        'Pontos',
-        'Consulte e cadastre os pontos do estabelecimento conforme sua permissão.',
+        'home-organization',
+        'Conta e organização',
+        'Os cartões levam à Organização. Abra a conta, as empresas ou seus estabelecimentos conforme suas permissões.',
+      ),
+    ];
+  } else if (path === '/conta/organizacao') {
+    title = 'Organização';
+    help = 'organizacao';
+    steps = [
+      at(
+        'organization-account',
+        'Conta contratante',
+        'O selo Conta contratante identifica o primeiro nível. O lápis abre seus dados e o botão de adição cadastra uma empresa.',
+      ),
+      at(
+        'organization-companies',
+        'Empresas',
+        'O selo Empresa identifica o segundo nível. Use o sinal de mais à esquerda do nome para abrir as unidades. O botão azul de adição à direita cadastra um estabelecimento.',
+      ),
+      at(
+        'organization-establishments',
+        'Estabelecimentos',
+        'Cada unidade tem o selo Estabelecimento. A linha também mostra a situação, a classificação fiscal e o selo Principal quando aplicável.',
       ),
     ];
   } else if (path === '/conta/editar') {
-    title = 'Editar estabelecimento';
-    help = 'minha-conta';
+    title = 'Dados da conta';
+    help = 'dados-da-conta';
     steps = form([
       at(
         'business-form',
-        'Dados do estabelecimento',
-        'Atualize identificação, contatos e endereço da sua conta.',
+        'Dados do contratante',
+        'Atualize nome, contatos e endereço do contratante. O documento e o plano são mantidos pela plataforma. Os dados fiscais das empresas ficam em Empresas.',
       ),
+    ]);
+  } else if (path === '/conta/empresas') {
+    title = 'Empresas';
+    help = 'empresas';
+    steps = businessListTourSteps({
+      filters: 'Busque por razão social, nome fantasia, código, CNPJ ou CPF e filtre pela situação. A lista se atualiza automaticamente.',
+      table: 'Cada linha é uma pessoa jurídica da conta, com a quantidade de estabelecimentos. Visualizar mostra os dados e as unidades da empresa.',
+    });
+  } else if (/^\/conta\/empresas\/(cadastrar|\d+\/editar)$/.test(path)) {
+    title = 'Cadastro de empresa';
+    help = 'empresas';
+    steps = form([
+      at(
+        'company-identity',
+        'Identificação da empresa',
+        'Escolha Pessoa jurídica ou Pessoa física e informe a razão social ou o nome. O CNPJ aceita o número completo ou a raiz com 8 caracteres, inclusive alfanumérico. O código é gerado pelo nome fantasia e não muda depois do cadastro.',
+      ),
+      at('company-fiscal', 'Dados fiscais', 'Regime tributário e CNAE principal valem para a empresa inteira. A situação aparece na edição conforme suas permissões.'),
+      at(
+        'company-primary',
+        'Estabelecimento principal',
+        'A empresa nasce com o estabelecimento principal, criado junto no mesmo salvamento. Com o CNPJ completo, escolha se ele é a matriz ou uma filial.',
+      ),
+      at('company-primary-address', 'Endereço da unidade', 'O endereço e os contatos pertencem ao estabelecimento principal. A consulta de CEP é opcional.'),
+    ]);
+  } else if (path === '/conta/estabelecimentos') {
+    title = 'Estabelecimentos';
+    help = 'estabelecimentos';
+    steps = businessListTourSteps({
+      filters: 'Busque por nome, código ou CNPJ e filtre por situação. O filtro de empresa aparece quando a conta tem mais de uma empresa.',
+      table: 'O selo Principal indica a unidade padrão da empresa. Matriz, Filial ou Sem CNPJ próprio é a classificação jurídica informada. A bandeira torna uma unidade a principal.',
+    });
+  } else if (/^\/conta\/estabelecimentos\/(cadastrar|\d+\/editar)$/.test(path)) {
+    title = 'Cadastro de estabelecimento';
+    help = 'estabelecimentos';
+    steps = form([
+      at(
+        'establishment-identity',
+        'Identificação da unidade',
+        'Escolha a empresa no cadastro. Na edição a empresa fica fixa, para que registros não mudem de pessoa jurídica. Tornar principal fica no topo da tela.',
+      ),
+      at(
+        'establishment-fiscal',
+        'Identificação fiscal',
+        'Matriz e Filial exigem CNPJ com a mesma raiz da empresa. A empresa tem no máximo uma matriz. O principal fica sempre ativo.',
+      ),
+      at('establishment-address', 'Endereço', 'Endereço da unidade, com consulta opcional de CEP.'),
+      at('establishment-contact', 'Contatos', 'Telefone, WhatsApp e e-mails da unidade, no mesmo padrão do cadastro da conta.'),
     ]);
   } else if (path === '/conta/pessoas') {
     title = 'Pessoas';

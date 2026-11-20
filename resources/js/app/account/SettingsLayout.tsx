@@ -25,14 +25,14 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
   const current = tabs.find((tab) => tab.component === category) ?? tabs[0];
   const tenant = !auth.user?.is_saas_admin;
   const entries = accountNavigation(tenant, auth.permissions);
-  const root = tenant ? { label: 'Minha conta', href: '/conta' } : { label: 'Início', href: '/dashboard' };
+  const root = tenant ? { label: 'Início', href: '/conta' } : { label: 'Início', href: '/dashboard' };
 
   return (
     <Theme navigation={{ entries }}>{(sidebar) => (
       <SettingsSidebarContext.Provider value={sidebar}>
         <Head title={current.label} />
         <PageHeader title={current.label} breadcrumbPosition="right"
-          breadcrumbItems={[root, { label: 'Configurações' }, { label: current.label }]} />
+          breadcrumbItems={[root, { label: 'Minha conta' }, { label: current.label }]} />
         <ProfileIdentity editable={component === 'settings/profile' && !auth.inspection_mode} />
         <PageTabs items={auth.inspection_mode ? tabs.filter((tab) => tab.component !== 'settings/security') : tabs}
           activeHref={current.href} label="Configurações" tourTarget="settings-tabs" />

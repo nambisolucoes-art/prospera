@@ -10,9 +10,10 @@ return [
         'users' => 'Usuários',
         'tags' => 'Etiquetas',
         'roles' => 'Cargos',
-        'establishment' => 'Estabelecimento',
-        'points' => 'Pontos',
-        'dashboard' => 'Minha conta',
+        'account-data' => 'Dados da conta',
+        'companies' => 'Empresas',
+        'establishments' => 'Estabelecimentos',
+        'dashboard' => 'Início',
         'accounts' => 'Contas SaaS',
         'inspection' => 'Inspeção de contas',
         'profile' => 'Perfil',
@@ -41,5 +42,27 @@ return [
         'photo' => 'Alterar foto',
         'password' => 'Alterar senha',
         'delete' => 'Excluir',
+        'promote' => 'Promover a principal',
+    ],
+
+    /*
+     * Alvos admitidos de cada permissão (seção 8.2.1 do plano 001). Até a E05 só existem atribuições de
+     * escopo tenant; a E05 passa a exigir a declaração de todos os slugs e a avaliá-la sobre o nó do recurso.
+     */
+    'targets' => [
+        'account.account-data.update' => ['tenant'],
+        'account.companies.list' => ['tenant', 'company'],
+        'account.companies.view' => ['tenant', 'company'],
+        'account.companies.create' => ['tenant'],
+        'account.companies.update' => ['company'],
+        'account.companies.activate' => ['tenant'],
+        'account.companies.deactivate' => ['tenant'],
+        'account.establishments.list' => ['tenant', 'company', 'establishment'],
+        'account.establishments.view' => ['tenant', 'company', 'establishment'],
+        'account.establishments.create' => ['company'],
+        'account.establishments.update' => ['establishment'],
+        'account.establishments.activate' => ['company'],
+        'account.establishments.deactivate' => ['company'],
+        'account.establishments.promote' => ['company'],
     ],
 ];

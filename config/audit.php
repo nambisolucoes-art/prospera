@@ -6,6 +6,9 @@ use App\Domains\Auditoria\Domain\Models\AuditRecord;
 return [
     'entities' => [
         'account' => 'Conta',
+        'company' => 'Empresa',
+        'establishment' => 'Estabelecimento',
+        // Histórico anterior à E04: o cadastro de pontos foi removido (DA-14).
         'point' => 'Ponto',
         'person' => 'Pessoa',
         'supplier' => 'Fornecedor',

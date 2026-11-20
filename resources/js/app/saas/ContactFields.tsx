@@ -52,18 +52,50 @@ export function AdditionalContacts({ kind, initial = [], errors, namePrefix = 'd
   );
 }
 
-export default function ContactFields({ client, errors, required }: { client?: ClientData; errors: Errors; required: boolean }) {
+type ContactValues = {
+  phone?: string | null;
+  whatsapp?: string | null;
+  email?: string | null;
+  additional_phones?: string[] | null;
+  additional_emails?: string[] | null;
+};
+
+/**
+ * Contatos no padrão do cadastro da conta. Sem `values`, usa os campos do contratante (`details[...]`);
+ * com `values`, recebe os nomes do cadastro que o utiliza, como os estabelecimentos.
+ */
+export default function ContactFields({ client, values, errors, required, namePrefix, errorPrefix, tourTarget }: {
+  client?: ClientData;
+  values?: ContactValues;
+  errors: Errors;
+  required: boolean;
+  namePrefix?: string;
+  errorPrefix?: string;
+  tourTarget?: string;
+}) {
+  const own = values !== undefined;
+  const prefix = namePrefix ?? (own ? '' : 'details');
+  const errorRoot = errorPrefix ?? prefix;
+  const name = (field: string) => prefix ? `${prefix}[${field}]` : field;
+  const error = (field: string) => errors[errorRoot ? `${errorRoot}.${field}` : field];
+  const phone = own ? values.phone ?? '' : contactNumber(client?.details, 'phone');
+  const whatsapp = own ? values.whatsapp ?? '' : contactNumber(client?.details, 'whatsapp');
+  const emailName = own ? name('email') : 'email';
+  const emailError = own ? error('email') : errors.email;
   return (
-    <BusinessFormSection title="Informações de contato">
+    <BusinessFormSection title="Informações de contato" tourTarget={tourTarget}>
       <BusinessFormRow>
-        <MaskedField mask="phone" label="Telefone" name="details[phone]" type="tel" leadingIcon="fa fa-phone"
-          defaultValue={contactNumber(client?.details, 'phone')} autoComplete="tel" error={errors['details.phone']} required={required} />
-        <MaskedField mask="phone" label="WhatsApp" name="details[whatsapp]" type="tel" leadingIcon="fa fa-whatsapp"
-          defaultValue={contactNumber(client?.details, 'whatsapp')} error={errors['details.whatsapp']} />
+        <MaskedField mask="phone" label="Telefone" name={name('phone')} type="tel" leadingIcon="fa fa-phone"
+          defaultValue={phone} autoComplete="tel" error={error('phone')} required={required} />
+        <MaskedField mask="phone" label="WhatsApp" name={name('whatsapp')} type="tel" leadingIcon="fa fa-whatsapp"
+          defaultValue={whatsapp} error={error('whatsapp')} />
       </BusinessFormRow>
-      <AdditionalContacts kind="phone" initial={client?.details?.additional_phones} errors={errors} />
-      <Field label="E-mail de contato" name="email" type="email" trailingIcon="fa fa-envelope-o" defaultValue={client?.email ?? ''} error={errors.email} />
-      <AdditionalContacts kind="email" initial={client?.details?.additional_emails} errors={errors} />
+      <AdditionalContacts kind="phone" initial={(own ? values.additional_phones : client?.details?.additional_phones) ?? []}
+        errors={errors} namePrefix={prefix} errorPrefix={errorRoot} />
+      <Field label="E-mail de contato" name={emailName} type="email" trailingIcon="fa fa-envelope-o"
+        defaultValue={(own ? values.email : client?.email) ?? ''} error={emailError} />
+      <AdditionalContacts kind="email" initial={(own ? values.additional_emails : client?.details?.additional_emails) ?? []}
+        errors={errors} namePrefix={prefix} errorPrefix={errorRoot} />
     </BusinessFormSection>
   );
 }

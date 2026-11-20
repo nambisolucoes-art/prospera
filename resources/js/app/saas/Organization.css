@@ -1,0 +1,179 @@
+.organization-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.organization-preview__unit {
+  display: contents;
+}
+
+.organization-home {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.organization-home__pending {
+  display: flex;
+  border: 1px solid var(--prospera-inspection-border);
+  background: var(--prospera-inspection-background);
+  color: var(--prospera-inspection-text);
+}
+
+.organization-home__pending-icon {
+  display: grid;
+  flex: 0 0 40px;
+  place-items: center;
+  border-right: 1px solid var(--prospera-inspection-border);
+  background: color-mix(in srgb, var(--prospera-inspection-border) 32%, var(--prospera-inspection-background));
+  font-size: 16px;
+}
+
+.organization-home__pending-content {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 18px;
+  overflow-wrap: anywhere;
+}
+
+.organization-home__pending-content .label {
+  color: var(--prospera-inspection-text);
+}
+
+.organization-home__pending-content ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.organization-home__pending-content li {
+  min-width: 0;
+}
+
+.organization-home__pending-content a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.saas-content .card-box.organization-tree {
+  padding: 12px;
+}
+
+.organization-tree__branch {
+  display: grid;
+  gap: 5px;
+  margin: 5px 0 0 30px;
+  padding: 0;
+  list-style: none;
+}
+
+.nestable-row.organization-tree__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding-block: 6px;
+}
+
+.nestable-row.organization-tree__row--selected {
+  background: var(--bold-color-surface-alt);
+}
+
+.organization-tree__expand {
+  display: grid;
+  flex: 0 0 16px;
+  margin-inline-start: -10px;
+  place-items: center;
+  min-height: 24px;
+  color: #555;
+  font-size: 17px;
+  line-height: 17px;
+}
+
+.organization-tree__expand:focus-visible {
+  outline: 2px solid var(--bold-color-primary);
+}
+
+.organization-tree__entry {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.organization-tree__entry > strong {
+  font-weight: inherit;
+}
+
+.organization-tree__entry > .organization-badges {
+  display: contents;
+}
+
+.organization-tree__type {
+  color: var(--bold-color-legacy-text);
+  font-size: 13px;
+}
+
+.organization-tree__pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.organization-tree__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.organization-tree__pagination,
+.organization-tree__empty {
+  margin: 8px 0 0 24px;
+}
+
+.organization-tree__pagination {
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .saas-content .card-box.organization-tree {
+    padding: 8px;
+  }
+
+  .organization-tree__branch {
+    margin-left: 12px;
+  }
+
+  .nestable-row.organization-tree__row {
+    gap: 4px;
+    padding-inline: 12px;
+  }
+}
+
+.organization-home {
+  max-width: 1120px;
+}
+
+.organization-home .dashboardTwoStatCard__icon .text-custom {
+  color: color-mix(in srgb, var(--bold-color-custom) 62%, var(--bold-color-surface));
+}
+
+.organization-home .dashboardTwoStatCard__icon .text-primary {
+  color: var(--prospera-title-accent);
+}

@@ -1,4 +1,4 @@
-import type { SidebarEntry } from '@/components/SidebarPrimary/SidebarPrimary.types';
+import type { SidebarEntry, SidebarItem } from '@/components/SidebarPrimary/SidebarPrimary.types';
 
 const platformEntries: SidebarEntry[] = [
   { key: 'saas', title: 'Plataforma SaaS' },
@@ -18,12 +18,19 @@ const platformEntries: SidebarEntry[] = [
 
 const accountEntries: SidebarEntry[] = [
   {
-    key: 'tenant',
-    label: 'Minha conta',
+    key: 'home',
+    label: 'Início',
     href: '/conta',
     iconClass: 'ti-home',
   },
 ];
+
+// Mostra o item quando há listagem; sem ela, leva ao cadastro permitido.
+function entry(permissions: string[], module: string, item: SidebarItem, create?: string): SidebarEntry[] {
+  if (permissions.includes(`account.${module}.list`)) return [item];
+  if (create && permissions.includes(`account.${module}.create`)) return [{ ...item, href: create }];
+  return [];
+}
 
 export function accountNavigation(tenant: boolean, permissions: string[] = []) {
   const shared: SidebarEntry[] = [
@@ -49,47 +56,24 @@ export function accountNavigation(tenant: boolean, permissions: string[] = []) {
       : []),
   ];
   if (!tenant) return [...platformEntries, ...shared];
+  const records: SidebarEntry[] = [
+    ...entry(permissions, 'people', { key: 'people', label: 'Pessoas', href: '/conta/pessoas', iconClass: 'ti-id-badge' }, '/conta/pessoas/cadastrar'),
+    ...entry(permissions, 'tags', { key: 'tags', label: 'Etiquetas', href: '/conta/etiquetas', iconClass: 'ti-tag' }, '/conta/etiquetas/cadastrar'),
+    // Cargos passa ao grupo Controle de acesso na E05, junto com Usuários.
+    ...entry(permissions, 'roles', { key: 'roles', label: 'Cargos', href: '/conta/cargos', iconClass: 'ti-id-badge' }, '/conta/cargos/cadastrar'),
+  ];
+  const organization: SidebarEntry[] = [
+    'account.account-data.update',
+    'account.companies.list',
+    'account.companies.create',
+    'account.establishments.list',
+  ].some((permission) => permissions.includes(permission))
+    ? [{ key: 'organization', label: 'Organização', href: '/conta/organizacao', iconClass: 'ti-layout-grid2' }]
+    : [];
   return [
     ...(permissions.includes('account.dashboard.view') ? accountEntries : []),
-    ...(permissions.includes('account.people.list') ||
-    permissions.includes('account.people.create')
-      ? [
-          {
-            key: 'people',
-            label: 'Pessoas',
-            href: permissions.includes('account.people.list')
-              ? '/conta/pessoas'
-              : '/conta/pessoas/cadastrar',
-            iconClass: 'ti-id-badge',
-          },
-        ]
-      : []),
-    ...(permissions.includes('account.tags.list') ||
-    permissions.includes('account.tags.create')
-      ? [
-          {
-            key: 'tags',
-            label: 'Etiquetas',
-            href: permissions.includes('account.tags.list')
-              ? '/conta/etiquetas'
-              : '/conta/etiquetas/cadastrar',
-            iconClass: 'ti-tag',
-          },
-        ]
-      : []),
-    ...(permissions.includes('account.roles.list') ||
-    permissions.includes('account.roles.create')
-      ? [
-          {
-            key: 'roles',
-            label: 'Cargos',
-            href: permissions.includes('account.roles.list')
-              ? '/conta/cargos'
-              : '/conta/cargos/cadastrar',
-            iconClass: 'ti-id-badge',
-          },
-        ]
-      : []),
+    ...(records.length ? [{ key: 'records', title: 'Cadastros' }, ...records] : []),
+    ...organization,
     ...shared,
   ];
 }

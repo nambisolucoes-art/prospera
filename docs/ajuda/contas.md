@@ -7,7 +7,7 @@ palavras-chave: conta, estabelecimento, CEP, cidade, estado, município, telefon
 
 ## Cadastrar e editar uma conta
 
-Na plataforma SaaS, abra **Contas**. Listar, visualizar, cadastrar e editar têm permissões separadas. Use **Cadastrar conta** e preencha identificação, CPF ou CNPJ, plano, situação, contatos e endereço. O acesso inicial exige nome e e-mail exclusivo do administrador. Escolha convite por e-mail ou senha inicial com confirmação. O convite permite que a pessoa defina a própria senha; a senha inicial é definida no cadastro. Se o envio do e-mail falhar, o cadastro é preservado e o link pode ser solicitado em **Esqueceu a senha**.
+Na plataforma SaaS, abra **Contas**. Listar, visualizar, cadastrar e editar têm permissões separadas. Use **Cadastrar conta** e preencha identificação, CPF ou CNPJ, plano, situação, contatos e endereço. Na seção **Primeira empresa**, confirme a identidade com o contratante somente quando estiver comprovada. Sem confirmação, a empresa começa com o nome da conta e a identificação fiscal fica pendente. O cadastro provisiona também um estabelecimento principal ativo. O acesso inicial exige nome e e-mail exclusivo do administrador. Escolha convite por e-mail ou senha inicial com confirmação. O convite permite que a pessoa defina a própria senha; a senha inicial é definida no cadastro. Se o envio do e-mail falhar, o cadastro é preservado e o link pode ser solicitado em **Esqueceu a senha**.
 
 Use a lupa à direita ou pressione Enter para buscar. A busca também atualiza automaticamente ao digitar. Use as ações da tabela para visualizar em modal ou editar o cadastro. As alterações ficam na [Auditoria](auditoria.md).
 

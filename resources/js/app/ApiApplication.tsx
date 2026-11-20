@@ -21,14 +21,20 @@ import {
 
 const screens = import.meta.glob<{ default: ComponentType }>([
   './account/{auth,settings}/*.tsx',
-  './saas/{clients,account-form,tenant,users,user-form,people,person-form,tags,roles,role-form,audit,help}.tsx',
+  './saas/{clients,account-form,home,users,user-form,people,person-form,tags,roles,role-form,audit,help}.tsx',
+  './saas/{organization,companies,company-form,establishments,establishment-form}.tsx',
 ]);
 
 const routes: Array<[RegExp, string]> = [
   [/^\/(?:saas|conta)\/auditoria$/, 'saas/audit'],
   [/^\/ajuda(?:\/[a-z0-9-]+)?$/, 'saas/help'],
   [/^\/dashboard$/, 'saas/clients'],
-  [/^\/conta$/, 'saas/tenant'],
+  [/^\/conta$/, 'saas/home'],
+  [/^\/conta\/organizacao$/, 'saas/organization'],
+  [/^\/conta\/empresas$/, 'saas/companies'],
+  [/^\/conta\/empresas\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/company-form'],
+  [/^\/conta\/estabelecimentos$/, 'saas/establishments'],
+  [/^\/conta\/estabelecimentos\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/establishment-form'],
   [
     /^\/(?:saas\/contas\/(?:cadastrar|\d+\/editar)|conta\/editar)$/,
     'saas/account-form',

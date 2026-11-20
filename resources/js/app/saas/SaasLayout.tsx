@@ -13,13 +13,32 @@ export default function SaasLayout({ title, children, tenant = false, actions, u
 }) {
   const permissions = usePage<SessionProps>().props.auth.permissions;
   const navigation = accountNavigation(tenant, permissions);
-  const root = tenant ? { label: 'Minha conta', href: '/conta' } : { label: 'Início', href: '/' };
+  const root = tenant ? { label: 'Início', href: '/conta' } : { label: 'Início', href: '/' };
+  const currentKey = sectionFor(window.location.pathname, tenant, userPage);
   const path = breadcrumb ?? (tenant && !userPage ? [] : [{ label: title }]);
   return (
-    <Theme navigation={{ entries: navigation, currentKey: window.location.pathname.startsWith('/ajuda') ? 'help' : window.location.pathname.includes('/auditoria') ? 'audit' : window.location.pathname.startsWith('/conta/cargos') ? 'roles' : window.location.pathname.startsWith('/conta/pessoas') ? 'people' : window.location.pathname.startsWith('/conta/etiquetas') ? 'tags' : userPage ? 'users' : tenant ? 'tenant' : 'saas-clients' }}>
+    <Theme navigation={{ entries: navigation, currentKey }}>
       <Head title={title} />
       <div className={headerClassName}><PageHeader title={title} breadcrumbItems={[root, ...path]} breadcrumbPosition="right" actions={actions} /></div>
       <div className="saas-content">{children}</div>
     </Theme>
   );
+}
+
+const sections: Array<[string, string]> = [
+  ['/conta/cargos', 'roles'],
+  ['/conta/pessoas', 'people'],
+  ['/conta/etiquetas', 'tags'],
+  ['/conta/empresas', 'companies'],
+  ['/conta/estabelecimentos', 'establishments'],
+  ['/conta/editar', 'account-data'],
+];
+
+function sectionFor(path: string, tenant: boolean, userPage: boolean): string {
+  if (path.startsWith('/ajuda')) return 'help';
+  if (path.includes('/auditoria')) return 'audit';
+  const section = sections.find(([prefix]) => path.startsWith(prefix));
+  if (section) return section[1];
+  if (userPage) return 'users';
+  return tenant ? 'home' : 'saas-clients';
 }

@@ -75,6 +75,38 @@ final class CheckAuditCommand extends Command
             foreach ($missing as $field) {
                 $errors[] = $class.': campo sem cobertura: '.$field;
             }
+
+            // A partir da E04, eventos de empresa e de unidade gravam os ids organizacionais (DA-12).
+            $columns = Schema::getColumnListing($model->getTable());
+            $probe = (new $class)->forceFill(['id' => 303]);
+            $expectedCompany = null;
+            $expectedEstablishment = null;
+
+            if (in_array('company_id', $columns, true)) {
+                $probe->forceFill(['company_id' => 101]);
+                $expectedCompany = 101;
+            }
+
+            if (in_array('establishment_id', $columns, true)) {
+                $probe->forceFill(['establishment_id' => 202]);
+                $expectedEstablishment = 202;
+            }
+
+            if ($model->getTable() === 'companies') {
+                $expectedCompany = 303;
+            }
+
+            if ($model->getTable() === 'establishments') {
+                $expectedEstablishment = 303;
+            }
+
+            if ($expectedCompany !== null && $probe->auditCompanyId() !== $expectedCompany) {
+                $errors[] = $class.': o evento não informa company_id.';
+            }
+
+            if ($expectedEstablishment !== null && $probe->auditEstablishmentId() !== $expectedEstablishment) {
+                $errors[] = $class.': o evento não informa establishment_id.';
+            }
         }
         foreach ($errors as $error) {
             $this->error($error);

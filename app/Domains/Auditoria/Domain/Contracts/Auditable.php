@@ -13,4 +13,8 @@ interface Auditable
     public static function unauditedFields(): array;
 
     public function auditAccountId(): ?int;
+
+    public function auditCompanyId(): ?int;
+
+    public function auditEstablishmentId(): ?int;
 }

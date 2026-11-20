@@ -36,7 +36,7 @@ final class DefaultRolesAction
                 ->whereNull('account_id')
                 ->where(fn ($query) => $query
                     ->where('scope', 'self')
-                    ->orWhereIn('slug', ['account.dashboard.view', 'account.points.list']))
+                    ->orWhereIn('slug', ['account.dashboard.view', 'account.establishments.list']))
                 ->pluck('id')
                 ->all();
 

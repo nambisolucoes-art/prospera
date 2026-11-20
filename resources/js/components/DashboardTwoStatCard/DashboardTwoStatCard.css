@@ -1,50 +1,51 @@
 .dashboardTwoStatCard {
-  position: relative;
-  margin-bottom: 20px;
-  padding: 30px 20px 30px 30px;
-  border-radius: 4px;
-  background-color: #ffffff;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(56px, 28%, 112px);
+  min-height: 108px;
+  height: 100%;
+  border: 1px solid var(--bold-color-border);
+  border-radius: var(--bold-radius);
+  background-color: var(--bold-color-surface);
 }
 
-.dashboardTwoStatCard i {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  padding: 30px 40px;
-  background: rgba(244, 248, 251, 0.6);
-  font-size: 48px;
-  line-height: 60px;
+a.dashboardTwoStatCard {
+  color: inherit;
+  text-decoration: none;
 }
 
-.dashboardTwoStatCard i.text-primary {
+a.dashboardTwoStatCard:focus-visible {
+  outline: 2px solid var(--bold-color-primary);
+  outline-offset: 2px;
+}
+
+.dashboardTwoStatCard__content {
+  align-self: center;
+  padding: 16px 20px;
+  overflow-wrap: anywhere;
+}
+
+.dashboardTwoStatCard__icon {
+  display: grid;
+  place-items: center;
+  background-color: color-mix(in srgb, var(--bold-color-surface-alt) 48%, var(--bold-color-surface));
   color: var(--bold-color-primary);
+  font-size: clamp(36px, 4vw, 44px);
+  line-height: 1;
 }
 
-.dashboardTwoStatCard i.text-pink {
-  color: #fb6d9d;
-}
-
-.dashboardTwoStatCard i.text-info {
-  color: #34d3eb;
-}
-
-.dashboardTwoStatCard i.text-custom {
-  color: var(--bold-color-custom);
-}
+.dashboardTwoStatCard__icon .text-custom { color: var(--bold-color-custom); }
+.dashboardTwoStatCard__icon .text-primary { color: var(--bold-color-primary); }
+.dashboardTwoStatCard__icon .text-pink { color: var(--bold-color-pink); }
+.dashboardTwoStatCard__icon .text-info { color: var(--bold-color-info); }
 
 .dashboardTwoStatCard__value {
   margin: 0;
-  color: #797979 !important;
-  font-family: var(--bold-font-ui);
-  font-size: 30px;
-  font-weight: 600;
-  line-height: 35px;
+  color: var(--bold-color-heading);
+  font: 600 25px/1.2 var(--bold-font-ui);
 }
 
 .dashboardTwoStatCard__title {
-  margin-top: 5px;
-  color: #98a6ad;
+  margin-top: 4px;
+  color: var(--bold-color-legacy-text);
   font-size: 14px;
-  line-height: 1.42857143;
 }

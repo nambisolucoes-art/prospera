@@ -91,12 +91,6 @@ class Client extends Model implements Auditable
         return ['active' => 'boolean', 'details' => 'array'];
     }
 
-    /** @return HasMany<Point, $this> */
-    public function points(): HasMany
-    {
-        return $this->hasMany(Point::class);
-    }
-
     /** @return HasMany<User, $this> */
     public function users(): HasMany
     {
