@@ -3,7 +3,7 @@
 Rotas: `/conta/auditoria` e `/saas/auditoria`. Ajuda: `/ajuda/auditoria`.
 
 1. `PageHeaderTour`: título e trilha. Sem passo de cadastro, pois a auditoria é somente leitura.
-2. `BusinessListTour`: filtros, Colunas, menu aberto, tabela, largura, demonstração temporária, ações, quantidade, opções e paginação.
+2. `BusinessListTour`: filtros (busca, seletores e as datas com o `DatePicker` compartilhado), Colunas, menu aberto, tabela, largura, demonstração temporária, ações, quantidade, opções e paginação.
 3. `audit-modal-summary`: abre a primeira operação autorizada e explica ação, tipo e data.
 4. `audit-modal-content`: campos em Formatado, comparações Antes e Depois ou valores de cadastro e exclusão.
 5. `audit-modal-views`: demonstra Log técnico e restaura Formatado ao sair. Exige permissão técnica.

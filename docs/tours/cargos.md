@@ -4,6 +4,7 @@ Artigo: [Cargos e permissões](../ajuda/cargos-permissoes.md). Executor disponí
 
 | Tela / passo | Alvo | Orientação |
 | --- | --- | --- |
+| Filtros | business-filters | Busque pelo nome e filtre pela origem (Cargo inicial ou Personalizado). Alvos internos: `roles-search` e `roles-origin`. |
 | Listagem | roles-list | Consulte cargos e use Visualizar para abrir o modal ou Editar para alterar um cargo autorizado. |
 | Cadastro e edição | role-fields | Informe o nome do cargo desta conta. |
 | Permissões | role-permissions | Selecione as ações específicas disponibilizadas automaticamente por cada módulo. As permissões não são cadastradas manualmente e não têm tela própria. Permissões não selecionadas ficam bloqueadas. |

@@ -3,8 +3,25 @@
   min-width: 0;
 }
 
-.business-list__filters { padding-bottom: 20px; }
+/* Filters share one row: search takes the larger share, selects and dates divide the rest. */
+.business-list__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 20px;
+}
+
+.business-list__filters > * { flex: 1 1 150px; min-width: 0; }
+.business-list__filters > .business-list__search { flex: 2 1 240px; }
+.business-list__filters > .datePicker { flex: 1 1 140px; max-width: 180px; }
+.business-list__search .inputGroup { max-width: none; }
 .business-list__filters .textInput { height: 34px; font-size: 13px; }
+
+@media (max-width: 560px) {
+  .business-list__filters > * { flex-basis: 100%; }
+  .business-list__filters > .datePicker { flex-basis: calc(50% - 5px); max-width: none; }
+}
 
 .business-list__summary {
   display: grid;

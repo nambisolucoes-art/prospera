@@ -1,0 +1,60 @@
+.datePicker { min-width: 0; }
+.datePicker .inputGroup { max-width: none; }
+
+/* The calendar addon keeps the neutral InputGroup button, as in Visdom. */
+.datePicker__toggle:disabled { cursor: not-allowed; }
+
+.datePicker__error {
+  display: block;
+  margin-top: 2px;
+  color: var(--bold-color-danger);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.datepicker.datePicker__popup {
+  position: absolute;
+  min-width: 160px;
+  margin: 2px 0 0;
+  padding: 8px;
+  border: 0;
+  border-radius: var(--bold-radius);
+  background: var(--bold-color-surface);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .26);
+  color: var(--bold-color-legacy-text);
+  font-size: 14px;
+  line-height: 1.42857143;
+  list-style: none;
+}
+
+.datepicker.datePicker__popup table { border-collapse: collapse; border-spacing: 0; }
+.datepicker.datePicker__popup th { color: #666; font-weight: 600; }
+.datepicker.datePicker__popup .table-condensed > :is(thead, tbody, tfoot) > tr > :is(th, td) { padding: 5px; }
+.datepicker.datePicker__popup thead tr:first-child th:hover,
+.datepicker.datePicker__popup tfoot tr th:hover { background: #fafafa; }
+
+.datepicker.datePicker__popup table tr td:is(.today, .selected, .active),
+.datepicker.datePicker__popup table tr td:is(.today, .selected, .active):hover,
+.datepicker.datePicker__popup table tr td span.active,
+.datepicker.datePicker__popup table tr td span.active:hover {
+  background-image: none;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+.datepicker.datePicker__popup table tr td.today,
+.datepicker.datePicker__popup table tr td.today:hover {
+  background-color: var(--bold-color-surface-alt) !important;
+  color: var(--bold-color-text);
+}
+
+.datepicker.datePicker__popup table tr td.active,
+.datepicker.datePicker__popup table tr td.active:hover,
+.datepicker.datePicker__popup table tr td span.active,
+.datepicker.datePicker__popup table tr td span.active:hover {
+  background-color: var(--bold-color-navigation) !important;
+  color: var(--bold-color-surface);
+}
+
+.datepicker.datePicker__popup table tr td:is(.day, span),
+.datepicker.datePicker__popup :is(thead, tfoot) th { border-radius: var(--bold-radius); }

@@ -113,7 +113,7 @@ export function tourFor(
     help = 'etiquetas';
     steps = [
       ...businessListTourSteps({
-        filters: 'Escolha o módulo para consultar suas etiquetas.',
+        filters: 'Busque pelo nome e filtre por módulo e situação (Ativas ou Inativas). A lista se atualiza automaticamente e preserva os demais filtros.',
         table:
           'Os marcadores usam a cor da etiqueta. Uma estrela identifica as etiquetas especiais.',
       }),
@@ -123,6 +123,8 @@ export function tourFor(
     title = 'Cargos';
     help = 'cargos-permissoes';
     steps = businessListTourSteps({
+      filters:
+        'Busque pelo nome do cargo e filtre pela origem: Cargo inicial ou Personalizado. A lista se atualiza automaticamente.',
       table:
         'Consulte os cargos e suas permissões. Use as ações de visualizar e editar conforme seu acesso.',
     });

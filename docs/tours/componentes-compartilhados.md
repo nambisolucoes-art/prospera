@@ -4,6 +4,8 @@
 
 `BusinessListTour.ts`: filtros, Colunas, abertura das opções, tabela, linha de largura, demonstração da largura, ações de cada registro, quantidade, abertura das opções e paginação. Passos organizados em Filtros, Tabela e Páginas. Telas passam somente os textos específicos de filtros e registros.
 
+A barra de filtros é montada pelo próprio `BusinessList`: busca (`BusinessListSearch`), seletores e datas (`DatePicker`) ficam na mesma linha, com a busca ocupando a maior parte, e quebram para uma coluna no celular. `useBusinessListFilters` aplica a busca com atraso, mantém os demais parâmetros e volta à primeira página. Os passos do tour continuam apontando para `business-filters`.
+
 Destaque com transição e pulso, indicador de progresso, explicação da demonstração e lista recolhível de todos os passos. Movimento reduzido desliga as animações. Separadores ausentes no mobile e botões sem permissão são pulados.
 
 Revisar em 1440, 390 e 320 px, inclusive saltos na lista de passos, voltar, Esc durante uma demonstração e conclusão. Verificar restauração exata de larguras e do localStorage, fechamento dos menus e retorno do foco ao botão Tutorial desta tela.

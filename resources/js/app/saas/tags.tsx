@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import BusinessList, {
   type PageSummary,
 } from '@/components/BusinessList/BusinessList';
+import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
+import { useBusinessListFilters } from '@/components/BusinessList/useBusinessListFilters';
 import Button from '@/components/Button/Button';
 import TagLabel from '@/components/TagLabel/TagLabel';
 import SelectControl from '@/components/SelectControl/SelectControl';
@@ -17,13 +19,13 @@ import StatusLabel from '@/components/StatusLabel/StatusLabel';
 import CardBox from '@/components/CardBox/CardBox';
 export default function Tags({
   tags,
-  module,
+  filters,
   formOpen = false,
   tag = null,
   canList = true,
 }: {
   tags: PageSummary & { data: TagRow[] };
-  module: string;
+  filters: { search: string; module: string; status: string };
   formOpen?: boolean;
   tag?: TagRow | null;
   canList?: boolean;
@@ -53,6 +55,7 @@ export default function Tags({
   const writable = auth.inspection_mode !== 'read-only';
   const can = (action: string) =>
     auth.permissions.includes(`account.tags.${action}`);
+  const { query, setQuery, submit, apply } = useBusinessListFilters('/conta/etiquetas', filters.search);
   return (
     <SaasLayout
       tenant
@@ -82,25 +85,21 @@ export default function Tags({
             page={tags}
             rows={tags.data}
             rowKey={(tag) => tag.id}
-            empty="Nenhuma etiqueta encontrada."
-            filters={
-              <div className="saas-search" data-tour="tags-module">
-                <SelectControl
-                  id="tags-module-filter"
-                  label="Módulo"
-                  value={module}
-                  onChange={(value) =>
-                    void navigate(
-                      '/conta/etiquetas' + (value ? '?module=' + value : ''),
-                    )
-                  }
-                  options={[
-                    { value: '', label: 'Todos os módulos' },
-                    { value: 'people', label: 'Pessoas' },
-                  ]}
-                />
+            empty={filters.search || filters.module || filters.status ? 'Nenhuma etiqueta encontrada.' : 'Nenhuma etiqueta cadastrada.'}
+            filters={<>
+              <BusinessListSearch tour="tags-search" label="Buscar etiquetas" placeholder="Buscar por nome"
+                value={query} onChange={setQuery} onSubmit={submit} maxLength={100} />
+              <div data-tour="tags-module">
+                <SelectControl id="tags-module-filter" label="Módulo" value={filters.module}
+                  onChange={(value) => apply({ module: value })}
+                  options={[{ value: '', label: 'Todos os módulos' }, { value: 'people', label: 'Pessoas' }]} />
               </div>
-            }
+              <div data-tour="tags-status">
+                <SelectControl id="tags-status-filter" label="Situação" value={filters.status}
+                  onChange={(value) => apply({ status: value })}
+                  options={[{ value: '', label: 'Todas as situações' }, { value: 'active', label: 'Ativas' }, { value: 'inactive', label: 'Inativas' }]} />
+              </div>
+            </>}
             columns={[
               {
                 id: 'actions',

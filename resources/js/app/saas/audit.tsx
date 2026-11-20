@@ -7,8 +7,9 @@ import Modal from '@/components/Modal/Modal';
 import SelectControl, {
   type SelectOption,
 } from '@/components/SelectControl/SelectControl';
-import InputGroup from '@/components/InputGroup/InputGroup';
-import TextInput from '@/components/TextInput/TextInput';
+import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
+import { useBusinessListFilters } from '@/components/BusinessList/useBusinessListFilters';
+import DatePicker from '@/components/DatePicker/DatePicker';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
 import { apiRequest } from '@/utils/apiRequest';
@@ -46,46 +47,16 @@ export default function Audit({
   options: Record<string, SelectOption[]>;
   platform: boolean;
 }) {
-  const { navigate, props } = useApiPage<SessionProps>();
-  const [search, setSearch] = useState(filters.search ?? '');
+  const { props } = useApiPage<SessionProps>();
   const [selected, setSelected] = useState<AuditRow>();
   const [detail, setDetail] = useState<AuditDetail>();
   const [error, setError] = useState('');
   const trigger = useRef<HTMLElement | null>(null);
-  const searchTimer = useRef<number | undefined>(undefined);
   const base = platform ? '/saas/auditoria' : '/conta/auditoria';
   const canView = props.auth.permissions.includes(
     (platform ? 'platform' : 'account') + '.audit.view',
   );
-  useEffect(() => {
-    setSearch(filters.search ?? '');
-  }, [filters.search]);
-  function filter(key: string, v: string) {
-    window.clearTimeout(searchTimer.current);
-    const params = new URLSearchParams(location.search);
-    params.delete('page');
-    if (key !== 'search') {
-      if (search) params.set('search', search);
-      else params.delete('search');
-    }
-    if (v) params.set(key, v);
-    else params.delete(key);
-    if (key === 'from' && v && (params.get('until') ?? v) < v)
-      params.delete('until');
-    void navigate(base + (params.size ? '?' + params : ''), {
-      preserveScroll: true,
-    });
-  }
-  const filterRef = useRef(filter);
-  filterRef.current = filter;
-  useEffect(() => {
-    if (search === (filters.search ?? '')) return;
-    searchTimer.current = window.setTimeout(
-      () => filterRef.current('search', search),
-      350,
-    );
-    return () => window.clearTimeout(searchTimer.current);
-  }, [search, filters.search]);
+  const { query, setQuery, submit, apply } = useBusinessListFilters(base, filters.search ?? '');
   useEffect(() => {
     if (!selected) return;
     const abort = new AbortController();
@@ -111,38 +82,9 @@ export default function Audit({
           rows={records.data}
           rowKey={(r) => r.id}
           empty="Nenhum registro encontrado."
-          filters={
-            <div className="audit-filters" data-tour="audit-filters">
-              <form
-                className="saas-search"
-                role="search"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  filter('search', search);
-                }}
-              >
-                <InputGroup
-                  action={
-                    <button
-                      className="inputGroup__button waves-effect"
-                      type="submit"
-                      aria-label="Buscar"
-                      title="Buscar"
-                    >
-                      <i className="fa fa-search" aria-hidden="true" />
-                    </button>
-                  }
-                >
-                  <TextInput
-                    type="search"
-                    aria-label="Buscar no histórico"
-                    placeholder="Buscar registro ou autor"
-                    value={search}
-                    maxLength={255}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                </InputGroup>
-              </form>
+          filters={<>
+              <BusinessListSearch label="Buscar no histórico" placeholder="Buscar registro ou autor"
+                value={query} onChange={setQuery} onSubmit={submit} />
               {[
                 ['entity', 'Tipo', 'entities'],
                 ['event', 'Ação', 'events'],
@@ -159,27 +101,15 @@ export default function Audit({
                     { value: '', label: 'Todos: ' + label },
                     ...options[source],
                   ]}
-                  onChange={(v) => filter(key, v)}
+                  onChange={(v) => apply({ [key]: v })}
                 />
               ))}
-              <TextInput
-                type="date"
-                aria-label="Data inicial"
-                title="Data inicial"
-                max={filters.until}
+              <DatePicker id="audit-from" label="Data inicial" placeholder="Data inicial" max={filters.until}
                 value={filters.from ?? ''}
-                onChange={(e) => filter('from', e.target.value)}
-              />
-              <TextInput
-                type="date"
-                aria-label="Data final"
-                title="Data final"
-                min={filters.from}
-                value={filters.until ?? ''}
-                onChange={(e) => filter('until', e.target.value)}
-              />
-            </div>
-          }
+                onChange={(v) => apply({ from: v, ...(v && filters.until && filters.until < v ? { until: '' } : {}) })} />
+              <DatePicker id="audit-until" label="Data final" placeholder="Data final" min={filters.from}
+                value={filters.until ?? ''} onChange={(v) => apply({ until: v })} />
+          </>}
           columns={[
             {
               id: 'actions',

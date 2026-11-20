@@ -3,10 +3,10 @@
 namespace App\Domains\Acessos\UI\Controllers;
 
 use App\Domains\Acessos\Application\Actions\SaveRoleAction;
+use App\Domains\Acessos\Application\Data\RoleFiltersData;
 use App\Domains\Acessos\Application\Data\SaveRoleData;
 use App\Domains\Acessos\Application\Queries\AccessDirectoryQuery;
 use App\Support\ApiPage;
-use App\Support\PageSize;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +17,9 @@ final class AccessController
 {
     public function roles(Request $r, AccessDirectoryQuery $q): JsonResponse|View
     {
-        return ApiPage::respond(['roles' => $q->roles($r->user()->account_id)->withCount('permissions')->paginate(PageSize::fromInput($r->query('per_page')))->withQueryString()]);
+        $filters = RoleFiltersData::fromInput($r->query());
+
+        return ApiPage::respond(['roles' => $q->roleList($r->user()->account_id, $filters), 'filters' => $filters->toArray()]);
     }
 
     public function roleForm(Request $r, AccessDirectoryQuery $q, ?int $roleId = null): JsonResponse|View

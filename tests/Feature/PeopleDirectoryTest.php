@@ -216,4 +216,20 @@ class PeopleDirectoryTest extends TestCase
         $tag = Tag::where('name', 'Cadastro permitido')->sole();
         $this->getJson('/conta/etiquetas/'.$tag->id.'/editar')->assertOk()->assertJsonPath('tag.id', $tag->id)->assertJsonCount(0, 'tags.data');
     }
+
+    public function test_tag_list_filters_by_search_and_status_within_the_account(): void
+    {
+        $owner = $this->owner();
+        Tag::create(['account_id' => $owner->account_id, 'module' => 'people', 'name' => 'Parceiro VIP', 'color' => '#123456', 'active' => true]);
+        Tag::create(['account_id' => $owner->account_id, 'module' => 'people', 'name' => 'Parceiro antigo', 'color' => '#123456', 'active' => false]);
+        $other = $this->owner();
+        Tag::create(['account_id' => $other->account_id, 'module' => 'people', 'name' => 'Parceiro externo', 'color' => '#123456', 'active' => true]);
+        $this->actingAs($owner);
+
+        $this->getJson('/conta/etiquetas?search=parceiro')->assertOk()->assertJsonCount(2, 'tags.data')->assertJsonPath('filters.search', 'parceiro');
+        $this->getJson('/conta/etiquetas?search=parceiro&status=active')->assertOk()->assertJsonCount(1, 'tags.data')->assertJsonPath('tags.data.0.name', 'Parceiro VIP');
+        $this->getJson('/conta/etiquetas?status=inactive')->assertOk()->assertJsonCount(1, 'tags.data')->assertJsonPath('tags.data.0.name', 'Parceiro antigo');
+        $this->getJson('/conta/etiquetas?search=%25')->assertOk()->assertJsonCount(0, 'tags.data');
+        $this->getJson('/conta/etiquetas?status=outro&module=outro')->assertOk()->assertJsonPath('filters.status', '')->assertJsonPath('filters.module', '')->assertJsonCount(5, 'tags.data');
+    }
 }

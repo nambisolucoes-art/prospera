@@ -179,4 +179,18 @@ class AccessControlTest extends TestCase
         $this->assertFalse($owner->can($legacy->slug));
         $this->assertDatabaseHas('access_catalog_events', ['event' => 'permission-management.retired', 'scope' => 'platform', 'actor_id' => null]);
     }
+
+    public function test_role_list_filters_by_search_and_origin_within_the_account(): void
+    {
+        $owner = $this->owner();
+        Role::create(['account_id' => $owner->account_id, 'name' => 'Caixa noturno']);
+        Role::create(['account_id' => $this->owner()->account_id, 'name' => 'Caixa externo']);
+        $initial = Role::where('account_id', $owner->account_id)->whereNotNull('system_key')->count();
+        $this->actingAs($owner);
+
+        $this->getJson('/conta/cargos?search=CAIXA')->assertOk()->assertJsonCount(1, 'roles.data')->assertJsonPath('roles.data.0.name', 'Caixa noturno')->assertJsonPath('filters.search', 'CAIXA');
+        $this->getJson('/conta/cargos?origin=custom')->assertOk()->assertJsonCount(1, 'roles.data');
+        $this->getJson('/conta/cargos?origin=system')->assertOk()->assertJsonCount($initial, 'roles.data');
+        $this->getJson('/conta/cargos?origin=outro')->assertOk()->assertJsonPath('filters.origin', '')->assertJsonCount($initial + 1, 'roles.data');
+    }
 }

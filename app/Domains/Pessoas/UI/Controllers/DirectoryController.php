@@ -6,6 +6,7 @@ use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Etiquetas\Application\Actions\DeleteTagAction;
 use App\Domains\Etiquetas\Application\Actions\SaveTagAction;
 use App\Domains\Etiquetas\Application\Data\SaveTagData;
+use App\Domains\Etiquetas\Application\Data\TagFiltersData;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Pessoas\Application\Actions\SavePersonAction;
 use App\Domains\Pessoas\Application\Data\SavePersonData;
@@ -91,9 +92,10 @@ final class DirectoryController
     private function tagsPayload(Request $r, PeopleDirectoryQuery $q): array
     {
         $canList = $r->user()->can('account.tags.list');
-        $tags = $q->tags($r->user()->account_id)->withCount('people')->when(! $canList, fn ($query) => $query->whereRaw('1 = 0'))->when($r->filled('module'), fn ($query) => $query->where('module', $r->query('module')))->paginate(PageSize::fromInput($r->query('per_page')))->withPath($canList ? '/conta/etiquetas' : $r->url())->withQueryString();
+        $filters = TagFiltersData::fromInput($r->query());
+        $tags = $q->tagList($r->user()->account_id, $filters, $canList, $canList ? '/conta/etiquetas' : $r->url());
 
-        return ['tags' => $tags, 'module' => $r->query('module', ''), 'canList' => $canList, 'formOpen' => false, 'tag' => null];
+        return ['tags' => $tags, 'filters' => $filters->toArray(), 'canList' => $canList, 'formOpen' => false, 'tag' => null];
     }
 
     public function previewTag(Request $r, PeopleDirectoryQuery $q, int $tagId): JsonResponse

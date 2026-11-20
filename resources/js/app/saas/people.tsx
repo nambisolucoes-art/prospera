@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import BusinessList, {
   type PageSummary,
 } from '@/components/BusinessList/BusinessList';
+import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
+import { useBusinessListFilters } from '@/components/BusinessList/useBusinessListFilters';
 import Button from '@/components/Button/Button';
 import TagLabel from '@/components/TagLabel/TagLabel';
-import InputGroup from '@/components/InputGroup/InputGroup';
 import SelectControl from '@/components/SelectControl/SelectControl';
-import TextInput from '@/components/TextInput/TextInput';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
 import SaasLayout from './SaasLayout';
@@ -24,51 +24,11 @@ export default function People({
   suppliersOnly?: boolean;
   customersOnly?: boolean;
 }) {
-  const { navigate, props } = useApiPage<SessionProps>();
+  const { props } = useApiPage<SessionProps>();
   const readOnly = props.auth.inspection_mode === 'read-only';
-  const [query, setQuery] = useState(search);
   const [preview, setPreview] = useState<PersonRow>();
   const trigger = useRef<HTMLElement | null>(null);
-  const navigateRef = useRef(navigate);
-  navigateRef.current = navigate;
-  const submittedSearch = useRef(search);
-  const searchTimer = useRef<number | undefined>(undefined);
-  useEffect(() => {
-    if (search !== submittedSearch.current) {
-      submittedSearch.current = search;
-      setQuery(search);
-    }
-  }, [search]);
-  useEffect(() => {
-    if (query === search) return;
-    const timer = window.setTimeout(() => {
-      const params = new URLSearchParams();
-      if (suppliersOnly) params.set('suppliers', '1');
-    if (customersOnly) params.set('customers', '1');
-      if (query) params.set('search', query);
-      if (people.per_page !== 25)
-        params.set('per_page', String(people.per_page));
-      submittedSearch.current = query;
-      void navigateRef.current(
-        '/conta/pessoas' + (params.size ? '?' + params : ''),
-        { preserveScroll: true },
-      );
-    }, 350);
-    searchTimer.current = timer;
-    return () => window.clearTimeout(timer);
-  }, [query, search, people.per_page, suppliersOnly, customersOnly]);
-  function searchNow() {
-    window.clearTimeout(searchTimer.current);
-    const params = new URLSearchParams();
-    if (suppliersOnly) params.set('suppliers', '1');
-    if (customersOnly) params.set('customers', '1');
-    if (query) params.set('search', query);
-    if (people.per_page !== 25) params.set('per_page', String(people.per_page));
-    submittedSearch.current = query;
-    void navigate('/conta/pessoas' + (params.size ? '?' + params : ''), {
-      preserveScroll: true,
-    });
-  }
+  const { query, setQuery, submit, apply } = useBusinessListFilters('/conta/pessoas', search);
   return (
     <SaasLayout
       tenant
@@ -97,51 +57,15 @@ export default function People({
             search ? 'Nenhuma pessoa encontrada.' : 'Nenhuma pessoa cadastrada.'
           }
           filters={<>
-            <form
-              className="saas-search"
-              role="search"
-              data-tour="people-search"
-              onSubmit={(event) => {
-                event.preventDefault();
-                searchNow();
-              }}
-            >
-              <InputGroup
-                action={
-                  <button
-                    className="inputGroup__button waves-effect"
-                    type="submit"
-                    aria-label="Buscar"
-                    title="Buscar"
-                  >
-                    <i className="fa fa-search" aria-hidden="true" />
-                  </button>
-                }
-              >
-                <TextInput
-                  type="search"
-                  aria-label="Buscar pessoas"
-                  placeholder="Buscar por nome ou e-mail"
-                  value={query}
-                  maxLength={255}
-                  onChange={(event) => setQuery(event.target.value)}
-                />
-              </InputGroup>
-            </form>
+            <BusinessListSearch tour="people-search" label="Buscar pessoas" placeholder="Buscar por nome ou e-mail"
+              value={query} onChange={setQuery} onSubmit={submit} />
             {(props.auth.permissions.includes('account.suppliers.list') || props.auth.permissions.includes('account.customers.list')) && (
               <div data-tour="people-suppliers"><SelectControl id="people-suppliers" label="Tipo de cadastro" value={customersOnly ? 'customers' : suppliersOnly ? 'suppliers' : ''}
                 options={[{ value: '', label: 'Todas as pessoas' },
                   ...(props.auth.permissions.includes('account.customers.list') ? [{ value: 'customers', label: 'Clientes' }] : []),
                   ...(props.auth.permissions.includes('account.suppliers.list') ? [{ value: 'suppliers', label: 'Fornecedores' }] : []),
                 ]}
-                onChange={(value) => {
-                  const params = new URLSearchParams();
-                  if (query) params.set('search', query);
-                  if (value === 'customers') params.set('customers', '1');
-                  if (value === 'suppliers') params.set('suppliers', '1');
-                  window.clearTimeout(searchTimer.current);
-                  void navigate('/conta/pessoas' + (params.size ? '?' + params : ''), { preserveScroll: true });
-                }} /></div>
+                onChange={(value) => apply({ customers: value === 'customers' ? '1' : '', suppliers: value === 'suppliers' ? '1' : '' })} /></div>
             )}
           </>}
 

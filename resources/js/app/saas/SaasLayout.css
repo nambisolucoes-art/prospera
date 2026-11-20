@@ -31,10 +31,3 @@
 
 .saas-point > details { margin-bottom: 0; }
 
-.saas-search {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-.saas-search .inputGroup { max-width: 420px; }

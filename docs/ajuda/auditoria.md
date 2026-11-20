@@ -7,7 +7,7 @@ palavras-chave: auditoria, ajuda, tutorial, histórico, consultar
 
 ## Consultar o histórico
 
-Abra **Auditoria** no menu. É necessária a permissão de listar auditoria. Busque pelo nome do registro ou do autor para atualizar a lista automaticamente. A lupa à direita e Enter também executam a busca. Filtre por tipo, ação, autor e datas inicial e final. A plataforma também pode filtrar por conta. Dentro da conta, somente os eventos daquela conta ficam disponíveis, inclusive nas opções dos filtros.
+Abra **Auditoria** no menu. É necessária a permissão de listar auditoria. Busque pelo nome do registro ou do autor para atualizar a lista automaticamente. A lupa à direita e Enter também executam a busca. Filtre por tipo, ação, autor e datas inicial e final. Nas datas, digite no formato DD/MM/AAAA ou use o botão de calendário à direita para escolher o dia; **Limpar** remove a data. Uma data inexistente é indicada abaixo do campo e não é aplicada. A plataforma também pode filtrar por conta. Dentro da conta, somente os eventos daquela conta ficam disponíveis, inclusive nas opções dos filtros.
 
 ## Visualizar uma operação
 

@@ -7,7 +7,7 @@ palavras-chave: etiquetas, tags, módulo, pessoas, usuário, especial, cor, clie
 
 ## Consultar etiquetas
 
-Usuários de contas ativas com a permissão de listar etiquetas podem abrir **Etiquetas**. Cadastrar, visualizar e editar exigem suas próprias permissões. A lista reúne as etiquetas da conta; use o seletor **Todos os módulos** no topo, sem rótulo visível. Cada etiqueta aparece em um marcador quadrado na sua cor; uma estrela amarela discreta indica **Especial** ao passar o mouse ou receber foco. A estrela aparece somente nesta listagem, sem ser repetida em seletores, pessoas ou modais. Inicialmente está disponível apenas **Pessoas**.
+Usuários de contas ativas com a permissão de listar etiquetas podem abrir **Etiquetas**. Cadastrar, visualizar e editar exigem suas próprias permissões. A lista reúne as etiquetas da conta. No topo, busque pelo nome e filtre por módulo e por situação (**Ativas** ou **Inativas**). A lista se atualiza automaticamente ao digitar; a lupa à direita e Enter também executam a busca. Trocar um filtro preserva a busca e os demais filtros. Cada etiqueta aparece em um marcador quadrado na sua cor; uma estrela amarela discreta indica **Especial** ao passar o mouse ou receber foco. A estrela aparece somente nesta listagem, sem ser repetida em seletores, pessoas ou modais. Inicialmente está disponível apenas **Pessoas**.
 
 ## Cadastrar e editar
 

@@ -3,7 +3,7 @@
 Artigo `/ajuda/etiquetas`. Listagem em `/conta/etiquetas`. Os endereços antigos de cadastro e edição compõem essa mesma tela com o modal aberto.
 
 1. `PageHeaderTour`: título, trilha e ação Cadastrar etiqueta, conforme permissão.
-2. `BusinessListTour`: módulo, colunas, tabela, largura, ações, quantidade e paginação.
+2. `BusinessListTour`: busca por nome, módulo e situação no passo de filtros, colunas, tabela, largura, ações, quantidade e paginação. Alvos dos filtros: `tags-search`, `tags-module` e `tags-status`, dentro de `business-filters`.
 3. `tag-fields`: abre o modal de cadastro por demonstração e explica nome, módulo e cor. Não grava nem abre o seletor automaticamente.
 4. `tag-modal-actions`: explica Salvar e Cancelar. Fecha somente a janela aberta pelo tutorial ao sair desta parte ou encerrar o tour.
 

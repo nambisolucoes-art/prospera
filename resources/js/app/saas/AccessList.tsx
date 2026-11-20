@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import BusinessList, {
   type PageSummary,
 } from '@/components/BusinessList/BusinessList';
+import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
+import { useBusinessListFilters } from '@/components/BusinessList/useBusinessListFilters';
+import SelectControl from '@/components/SelectControl/SelectControl';
 import Button from '@/components/Button/Button';
 import Modal, { type ModalSize } from '@/components/Modal/Modal';
 import { useApiPage } from '@/hooks/useApiPage';
@@ -15,8 +18,10 @@ import './AccountPreview.css';
 import './Access.css';
 export default function AccessList({
   rows,
+  filters,
 }: {
   rows: PageSummary & { data: RoleRow[] };
+  filters: { search: string; origin: string };
 }) {
   const { auth } = useApiPage<SessionProps>().props;
   const base = '/conta/cargos';
@@ -26,6 +31,7 @@ export default function AccessList({
   const writable = auth.inspection_mode !== 'read-only';
   const can = (action: string) =>
     auth.permissions.includes(`account.roles.${action}`);
+  const { query, setQuery, submit, apply } = useBusinessListFilters(base, filters.search);
   return (
     <SaasLayout
       tenant
@@ -51,7 +57,16 @@ export default function AccessList({
           page={rows}
           rows={rows.data}
           rowKey={(row) => row.id}
-          empty="Nenhum registro encontrado."
+          empty={filters.search || filters.origin ? 'Nenhum cargo encontrado.' : 'Nenhum cargo cadastrado.'}
+          filters={<>
+            <BusinessListSearch tour="roles-search" label="Buscar cargos" placeholder="Buscar por nome"
+              value={query} onChange={setQuery} onSubmit={submit} maxLength={100} />
+            <div data-tour="roles-origin">
+              <SelectControl id="roles-origin-filter" label="Origem" value={filters.origin}
+                onChange={(value) => apply({ origin: value })}
+                options={[{ value: '', label: 'Todas as origens' }, { value: 'system', label: 'Cargo inicial' }, { value: 'custom', label: 'Personalizado' }]} />
+            </div>
+          </>}
           columns={[
             {
               id: 'actions',
