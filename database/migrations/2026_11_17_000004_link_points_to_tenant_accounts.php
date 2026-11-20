@@ -16,7 +16,9 @@ return new class extends Migration
         });
 
         DB::table('points')->update([
-            'client_id' => DB::table('establishments')->select('client_id')->whereColumn('establishments.id', 'points.establishment_id'),
+            'client_id' => DB::table('establishments')
+                ->select('client_id')
+                ->whereColumn('establishments.id', 'points.establishment_id'),
         ]);
 
         Schema::table('points', function (Blueprint $table) {
@@ -26,13 +28,24 @@ return new class extends Migration
 
     public function down(): void
     {
-        $accounts = DB::table('clients')->whereIn('id', DB::table('points')->whereNull('establishment_id')->select('client_id'));
+        $accountsWithLegacyPoints = DB::table('points')
+            ->whereNull('establishment_id')
+            ->select('client_id');
+
+        $accounts = DB::table('clients')->whereIn('id', $accountsWithLegacyPoints);
+
         foreach ($accounts->select('id', 'name')->lazyById() as $account) {
             $legacyId = DB::table('establishments')->where('client_id', $account->id)->orderBy('id')->value('id')
                 ?? DB::table('establishments')->insertGetId([
-                    'client_id' => $account->id, 'name' => $account->name, 'created_at' => now(), 'updated_at' => now(),
+                    'client_id' => $account->id,
+                    'name' => $account->name,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
-            DB::table('points')->where('client_id', $account->id)->whereNull('establishment_id')->update(['establishment_id' => $legacyId]);
+            DB::table('points')
+                ->where('client_id', $account->id)
+                ->whereNull('establishment_id')
+                ->update(['establishment_id' => $legacyId]);
         }
 
         Schema::table('points', function (Blueprint $table) {

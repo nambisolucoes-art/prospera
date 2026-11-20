@@ -14,12 +14,22 @@ final class DeleteTagAction
     {
         Gate::authorize('account.tags.delete');
         AuditLog::transaction(function () use ($accountId, $id) {
-            Client::whereKey($accountId)->lockForUpdate()->firstOrFail();
-            $tag = Tag::where('account_id', $accountId)->lockForUpdate()->findOrFail($id);
+            Client::whereKey($accountId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $tag = Tag::where('account_id', $accountId)
+                ->lockForUpdate()
+                ->findOrFail($id);
+
             abort_if($tag->system_key !== null, 403, 'Etiquetas especiais são gerenciadas pelo sistema.');
+
             if ($tag->people()->exists()) {
-                throw ValidationException::withMessages(['_form' => 'Esta etiqueta possui registros vinculados. Inative a etiqueta em vez de excluir.']);
+                throw ValidationException::withMessages([
+                    '_form' => 'Esta etiqueta possui registros vinculados. Inative a etiqueta em vez de excluir.',
+                ]);
             }
+
             $tag->delete();
         });
     }

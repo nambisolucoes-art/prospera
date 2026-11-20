@@ -21,7 +21,9 @@ class AuditAndGuidanceTest extends TestCase
 
     private function owner(): User
     {
-        return User::factory()->create(['account_id' => Client::create(['name' => 'Conta de auditoria', 'active' => true])->id, 'is_account_admin' => true]);
+        $account = Client::create(['name' => 'Conta de auditoria', 'active' => true]);
+
+        return User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
     }
 
     public function test_writes_record_actor_account_and_real_before_after_without_noops(): void
@@ -35,7 +37,10 @@ class AuditAndGuidanceTest extends TestCase
         $this->assertSame('created', $created->event);
         $this->assertSame('Pessoa original', $created->changes['name']['after']);
         $this->patchJson('/conta/pessoas/'.$person->id, ['name' => 'Pessoa editada'])->assertOk();
-        $updated = AuditRecord::where('entity_type', 'person')->where('entity_id', $person->id)->where('event', 'updated')->sole();
+        $updated = AuditRecord::where('entity_type', 'person')
+            ->where('entity_id', $person->id)
+            ->where('event', 'updated')
+            ->sole();
         $this->assertSame('Pessoa original', $updated->changes['name']['before']);
         $this->assertSame('Pessoa editada', $updated->changes['name']['after']);
         $count = AuditRecord::count();
@@ -47,7 +52,16 @@ class AuditAndGuidanceTest extends TestCase
     public function test_operation_groups_pivot_and_field_changes_and_rolls_back_as_one(): void
     {
         $owner = $this->owner();
-        $this->actingAs($owner)->postJson('/conta/cargos', ['name' => 'Cargo auditado', 'permission_ids' => [Permission::where('slug', 'account.people.list')->sole()->id]])->assertOk();
+        $this
+            ->actingAs($owner)
+            ->postJson(
+                '/conta/cargos',
+                [
+                    'name' => 'Cargo auditado',
+                    'permission_ids' => [Permission::where('slug', 'account.people.list')->sole()->id],
+                ],
+            )
+            ->assertOk();
         $role = Role::where('name', 'Cargo auditado')->sole();
         $record = AuditRecord::where('entity_type', 'role')->where('entity_id', $role->id)->sole();
         $this->assertSame('Cargo auditado', $record->changes['name']['after']);
@@ -79,21 +93,39 @@ class AuditAndGuidanceTest extends TestCase
         $other = $this->owner();
         $this->actingAs($other)->postJson('/conta/pessoas', ['name' => 'Pessoa de outra conta'])->assertOk();
         $foreign = AuditRecord::where('entity_name', 'Pessoa de outra conta')->sole();
-        $this->actingAs($owner)->getJson('/conta/auditoria')->assertOk()->assertJsonMissing(['name' => 'Pessoa de outra conta']);
+        $this
+            ->actingAs($owner)
+            ->getJson('/conta/auditoria')
+            ->assertOk()
+            ->assertJsonMissing(['name' => 'Pessoa de outra conta']);
         $this->getJson('/conta/auditoria/'.$foreign->id.'/visualizar')->assertNotFound();
         $this->getJson('/conta/auditoria?account='.$other->account_id)->assertUnprocessable();
         $role = Role::create(['name' => 'Leitor', 'account_id' => $owner->account_id]);
-        $role->permissions()->sync(Permission::whereIn('slug', ['account.audit.list', 'account.audit.view'])->pluck('id'));
+        $role
+            ->permissions()
+            ->sync(Permission::whereIn('slug', ['account.audit.list', 'account.audit.view'])->pluck('id'));
         $reader = User::factory()->create(['account_id' => $owner->account_id, 'role_id' => $role->id]);
         $local = AuditRecord::where('entity_type', 'account')->where('entity_id', $owner->account_id)->sole();
-        $this->actingAs($reader)->getJson('/conta/auditoria/'.$local->id.'/visualizar')->assertOk()->assertJsonPath('technical', null)->assertJsonPath('event_key', $local->event);
+        $this
+            ->actingAs($reader)
+            ->getJson('/conta/auditoria/'.$local->id.'/visualizar')
+            ->assertOk()
+            ->assertJsonPath('technical', null)
+            ->assertJsonPath('event_key', $local->event);
         $this->getJson('/saas/auditoria')->assertForbidden();
         $role->permissions()->detach();
         $this->getJson('/conta/auditoria')->assertForbidden();
         $this->getJson('/conta/auditoria/'.$local->id.'/visualizar')->assertForbidden();
         $platform = User::factory()->create(['is_saas_admin' => true]);
-        $this->actingAs($platform)->getJson('/saas/auditoria?account='.$other->account_id.'&entity=person')->assertOk()->assertJsonFragment(['name' => 'Pessoa de outra conta']);
-        $this->getJson('/saas/auditoria/'.$foreign->id.'/visualizar')->assertOk()->assertJsonPath('technical.entity_id', $foreign->entity_id);
+        $this
+            ->actingAs($platform)
+            ->getJson('/saas/auditoria?account='.$other->account_id.'&entity=person')
+            ->assertOk()
+            ->assertJsonFragment(['name' => 'Pessoa de outra conta']);
+        $this
+            ->getJson('/saas/auditoria/'.$foreign->id.'/visualizar')
+            ->assertOk()
+            ->assertJsonPath('technical.entity_id', $foreign->entity_id);
     }
 
     public function test_secrets_and_photo_contents_never_enter_either_audit_view(): void
@@ -107,8 +139,18 @@ class AuditAndGuidanceTest extends TestCase
             $owner->profile_photo = 'private-photo-path';
             $owner->save();
         });
-        $r = AuditRecord::where('entity_type', 'user')->where('entity_id', $owner->id)->where('event', 'updated')->sole();
-        foreach (['PrivatePassword123', 'PrivateSecret', 'PrivateRecovery', 'private-photo-path', $owner->password, $owner->two_factor_secret] as $secret) {
+        $r = AuditRecord::where('entity_type', 'user')
+            ->where('entity_id', $owner->id)
+            ->where('event', 'updated')
+            ->sole();
+        foreach ([
+            'PrivatePassword123',
+            'PrivateSecret',
+            'PrivateRecovery',
+            'private-photo-path',
+            $owner->password,
+            $owner->two_factor_secret,
+        ] as $secret) {
             $this->assertStringNotContainsString($secret, $r->toJson());
             $this->getJson('/conta/auditoria/'.$r->id.'/visualizar')->assertOk()->assertDontSee($secret);
         }
@@ -120,7 +162,10 @@ class AuditAndGuidanceTest extends TestCase
     {
         $owner = $this->owner();
         $platform = User::factory()->create(['is_saas_admin' => true]);
-        $this->actingAs($platform)->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])->assertOk();
+        $this
+            ->actingAs($platform)
+            ->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])
+            ->assertOk();
         $this->postJson('/conta/pessoas', ['name' => 'Criada por inspeção'])->assertOk();
         $r = AuditRecord::where('entity_name', 'Criada por inspeção')->sole();
         $this->assertSame($platform->id, $r->actor_id);
@@ -129,7 +174,11 @@ class AuditAndGuidanceTest extends TestCase
         $this->assertSame('platform-account', $r->context);
         $this->postJson('/conta/inspecao/encerrar')->assertOk();
         foreach (['inspection-started', 'inspection-ended'] as $event) {
-            $this->assertDatabaseHas('audit_records', ['event' => $event, 'actor_id' => $platform->id, 'represented_user_id' => $owner->id]);
+            $this->assertDatabaseHas('audit_records', [
+                'event' => $event,
+                'actor_id' => $platform->id,
+                'represented_user_id' => $owner->id,
+            ]);
         }
         // The next ordinary request must not inherit the inspection context.
         $this->actingAs($owner)->postJson('/conta/pessoas', ['name' => 'Criada pela conta'])->assertOk();
@@ -152,7 +201,8 @@ class AuditAndGuidanceTest extends TestCase
             $this->getJson('/conta/auditoria/'.$record->id.'/visualizar')->assertOk()
                 ->assertJsonPath('changes.0.after', $label)->assertJsonPath('changes.0.before', null)
                 ->assertJsonPath('changes.1.before', 'read-only')->assertJsonPath('changes.1.after', 'edit')
-                ->assertJsonPath('changes.2.before', 'Pessoa física')->assertJsonPath('changes.2.after', 'Pessoa jurídica');
+                ->assertJsonPath('changes.2.before', 'Pessoa física')
+                ->assertJsonPath('changes.2.after', 'Pessoa jurídica');
             $this->assertSame($mode, $record->fresh()->changes['mode']['after']);
         }
         AuditLog::record('tag', 999, $owner->account_id, 'updated', 'Etiqueta', [
@@ -161,20 +211,41 @@ class AuditAndGuidanceTest extends TestCase
         ]);
         $record = AuditRecord::latest('id')->firstOrFail();
         $this->getJson('/conta/auditoria/'.$record->id.'/visualizar')->assertOk()
-            ->assertJsonPath('changes.0.after', 'Pessoas')->assertJsonPath('changes.1.before', 'Ativa')->assertJsonPath('changes.1.after', 'Inativa');
+            ->assertJsonPath('changes.0.after', 'Pessoas')
+            ->assertJsonPath('changes.1.before', 'Ativa')
+            ->assertJsonPath('changes.1.after', 'Inativa');
         $this->assertTrue($record->fresh()->changes['active']['before']);
     }
 
     public function test_help_search_and_direct_articles_enforce_context_and_permissions(): void
     {
         $owner = $this->owner();
-        $this->actingAs($owner)->getJson('/ajuda')->assertOk()->assertJsonFragment(['slug' => 'pessoas'])->assertJsonFragment(['slug' => 'central-de-ajuda'])->assertJsonMissing(['slug' => 'contas']);
+        $this
+            ->actingAs($owner)
+            ->getJson('/ajuda')
+            ->assertOk()
+            ->assertJsonFragment(['slug' => 'pessoas'])
+            ->assertJsonFragment(['slug' => 'central-de-ajuda'])
+            ->assertJsonMissing(['slug' => 'contas']);
         $this->getJson('/ajuda?search=etiqueta')->assertOk()->assertJsonFragment(['slug' => 'pessoas']);
-        $this->getJson('/ajuda/pessoas')->assertOk()->assertJsonPath('article.title', 'Pessoas e acesso de usuário')->assertJsonPath('article.html', fn ($html) => str_contains($html, '/ajuda/cargos-permissoes') && str_contains($html, 'id="cadastrar-uma-pessoa"'));
+        $this
+            ->getJson('/ajuda/pessoas')
+            ->assertOk()
+            ->assertJsonPath('article.title', 'Pessoas e acesso de usuário')
+            ->assertJsonPath(
+                'article.html',
+                fn ($html) => str_contains($html, '/ajuda/cargos-permissoes')
+                    && str_contains($html, 'id="cadastrar-uma-pessoa"'),
+            );
         $this->getJson('/ajuda/contas')->assertNotFound();
         $this->getJson('/ajuda?search=termoimpossivel')->assertOk()->assertJsonCount(0, 'articles');
         $platform = User::factory()->create(['is_saas_admin' => true]);
-        $this->actingAs($platform)->getJson('/ajuda')->assertOk()->assertJsonFragment(['slug' => 'contas'])->assertJsonMissing(['slug' => 'pessoas']);
+        $this
+            ->actingAs($platform)
+            ->getJson('/ajuda')
+            ->assertOk()
+            ->assertJsonFragment(['slug' => 'contas'])
+            ->assertJsonMissing(['slug' => 'pessoas']);
         $this->getJson('/ajuda/pessoas')->assertNotFound();
         $role = Role::create(['name' => 'Sem pessoas', 'account_id' => $owner->account_id]);
         $role->permissions()->sync(Permission::whereIn('slug', ['self.help.list', 'self.help.view'])->pluck('id'));
@@ -195,7 +266,11 @@ class AuditAndGuidanceTest extends TestCase
         $this->assertStringNotContainsString('<script', $article['html']);
         $this->assertStringNotContainsString('href="javascript:', $article['html']);
         $this->assertStringContainsString('id="uma-secao"', $article['html']);
-        $this->actingAs($owner)->getJson('/ajuda?search=telefone')->assertOk()->assertJsonFragment(['slug' => 'pessoas', 'anchor' => 'cadastrar-uma-pessoa']);
+        $this
+            ->actingAs($owner)
+            ->getJson('/ajuda?search=telefone')
+            ->assertOk()
+            ->assertJsonFragment(['slug' => 'pessoas', 'anchor' => 'cadastrar-uma-pessoa']);
         $this->getJson('/conta/auditoria?until=2030-01-01')->assertOk();
         $this->assertSame('sqlite', DB::connection()->getDriverName());
         $this->assertSame(':memory:', config('database.connections.sqlite.database'));

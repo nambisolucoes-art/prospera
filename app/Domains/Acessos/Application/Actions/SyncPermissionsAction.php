@@ -9,47 +9,102 @@ use App\Domains\Plataforma\Domain\Models\Client;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-final class SyncPermissionsAction
+final readonly class SyncPermissionsAction
 {
+    public function __construct(
+        private PermissionRegistry $registry,
+        private DefaultRolesAction $defaultRoles,
+    ) {}
+
     /** @return array{created:int, updated:int, deleted:int, total:int} */
     public function execute(bool $prune = false): array
     {
-        $definitions = app(PermissionRegistry::class)->discover();
+        $definitions = $this->registry->discover();
         if ($prune && ! $definitions) {
             throw new \RuntimeException('Nenhuma permissão descoberta. Remoção cancelada.');
         }
-        $deleted = 0;
         $created = 0;
         $updated = 0;
-        AuditLog::transaction(function () use ($definitions, $prune, &$created, &$updated, &$deleted) {
+        $deleted = 0;
+
+        AuditLog::transaction(function () use ($definitions, $prune, &$created, &$updated, &$deleted): void {
             $changes = [];
-            foreach ($definitions as $data) {
-                $p = Permission::firstOrNew(['slug' => $data['slug']]);
-                $new = ! $p->exists;
-                $p->fill([...$data, 'is_system' => true, 'account_id' => null]);
-                if ($p->isDirty()) {
-                    $changes[$data['slug']] = ['label' => $data['name'], 'before' => $new ? null : $p->getOriginal('name'), 'after' => $data['name']];
-                    $p->saveOrFail();
-                    $new ? $created++ : $updated++;
+
+            foreach ($definitions as $definition) {
+                $permission = Permission::firstOrNew(['slug' => $definition['slug']]);
+                $isNew = ! $permission->exists;
+
+                $permission->fill([...$definition, 'is_system' => true, 'account_id' => null]);
+
+                if (! $permission->isDirty()) {
+                    continue;
                 }
+
+                $changes[$definition['slug']] = [
+                    'label' => $definition['name'],
+                    'before' => $isNew ? null : $permission->getOriginal('name'),
+                    'after' => $definition['name'],
+                ];
+
+                $permission->saveOrFail();
+                $isNew ? $created++ : $updated++;
             }
+
             if ($prune) {
-                $obsolete = Permission::where('is_system', true)->whereNotIn('slug', array_column($definitions, 'slug'));
+                $obsolete = Permission::where('is_system', true)
+                    ->whereNotIn('slug', array_column($definitions, 'slug'));
+
                 foreach ((clone $obsolete)->get() as $permission) {
-                    $changes[$permission->slug] = ['label' => $permission->name, 'before' => $permission->name, 'after' => null];
+                    $changes[$permission->slug] = [
+                        'label' => $permission->name,
+                        'before' => $permission->name,
+                        'after' => null,
+                    ];
                 }
+
                 $deleted = $obsolete->delete();
             }
+
             $accountIds = Client::pluck('id')->all();
-            foreach ($accountIds as $id) {
-                app(DefaultRolesAction::class)->execute($id);
+
+            foreach ($accountIds as $accountId) {
+                $this->defaultRoles->execute($accountId);
             }
+
             if ($created || $updated || $deleted) {
-                AuditLog::record('permission-catalog', 0, null, 'catalog-synchronized', 'Catálogo de permissões', $changes);
-                DB::table('access_catalog_events')->insert(['operation_id' => (string) Str::uuid(), 'actor_id' => auth()->id(), 'scope' => 'platform', 'event' => 'permission-catalog.synchronized', 'changes' => json_encode(['created' => $created, 'updated' => $updated, 'deleted' => $deleted, 'account_ids' => $accountIds, 'slugs' => array_column($definitions, 'slug')], JSON_THROW_ON_ERROR), 'created_at' => now()]);
+                AuditLog::record(
+                    'permission-catalog',
+                    0,
+                    null,
+                    'catalog-synchronized',
+                    'Catálogo de permissões',
+                    $changes,
+                );
+
+                $summary = [
+                    'created' => $created,
+                    'updated' => $updated,
+                    'deleted' => $deleted,
+                    'account_ids' => $accountIds,
+                    'slugs' => array_column($definitions, 'slug'),
+                ];
+
+                DB::table('access_catalog_events')->insert([
+                    'operation_id' => (string) Str::uuid(),
+                    'actor_id' => auth()->id(),
+                    'scope' => 'platform',
+                    'event' => 'permission-catalog.synchronized',
+                    'changes' => json_encode($summary, JSON_THROW_ON_ERROR),
+                    'created_at' => now(),
+                ]);
             }
         });
 
-        return ['created' => $created, 'updated' => $updated, 'deleted' => $deleted, 'total' => count($definitions)];
+        return [
+            'created' => $created,
+            'updated' => $updated,
+            'deleted' => $deleted,
+            'total' => count($definitions),
+        ];
     }
 }

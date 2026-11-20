@@ -16,18 +16,33 @@ final class CheckAuditCommand extends Command
 
     public function handle(): int
     {
-        $errors = Schema::hasTable('audit_records') ? [] : ['A tabela central de auditoria não está disponível. Execute as migrações.'];
+        $errors = [];
         $checked = 0;
+
+        if (! Schema::hasTable('audit_records')) {
+            $errors[] = 'A tabela central de auditoria não está disponível. Execute as migrações.';
+        }
+
         foreach (File::allFiles(app_path()) as $file) {
             $path = $file->getPathname();
-            if ($file->getExtension() !== 'php' || (! str_contains($path, '/Domain/Models/') && ! str_contains($path, '/app/Models/'))) {
+            $isModelFile = str_contains($path, '/Domain/Models/') || str_contains($path, '/app/Models/');
+
+            if ($file->getExtension() !== 'php' || ! $isModelFile) {
                 continue;
             }
+
             $class = 'App\\'.str_replace('/', '\\', substr($path, strlen(app_path()) + 1, -4));
-            if (! class_exists($class) || ! is_subclass_of($class, Model::class) || (new \ReflectionClass($class))->isAbstract()) {
+
+            if (
+                ! class_exists($class)
+                || ! is_subclass_of($class, Model::class)
+                || (new \ReflectionClass($class))->isAbstract()
+            ) {
                 continue;
             }
+
             $excluded = config('audit.excluded_models', []);
+
             if (isset($excluded[$class]) && is_string($excluded[$class]) && trim($excluded[$class]) !== '') {
                 continue;
             }
@@ -50,7 +65,13 @@ final class CheckAuditCommand extends Command
                     $errors[] = $class.': justifique a exclusão de '.$field;
                 }
             }
-            $missing = array_diff(Schema::getColumnListing($model->getTable()), ['id', 'created_at', 'updated_at'], $fields, array_keys($ignored));
+            $missing = array_diff(
+                Schema::getColumnListing($model->getTable()),
+                ['id', 'created_at', 'updated_at'],
+                $fields,
+                array_keys($ignored),
+            );
+
             foreach ($missing as $field) {
                 $errors[] = $class.': campo sem cobertura: '.$field;
             }

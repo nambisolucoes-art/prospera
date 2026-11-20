@@ -17,7 +17,17 @@ final readonly class SaveTagData
             $input['name'] = trim($input['name']);
         }
 
-        return new self(Validator::validate($input, ['active' => ['sometimes', 'boolean'], 'name' => ['required', 'string', 'max:100', Rule::unique('tags')->where('account_id', $accountId)->where('module', 'people')->ignore($id)], 'module' => ['required', Rule::in(['people'])], 'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/']], [
+        $uniqueName = Rule::unique('tags')
+            ->where('account_id', $accountId)
+            ->where('module', 'people')
+            ->ignore($id);
+
+        $values = Validator::validate($input, [
+            'active' => ['sometimes', 'boolean'],
+            'name' => ['required', 'string', 'max:100', $uniqueName],
+            'module' => ['required', Rule::in(['people'])],
+            'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
+        ], [
             'active.boolean' => 'Selecione uma situação válida.',
             'name.required' => 'Informe o nome da etiqueta.',
             'name.string' => 'Informe um nome válido.',
@@ -27,6 +37,8 @@ final readonly class SaveTagData
             'module.in' => 'Selecione um módulo válido.',
             'color.required' => 'Informe a cor.',
             'color.regex' => 'Informe uma cor hexadecimal válida.',
-        ]));
+        ]);
+
+        return new self($values);
     }
 }

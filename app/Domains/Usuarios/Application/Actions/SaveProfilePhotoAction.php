@@ -15,6 +15,7 @@ final class SaveProfilePhotoAction
     public function execute(User $user, ProfilePhotoData $data): void
     {
         $source = @imagecreatefromstring($data->photo->getContent());
+
         if ($source === false) {
             throw ValidationException::withMessages(['photo' => 'Não foi possível ler a imagem.']);
         }
@@ -26,9 +27,23 @@ final class SaveProfilePhotoAction
         $avatar = imagecreatetruecolor($size, $size);
         imagealphablending($avatar, false);
         imagesavealpha($avatar, true);
-        imagecopyresampled($avatar, $source, 0, 0, intdiv($width - $crop, 2), intdiv($height - $crop, 2), $size, $size, $crop, $crop);
+
+        // Recorta o quadrado central e reduz para no máximo 320 px.
+        imagecopyresampled(
+            $avatar,
+            $source,
+            0,
+            0,
+            intdiv($width - $crop, 2),
+            intdiv($height - $crop, 2),
+            $size,
+            $size,
+            $crop,
+            $crop,
+        );
 
         $stream = fopen('php://temp', 'w+b');
+
         if ($stream === false) {
             throw new RuntimeException('Não foi possível preparar a foto do perfil.');
         }
@@ -43,6 +58,7 @@ final class SaveProfilePhotoAction
             }
 
             rewind($stream);
+
             if (! $disk->put($path, $stream)) {
                 throw new RuntimeException('Não foi possível armazenar a foto do perfil.');
             }

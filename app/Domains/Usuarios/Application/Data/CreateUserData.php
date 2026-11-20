@@ -15,8 +15,12 @@ final readonly class CreateUserData
 
     public string $email;
 
-    public function __construct(string $name, string $email, public PasswordSetup $setup, #[\SensitiveParameter] public ?string $password)
-    {
+    public function __construct(
+        string $name,
+        string $email,
+        public PasswordSetup $setup,
+        #[\SensitiveParameter] public ?string $password,
+    ) {
         $this->name = trim($name);
         $this->email = Str::lower(trim($email));
     }
@@ -75,7 +79,14 @@ final readonly class CreateUserData
             $prefix.'name' => ['required', 'string', 'max:255'],
             $prefix.'email' => ['required', 'email', 'max:255'],
             $mode => ['required', Rule::enum(PasswordSetup::class)],
-            $prefix.'password' => ["exclude_unless:$mode,manual", 'required', 'string', 'max:72', Password::default(), 'confirmed'],
+            $prefix.'password' => [
+                "exclude_unless:$mode,manual",
+                'required',
+                'string',
+                'max:72',
+                Password::default(),
+                'confirmed',
+            ],
             $prefix.'password_confirmation' => ["exclude_unless:$mode,manual", 'required', 'string'],
         ];
     }

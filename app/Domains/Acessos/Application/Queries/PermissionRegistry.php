@@ -36,8 +36,17 @@ final class PermissionRegistry
         ksort($slugs);
         $definitions = [];
         foreach (array_keys($slugs) as $slug) {
-            [$scope,$module,$action] = explode('.', $slug);
-            $definitions[] = ['slug' => $slug, 'scope' => $scope, 'module' => $module, 'name' => (config('permissions.actions.'.$action) ?? Str::headline($action)).': '.(config('permissions.modules.'.$module) ?? Str::headline($module))];
+            [$scope, $module, $action] = explode('.', $slug);
+
+            $actionName = config('permissions.actions.'.$action) ?? Str::headline($action);
+            $moduleName = config('permissions.modules.'.$module) ?? Str::headline($module);
+
+            $definitions[] = [
+                'slug' => $slug,
+                'scope' => $scope,
+                'module' => $module,
+                'name' => $actionName.': '.$moduleName,
+            ];
         }
 
         return $definitions;

@@ -44,7 +44,15 @@ return new class extends Migration
             $t->timestamp('created_at');
         });
         foreach (DB::table('clients')->pluck('id') as $id) {
-            DB::table('tags')->insert(['account_id' => $id, 'module' => 'people', 'name' => 'Usuário', 'system_key' => 'user', 'color' => '#3563e9', 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('tags')->insert([
+                'account_id' => $id,
+                'module' => 'people',
+                'name' => 'Usuário',
+                'system_key' => 'user',
+                'color' => '#3563e9',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
         foreach (DB::table('users')->whereNotNull('account_id')->get() as $u) {
             $tag = DB::table('tags')->where('account_id', $u->account_id)->where('system_key', 'user')->value('id');

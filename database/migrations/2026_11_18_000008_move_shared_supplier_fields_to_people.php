@@ -7,7 +7,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    private const FIELDS = ['person_type', 'document', 'trade_name', 'state_registration', 'municipal_registration', 'contact_name', 'whatsapp', 'website', 'address'];
+    private const FIELDS = [
+        'person_type',
+        'document',
+        'trade_name',
+        'state_registration',
+        'municipal_registration',
+        'contact_name',
+        'whatsapp',
+        'website',
+        'address',
+    ];
 
     public function up(): void
     {
@@ -20,7 +30,10 @@ return new class extends Migration
             foreach (self::FIELDS as $field) {
                 $values[$field] = $supplier->{$field};
             }
-            DB::table('people')->where('id', $supplier->person_id)->where('account_id', $supplier->account_id)->update($values);
+            DB::table('people')
+                ->where('id', $supplier->person_id)
+                ->where('account_id', $supplier->account_id)
+                ->update($values);
         }
         Schema::table('suppliers', function (Blueprint $table) {
             $table->dropUnique(['account_id', 'document']);
@@ -35,7 +48,10 @@ return new class extends Migration
             $table->unique(['account_id', 'document']);
         });
         foreach (DB::table('suppliers')->get() as $supplier) {
-            $person = DB::table('people')->where('id', $supplier->person_id)->where('account_id', $supplier->account_id)->first();
+            $person = DB::table('people')
+                ->where('id', $supplier->person_id)
+                ->where('account_id', $supplier->account_id)
+                ->first();
             if (! $person) {
                 continue;
             }

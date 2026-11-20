@@ -15,7 +15,9 @@ final class EnsureUserAccessEnabled
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return $request->expectsJson() ? response()->json(['message' => 'Acesso revogado.'], 401) : redirect('/login');
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Acesso revogado.'], 401)
+                : redirect('/login');
         }
 
         return $next($request);

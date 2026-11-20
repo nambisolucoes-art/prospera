@@ -4,6 +4,7 @@ namespace App\Domains\Etiquetas\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
+use App\Domains\Etiquetas\Domain\DTOs\TagDTO;
 use App\Domains\Pessoas\Domain\Models\Person;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -35,7 +36,32 @@ class Tag extends Model implements Auditable
     /** @return array<string,string> */
     public static function auditedFields(): array
     {
-        return ['active' => 'Ativa', 'name' => 'Nome', 'module' => 'Módulo', 'color' => 'Cor', 'account_id' => 'Conta', 'system_key' => 'Etiqueta especial'];
+        return [
+            'active' => 'Ativa',
+            'name' => 'Nome',
+            'module' => 'Módulo',
+            'color' => 'Cor',
+            'account_id' => 'Conta',
+            'system_key' => 'Etiqueta especial',
+        ];
+    }
+
+    public static function register(TagDTO $data, int $accountId): self
+    {
+        $tag = new self(['account_id' => $accountId]);
+        $tag->revise($data);
+
+        return $tag;
+    }
+
+    public function revise(TagDTO $data): void
+    {
+        $this->fill([
+            'name' => $data->name,
+            'module' => $data->module,
+            'color' => $data->color,
+            'active' => $data->active,
+        ]);
     }
 
     public static function supplierTag(int $accountId): self
@@ -50,21 +76,42 @@ class Tag extends Model implements Auditable
 
     private static function specialTag(int $accountId, string $key, string $label, string $color): self
     {
-        $existing = self::where('account_id', $accountId)->where('module', 'people')->where('system_key', $key)->first();
+        $existing = self::where('account_id', $accountId)
+            ->where('module', 'people')
+            ->where('system_key', $key)
+            ->first();
+
         if ($existing) {
             return $existing;
         }
+
+        // Uma etiqueta comum com o mesmo nome recebe um sufixo para não colidir.
         $name = $label;
         $suffix = 1;
-        while (self::where('account_id', $accountId)->where('module', 'people')->where('name', $name)->exists()) {
+
+        while (self::nameInUse($accountId, $name)) {
             $name = $label.' (especial '.$suffix++.')';
         }
 
-        return self::firstOrCreate(['account_id' => $accountId, 'module' => 'people', 'system_key' => $key], ['name' => $name, 'color' => $color, 'active' => true]);
+        return self::firstOrCreate(
+            ['account_id' => $accountId, 'module' => 'people', 'system_key' => $key],
+            ['name' => $name, 'color' => $color, 'active' => true],
+        );
+    }
+
+    private static function nameInUse(int $accountId, string $name): bool
+    {
+        return self::where('account_id', $accountId)
+            ->where('module', 'people')
+            ->where('name', $name)
+            ->exists();
     }
 
     public static function userTag(int $accountId): self
     {
-        return self::firstOrCreate(['account_id' => $accountId, 'module' => 'people', 'system_key' => 'user'], ['name' => 'Usuário', 'color' => '#3563e9']);
+        return self::firstOrCreate(
+            ['account_id' => $accountId, 'module' => 'people', 'system_key' => 'user'],
+            ['name' => 'Usuário', 'color' => '#3563e9'],
+        );
     }
 }

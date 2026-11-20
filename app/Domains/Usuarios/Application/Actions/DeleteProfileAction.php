@@ -13,6 +13,7 @@ final class DeleteProfileAction
     public function execute(DeleteProfileData $data, Session $session): void
     {
         Auth::logout();
+
         $photo = $data->user->getConnection()->transaction(function () use ($data) {
             $user = User::query()->lockForUpdate()->findOrFail($data->user->id);
             $photo = $user->profile_photo;
@@ -20,6 +21,7 @@ final class DeleteProfileAction
 
             return $photo;
         });
+
         $session->invalidate();
         $session->regenerateToken();
 

@@ -6,7 +6,12 @@ use App\Support\PageSize;
 
 final readonly class TagFiltersData
 {
-    private function __construct(public string $search, public string $module, public ?bool $active, public int $pageSize) {}
+    private function __construct(
+        public string $search,
+        public string $module,
+        public ?bool $active,
+        public int $pageSize,
+    ) {}
 
     /** @param array<string, mixed> $input */
     public static function fromInput(array $input): self
@@ -30,10 +35,16 @@ final readonly class TagFiltersData
     /** @return array{search: string, module: string, status: string} */
     public function toArray(): array
     {
-        return ['search' => $this->search, 'module' => $this->module, 'status' => match ($this->active) {
+        $status = match ($this->active) {
             true => 'active',
             false => 'inactive',
             null => '',
-        }];
+        };
+
+        return [
+            'search' => $this->search,
+            'module' => $this->module,
+            'status' => $status,
+        ];
     }
 }

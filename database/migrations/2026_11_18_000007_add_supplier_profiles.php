@@ -29,17 +29,35 @@ return new class extends Migration
         foreach (DB::table('clients')->pluck('id') as $id) {
             $name = 'Fornecedor';
             $suffix = 1;
-            while (DB::table('tags')->where('account_id', $id)->where('module', 'people')->where('name', $name)->exists()) {
+            while (
+                DB::table('tags')
+                    ->where('account_id', $id)
+                    ->where('module', 'people')
+                    ->where('name', $name)
+                    ->exists()
+            ) {
                 $name = 'Fornecedor (especial '.$suffix++.')';
             }
-            DB::table('tags')->insert(['account_id' => $id, 'module' => 'people', 'name' => $name, 'color' => '#7266ba', 'system_key' => 'supplier', 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('tags')->insert([
+                'account_id' => $id,
+                'module' => 'people',
+                'name' => $name,
+                'color' => '#7266ba',
+                'system_key' => 'supplier',
+                'active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
     }
 
     public function down(): void
     {
         // Keep definitions with existing links rather than silently discarding business data.
-        DB::table('tags')->where('system_key', 'supplier')->whereNotIn('id', DB::table('person_tag')->select('tag_id'))->delete();
+        DB::table('tags')
+            ->where('system_key', 'supplier')
+            ->whereNotIn('id', DB::table('person_tag')->select('tag_id'))
+            ->delete();
         Schema::dropIfExists('suppliers');
     }
 };

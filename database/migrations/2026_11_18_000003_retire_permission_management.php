@@ -16,9 +16,14 @@ return new class extends Migration
             }
             $query->delete();
             DB::table('access_catalog_events')->insert([
-                'operation_id' => (string) Str::uuid(), 'actor_id' => null, 'scope' => 'platform',
+                'operation_id' => (string) Str::uuid(),
+                'actor_id' => null,
+                'scope' => 'platform',
                 'event' => 'permission-management.retired',
-                'changes' => json_encode(['removed_slugs' => $slugs, 'account_ids' => DB::table('clients')->pluck('id')->all()], JSON_THROW_ON_ERROR),
+                'changes' => json_encode([
+                    'removed_slugs' => $slugs,
+                    'account_ids' => DB::table('clients')->pluck('id')->all(),
+                ], JSON_THROW_ON_ERROR),
                 'created_at' => now(),
             ]);
         });

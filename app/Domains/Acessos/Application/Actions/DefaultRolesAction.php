@@ -4,24 +4,47 @@ namespace App\Domains\Acessos\Application\Actions;
 
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
-use App\Domains\Auditoria\Application\Actions\AuditLog;
 
 final class DefaultRolesAction
 {
     /** @return array{Role, Role} */
     public function execute(int $accountId): array
     {
-        $admin = Role::firstOrCreate(['account_id' => $accountId, 'system_key' => 'administrator'], ['name' => 'Administrador da conta']);
-        $member = Role::firstOrCreate(['account_id' => $accountId, 'system_key' => 'member'], ['name' => 'Usuário']);
-        $adminBefore = $admin->permissions()->pluck('permissions.id')->all();
-        $memberBefore = $member->permissions()->pluck('permissions.id')->all();
-        $admin->permissions()->syncWithoutDetaching(Permission::where('is_system', true)->whereNull('account_id')->whereIn('scope', ['account', 'self'])->pluck('id')->all());
+        $admin = Role::firstOrCreate(
+            ['account_id' => $accountId, 'system_key' => 'administrator'],
+            ['name' => 'Administrador da conta'],
+        );
+        $member = Role::firstOrCreate(
+            ['account_id' => $accountId, 'system_key' => 'member'],
+            ['name' => 'Usuário'],
+        );
+
+        $adminBefore = $admin->permissionIds();
+        $memberBefore = $member->permissionIds();
+
+        // O administrador recebe toda permissão de conta e pessoal, inclusive as novas.
+        $accountAndSelfIds = Permission::where('is_system', true)
+            ->whereNull('account_id')
+            ->whereIn('scope', ['account', 'self'])
+            ->pluck('id')
+            ->all();
+
+        $admin->permissions()->syncWithoutDetaching($accountAndSelfIds);
+
         if ($member->wasRecentlyCreated) {
-            $member->permissions()->sync(Permission::where('is_system', true)->whereNull('account_id')->where(fn ($q) => $q->where('scope', 'self')->orWhereIn('slug', ['account.dashboard.view', 'account.points.list']))->pluck('id')->all());
+            $memberIds = Permission::where('is_system', true)
+                ->whereNull('account_id')
+                ->where(fn ($query) => $query
+                    ->where('scope', 'self')
+                    ->orWhereIn('slug', ['account.dashboard.view', 'account.points.list']))
+                ->pluck('id')
+                ->all();
+
+            $member->permissions()->sync($memberIds);
         }
 
-        AuditLog::relationship($admin, 'permission_ids', $adminBefore, $admin->permissions()->pluck('permissions.id')->all(), 'Permissões');
-        AuditLog::relationship($member, 'permission_ids', $memberBefore, $member->permissions()->pluck('permissions.id')->all(), 'Permissões');
+        $admin->recordAuditFieldChange('permission_ids', $adminBefore, $admin->permissionIds(), 'Permissões');
+        $member->recordAuditFieldChange('permission_ids', $memberBefore, $member->permissionIds(), 'Permissões');
 
         return [$admin, $member];
     }

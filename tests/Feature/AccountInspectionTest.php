@@ -55,19 +55,25 @@ class AccountInspectionTest extends TestCase
             ->post(route('saas.accounts.inspection.start', $account), ['user_id' => $owner->id, 'mode' => 'read-only'])
             ->assertRedirect(route('account.dashboard'))->assertSessionMissing('auth.password_confirmed_at');
         $this->assertAuthenticatedAs($owner);
-        $this->getJson(route('account.dashboard'))->assertJsonPath('auth.inspection_mode', 'read-only')->assertJsonPath('auth.user.id', $owner->id)
+        $this
+            ->getJson(route('account.dashboard'))
+            ->assertJsonPath('auth.inspection_mode', 'read-only')
+            ->assertJsonPath('auth.user.id', $owner->id)
             ->assertJsonPath('account.name', 'Conta ativa');
         $this->getJson(route('two-factor.secret-key'))->assertForbidden();
         $this->post(route('account.points.store'), ['name' => 'Ponto de teste', 'active' => '1'])->assertForbidden();
         $this->assertDatabaseMissing('points', ['name' => 'Ponto de teste']);
         $this->get(route('saas.users.index'))->assertForbidden();
 
-        $this->post(route('account.inspection.end'))->assertRedirect(route('dashboard'))->assertSessionMissing('account_inspection');
+        $this
+            ->post(route('account.inspection.end'))
+            ->assertRedirect(route('dashboard'))
+            ->assertSessionMissing('account_inspection');
         $this->assertAuthenticatedAs($platform);
         $this->post(route('account.inspection.end'))->assertForbidden();
     }
 
-    public function test_edit_inspection_uses_the_selected_users_permissions_and_keeps_personal_settings_protected(): void
+    public function test_edit_inspection_uses_target_permissions_and_protects_personal_settings(): void
     {
         $account = Client::query()->create(['name' => 'Conta ativa', 'active' => true]);
         $platform = User::factory()->create(['is_saas_admin' => true]);

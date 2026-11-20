@@ -28,7 +28,13 @@ return new class extends Migration
             $table->boolean('is_account_admin')->default(false);
         });
 
-        DB::table('users')->select(['id', 'name', 'email', 'created_at', 'updated_at'])->chunkById(500, function ($users) {
+        DB::table('users')->select([
+            'id',
+            'name',
+            'email',
+            'created_at',
+            'updated_at',
+        ])->chunkById(500, function ($users) {
             foreach ($users as $user) {
                 $id = DB::table('people')->insertGetId([
                     'name' => $user->name,

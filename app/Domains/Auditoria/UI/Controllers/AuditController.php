@@ -14,25 +14,95 @@ use Illuminate\View\View;
 
 final class AuditController
 {
-    public function index(Request $r, AuditQuery $query): JsonResponse|View
+    public function index(Request $request, AuditQuery $query): JsonResponse|View
     {
-        $platform = $r->is('saas/*');
-        $user = $r->user();
-        $f = AuditFilterData::fromInput($r->query(), $platform)->values;
-        $scope = $query->scoped($user, $platform);
-        $actors = (clone $scope)->whereNotNull('actor_id')->select('actor_id', 'actor_name')->distinct()->orderBy('actor_name')->get()->map(fn ($r) => ['value' => (string) $r->actor_id, 'label' => $r->actor_name])->unique('value')->values();
-        $entities = (clone $scope)->distinct()->pluck('entity_type')->map(fn ($v) => ['value' => $v, 'label' => config('audit.entities.'.$v, $v)])->sortBy('label')->values();
-        $events = (clone $scope)->distinct()->pluck('event')->map(fn ($v) => ['value' => $v, 'label' => config('audit.events.'.$v, $v)])->sortBy('label')->values();
+        $platform = $request->is('saas/*');
+        $filters = AuditFilterData::fromInput($request->query(), $platform)->values;
+        $scope = $query->scoped($request->user(), $platform);
 
-        return ApiPage::respond(['records' => $query->filter($scope, $f)->orderByDesc('created_at')->orderByDesc('id')->paginate(PageSize::fromInput($r->query('per_page')))->withQueryString()->through(fn ($v) => $query->summary($v)), 'filters' => $f, 'options' => ['actors' => $actors, 'entities' => $entities, 'events' => $events, 'accounts' => $platform ? Client::orderBy('name')->get(['id', 'name'])->map(fn ($v) => ['value' => (string) $v->id, 'label' => $v->name]) : []], 'platform' => $platform]);
+        // As opções de filtro usam a mesma consulta com escopo da listagem.
+        $actors = (clone $scope)
+            ->whereNotNull('actor_id')
+            ->select('actor_id', 'actor_name')
+            ->distinct()
+            ->orderBy('actor_name')
+            ->get()
+            ->map(fn ($record) => ['value' => (string) $record->actor_id, 'label' => $record->actor_name])
+            ->unique('value')
+            ->values();
+
+        $entities = (clone $scope)
+            ->distinct()
+            ->pluck('entity_type')
+            ->map(fn ($type) => ['value' => $type, 'label' => config('audit.entities.'.$type, $type)])
+            ->sortBy('label')
+            ->values();
+
+        $events = (clone $scope)
+            ->distinct()
+            ->pluck('event')
+            ->map(fn ($event) => ['value' => $event, 'label' => config('audit.events.'.$event, $event)])
+            ->sortBy('label')
+            ->values();
+
+        $accounts = $platform
+            ? Client::orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn ($account) => ['value' => (string) $account->id, 'label' => $account->name])
+            : [];
+
+        $records = $query->filter($scope, $filters)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(PageSize::fromInput($request->query('per_page')))
+            ->withQueryString()
+            ->through(fn ($record) => $query->summary($record));
+
+        return ApiPage::respond([
+            'records' => $records,
+            'filters' => $filters,
+            'options' => [
+                'actors' => $actors,
+                'entities' => $entities,
+                'events' => $events,
+                'accounts' => $accounts,
+            ],
+            'platform' => $platform,
+        ]);
     }
 
-    public function show(Request $r, AuditQuery $query, int $recordId, AuditValueFormatter $formatter): JsonResponse
-    {
-        $platform = $r->is('saas/*');
-        $record = $query->scoped($r->user(), $platform)->findOrFail($recordId);
-        $technical = $platform ? $r->user()->can('platform.audit.technical') : $r->user()->can('account.audit.technical');
+    public function show(
+        Request $request,
+        AuditQuery $query,
+        int $recordId,
+        AuditValueFormatter $formatter,
+    ): JsonResponse {
+        $platform = $request->is('saas/*');
+        $record = $query->scoped($request->user(), $platform)->findOrFail($recordId);
 
-        return response()->json([...$query->summary($record), 'changes' => $formatter->changes($record), 'technical' => $technical ? $record->only(['operation_id', 'entity_type', 'entity_id', 'actor_id', 'account_id', 'context', 'represented_user_id']) : null], headers: ['Cache-Control' => 'private, no-store']);
+        $technical = $platform
+            ? $request->user()->can('platform.audit.technical')
+            : $request->user()->can('account.audit.technical');
+
+        $technicalData = $technical
+            ? $record->only([
+                'operation_id',
+                'entity_type',
+                'entity_id',
+                'actor_id',
+                'account_id',
+                'context',
+                'represented_user_id',
+            ])
+            : null;
+
+        return response()->json(
+            [
+                ...$query->summary($record),
+                'changes' => $formatter->changes($record),
+                'technical' => $technicalData,
+            ],
+            headers: ['Cache-Control' => 'private, no-store'],
+        );
     }
 }

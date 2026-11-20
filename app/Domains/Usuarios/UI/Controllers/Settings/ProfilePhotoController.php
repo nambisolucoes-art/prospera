@@ -34,16 +34,24 @@ final class ProfilePhotoController extends Controller
         return $this->image($user, $version);
     }
 
-    public function showDirectory(Request $request, UserDirectoryQuery $directory, string $userId, string $version): StreamedResponse
-    {
+    public function showDirectory(
+        Request $request,
+        UserDirectoryQuery $directory,
+        string $userId,
+        string $version,
+    ): StreamedResponse {
         $account = $request->routeIs('account.users.*') ? $request->user()->account()->firstOrFail() : null;
         $user = $directory->findWithPhoto($account, (int) $userId, $version);
 
         return $this->image($user, $version);
     }
 
-    public function showInspection(Client $client, AccountInspectionUsersQuery $users, string $userId, string $version): StreamedResponse
-    {
+    public function showInspection(
+        Client $client,
+        AccountInspectionUsersQuery $users,
+        string $userId,
+        string $version,
+    ): StreamedResponse {
         abort_unless($client->active, 404);
         $user = $users->find($client, (int) $userId);
         abort_unless($user !== null && $user->profile_photo === $version, 404);

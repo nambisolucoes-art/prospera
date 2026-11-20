@@ -24,9 +24,12 @@ final class AuditContext
         $this->operationId ??= (string) Str::uuid();
         $user = $request->user();
         $inspection = $request->hasSession() ? AccountInspectionSession::current($request->session()) : null;
+
         if ($inspection) {
+            $administratorName = User::whereKey($inspection->administratorId)->value('name');
+
             $this->actorId = $inspection->administratorId;
-            $this->actorName = User::whereKey($inspection->administratorId)->value('name') ?? 'Administrador da plataforma';
+            $this->actorName = $administratorName ?? 'Administrador da plataforma';
             $this->representedUserId = $inspection->userId;
             $this->context = 'platform-account';
         } elseif ($user) {

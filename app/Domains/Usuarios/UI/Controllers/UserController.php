@@ -49,8 +49,11 @@ final class UserController
         return ApiPage::respond(['tenant' => false]);
     }
 
-    public function store(Request $request, CreateUserAction $create, SendUserInvitationAction $invite): RedirectResponse
-    {
+    public function store(
+        Request $request,
+        CreateUserAction $create,
+        SendUserInvitationAction $invite,
+    ): RedirectResponse {
         $tenant = $request->routeIs('account.users.*');
         $data = ProvisionUserData::fromInput($request->all(), $tenant, $tenant ? $request->user()->account_id : null);
         $account = $tenant ? $request->user()->account()->where('active', true)->firstOrFail() : null;

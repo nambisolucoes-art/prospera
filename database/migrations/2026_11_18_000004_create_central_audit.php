@@ -33,21 +33,52 @@ return new class extends Migration
             $t->index(['entity_type', 'event']);
         });
         foreach (['directory_audit_events', 'access_catalog_events'] as $table) {
-            DB::table($table)->orderBy('id')->chunkById(200, function ($rows) use ($table) {
+            $legacyFields = [
+                'name',
+                'email',
+                'phone',
+                'module',
+                'color',
+                'system_key',
+                'permission_ids',
+                'tag_ids',
+                'role_id',
+                'person_id',
+                'user_id',
+            ];
+
+            DB::table($table)->orderBy('id')->chunkById(200, function ($rows) use ($table, $legacyFields) {
                 foreach ($rows as $row) {
                     $old = json_decode($row->changes, true) ?? [];
                     $changes = [];
                     $before = $old['before'] ?? [];
                     $after = $old['after'] ?? [];
-                    foreach (array_unique([...array_keys(is_array($before) ? $before : []), ...array_keys(is_array($after) ? $after : [])]) as $key) {
-                        if (! in_array($key, ['name', 'email', 'phone', 'module', 'color', 'system_key', 'permission_ids', 'tag_ids', 'role_id', 'person_id', 'user_id'], true)) {
+                    $keys = array_unique([
+                        ...array_keys(is_array($before) ? $before : []),
+                        ...array_keys(is_array($after) ? $after : []),
+                    ]);
+
+                    foreach ($keys as $key) {
+                        if (! in_array($key, $legacyFields, true)) {
                             continue;
-                        }$changes[$key] = ['label' => Str::headline($key), 'before' => $before[$key] ?? null, 'after' => $after[$key] ?? null];
+                        }
+
+                        $changes[$key] = [
+                            'label' => Str::headline($key),
+                            'before' => $before[$key] ?? null,
+                            'after' => $after[$key] ?? null,
+                        ];
                     }
                     foreach ($old['changed_fields'] ?? [] as $key) {
-                        if (! in_array($key, ['name', 'email', 'phone', 'module', 'color', 'system_key', 'permission_ids', 'tag_ids', 'role_id', 'person_id', 'user_id'], true)) {
+                        if (! in_array($key, $legacyFields, true)) {
                             continue;
-                        }$changes[$key] = ['label' => Str::headline($key), 'before' => 'Valor não registrado no histórico anterior', 'after' => 'Campo alterado'];
+                        }
+
+                        $changes[$key] = [
+                            'label' => Str::headline($key),
+                            'before' => 'Valor não registrado no histórico anterior',
+                            'after' => 'Campo alterado',
+                        ];
                     }
                     $actor = $row->actor_id ? DB::table('users')->where('id', $row->actor_id)->value('name') : null;
                     $type = $row->entity_type ?? 'permission-catalog';
@@ -55,8 +86,24 @@ return new class extends Migration
                     $accountId = $row->account_id ?? null;
                     $events = ['created' => 'created', 'updated' => 'updated', 'role-updated' => 'updated'];
                     $suffix = Str::afterLast($row->event, '.');
-                    $event = $events[$suffix] ?? ($table === 'access_catalog_events' ? 'catalog-synchronized' : 'updated');
-                    DB::table('audit_records')->insert(['operation_id' => $row->operation_id, 'actor_id' => $row->actor_id, 'actor_name' => $actor ?? ($row->actor_id ? 'Usuário #'.$row->actor_id : 'Sistema'), 'account_id' => $accountId, 'context' => $table === 'access_catalog_events' ? 'system' : 'account', 'represented_user_id' => null, 'entity_type' => $type, 'entity_id' => $id, 'entity_name' => (config('audit.entities.'.$type) ?? $type).' #'.$id, 'event' => $event, 'changes' => json_encode($changes, JSON_THROW_ON_ERROR), 'created_at' => $row->created_at, 'legacy_key' => $table.':'.$row->id]);
+                    $defaultEvent = $table === 'access_catalog_events' ? 'catalog-synchronized' : 'updated';
+                    $event = $events[$suffix] ?? $defaultEvent;
+
+                    DB::table('audit_records')->insert([
+                        'operation_id' => $row->operation_id,
+                        'actor_id' => $row->actor_id,
+                        'actor_name' => $actor ?? ($row->actor_id ? 'Usuário #'.$row->actor_id : 'Sistema'),
+                        'account_id' => $accountId,
+                        'context' => $table === 'access_catalog_events' ? 'system' : 'account',
+                        'represented_user_id' => null,
+                        'entity_type' => $type,
+                        'entity_id' => $id,
+                        'entity_name' => (config('audit.entities.'.$type) ?? $type).' #'.$id,
+                        'event' => $event,
+                        'changes' => json_encode($changes, JSON_THROW_ON_ERROR),
+                        'created_at' => $row->created_at,
+                        'legacy_key' => $table.':'.$row->id,
+                    ]);
                 }
             });
         }
@@ -65,7 +112,8 @@ return new class extends Migration
         foreach (Role::all() as $role) {
             $before = $role->permissions()->pluck('permissions.id')->all();
             $role->permissions()->syncWithoutDetaching($help);
-            AuditLog::relationship($role, 'permission_ids', $before, $role->permissions()->pluck('permissions.id')->all(), 'Permissões');
+            $after = $role->permissions()->pluck('permissions.id')->all();
+            AuditLog::relationship($role, 'permission_ids', $before, $after, 'Permissões');
         }
     }
 

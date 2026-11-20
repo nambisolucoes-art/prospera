@@ -13,6 +13,7 @@ use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
 
 final class ClientController
@@ -32,7 +33,10 @@ final class ClientController
         abort_unless($request->user()->can('platform.accounts.list'), 403);
         $filters = AccountFiltersData::fromInput($request->query());
 
-        return ApiPage::respond(['accounts' => $directory->list($filters), 'search' => $filters->search]);
+        return ApiPage::respond([
+            'accounts' => $directory->list($filters),
+            'search' => $filters->search,
+        ]);
     }
 
     public function create(): JsonResponse|View
@@ -52,30 +56,60 @@ final class ClientController
 
     public function preview(Client $client): JsonResponse
     {
-        $details = $client->details ?? [];
+        $details = Arr::only($client->details ?? [], [
+            'trade_name',
+            'phone',
+            'whatsapp',
+            'phones',
+            'address',
+            'additional_phones',
+            'additional_emails',
+        ]);
+
+        $administrator = $client->users()
+            ->where('is_account_admin', true)
+            ->orderBy('id')
+            ->first(['name', 'email']);
 
         return response()->json([
             ...$client->only(['id', 'name', 'document', 'person_type', 'active', 'plan', 'email']),
-            'details' => array_intersect_key($details, array_flip(['trade_name', 'phone', 'whatsapp', 'phones', 'address', 'additional_phones', 'additional_emails'])),
-            'administrator' => $client->users()->where('is_account_admin', true)->orderBy('id')->first(['name', 'email']),
+            'details' => $details,
+            'administrator' => $administrator,
         ]);
     }
 
     public function accountDashboard(Request $request): JsonResponse|View|RedirectResponse
     {
         if (! $request->user()->can('account.dashboard.view')) {
-            foreach (['account.people.list' => '/conta/pessoas', 'account.tags.list' => '/conta/etiquetas', 'account.roles.list' => '/conta/cargos', 'account.people.create' => '/conta/pessoas/cadastrar', 'account.tags.create' => '/conta/etiquetas/cadastrar', 'account.roles.create' => '/conta/cargos/cadastrar', 'self.profile.view' => '/settings/profile'] as $ability => $path) {
+            // Sem acesso ao painel, a pessoa vai para a primeira tela que pode abrir.
+            $fallbacks = [
+                'account.people.list' => '/conta/pessoas',
+                'account.tags.list' => '/conta/etiquetas',
+                'account.roles.list' => '/conta/cargos',
+                'account.people.create' => '/conta/pessoas/cadastrar',
+                'account.tags.create' => '/conta/etiquetas/cadastrar',
+                'account.roles.create' => '/conta/cargos/cadastrar',
+                'self.profile.view' => '/settings/profile',
+            ];
+
+            foreach ($fallbacks as $ability => $path) {
                 if ($request->user()->can($ability)) {
                     return redirect($path);
                 }
             }
+
             abort(403);
         }
+
         $account = $this->currentAccount($request);
+
+        $points = $request->user()->can('account.points.list')
+            ? $account->points()->orderBy('name')->orderBy('id')->get(['id', 'name', 'active'])
+            : [];
 
         return ApiPage::respond([
             'account' => $account->only(['name']),
-            'points' => $request->user()->can('account.points.list') ? $account->points()->orderBy('name')->orderBy('id')->get(['id', 'name', 'active']) : [],
+            'points' => $points,
         ]);
     }
 

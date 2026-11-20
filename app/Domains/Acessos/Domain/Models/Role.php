@@ -24,6 +24,15 @@ class Role extends Model implements Auditable
         return ['name' => 'Nome', 'account_id' => 'Conta', 'system_key' => 'Cargo inicial'];
     }
 
+    /** @return array<int,int> */
+    public function permissionIds(): array
+    {
+        return $this->permissions()
+            ->orderBy('permissions.id')
+            ->pluck('permissions.id')
+            ->all();
+    }
+
     /** @return BelongsToMany<Permission, $this> */
     public function permissions(): BelongsToMany
     {

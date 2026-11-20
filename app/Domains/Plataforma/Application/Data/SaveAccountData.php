@@ -11,17 +11,30 @@ use Illuminate\Validation\Rule;
 
 final readonly class SaveAccountData
 {
-    /** @param array{email?: ?string, plan?: ?string, person_type?: ?string, document?: ?string, active?: bool|int|string, details?: array<string, mixed>} $attributes */
-    private function __construct(public string $name, public array $attributes, public ?CreateUserData $administrator) {}
+    /** @param array<string,mixed>|null $details */
+    private function __construct(
+        public string $name,
+        public ?string $email,
+        public ?string $plan,
+        public ?string $personType,
+        public ?string $document,
+        public bool $active,
+        public ?array $details,
+        public ?CreateUserData $administrator,
+    ) {}
 
     /** @param array<string, mixed> $input */
-    public static function fromInput(#[\SensitiveParameter] array $input, ?Client $client = null, bool $profile = false): self
-    {
+    public static function fromInput(
+        #[\SensitiveParameter] array $input,
+        ?Client $client = null,
+        bool $profile = false,
+    ): self {
         $input = self::normalize($input, $client);
         $validated = Validator::validate($input, self::rules($input, $client, $profile), self::messages());
-        $administrator = isset($validated['administrator']) ? CreateUserData::fromValidated($validated['administrator']) : null;
-        $name = $validated['name'];
-        unset($validated['administrator'], $validated['name']);
+
+        $administrator = isset($validated['administrator'])
+            ? CreateUserData::fromValidated($validated['administrator'])
+            : null;
 
         foreach (['additional_phones', 'additional_emails'] as $field) {
             if (isset($validated['details'][$field])) {
@@ -32,7 +45,21 @@ final readonly class SaveAccountData
             }
         }
 
-        return new self($name, $validated, $administrator);
+        // Campos ausentes no envio mantêm o valor atual da conta.
+        $value = static fn (string $field): mixed => array_key_exists($field, $validated)
+            ? $validated[$field]
+            : $client?->getAttribute($field);
+
+        return new self(
+            name: $validated['name'],
+            email: $value('email'),
+            plan: $value('plan'),
+            personType: $value('person_type'),
+            document: $value('document'),
+            active: array_key_exists('active', $validated) ? (bool) $validated['active'] : ($client->active ?? true),
+            details: $validated['details'] ?? null,
+            administrator: $administrator,
+        );
     }
 
     /** @param array<string, mixed> $input */
@@ -96,9 +123,20 @@ final readonly class SaveAccountData
      */
     private static function rules(#[\SensitiveParameter] array $input, ?Client $client, bool $profile): array
     {
-        $documentRequired = ! $profile && ($client === null
-            || (Arr::hasAny($input, ['person_type', 'document', 'details']) && ($client->getAttribute('document') !== null || filled($input['document'] ?? null))));
-        $company = ($profile ? $client?->getAttribute('person_type') : ($input['person_type'] ?? null)) === 'company';
+        // O documento é exigido no cadastro e quando a edição toca nos dados de identificação.
+        $documentRequired = ! $profile
+            && (
+                $client === null
+                || (
+                    Arr::hasAny($input, ['person_type', 'document', 'details'])
+                    && ($client->getAttribute('document') !== null || filled($input['document'] ?? null))
+                )
+            );
+
+        $personType = $profile ? $client?->getAttribute('person_type') : ($input['person_type'] ?? null);
+        $company = $personType === 'company';
+        $states = explode(' ', 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO');
+
         $uniqueDocument = Rule::unique(Client::class, 'document');
         if ($client !== null) {
             $uniqueDocument->ignore($client);
@@ -131,14 +169,17 @@ final readonly class SaveAccountData
             'details.address.complement' => ['nullable', 'string', 'max:255'],
             'details.address.neighborhood' => ['nullable', 'string', 'max:255'],
             'details.address.city' => ['nullable', 'string', 'max:255'],
-            'details.address.state' => ['nullable', Rule::in(explode(' ', 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'))],
+            'details.address.state' => ['nullable', Rule::in($states)],
             'details.phone' => [Rule::requiredIf($documentRequired), 'nullable', 'regex:/^\d{10,11}$/'],
             'details.whatsapp' => ['nullable', 'regex:/^\d{10,11}$/'],
             'details.additional_phones' => ['sometimes', 'array', 'list', 'max:20'],
             'details.additional_phones.*' => ['nullable', 'string', 'regex:/^\d{10,11}$/'],
             'details.additional_emails' => ['sometimes', 'array', 'list', 'max:20'],
             'details.additional_emails.*' => ['nullable', 'string', 'email', 'max:255'],
-            'administrator' => [Rule::requiredIf($client === null), 'array:name,email,mode,password,password_confirmation'],
+            'administrator' => [
+                Rule::requiredIf($client === null),
+                'array:name,email,mode,password,password_confirmation',
+            ],
             ...($client !== null ? [] : CreateUserData::rules('administrator.')),
         ];
     }
@@ -174,7 +215,11 @@ final readonly class SaveAccountData
 
     private static function validDocument(string $value, bool $company): bool
     {
-        if (! ctype_digit($value) || strlen($value) !== ($company ? 14 : 11) || count(array_unique(str_split($value))) === 1) {
+        if (
+            ! ctype_digit($value)
+            || strlen($value) !== ($company ? 14 : 11)
+            || count(array_unique(str_split($value))) === 1
+        ) {
             return false;
         }
 

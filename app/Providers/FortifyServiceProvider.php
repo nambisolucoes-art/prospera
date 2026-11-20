@@ -75,7 +75,8 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::twoFactorChallengeView(fn () => ApiPage::respond());
         Fortify::confirmPasswordView(function (Request $request) {
             $intended = $request->session()->get('url.intended');
-            $isSecurity = is_string($intended) && parse_url($intended, PHP_URL_PATH) === route('security.edit', absolute: false);
+            $isSecurity = is_string($intended)
+                && parse_url($intended, PHP_URL_PATH) === route('security.edit', absolute: false);
 
             return ApiPage::respond(['forSecurity' => $isSecurity]);
         });

@@ -13,6 +13,9 @@ final readonly class AccountFiltersData
     {
         $search = $input['q'] ?? null;
 
-        return new self(is_string($search) ? mb_substr(trim($search), 0, 100) : '', PageSize::fromInput($input['per_page'] ?? null));
+        return new self(
+            is_string($search) ? mb_substr(trim($search), 0, 100) : '',
+            PageSize::fromInput($input['per_page'] ?? null),
+        );
     }
 }

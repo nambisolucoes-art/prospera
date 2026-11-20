@@ -46,7 +46,8 @@ final class JsonNavigation
             $request->session()->flash('status', $status);
         }
 
-        $needsTwoFactor = $response instanceof JsonResponse && data_get($response->getData(true), 'two_factor') === true;
+        $needsTwoFactor = $response instanceof JsonResponse
+            && data_get($response->getData(true), 'two_factor') === true;
         $redirect = match ($request->route()?->getName()) {
             'login.store' => $needsTwoFactor
                 ? route('two-factor.login') : $request->session()->pull('url.intended', route('dashboard')),

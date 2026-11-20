@@ -58,7 +58,22 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
     /** @return array<string,string> */
     public static function auditedFields(): array
     {
-        return ['access_enabled' => 'Acesso habilitado', 'name' => 'Nome', 'email' => 'E-mail', 'person_id' => 'Pessoa', 'account_id' => 'Conta', 'role_id' => 'Cargo', 'is_saas_admin' => 'Acesso à plataforma', 'is_account_admin' => 'Administrador inicial', 'password' => 'Senha', 'profile_photo' => 'Foto do perfil', 'email_verified_at' => 'Verificação do e-mail', 'two_factor_secret' => 'Segundo fator', 'two_factor_recovery_codes' => 'Códigos de recuperação', 'two_factor_confirmed_at' => 'Confirmação do segundo fator'];
+        return [
+            'access_enabled' => 'Acesso habilitado',
+            'name' => 'Nome',
+            'email' => 'E-mail',
+            'person_id' => 'Pessoa',
+            'account_id' => 'Conta',
+            'role_id' => 'Cargo',
+            'is_saas_admin' => 'Acesso à plataforma',
+            'is_account_admin' => 'Administrador inicial',
+            'password' => 'Senha',
+            'profile_photo' => 'Foto do perfil',
+            'email_verified_at' => 'Verificação do e-mail',
+            'two_factor_secret' => 'Segundo fator',
+            'two_factor_recovery_codes' => 'Códigos de recuperação',
+            'two_factor_confirmed_at' => 'Confirmação do segundo fator',
+        ];
     }
 
     /** @return array<string,string> */
@@ -99,17 +114,42 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
         if (! $this->access_enabled) {
             return [];
         }
+
+        $systemPermissions = Permission::where('is_system', true);
+
         if ($this->is_saas_admin) {
-            return Permission::where('is_system', true)->whereNull('account_id')->whereIn('scope', ['platform', 'self'])->pluck('slug')->map(fn ($slug): string => (string) $slug)->all();
+            return $systemPermissions
+                ->whereNull('account_id')
+                ->whereIn('scope', ['platform', 'self'])
+                ->pluck('slug')
+                ->map(fn ($slug): string => (string) $slug)
+                ->all();
         }
+
         if (! $this->account_id) {
-            return Permission::where('is_system', true)->whereNull('account_id')->where('scope', 'self')->pluck('slug')->map(fn ($slug): string => (string) $slug)->all();
+            return $systemPermissions
+                ->whereNull('account_id')
+                ->where('scope', 'self')
+                ->pluck('slug')
+                ->map(fn ($slug): string => (string) $slug)
+                ->all();
         }
+
         if (! $this->account()->where('active', true)->exists()) {
             return [];
         }
 
-        return Permission::where('is_system', true)->whereHas('roles', fn ($q) => $q->where('roles.id', $this->role_id)->where('roles.account_id', $this->account_id))->whereIn('scope', ['account', 'self'])->where(fn ($q) => $q->whereNull('account_id')->orWhere('account_id', $this->account_id))->pluck('slug')->map(fn ($slug): string => (string) $slug)->all();
+        return $systemPermissions
+            ->whereHas('roles', fn ($role) => $role
+                ->where('roles.id', $this->role_id)
+                ->where('roles.account_id', $this->account_id))
+            ->whereIn('scope', ['account', 'self'])
+            ->where(fn ($query) => $query
+                ->whereNull('account_id')
+                ->orWhere('account_id', $this->account_id))
+            ->pluck('slug')
+            ->map(fn ($slug): string => (string) $slug)
+            ->all();
     }
 
     public function applyIdentity(UserIdentityDTO $identity): void
@@ -119,6 +159,20 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
         if ($this->exists && $this->isDirty('email')) {
             $this->email_verified_at = null;
         }
+    }
+
+    public function isLastAdministratorWithAccess(): bool
+    {
+        if ($this->role?->system_key !== 'administrator') {
+            return false;
+        }
+
+        $administratorsWithAccess = self::where('account_id', $this->account_id)
+            ->where('role_id', $this->role_id)
+            ->where('access_enabled', true)
+            ->count();
+
+        return $administratorsWithAccess <= 1;
     }
 
     /** @return BelongsTo<Person, $this> */
@@ -148,7 +202,7 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
     private function saveIdentity(array $options = []): bool
     {
         if ($this->account_id && ! $this->role_id) {
-            [$admin,$member] = app(DefaultRolesAction::class)->execute($this->account_id);
+            [$admin, $member] = app(DefaultRolesAction::class)->execute($this->account_id);
             $this->role_id = $this->is_account_admin ? $admin->id : $member->id;
         }
 
@@ -158,7 +212,12 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
 
         return $this->getConnection()->transaction(function () use ($options): bool {
             $person = $this->person()->first() ?? $this->person()->make();
-            $person->fill(['name' => $this->name, 'email' => $this->email, 'account_id' => $this->account_id])->saveOrFail();
+            $person->fill([
+                'name' => $this->name,
+                'email' => $this->email,
+                'account_id' => $this->account_id,
+            ]);
+            $person->saveOrFail();
             $this->person()->associate($person);
 
             if (! parent::save($options)) {
@@ -171,7 +230,9 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
                 $tag = Tag::userTag($this->account_id);
                 $beforeTags = $person->tags()->pluck('tags.id')->all();
                 $person->tags()->syncWithoutDetaching([$tag->id]);
-                AuditLog::relationship($person, 'tag_ids', $beforeTags, $person->tags()->pluck('tags.id')->all(), 'Etiquetas');
+
+                $afterTags = $person->tags()->pluck('tags.id')->all();
+                $person->recordAuditFieldChange('tag_ids', $beforeTags, $afterTags, 'Etiquetas');
             }
 
             return true;

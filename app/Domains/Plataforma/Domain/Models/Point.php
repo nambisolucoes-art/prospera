@@ -4,7 +4,7 @@ namespace App\Domains\Plataforma\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Plataforma\Domain\DTOs\PointConfigurationDTO;
+use App\Domains\Plataforma\Domain\DTOs\PointDTO;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,9 +30,12 @@ class Point extends Model implements Auditable
         return ['establishment_id' => 'Vínculo legado, substituído por client_id.'];
     }
 
-    public function configure(PointConfigurationDTO $configuration): void
+    public function revise(PointDTO $data): void
     {
-        $this->fill(['name' => $configuration->name, 'active' => $configuration->active]);
+        $this->fill([
+            'name' => $data->name,
+            'active' => $data->active,
+        ]);
     }
 
     /** @return array<string, string> */

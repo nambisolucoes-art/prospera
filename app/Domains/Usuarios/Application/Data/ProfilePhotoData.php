@@ -13,7 +13,11 @@ final readonly class ProfilePhotoData
     public static function fromFile(mixed $photo): self
     {
         $data = Validator::validate(['photo' => $photo], [
-            'photo' => ['required', File::types(['jpg', 'jpeg', 'png', 'webp'])->max('5mb'), 'dimensions:max_width=4096,max_height=4096'],
+            'photo' => [
+                'required',
+                File::types(['jpg', 'jpeg', 'png', 'webp'])->max('5mb'),
+                'dimensions:max_width=4096,max_height=4096',
+            ],
         ], [
             'photo.required' => 'Selecione uma foto.',
             'photo.mimes' => 'Use uma foto JPG, PNG ou WebP.',

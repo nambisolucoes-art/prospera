@@ -29,6 +29,17 @@ trait AuditsChanges
         return $id === null ? null : (int) $id;
     }
 
+    /**
+     * Registra a mudança de um relacionamento, que não dispara os eventos do Eloquent.
+     *
+     * @param  array<int,mixed>  $before
+     * @param  array<int,mixed>  $after
+     */
+    public function recordAuditFieldChange(string $field, array $before, array $after, string $label): void
+    {
+        AuditLog::relationship($this, $field, $before, $after, $label);
+    }
+
     /** @param array<string,mixed> $options */
     public function save(array $options = []): bool
     {

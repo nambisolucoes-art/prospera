@@ -20,13 +20,23 @@ class CustomerDirectoryTest extends TestCase
 
     private function owner(): User
     {
-        return User::factory()->create(['account_id' => Client::create(['name' => 'Conta de clientes', 'active' => true])->id, 'is_account_admin' => true]);
+        $account = Client::create(['name' => 'Conta de clientes', 'active' => true]);
+
+        return User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
     }
 
     /** @return array<string,mixed> */
     private function payload(User $owner): array
     {
-        return ['name' => 'Cliente de teste', 'tag_ids' => [Tag::customerTag($owner->account_id)->id], 'person_type' => 'individual', 'document' => '52998224725', 'additional_phones' => ['71999991234'], 'additional_emails' => ['contato@example.test'], 'address' => ['city' => 'Salvador', 'state' => 'BA']];
+        return [
+            'name' => 'Cliente de teste',
+            'tag_ids' => [Tag::customerTag($owner->account_id)->id],
+            'person_type' => 'individual',
+            'document' => '52998224725',
+            'additional_phones' => ['71999991234'],
+            'additional_emails' => ['contato@example.test'],
+            'address' => ['city' => 'Salvador', 'state' => 'BA'],
+        ];
     }
 
     public function test_customer_uses_the_same_person_and_contacts_as_supplier_without_creating_access(): void
@@ -44,12 +54,18 @@ class CustomerDirectoryTest extends TestCase
         $this->assertSame(['71999991234'], $person->additional_phones);
         $this->assertFalse(Schema::hasColumn('customers', 'document'));
         $this->getJson('/conta/pessoas?customers=1')->assertOk()->assertJsonCount(1, 'people.data');
-        $this->getJson('/conta/pessoas/'.$person->id.'/visualizar')->assertOk()->assertJsonPath('customer.active', true)->assertJsonPath('document', '52998224725')->assertJsonPath('additional_emails.0', 'contato@example.test');
+        $this
+            ->getJson('/conta/pessoas/'.$person->id.'/visualizar')
+            ->assertOk()
+            ->assertJsonPath('customer.active', true)
+            ->assertJsonPath('document', '52998224725')
+            ->assertJsonPath('additional_emails.0', 'contato@example.test');
         $audit = AuditRecord::where('entity_type', 'customer')->sole();
         $this->assertSame($owner->id, $audit->actor_id);
         $this->assertSame($owner->account_id, $audit->account_id);
         $this->assertSame($person->name, $audit->entity_name);
-        $this->assertSame(AuditRecord::where('entity_type', 'person')->where('entity_id', $person->id)->sole()->operation_id, $audit->operation_id);
+        $personAudit = AuditRecord::where('entity_type', 'person')->where('entity_id', $person->id)->sole();
+        $this->assertSame($personAudit->operation_id, $audit->operation_id);
         $this->assertStringNotContainsString('52998224725', json_encode($audit->changes));
         $this->artisan('audit:check')->assertSuccessful();
     }
@@ -101,11 +117,18 @@ class CustomerDirectoryTest extends TestCase
         $this->patchJson($url, ['name' => 'Mudança revertida', 'tag_ids' => []])->assertForbidden();
         $this->assertDatabaseMissing('people', ['name' => 'Mudança revertida']);
         $this->assertSame($count, AuditRecord::count());
-        $role->permissions()->sync(Permission::whereIn('slug', [...$base, 'account.customers.deactivate'])->pluck('id'));
+        $role
+            ->permissions()
+            ->sync(Permission::whereIn('slug', [...$base, 'account.customers.deactivate'])->pluck('id'));
         $this->patchJson($url, ['name' => 'Nome compartilhado', 'tag_ids' => []])->assertOk();
         $this->assertFalse($customer->fresh()->active);
         $this->patchJson($url, $payload)->assertForbidden();
-        $role->permissions()->sync(Permission::whereIn('slug', [...$base, 'account.customers.activate', 'account.customers.view', 'account.customers.list'])->pluck('id'));
+        $role->permissions()->sync(Permission::whereIn('slug', [
+            ...$base,
+            'account.customers.activate',
+            'account.customers.view',
+            'account.customers.list',
+        ])->pluck('id'));
         $this->patchJson($url, $payload)->assertOk();
         $this->getJson($url.'/visualizar')->assertJsonPath('customer.active', true);
         $this->getJson('/conta/pessoas?customers=1')->assertOk()->assertJsonCount(1, 'people.data');
@@ -115,7 +138,10 @@ class CustomerDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         $tag = Tag::customerTag($owner->account_id);
-        $this->actingAs($owner)->patchJson('/conta/etiquetas/'.$tag->id, ['name' => 'Alterada', 'active' => false])->assertForbidden();
+        $this
+            ->actingAs($owner)
+            ->patchJson('/conta/etiquetas/'.$tag->id, ['name' => 'Alterada', 'active' => false])
+            ->assertForbidden();
         $this->deleteJson('/conta/etiquetas/'.$tag->id)->assertForbidden();
         $other = $this->owner();
         $this->actingAs($other)->postJson('/conta/pessoas', $this->payload($owner))->assertUnprocessable();
@@ -125,13 +151,21 @@ class CustomerDirectoryTest extends TestCase
         $this->patchJson('/conta/pessoas/'.$id, ['name' => 'Intruso'])->assertNotFound();
         $this->getJson('/conta/pessoas?customers=1')->assertJsonCount(0, 'people.data');
         $account = Client::create(['name' => 'Conta com etiqueta comum', 'active' => true]);
-        $custom = Tag::create(['account_id' => $account->id, 'module' => 'people', 'name' => 'Cliente', 'color' => '#123456']);
+        $custom = Tag::create([
+            'account_id' => $account->id,
+            'module' => 'people',
+            'name' => 'Cliente',
+            'color' => '#123456',
+        ]);
         $newOwner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
         $special = Tag::customerTag($account->id);
         $this->assertNotSame($custom->id, $special->id);
         $this->assertNull($custom->fresh()->system_key);
         $this->assertSame('customer', $special->system_key);
-        $this->actingAs($newOwner)->postJson('/conta/pessoas', ['name' => 'Categoria comum', 'tag_ids' => [$custom->id]])->assertOk();
+        $this
+            ->actingAs($newOwner)
+            ->postJson('/conta/pessoas', ['name' => 'Categoria comum', 'tag_ids' => [$custom->id]])
+            ->assertOk();
         $this->assertDatabaseCount('customers', 1);
     }
 
@@ -139,7 +173,10 @@ class CustomerDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         $platform = User::factory()->create(['is_saas_admin' => true]);
-        $this->actingAs($platform)->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])->assertOk();
+        $this
+            ->actingAs($platform)
+            ->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])
+            ->assertOk();
         $this->postJson('/conta/pessoas', $this->payload($owner))->assertOk();
         $event = AuditRecord::where('entity_type', 'customer')->sole();
         $this->assertSame($platform->id, $event->actor_id);
@@ -147,9 +184,16 @@ class CustomerDirectoryTest extends TestCase
         $this->assertSame($owner->account_id, $event->account_id);
         $this->assertSame('platform-account', $event->context);
         $this->postJson('/conta/inspecao/encerrar')->assertOk();
-        $this->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])->assertOk();
+        $this
+            ->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
+            ->assertOk();
         $count = AuditRecord::count();
-        $this->postJson('/conta/pessoas', ['name' => 'Bloqueado', 'tag_ids' => [Tag::customerTag($owner->account_id)->id]])->assertForbidden();
+        $this
+            ->postJson(
+                '/conta/pessoas',
+                ['name' => 'Bloqueado', 'tag_ids' => [Tag::customerTag($owner->account_id)->id]],
+            )
+            ->assertForbidden();
         $this->assertDatabaseMissing('people', ['name' => 'Bloqueado']);
         $this->assertSame($count, AuditRecord::count());
     }

@@ -10,10 +10,15 @@ final class SaveCustomerAction
 {
     public function execute(Person $person, bool $selected): void
     {
-        $customer = Customer::where('account_id', $person->account_id)->where('person_id', $person->id)->lockForUpdate()->first();
+        $customer = Customer::where('account_id', $person->account_id)
+            ->where('person_id', $person->id)
+            ->lockForUpdate()
+            ->first();
+
         if (! $customer && ! $selected) {
             return;
         }
+
         if (! $customer) {
             Gate::authorize('account.customers.create');
             $customer = new Customer(['account_id' => $person->account_id, 'person_id' => $person->id]);
@@ -24,7 +29,9 @@ final class SaveCustomerAction
                 Gate::authorize('account.customers.deactivate');
             }
         }
+
         $customer->active = $selected;
+
         if ($customer->isDirty()) {
             $customer->saveOrFail();
         }

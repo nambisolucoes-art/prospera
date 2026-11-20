@@ -85,7 +85,10 @@ class SecurityTest extends TestCase
 
         $this->post(route('two-factor.confirm'), ['code' => ''])
             ->assertRedirect(route('security.edit'))
-            ->assertSessionHasErrorsIn('confirmTwoFactorAuthentication', ['code' => 'Informe o código do autenticador.']);
+            ->assertSessionHasErrorsIn(
+                'confirmTwoFactorAuthentication',
+                ['code' => 'Informe o código do autenticador.'],
+            );
 
         $this->post(route('two-factor.confirm'), ['code' => '123'])
             ->assertRedirect(route('security.edit'))

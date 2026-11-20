@@ -14,7 +14,10 @@ final class SyncPermissionsCommand extends Command
     public function handle(SyncPermissionsAction $sync): int
     {
         $r = $sync->execute((bool) $this->option('prune'));
-        $this->info("Permissões sincronizadas: {$r['created']} criadas, {$r['updated']} atualizadas, {$r['deleted']} removidas, {$r['total']} descobertas.");
+        $this->info(
+            "Permissões sincronizadas: {$r['created']} criadas, {$r['updated']} atualizadas, "
+            ."{$r['deleted']} removidas, {$r['total']} descobertas.",
+        );
 
         return self::SUCCESS;
     }

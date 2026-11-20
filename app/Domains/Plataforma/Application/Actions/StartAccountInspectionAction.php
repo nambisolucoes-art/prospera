@@ -19,24 +19,47 @@ final readonly class StartAccountInspectionAction
 {
     public function __construct(private AccountInspectionUsersQuery $users) {}
 
-    public function execute(User $administrator, Client $account, StartAccountInspectionData $data, Session $session): void
-    {
+    public function execute(
+        User $administrator,
+        Client $account,
+        StartAccountInspectionData $data,
+        Session $session,
+    ): void {
         abort_unless($administrator->can('access-saas') && $administrator->hasVerifiedEmail(), 403);
         abort_if(AccountInspectionSession::current($session) !== null, 403);
 
         $target = $account->active ? $this->users->find($account, $data->userId) : null;
+
         if ($target === null) {
-            throw ValidationException::withMessages(['user_id' => 'Selecione um usuário com acesso a esta conta ativa.']);
+            throw ValidationException::withMessages([
+                'user_id' => 'Selecione um usuário com acesso a esta conta ativa.',
+            ]);
         }
 
-        $inspection = new AccountInspectionDTO($administrator->id, $account->id, $target->id, $data->mode);
+        $inspectionDTO = new AccountInspectionDTO(
+            administratorId: $administrator->id,
+            accountId: $account->id,
+            userId: $target->id,
+            mode: $data->mode,
+        );
 
         $session->invalidate();
         Auth::guard('web')->login($target);
-        AccountInspectionSession::start($session, $inspection);
+        AccountInspectionSession::start($session, $inspectionDTO);
 
         app(AuditContext::class)->begin(request());
-        AuditLog::record('account', $account->id, $account->id, 'inspection-started', $account->name, ['mode' => ['label' => 'Modo de inspeção', 'before' => null, 'after' => $data->mode->value], 'represented' => ['label' => 'Usuário representado', 'before' => null, 'after' => $target->name]]);
-        Log::notice('Inspeção de conta iniciada.', AccountInspectionSession::context($inspection));
+        AuditLog::record(
+            'account',
+            $account->id,
+            $account->id,
+            'inspection-started',
+            $account->name,
+            [
+                'mode' => ['label' => 'Modo de inspeção', 'before' => null, 'after' => $data->mode->value],
+                'represented' => ['label' => 'Usuário representado', 'before' => null, 'after' => $target->name],
+            ],
+        );
+
+        Log::notice('Inspeção de conta iniciada.', AccountInspectionSession::context($inspectionDTO));
     }
 }

@@ -105,14 +105,23 @@ class SaasPlatformTest extends TestCase
             'plan' => 'Alteração de plano indevida',
             'document' => '52998224725',
         ])->assertSessionHasNoErrors()->assertRedirect(route('account.dashboard'));
-        $this->assertDatabaseHas('clients', ['id' => $client->id, 'active' => true, 'plan' => 'Essencial', 'document' => '11222333000181']);
+        $this->assertDatabaseHas('clients', [
+            'id' => $client->id,
+            'active' => true,
+            'plan' => 'Essencial',
+            'document' => '11222333000181',
+        ]);
         $this->assertSame('Nova marca', $client->refresh()->details['trade_name']);
         $this->assertSame('Campinas', $client->details['address']['city']);
         $this->assertSame('01001000', $client->details['address']['postal_code']);
         $this->assertSame('Outro cliente', $otherClient->refresh()->name);
-        $this->post('/conta/pontos', ['name' => 'Recepção', 'active' => '1'])->assertRedirect(route('account.dashboard'));
+        $this
+            ->post('/conta/pontos', ['name' => 'Recepção', 'active' => '1'])
+            ->assertRedirect(route('account.dashboard'));
         $point = $client->points()->sole();
-        $this->patch("/conta/pontos/{$point->id}", ['name' => 'Caixa', 'active' => '0'])->assertRedirect(route('account.dashboard'));
+        $this
+            ->patch("/conta/pontos/{$point->id}", ['name' => 'Caixa', 'active' => '0'])
+            ->assertRedirect(route('account.dashboard'));
         $this->patch("/conta/pontos/{$otherPoint->id}", ['name' => 'Inválido', 'active' => '1'])->assertNotFound();
         $this->getJson('/conta')->assertJsonPath('account.name', 'Estabelecimento atualizado')
             ->assertJsonPath('points.0.name', 'Caixa')
@@ -174,13 +183,20 @@ class SaasPlatformTest extends TestCase
             'password' => 'SenhaForte123!', 'password_confirmation' => 'SenhaForte123!',
             'role' => 'account-member', 'account_id' => $other->id,
         ])->assertRedirect(route('saas.users.index'));
-        $this->assertDatabaseHas('users', ['email' => 'platform@example.test', 'is_saas_admin' => true, 'account_id' => null]);
+        $this->assertDatabaseHas('users', [
+            'email' => 'platform@example.test',
+            'is_saas_admin' => true,
+            'account_id' => null,
+        ]);
 
         $this->actingAs($owner)->post('/saas/usuarios', [])->assertForbidden();
         $this->post('/conta/usuarios', [
             'name' => 'Colaborador', 'email' => 'member@example.test', 'mode' => 'manual',
             'password' => 'SenhaForte123!', 'password_confirmation' => 'SenhaForte123!',
-            'role_id' => Role::where('account_id', $account->id)->where('system_key', 'member')->value('id'), 'account_id' => $other->id, 'is_saas_admin' => true,
+            'role_id' => Role::where('account_id', $account->id)
+                ->where('system_key', 'member')
+                ->value('id'), 'account_id' => $other
+                ->id, 'is_saas_admin' => true,
         ])->assertRedirect(route('account.users.index'));
         $member = User::query()->where('email', 'member@example.test')->sole();
         $this->assertSame($account->id, $member->account_id);
@@ -193,7 +209,11 @@ class SaasPlatformTest extends TestCase
 
     public function test_the_command_creates_a_verified_administrator_with_a_hashed_password(): void
     {
-        $this->artisan('auth:create-user', ['--role' => 'platform-admin', '--name' => 'Administrador', '--email' => 'ADMIN@example.test'])
+        $this->artisan('auth:create-user', [
+            '--role' => 'platform-admin',
+            '--name' => 'Administrador',
+            '--email' => 'ADMIN@example.test',
+        ])
             ->expectsQuestion('Senha (mínimo de 12 caracteres)', 'SenhaForte123!')
             ->expectsQuestion('Confirme a senha', 'SenhaForte123!')
             ->assertSuccessful();
