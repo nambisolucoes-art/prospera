@@ -2,6 +2,7 @@
 
 namespace App\Domains\Pessoas\UI\Controllers;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Etiquetas\Application\Actions\DeleteTagAction;
 use App\Domains\Etiquetas\Application\Actions\SaveTagAction;
@@ -42,7 +43,7 @@ final class DirectoryController
 
         $people = $directory
             ->people(
-                $request->user()->account_id,
+                app(AccountContext::class)->requireId(),
                 PageSize::fromInput($request->query('per_page')),
                 $search,
                 $suppliersOnly,
@@ -65,7 +66,7 @@ final class DirectoryController
 
     public function previewPerson(Request $request, PeopleDirectoryQuery $directory, int $personId): JsonResponse
     {
-        $person = $directory->person($request->user()->account_id, $personId);
+        $person = $directory->person(app(AccountContext::class)->requireId(), $personId);
 
         return response()->json($this->personPayload($request, $person));
     }
@@ -110,7 +111,7 @@ final class DirectoryController
         PeopleDirectoryQuery $directory,
         ?int $personId = null,
     ): JsonResponse|View {
-        $accountId = $request->user()->account_id;
+        $accountId = app(AccountContext::class)->requireId();
 
         $roles = $request->user()->can('account.users.assign-role')
             ? Role::where('account_id', $accountId)->orderBy('name')->get(['id', 'name', 'system_key'])
@@ -140,7 +141,7 @@ final class DirectoryController
         SavePersonAction $save,
         ?int $personId = null,
     ): RedirectResponse {
-        $account = $request->user()->account()->firstOrFail();
+        $account = app(AccountContext::class)->requireAccount(404);
         $person = $personId ? $directory->person($account->id, $personId) : null;
 
         $data = SavePersonData::fromInput(
@@ -171,9 +172,9 @@ final class DirectoryController
         return redirect($personId ? '/conta/pessoas/'.$personId.'/editar' : '/conta/pessoas/cadastrar');
     }
 
-    public function deleteTag(Request $request, DeleteTagAction $delete, int $tagId): RedirectResponse
+    public function deleteTag(DeleteTagAction $delete, int $tagId): RedirectResponse
     {
-        $delete->execute($request->user()->account_id, $tagId);
+        $delete->execute(app(AccountContext::class)->requireId(), $tagId);
         ApiPage::toast('Etiqueta excluída.');
 
         return redirect('/conta/etiquetas');
@@ -191,7 +192,7 @@ final class DirectoryController
         $filters = TagFiltersData::fromInput($request->query());
 
         $tags = $directory->tagList(
-            $request->user()->account_id,
+            app(AccountContext::class)->requireId(),
             $filters,
             $canList,
             $canList ? '/conta/etiquetas' : $request->url(),
@@ -206,15 +207,15 @@ final class DirectoryController
         ];
     }
 
-    public function previewTag(Request $request, PeopleDirectoryQuery $directory, int $tagId): JsonResponse
+    public function previewTag(PeopleDirectoryQuery $directory, int $tagId): JsonResponse
     {
-        return response()->json($directory->tags($request->user()->account_id)->findOrFail($tagId));
+        return response()->json($directory->tags(app(AccountContext::class)->requireId())->findOrFail($tagId));
     }
 
     public function tagForm(Request $request, ?int $tagId = null): JsonResponse|View
     {
         $tag = $tagId
-            ? Tag::where('account_id', $request->user()->account_id)->findOrFail($tagId)
+            ? Tag::where('account_id', app(AccountContext::class)->requireId())->findOrFail($tagId)
             : null;
 
         return ApiPage::respond([
@@ -226,7 +227,7 @@ final class DirectoryController
 
     public function saveTag(Request $request, SaveTagAction $save, ?int $tagId = null): RedirectResponse
     {
-        $accountId = $request->user()->account_id;
+        $accountId = app(AccountContext::class)->requireId();
         $tag = $tagId ? Tag::where('account_id', $accountId)->findOrFail($tagId) : null;
 
         abort_if($tag?->system_key !== null, 403);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use Closure;
@@ -37,7 +38,7 @@ final class EnforceAudit
                     AuditLog::record(
                         'user',
                         $user->id,
-                        $user->account_id,
+                        app(AccountContext::class)->linkedId($user),
                         'updated',
                         $user->name,
                         ['passkeys' => ['label' => 'Chaves de acesso', 'before' => null, 'after' => $after]],

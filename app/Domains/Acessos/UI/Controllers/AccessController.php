@@ -3,6 +3,7 @@
 namespace App\Domains\Acessos\UI\Controllers;
 
 use App\Domains\Acessos\Application\Actions\SaveRoleAction;
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Data\RoleFiltersData;
 use App\Domains\Acessos\Application\Data\SaveRoleData;
 use App\Domains\Acessos\Application\Queries\AccessDirectoryQuery;
@@ -20,14 +21,14 @@ final class AccessController
         $filters = RoleFiltersData::fromInput($request->query());
 
         return ApiPage::respond([
-            'roles' => $directory->roleList($request->user()->account_id, $filters),
+            'roles' => $directory->roleList(app(AccountContext::class)->requireId(), $filters),
             'filters' => $filters->toArray(),
         ]);
     }
 
-    public function roleForm(Request $request, AccessDirectoryQuery $directory, ?int $roleId = null): JsonResponse|View
+    public function roleForm(AccessDirectoryQuery $directory, ?int $roleId = null): JsonResponse|View
     {
-        $accountId = $request->user()->account_id;
+        $accountId = app(AccountContext::class)->requireId();
 
         $role = $roleId
             ? $directory->roles($accountId)->with('permissions')->findOrFail($roleId)
@@ -40,9 +41,9 @@ final class AccessController
         ]);
     }
 
-    public function rolePreview(Request $request, AccessDirectoryQuery $directory, int $roleId): JsonResponse
+    public function rolePreview(AccessDirectoryQuery $directory, int $roleId): JsonResponse
     {
-        $role = $directory->roles($request->user()->account_id)
+        $role = $directory->roles(app(AccountContext::class)->requireId())
             ->with('permissions')
             ->findOrFail($roleId);
 
@@ -62,7 +63,7 @@ final class AccessController
         SaveRoleAction $save,
         ?int $roleId = null,
     ): RedirectResponse {
-        $accountId = $request->user()->account_id;
+        $accountId = app(AccountContext::class)->requireId();
         $role = $roleId ? $directory->roles($accountId)->findOrFail($roleId) : null;
 
         $save->execute($accountId, $role, SaveRoleData::fromInput($request->all(), $accountId, $roleId));

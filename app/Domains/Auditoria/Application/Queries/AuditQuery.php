@@ -3,19 +3,18 @@
 namespace App\Domains\Auditoria\Application\Queries;
 
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 final class AuditQuery
 {
     /** @return Builder<AuditRecord> */
-    public function scoped(User $user, bool $platform): Builder
+    public function scoped(?int $accountId, bool $platform): Builder
     {
         $query = AuditRecord::query();
 
         if (! $platform) {
-            abort_unless($user->account_id !== null, 403);
-            $query->where('account_id', $user->account_id);
+            abort_unless($accountId !== null, 403);
+            $query->where('account_id', $accountId);
         }
 
         return $query;

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Plataforma\UI\Controllers;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Plataforma\Application\Actions\SaveAccountAction;
 use App\Domains\Plataforma\Application\Actions\SavePointAction;
 use App\Domains\Plataforma\Application\Data\AccountFiltersData;
@@ -21,7 +22,7 @@ final class ClientController
     public function index(Request $request, AccountDirectoryQuery $directory): JsonResponse|View|RedirectResponse
     {
         if (! $request->user()->can('access-saas')) {
-            abort_unless($request->user()->account_id !== null, 403);
+            abort_unless(app(AccountContext::class)->linkedId($request->user()) !== null, 403);
 
             return to_route('account.dashboard');
         }
@@ -101,7 +102,7 @@ final class ClientController
             abort(403);
         }
 
-        $account = $this->currentAccount($request);
+        $account = app(AccountContext::class)->requireAccount();
 
         $points = $request->user()->can('account.points.list')
             ? $account->points()->orderBy('name')->orderBy('id')->get(['id', 'name', 'active'])
@@ -113,14 +114,14 @@ final class ClientController
         ]);
     }
 
-    public function editTenant(Request $request): JsonResponse|View
+    public function editTenant(): JsonResponse|View
     {
-        return ApiPage::respond(['client' => $this->currentAccount($request), 'tenant' => true]);
+        return ApiPage::respond(['client' => app(AccountContext::class)->requireAccount(), 'tenant' => true]);
     }
 
     public function updateTenant(Request $request, SaveAccountAction $save): RedirectResponse
     {
-        $account = $this->currentAccount($request);
+        $account = app(AccountContext::class)->requireAccount();
         $save->execute($account, SaveAccountData::fromTenantInput($request->all(), $account));
         ApiPage::toast('Dados do estabelecimento salvos.');
 
@@ -139,7 +140,7 @@ final class ClientController
 
     public function savePoint(Request $request, SavePointAction $save, ?int $pointId = null): RedirectResponse
     {
-        $account = $this->currentAccount($request);
+        $account = app(AccountContext::class)->requireAccount();
         $point = $pointId === null ? null : $account->points()->findOrFail($pointId);
         $data = SavePointData::fromInput($request->all());
         $save->execute($account, $point, $data);
@@ -147,13 +148,5 @@ final class ClientController
         ApiPage::toast('Ponto salvo.');
 
         return to_route('account.dashboard');
-    }
-
-    private function currentAccount(Request $request): Client
-    {
-        $account = $request->user()->account()->where('active', true)->first();
-        abort_unless($account !== null, 403);
-
-        return $account;
     }
 }

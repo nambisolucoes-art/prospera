@@ -2,6 +2,7 @@
 
 namespace App\Domains\Acessos\Application\Actions;
 
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Data\SaveRoleData;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
@@ -38,8 +39,13 @@ final class SaveRoleAction
             $lockedRole->name = $data->values['name'];
             $lockedRole->saveOrFail();
 
-            $lockedRole->permissions()->sync($permissionIds);
+            $changes = $lockedRole->permissions()->sync($permissionIds);
             $lockedRole->recordAuditFieldChange('permission_ids', $before, $permissionIds, 'Permissões');
+
+            // O destino após salvar um cargo depende das permissões que o operador acabou de editar.
+            if ($changes['attached'] !== [] || $changes['detached'] !== []) {
+                app(EffectivePermissions::class)->forget();
+            }
         });
     }
 }

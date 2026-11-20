@@ -1361,6 +1361,34 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 
 **Entregáveis.** Código, testes, relatório de performance antes e depois, atualização de `docs/convencoes/permissoes.md`.
 
+
+#### Registro E03, 20/11/2026
+
+**Estado:** Concluída em 20/11/2026, após homologação. A execução partiu de `c9719a1` com working tree limpo. Os commits imediatamente anteriores continham o encerramento da E02 e a padronização do backend. As seis subfrentes cobriram diagnóstico, conta de execução, RBAC, índices, medições e regressão.
+
+**Diagnóstico e escopo.** A leitura da conta do operador foi classificada separadamente da propriedade do recurso, da associação de um usuário cadastrado e do vínculo reportado em eventos de identidade. Os acessos de propriedade em `User`, `Person`, `Supplier`, `Customer` e `AuditRecord`, a associação em `CreateUserAction` e o vínculo do usuário-alvo travado por `AssignRoleAction` permaneceram explícitos. O catálogo e o provisionamento de cargos continuam nas estruturas atuais. A sidebar usa o JSON de `ApiPage`, que já delegava a `User::permissionSlugs()`. A Central de Ajuda usa o mesmo Gate e a mesma lista. A autorização HTTP, o modo de inspeção e a autoria auditável mantêm seus pontos de controle.
+
+**Arquivos e decisões.**
+
+- `AccountContext.php`, `EffectivePermissions.php` e `EffectivePermissionSlugsQuery.php` centralizam a conta ativa e o conjunto de slugs de sistema aplicável ao sujeito, ao cargo e à conta. `AppServiceProvider.php` registra ambos os contextos como `scoped`. O Gate resolve do container no momento da checagem e `User.php` delega a lista. O ciclo de vida real usa a limpeza de serviços temporários do Octane.
+- `AccessController.php`, `DirectoryController.php`, `UserController.php`, `ProfilePhotoController.php` e `ClientController.php` obtêm o contexto central antes de consultar ou executar Actions. `AccountDirectoryQuery.php` busca a conta ativa pelo ID resolvido. `AuditController.php` entrega o ID explícito a `AuditQuery.php`.
+- `AssignRoleAction.php` valida a conta do operador pelo contexto. `SaveRoleAction.php` invalida o conjunto de slugs apenas quando muda o pivô, preservando as checagens posteriores à escrita. `EnforceAccountInspection.php` compara o vínculo com os dados da inspeção. `EnforceAudit.php` e `AppServiceProvider.php` usam o vínculo contextual para o escopo dos eventos de credenciais e sessão. `AuditContext` continua `scoped` e mantém autor e representado em campos distintos.
+- `2026_11_20_000001_add_reverse_lookup_indexes.php` acrescenta `permission_role(permission_id)`, `person_tag(tag_id)` e `users(role_id)`. Os ganhos observados foram nas buscas reversas de FKs e na contagem por etiqueta. A migration é reversível (R), com rollback e reaplicação verificados no PostgreSQL isolado.
+- `tests/TestCase.php`, `AccountContextTest.php` e `AccountContextArchitectureTest.php` cobrem a fronteira de requisição, perfis, escopo e revogação. A regra de arquitetura usa AST e reconhece leituras diretas do guard e seus aliases locais, preservando relacionamentos de domínio. O harness em `tests/Performance` cobre as nove rotas da linha de base, volume de slugs, índices e inspeção no worker.
+- `docs/convencoes/permissoes.md` registra a resolução atual e o relatório [001-e03-medicoes.md](001-e03-medicoes.md) contém comandos, tabelas de resultados e limitações.
+
+**Resultados.** A suíte SQLite em Docker passou com 114 testes e 1.020 asserções. A referência passou com 110 testes e 990 asserções no mesmo runtime. O harness SQLite passou com 1 teste e 45 asserções. `audit:check` confirmou os 8 modelos cobertos. `permissions:sync` descobriu 68 slugs, com zero inserções, atualizações ou exclusões. O PHPStan passou. O Pint passou nos arquivos PHP da E03. A execução global apontou o mesmo desvio de estilo preexistente em `bootstrap/app.php`.
+
+**Medições e aceite.** A Central de Ajuda caiu de 26 para 2 consultas no SQLite sem sessão de banco e de 29 para 5 no PostgreSQL via HTTP com sessão. Do total, 13 leituras de slugs caíram para 1 e 24 duplicatas caíram para zero nos dois ambientes. O orçamento de autorização foi atingido nas rotas de leitura com uma consulta de conta ativa e uma de slugs. No fluxo que altera o próprio cargo, a checagem do destino após a escrita pode requerer uma terceira consulta, restrita à releitura dos slugs. O mesmo worker real alternou contas, preservou isolamento após resposta 403, aplicou revogação com sessão ativa e preservou o autor SaaS e o representado na inspeção. As suítes também cobriram a separação entre plataforma e conta, identificação de recursos de outro tenant e antiescalada.
+
+**Limitações e riscos remanescentes.** A medição foi feita com dados sintéticos e tráfego sequencial. O catálogo observado tem 68 slugs, dos quais 56 aplicáveis ao administrador da conta. A verificação de arquitetura detecta cadeias diretas e aliases simples, com revisão necessária para novos padrões de obtenção do usuário. As interfaces e o conteúdo de ajuda mantiveram o comportamento, portanto a verificação ocorreu nas respostas HTTP.
+
+**Retomada da validação, 20/11/2026.** O harness em `OctaneMetrics.php`, `octane-client.php` e `octane-fixtures.php` passou a verificar 300 requisições alternadas no mesmo worker após respostas 403, 404 e 422, a memória PHP no início das requisições e a autoria de uma gravação normal logo após uma gravação em inspeção. A sequência passou na referência e na E03. A suíte em Docker passou novamente com 114 testes e 1.020 asserções. O harness SQLite passou com 45 asserções, e PHPStan e Pint dos arquivos da etapa passaram. O PHP local pulou o teste de redimensionamento de foto por falta de GD, coberto pela execução completa em Docker. As novas amostras de HTTP, memória e índices constam no [relatório de medições](001-e03-medicoes.md).
+
+**Homologação final, 20/11/2026.** O diff efetivo, incluindo arquivos ainda não rastreados, foi conferido contra `c9719a1` e corresponde ao escopo da E03. A revisão confirmou os bindings `scoped`, a limpeza do Octane, a invalidação após alteração do próprio cargo e a ausência de leituras implícitas da conta de execução fora do contexto. A suíte repetida em SQLite em memória passou com 114 testes e 1.020 asserções. O harness passou com 45 asserções, PHPStan e Pint dos arquivos da etapa passaram, `audit:check` confirmou 8 modelos e `permissions:sync` confirmou 68 slugs sem alterações. O worker real repetiu as 300 requisições com isolamento, revogação na requisição seguinte e autoria correta durante e após a inspeção. O PostgreSQL isolado confirmou os ganhos nos três planos de busca reversa e o rollback e a reaplicação da migration. A conferência de schema identificou zero índices com as colunas-alvo na primeira posição antes da E03 e um por alvo após a migration. A migration preservou integralmente um registro sintético em `directory_audit_events`. A tabela histórica e suas migrations anteriores estão fora do diff.
+
+**Pendências para trabalho futuro, sem bloqueio da E03.** Executar testes adicionais de concorrência e medir bloqueios e custos de escrita das migrations em bases maiores.
+
 ---
 
 ### E04: Empresas e estabelecimentos
@@ -1981,7 +2009,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | --- | --- | --- | --- | --- | --- |
 | E01 | Concluída | 19/11/2026 | 19/11/2026 | Seção 03, linha de base 15.2, revisões 2 a 4 | Arquitetura e PD-01 a PD-06 aprovadas; refinamentos DA-24 e DA-25 registrados para a E02 |
 | E02 | Concluída | 20/11/2026 | 20/11/2026 | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registros abaixo) | DA-26 a DA-30 aprovadas; I1 e I2 atribuídas à E05 |
-| E03 | Pendente | | | | |
+| E03 | Concluída | 20/11/2026 | 20/11/2026 | Registro E03 e relatório de medições | Concorrência e custos de migrations em bases maiores ficam para trabalho futuro |
 | E04 | Pendente | | | | |
 | E05 | Pendente | | | | |
 | E06 | Pendente | | | | |

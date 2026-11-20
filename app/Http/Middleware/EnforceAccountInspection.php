@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use Closure;
@@ -21,8 +22,13 @@ final class EnforceAccountInspection
         }
 
         $user = $request->user();
-        if ($user === null || $user->id !== $inspection->userId || $user->account_id !== $inspection->accountId
-            || $user->is_saas_admin || ! $user->hasVerifiedEmail()) {
+        if (
+            $user === null
+            || $user->id !== $inspection->userId
+            || app(AccountContext::class)->linkedId($user) !== $inspection->accountId
+            || $user->is_saas_admin
+            || ! $user->hasVerifiedEmail()
+        ) {
             Auth::guard('web')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

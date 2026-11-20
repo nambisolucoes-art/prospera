@@ -3,6 +3,7 @@
 namespace App\Domains\Usuarios\UI\Controllers;
 
 use App\Domains\Acessos\Application\Actions\AssignRoleAction;
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
 use App\Domains\Usuarios\Application\Actions\SendUserInvitationAction;
 use App\Domains\Usuarios\Application\Data\ProvisionUserData;
@@ -22,7 +23,7 @@ final class UserController
     public function index(Request $request, UserDirectoryQuery $directory): JsonResponse|View
     {
         $tenant = $request->routeIs('account.users.*');
-        $account = $tenant ? $request->user()->account()->firstOrFail() : null;
+        $account = $tenant ? app(AccountContext::class)->requireAccount(404) : null;
 
         return ApiPage::respond([
             'tenant' => $tenant,
@@ -55,8 +56,9 @@ final class UserController
         SendUserInvitationAction $invite,
     ): RedirectResponse {
         $tenant = $request->routeIs('account.users.*');
-        $data = ProvisionUserData::fromInput($request->all(), $tenant, $tenant ? $request->user()->account_id : null);
-        $account = $tenant ? $request->user()->account()->where('active', true)->firstOrFail() : null;
+        $accountId = $tenant ? app(AccountContext::class)->requireId() : null;
+        $data = ProvisionUserData::fromInput($request->all(), $tenant, $accountId);
+        $account = $tenant ? app(AccountContext::class)->requireAccount(404) : null;
         if ($tenant) {
             Gate::authorize('account.people.create');
             Gate::authorize('account.users.assign-role');

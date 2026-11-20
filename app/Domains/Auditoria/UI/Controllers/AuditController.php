@@ -2,6 +2,7 @@
 
 namespace App\Domains\Auditoria\UI\Controllers;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Auditoria\Application\Data\AuditFilterData;
 use App\Domains\Auditoria\Application\Queries\AuditQuery;
 use App\Domains\Auditoria\Application\Queries\AuditValueFormatter;
@@ -18,7 +19,7 @@ final class AuditController
     {
         $platform = $request->is('saas/*');
         $filters = AuditFilterData::fromInput($request->query(), $platform)->values;
-        $scope = $query->scoped($request->user(), $platform);
+        $scope = $query->scoped($platform ? null : app(AccountContext::class)->requireId(), $platform);
 
         // As opções de filtro usam a mesma consulta com escopo da listagem.
         $actors = (clone $scope)
@@ -78,7 +79,8 @@ final class AuditController
         AuditValueFormatter $formatter,
     ): JsonResponse {
         $platform = $request->is('saas/*');
-        $record = $query->scoped($request->user(), $platform)->findOrFail($recordId);
+        $accountId = $platform ? null : app(AccountContext::class)->requireId();
+        $record = $query->scoped($accountId, $platform)->findOrFail($recordId);
 
         $technical = $platform
             ? $request->user()->can('platform.audit.technical')

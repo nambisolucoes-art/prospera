@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Models\User;
@@ -23,6 +25,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(AuditContext::class);
+        $this->app->scoped(AccountContext::class);
+        $this->app->scoped(EffectivePermissions::class);
     }
 
     /**
@@ -46,7 +50,13 @@ class AppServiceProvider extends ServiceProvider
                     $context->actorName = $user->name;
                     $context->context = $user->is_saas_admin ? 'platform' : 'account';
                 }
-                AuditLog::record('user', $user->id, $user->account_id, $action, $user->name);
+                AuditLog::record(
+                    'user',
+                    $user->id,
+                    app(AccountContext::class)->linkedId($user),
+                    $action,
+                    $user->name,
+                );
             });
         }
 
@@ -56,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
                 return null;
             }
 
-            return in_array($ability, $user->permissionSlugs(), true);
+            return app(EffectivePermissions::class)->allows($user, $ability);
         });
     }
 

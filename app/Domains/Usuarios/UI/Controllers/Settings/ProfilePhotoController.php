@@ -2,6 +2,7 @@
 
 namespace App\Domains\Usuarios\UI\Controllers\Settings;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Actions\SaveProfilePhotoAction;
@@ -40,7 +41,7 @@ final class ProfilePhotoController extends Controller
         string $userId,
         string $version,
     ): StreamedResponse {
-        $account = $request->routeIs('account.users.*') ? $request->user()->account()->firstOrFail() : null;
+        $account = $request->routeIs('account.users.*') ? app(AccountContext::class)->requireAccount(404) : null;
         $user = $directory->findWithPhoto($account, (int) $userId, $version);
 
         return $this->image($user, $version);

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Acessos\Application\Actions;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -14,7 +15,7 @@ final class AssignRoleAction
         Gate::authorize('account.users.assign-role');
 
         $operator = auth()->user();
-        abort_unless($operator->account_id === $accountId, 403);
+        abort_unless(app(AccountContext::class)->requireId() === $accountId, 403);
 
         $role = Role::where('account_id', $accountId)->findOrFail($roleId);
 

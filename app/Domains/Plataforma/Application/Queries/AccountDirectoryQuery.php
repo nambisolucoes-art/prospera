@@ -9,6 +9,11 @@ use Illuminate\Support\Str;
 
 final class AccountDirectoryQuery
 {
+    public function activeAccount(int $accountId): ?Client
+    {
+        return Client::whereKey($accountId)->where('active', true)->first();
+    }
+
     /** @return LengthAwarePaginator<int, Client> */
     public function list(AccountFiltersData $filters): LengthAwarePaginator
     {

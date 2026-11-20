@@ -98,7 +98,11 @@ Administradores de empresa e de estabelecimento não criam nem alteram cargos, n
 
 ### Resolução e custo (E03 e E05)
 
-`EffectivePermissions` (`scoped`) carrega as permissões na primeira checagem da requisição, em no máximo 2 queries, e memoriza cada resultado. Detalhes em [Performance](performance.md).
+`AccountContext` e `EffectivePermissions` usam binding `scoped`. Na E03, o contexto resolve a conta ativa a partir do vínculo atual, inclusive quando o guard contém o usuário representado em inspeção. O contexto de auditoria identifica o autor real separadamente. O modo de inspeção continua bloqueando escritas no middleware.
+
+Na primeira checagem para um usuário da conta, o resolvedor consulta a conta ativa e carrega os slugs do cargo dessa conta. Gate, Central de Ajuda e `auth.permissions` reutilizam o resultado. Perfis globais consultam apenas o catálogo dos escopos aplicáveis. Os privilégios do administrador integral continuam provisionados pela sincronização do cargo protegido. A próxima requisição resolve tudo novamente.
+
+Ao alterar o pivô de um cargo, a Action invalida os slugs da requisição atual para preservar as checagens após a escrita. Nesse fluxo uma nova leitura de slugs pode ser necessária, com a conta ativa já resolvida. A meta de até duas consultas vale para a resolução inicial e para as rotas de leitura medidas. Detalhes em [Performance](performance.md).
 
 ## Nomes fechados na E02
 

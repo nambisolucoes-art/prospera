@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
-use App\Domains\Acessos\Domain\Models\Permission;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
@@ -111,45 +111,7 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
     /** @return array<int,string> */
     public function permissionSlugs(): array
     {
-        if (! $this->access_enabled) {
-            return [];
-        }
-
-        $systemPermissions = Permission::where('is_system', true);
-
-        if ($this->is_saas_admin) {
-            return $systemPermissions
-                ->whereNull('account_id')
-                ->whereIn('scope', ['platform', 'self'])
-                ->pluck('slug')
-                ->map(fn ($slug): string => (string) $slug)
-                ->all();
-        }
-
-        if (! $this->account_id) {
-            return $systemPermissions
-                ->whereNull('account_id')
-                ->where('scope', 'self')
-                ->pluck('slug')
-                ->map(fn ($slug): string => (string) $slug)
-                ->all();
-        }
-
-        if (! $this->account()->where('active', true)->exists()) {
-            return [];
-        }
-
-        return $systemPermissions
-            ->whereHas('roles', fn ($role) => $role
-                ->where('roles.id', $this->role_id)
-                ->where('roles.account_id', $this->account_id))
-            ->whereIn('scope', ['account', 'self'])
-            ->where(fn ($query) => $query
-                ->whereNull('account_id')
-                ->orWhere('account_id', $this->account_id))
-            ->pluck('slug')
-            ->map(fn ($slug): string => (string) $slug)
-            ->all();
+        return app(EffectivePermissions::class)->slugsFor($this);
     }
 
     public function applyIdentity(UserIdentityDTO $identity): void
