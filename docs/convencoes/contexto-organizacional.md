@@ -104,7 +104,7 @@ Um tenant com uma empresa e um estabelecimento não percebe a estrutura:
 - o seletor organizacional fica oculto;
 - rotas operacionais sem código redirecionam para o estabelecimento principal, e o contexto continua definido na URL;
 - o filtro de empresa some das listagens, e o menu Empresas leva direto à edição da empresa;
-- formulários de Pessoas mantêm as seções atuais, sem a distinção entre dados centrais e dados desta empresa;
+- formulários de Pessoas mantêm as seções atuais, sem a distinção entre dados centrais e dados desta empresa, apenas com o aviso de que contatos e endereço pertencem ao cadastro compartilhado da conta;
 - cargos com abrangência "Toda a conta" são o padrão.
 
 A interface só passa a mostrar empresa, estabelecimento e abrangência quando existir mais de uma opção real.

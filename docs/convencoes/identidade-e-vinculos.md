@@ -15,8 +15,16 @@ Regras gerais:
 
 - **Sem cópia automática:** nenhuma camada altera outra implicitamente. Editar o nome ou o e-mail da pessoa não altera a identidade (corrige A20 na E05). Na criação do vínculo, a pessoa da conta recebe nome e e-mail iniciais da identidade; depois disso, cada camada segue seu próprio fluxo.
 - **Pessoa por conta:** a mesma identidade tem uma pessoa diferente em cada conta. Dados cadastrais não atravessam contas.
-- **Sem exceção de tenant:** nenhum administrador de tenant, empresa ou estabelecimento altera diretamente o e-mail de acesso, a senha, o segundo fator, as chaves de acesso ou a situação da identidade de outra pessoa, nem quando ela tem um único vínculo.
+- **Sem exceção de tenant:** nenhum administrador de tenant, empresa ou estabelecimento altera diretamente a foto, o e-mail de acesso, a senha, o segundo fator, as chaves de acesso ou a situação da identidade de outra pessoa, nem quando ela tem um único vínculo.
 - **Identidade somente leitura:** na interface da conta, o e-mail de acesso aparece apenas para leitura, com o rótulo "E-mail de acesso".
+
+## Autoridade do administrador da conta
+
+- O administrador da conta gerencia vínculos e atribuições dentro da própria autoridade: vínculos com escopo tenant, atribuições sobre os nós que ele cobre (antiescalada em [Cargos e permissões](permissoes.md)).
+- A identidade global (foto, e-mail de acesso, senha, segundo fator e chaves de acesso) pertence ao titular. Nenhuma permissão `account.*` concede alteração desses dados. A foto só muda por `self.profile.photo`.
+- `account.users.photo` **não é uma permissão**: é o nome da rota que exibe a foto de um usuário da conta, protegida por `account.users.view`. Ela apenas lê a imagem.
+- Reativar o vínculo devolve o acesso àquela conta. Não reativa a identidade global: se `access_enabled` estiver desligado, só a plataforma o religa.
+- O operador autorizado pode disparar a recuperação de senha, sem definir nem conhecer a senha do titular.
 
 ## Fluxos
 
@@ -35,7 +43,7 @@ A plataforma pode iniciar a troca em suporte, com autoria registrada. A conclus�
 
 - Usa a redefinição de senha do Fortify, sempre enviada ao e-mail da própria identidade.
 - A tela pública de esqueci a senha responde da mesma forma para e-mail existente ou inexistente.
-- Um operador de escopo tenant pode **disparar** o envio do link pela ação "Enviar link de redefinição de senha" (`account.users.reset-password`). Ele não vê, não define e não recebe a senha nem o link.
+- Um operador de escopo tenant pode **disparar** o envio do link pela ação "Enviar link de redefinição de senha" (`account.users.send-password-reset`). Ele não vê, não define e não recebe a senha nem o link. O nome descreve a operação real: enviar o link, e não redefinir a senha.
 - O disparo é auditado como evento de vínculo, com o operador como autor.
 
 ### Reenvio de convite
@@ -46,7 +54,7 @@ A plataforma pode iniciar a troca em suporte, com autoria registrada. A conclus�
 
 ### Suspensão e reativação do vínculo
 
-- Suspender o acesso à conta (`account.users.revoke`) e reativá-lo (`account.users.reactivate`) são operações de escopo tenant.
+- Suspender o acesso à conta (`account.users.revoke`) e reativá-lo (`account.users.reactivate`) são operações de escopo tenant sobre o vínculo. Nenhuma das duas altera a identidade global.
 - A suspensão bloqueia todas as permissões daquela conta na requisição seguinte e não afeta outras contas, a identidade nem as atribuições gravadas.
 - Administradores de empresa e de estabelecimento não suspendem vínculos. Eles retiram o acesso local removendo as atribuições que gerenciam.
 - `access_enabled = false` bloqueia a identidade inteira e é exclusivo da plataforma.
@@ -89,12 +97,25 @@ Validações de unicidade de documento seguem a mesma regra: são sempre limitad
 | `account.users.create` | tenant, company, establishment | Cria identidade nova, vínculo e a primeira atribuição no escopo do operador. Nunca altera identidade existente |
 | `account.users.update` | tenant | Dados do vínculo na conta. Não inclui a identidade |
 | `account.users.revoke`, `account.users.reactivate` | tenant | Suspender e reativar o acesso à conta |
-| `account.users.reset-password` | tenant | Disparar o link de redefinição de senha |
+| `account.users.send-password-reset` | tenant | Disparar o link de redefinição de senha ao e-mail do titular |
 | `account.users.invite` | tenant | Reenviar o convite |
 | `account.users.assign-role` | tenant, company, establishment | Conceder e retirar atribuições no nó |
 | `self.profile.*`, `self.security.*` | identidade | Fluxos da própria pessoa |
 
-`account.users.reactivate`, `account.users.reset-password` e `account.users.invite` são nomes fechados na E02 e entram no catálogo na E05.
+`account.users.reactivate`, `account.users.send-password-reset` e `account.users.invite` são nomes fechados na E02 e entram no catálogo na E05. Não existe permissão de tenant para foto, e-mail de acesso, senha ou fatores de autenticação de outra pessoa.
+
+## Segurança de e-mail (E05)
+
+As incompatibilidades I1 e I2 do plano são tarefas da E05:
+
+- alteração do e-mail de acesso com verificação do novo endereço antes da troca;
+- aviso ao endereço anterior;
+- encerramento das demais sessões da identidade após a troca de e-mail e após a redefinição de senha, preservando a sessão que concluiu a operação;
+- respostas neutras na recuperação de acesso, na troca do próprio e-mail, na criação de usuário e na edição de pessoa;
+- limitação de tentativas (`throttle`) nas rotas de recuperação de acesso, verificação e troca de e-mail, e proteção contra enumeração de contas;
+- testes de segurança dos cenários 54 a 57 do plano.
+
+A correção de I2 é condição para disponibilizar publicamente os fluxos afetados.
 
 ## Auditoria
 

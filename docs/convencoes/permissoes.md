@@ -107,7 +107,7 @@ Administradores de empresa e de estabelecimento não criam nem alteram cargos, n
 | `account.account-data.update` | Substitui `account.establishment.update` na E04 (Dados da conta), com migração do pivô |
 | `account.companies.list/view/create/update/activate/deactivate` | E04 |
 | `account.establishments.list/view/create/update/activate/deactivate/promote` | E04; `promote` promove o estabelecimento principal |
-| `account.users.reactivate`, `account.users.reset-password`, `account.users.invite` | E05 ([Identidade e vínculos](identidade-e-vinculos.md)) |
+| `account.users.reactivate`, `account.users.send-password-reset`, `account.users.invite` | E05 ([Identidade e vínculos](identidade-e-vinculos.md)) |
 | `account.points.*` | Removidas na E04 (PD-05) |
 
 ## Auditoria

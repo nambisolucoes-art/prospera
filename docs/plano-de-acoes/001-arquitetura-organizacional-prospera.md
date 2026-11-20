@@ -3,11 +3,11 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 concluída em 19/11/2026. E02 em validação desde 20/11/2026 |
+| Situação do documento | Aprovado. E01 concluída em 19/11/2026. E02 concluída em 20/11/2026 |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
-| Revisão | 5 (20/11/2026), em validação. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
-| Revisão 5 | Execução da E02 (contrato organizacional). Convenções publicadas em `docs/convencoes/`, `AGENTS.md` emendado e nomenclaturas fechadas (DA-26 a DA-30). Seções 6.2, 6.3, 7.2, 8.2.1, 10.2.1, 12.1, 12.2, E04, R07, 26, 27 e 28 ajustadas. Detalhes no registro da seção 26 |
+| Revisão | 6 (20/11/2026): encerramento da E02. Revisão 5 (20/11/2026): execução da E02. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
+| Revisões 5 e 6 | Revisão 6: ajustes da validação (identidade, contatos, segurança de e-mail na E05, URLs) e aprovação de DA-26 a DA-30. Revisão 5: execução da E02 (contrato organizacional). Convenções publicadas em `docs/convencoes/`, `AGENTS.md` emendado e nomenclaturas fechadas (DA-26 a DA-30). Seções 6.2, 6.3, 7.2, 8.2.1, 10.2.1, 12.1, 12.2, E04, R07, 26, 27 e 28 ajustadas. Detalhes no registro da seção 26 |
 | Antecessor | Relatório de auditoria arquitetural apresentado na sessão anterior (não versionado) |
 | Regra de uso | Executar uma etapa por vez, somente após autorização explícita |
 
@@ -166,7 +166,7 @@ PROSPERA
 | A08 | Custo do RBAC | [C] Cada `can()` executa `User::permissionSlugs()`: 1 query de conta ativa e 1 de permissões. A Central de Ajuda faz 26 queries, 13 idênticas | Medição da seção 15.2 |
 | A09 | Administrador | [C] `DefaultRolesAction` acrescenta ao cargo `administrator` todas as permissões `account` e `self` em cada sincronização. Nunca inclui `platform` | `DefaultRolesAction::execute` |
 | A10 | Auditoria | [C] Central (`audit_records`, `Auditable`, `AuditsChanges`, `AuditLog::transaction`, `AuditContext` com binding scoped), filtrada por `account_id`; opções de filtro e detalhe usam a mesma consulta com escopo | `Auditoria/*` |
-| A11 | Trilha paralela | [C] `DirectoryAudit` grava em `directory_audit_events` em 5 pontos (`AssignRoleAction`, `SaveRoleAction`, `CreateUserAction` e outros), duplicando eventos já registrados por `AuditsChanges` | `grep DirectoryAudit::record` |
+| A11 | Trilha paralela | [C] (atualização de 20/11/2026: removida no commit `a661b8d`; a tabela continua no banco sem novas gravações) `DirectoryAudit` gravava em `directory_audit_events` em 5 pontos (`AssignRoleAction`, `SaveRoleAction`, `CreateUserAction` e outros), duplicando eventos já registrados por `AuditsChanges` | `grep DirectoryAudit::record` |
 | A12 | Auditoria da plataforma | [C] `/saas/auditoria` não filtra conta (`AuditQuery::scoped` com `platform = true`). O administrador SaaS vê os eventos de negócio de todos os tenants sem inspeção | `AuditQuery::scoped` |
 | A13 | Inspeção | [C] Troca de sessão para um usuário da conta, nos modos Somente leitura e Leitura e edição. A autoria registra o administrador e o usuário representado. Escritas fora de `account.*` são bloqueadas | `StartAccountInspectionAction`, `EnforceAccountInspection`, `AuditContext::begin` |
 | A14 | Clientes e fornecedores | [C] `customers` e `suppliers` são 1:1 com a pessoa e pertencem à conta (`person_id` único); não há empresa | migrations `2026_11_18_000007` e `000010` |
@@ -225,11 +225,11 @@ Decisões consolidadas. O registro formal está na seção 28.
 | DA-23 | Cada migration é classificada como reversível, reversível com perda ou de recuperação somente por backup. Etapas com ponto de não retorno usam janela de reversão, backup verificado e correção para frente (seção 23.1) | [R] |
 | DA-24 | Identidade autenticada, cadastro de pessoa e vínculo organizacional são separados. Nenhum administrador de tenant altera a identidade de login, mesmo com vínculo único. Alteração de e-mail e recuperação de acesso só pelos fluxos seguros da própria pessoa (revisão 4) | [DP] |
 | DA-25 | Contatos centrais da pessoa separados dos dados e contatos da relação comercial de cada empresa. Alteração local não modifica dados comerciais de outras empresas. A política campo a campo de edição e visibilidade é fechada na E02 (revisão 4) | [DP] |
-| DA-26 | O contrato organizacional é publicado em convenções separadas por assunto (`contexto-organizacional.md`, `identidade-e-vinculos.md`, `pessoas-e-contatos.md`, `performance.md`, `checklist-modulos.md`), além de `permissoes.md` e `auditoria.md` atualizadas, e referenciado no `AGENTS.md` (revisão 5) | [R] Em validação |
-| DA-27 | Nomes de código: domínio `App\Domains\Organizacao`; `App\Support\TaxDocument`; serviços `scoped` em `App\Domains\Acessos\Application\Context` (`AccountContext`, `EffectivePermissions`, `OrganizationContext`); middleware `ResolveOrganizationContext`; models `Company`, `Establishment`, `AccountMembership`, `RoleAssignment`, `RoleAvailability`; permissões `account.account-data.update`, `account.establishments.promote`, `account.users.reactivate`, `account.users.reset-password` e `account.users.invite` (revisão 5) | [R] Em validação |
-| DA-28 | URLs e identificadores: operação em `/conta/empresa/{empresa}` e `/conta/estabelecimento/{estabelecimento}`, consolidado pelo código reservado `todos`, tenant em `/contas/{conta}` (E09); administração com ID numérico; código com letras minúsculas, números e hífen, de 2 a 40 caracteres, único por tenant, imutável na v1, com palavras reservadas; terminologia de menus da convenção (revisão 5) | [R] Em validação |
-| DA-29 | Fluxos de identidade: troca de e-mail só depois da confirmação no novo endereço, com aviso ao anterior e encerramento das demais sessões; respostas neutras também na recuperação de senha e na troca do próprio e-mail; disparo do link de redefinição e reenvio de convite só por escopo tenant (revisão 5) | [R] Em validação |
-| DA-30 | Pessoas: classificação dos campos atuais (identificação central, contatos centrais, endereço, dados comerciais por empresa, contatos da relação, dados operacionais restritos), `contact_name` mantido central, seções "Dados centrais" e "Dados desta empresa" só com mais de uma empresa ativa e aviso ao editar contatos centrais de pessoa com várias empresas (revisão 5) | [R] Em validação |
+| DA-26 | O contrato organizacional é publicado em convenções separadas por assunto (`contexto-organizacional.md`, `identidade-e-vinculos.md`, `pessoas-e-contatos.md`, `performance.md`, `checklist-modulos.md`), além de `permissoes.md` e `auditoria.md` atualizadas, e referenciado no `AGENTS.md` (revisão 5) | [R] Aprovada |
+| DA-27 | Nomes de código: domínio `App\Domains\Organizacao`; `App\Support\TaxDocument`; serviços `scoped` em `App\Domains\Acessos\Application\Context` (`AccountContext`, `EffectivePermissions`, `OrganizationContext`); middleware `ResolveOrganizationContext`; models `Company`, `Establishment`, `AccountMembership`, `RoleAssignment`, `RoleAvailability`; permissões `account.account-data.update`, `account.establishments.promote`, `account.users.reactivate`, `account.users.send-password-reset` e `account.users.invite` (revisões 5 e 6) | [R] Aprovada |
+| DA-28 | URLs e identificadores: operação em `/conta/empresa/{empresa}` e `/conta/estabelecimento/{estabelecimento}`, consolidado pelo código reservado `todos`, tenant em `/contas/{conta}` (E09); administração com ID numérico; código com letras minúsculas, números e hífen, de 2 a 40 caracteres, único por tenant, imutável na v1, com palavras reservadas; terminologia de menus da convenção; o identificador técnico do tenant é definido na E09 (revisões 5 e 6) | [R] Aprovada |
+| DA-29 | Fluxos de identidade: troca de e-mail só depois da confirmação no novo endereço, com aviso ao anterior e encerramento das demais sessões; respostas neutras também na recuperação de senha e na troca do próprio e-mail; disparo do link de redefinição e reenvio de convite só por escopo tenant; limitação de tentativas; correções I1 e I2 na E05, com I2 como condição para disponibilizar publicamente os fluxos afetados (revisões 5 e 6) | [R] Aprovada |
+| DA-30 | Pessoas: classificação dos campos atuais (identificação central, contatos centrais, endereço, dados comerciais por empresa, contatos da relação, dados operacionais restritos), `contact_name` mantido central, seções "Dados centrais" e "Dados desta empresa" só com mais de uma empresa ativa, aviso permanente de cadastro compartilhado ao editar contatos e endereço centrais e aviso adicional para pessoa com várias empresas; "Pessoa de contato" por empresa avaliada na E07 (revisões 5 e 6) | [R] Aprovada |
 
 ---
 
@@ -481,7 +481,7 @@ Consequências:
 | `account.customers.*`, `account.suppliers.*` | company | Empresa da relação | |
 | `account.users.list/view` | tenant, company, establishment | Lista os vínculos com atribuição dentro do escopo do operador e mostra **somente** as atribuições desse escopo; vínculos sem atribuição e atribuições de fora do escopo só com atribuição de tenant | |
 | `account.users.create` | tenant, company, establishment | Nó da primeira atribuição criada na mesma operação. Só cria identidade nova; nunca altera uma identidade existente (8.5) | Exige tenant (vínculo sem atribuição) |
-| `account.users.update` (dados de acesso do vínculo), `account.users.revoke` (suspender o vínculo), `account.users.reactivate` (reativar), `account.users.reset-password` (disparar o link de redefinição) e `account.users.invite` (reenviar convite) (nomes fechados na E02) | tenant | Tenant. O vínculo é do tenant inteiro; administradores de empresa e de unidade retiram o acesso local removendo as atribuições que gerenciam (`assign-role`) | |
+| `account.users.update` (dados de acesso do vínculo), `account.users.revoke` (suspender o vínculo), `account.users.reactivate` (reativar o vínculo, sem reativar a identidade), `account.users.send-password-reset` (disparar o link de redefinição) e `account.users.invite` (reenviar convite) (nomes fechados na E02) | tenant | Tenant. O vínculo é do tenant inteiro; administradores de empresa e de unidade retiram o acesso local removendo as atribuições que gerenciam (`assign-role`) | |
 | `account.users.assign-role` | tenant, company, establishment | Nó da atribuição criada ou removida, independentemente das demais atribuições da pessoa (8.5) | |
 | `account.audit.list/view/technical` | tenant, company, establishment | Nó do evento (`establishment_id`, senão `company_id`, senão tenant) | |
 | `account.companies.list/view` | tenant, company | Empresa (a listagem mostra só as empresas cobertas) | |
@@ -522,7 +522,7 @@ A E05 classifica **todas** as permissões existentes. A sincronização falha se
 
    | Camada | O que inclui | Quem altera |
    | --- | --- | --- |
-   | Identidade global | E-mail de acesso, senha, 2FA, chaves de acesso, nome da identidade, `access_enabled` | Somente a própria pessoa (`self.*`), pelos fluxos seguros, e a plataforma (suporte, auditado). **Nenhum administrador de tenant, empresa ou unidade altera a identidade, nem com vínculo único** (revisão 4, DA-24). O administrador do tenant pode apenas disparar o envio do link de redefinição de senha ou reenviar o convite para o e-mail da própria identidade |
+   | Identidade global | Foto, e-mail de acesso, senha, 2FA, chaves de acesso, nome da identidade, `access_enabled` | Somente a própria pessoa (`self.*`), pelos fluxos seguros, e a plataforma (suporte, auditado). **Nenhum administrador de tenant, empresa ou unidade altera a identidade, nem com vínculo único** (revisão 4, DA-24). O administrador do tenant pode apenas disparar o envio do link de redefinição de senha ou reenviar o convite para o e-mail da própria identidade |
    | Vínculo com o tenant | Criar, suspender, reativar ou revogar o vínculo; pessoa vinculada | Somente atribuição de escopo tenant (`account.users.update` e `account.users.revoke`) |
    | Atribuições locais | Cargo em um nó (tenant, empresa ou unidade) | Qualquer operador com `account.users.assign-role` sobre o nó da atribuição (item 3) |
 
@@ -784,9 +784,9 @@ Isso é a regra de alvo da 8.2 aplicada em SQL: o nó do evento precisa estar co
 
 ### 11.4 Consolidação da trilha legada
 
-1. Substituir as 5 chamadas de `DirectoryAudit::record` por `AuditLog` (ou removê-las quando `AuditsChanges` já registra o mesmo fato), sem perder campos.
+1. ~~Substituir as 5 chamadas de `DirectoryAudit::record`~~: concluído em 20/11/2026 (commit `a661b8d`). A classe foi removida e o histórico central é a única trilha; os mesmos fatos são registrados por `AuditsChanges` e `recordAuditFieldChange()`.
 2. Migrar as linhas de `directory_audit_events` posteriores à migration `2026_11_18_000004` para `audit_records`, com `legacy_key`, o mesmo mecanismo já usado.
-3. Remover a classe e, numa migration posterior e reversível, a tabela, com exportação prévia.
+3. Remover, numa migration posterior e reversível, a tabela `directory_audit_events`, com exportação prévia e aprovação (apaga o histórico guardado nela).
 
 Além disso, `access_catalog_events` continua recebendo a sincronização do catálogo em paralelo com `audit_records`. Ela será tratada da mesma forma.
 
@@ -1486,6 +1486,14 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - Consulta contextual mínima da auditoria e proteção da concessão de auditoria local (11.1.1).
 - Edição de pessoas por classe de dado (10.2.1). Até a E07, toda relação comercial é da única empresa do tenant, então a regra de identificação só passa a restringir alguém quando houver mais de uma empresa.
 - Nome e e-mail da pessoa deixam de propagar para a identidade (A20). A verificação de e-mail de identidade usa resposta neutra.
+- **Segurança de e-mail (I1 e I2, revisão 6):**
+  - alteração do e-mail de acesso com verificação do novo endereço antes da troca (I1);
+  - aviso ao endereço anterior (I1);
+  - encerramento das demais sessões da identidade após a troca de e-mail e após a redefinição de senha, preservando a sessão que concluiu a operação (I1);
+  - respostas neutras na recuperação de acesso, na troca do próprio e-mail, na criação de usuário e na edição de pessoa (I2);
+  - limitação de tentativas nas rotas de recuperação de acesso, verificação e troca de e-mail, e proteção contra enumeração de contas (I2);
+  - a correção de I2 é condição para disponibilizar publicamente os fluxos afetados.
+- Reativar o vínculo não reativa a identidade global; foto, e-mail, senha e fatores de autenticação continuam exclusivos do titular.
 
 **Escopo técnico.**
 - **Banco:**
@@ -1512,7 +1520,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - **Auditoria:**
   - criação e remoção de atribuições com `company_id` e `establishment_id` do escopo (11.1);
   - mudanças de disponibilidade registradas como relação do cargo;
-  - novas chamadas a `DirectoryAudit` proibidas; as chamadas de `AssignRoleAction` saem junto com ela;
+  - trilha única em `audit_records` (a classe `DirectoryAudit` já foi removida no commit `a661b8d`);
   - consulta contextual mínima em `/conta/auditoria` (11.1.1); concessão local de `account.audit.*` liberada só com ela ativa.
 
 **Componentes envolvidos.**
@@ -1538,10 +1546,11 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - Auditor local vê só os eventos dos nós autorizados na lista, na contagem, nas opções de filtro e no detalhe; sem eventos de tenant.
 - Concessão local de auditoria bloqueada se a consulta contextual não estiver ativa.
 - Existência de e-mail em outro tenant não revelada.
+- Enumeração de contas pela recuperação de acesso e pela troca de e-mail, com limitação de tentativas.
 - Nenhuma permissão `platform` em cargos de tenant.
 
 **Testes.**
-- Cenários 6 a 16, 22 (consulta mínima), 29, 36 a 42 e 50 a 53.
+- Cenários 6 a 16, 22 (consulta mínima), 29, 36 a 42 e 50 a 57.
 - Equivalência pós-migração.
 - Alteração de disponibilidade que descobre atribuições.
 
@@ -1549,6 +1558,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - Matriz de cenários verde.
 - Usuários existentes com exatamente as mesmas permissões após a migração.
 - 2 queries de autorização no máximo.
+- I1 e I2 corrigidas, com os cenários 54 a 57 verdes.
 - Ajuda e tours de Cargos, Usuários e Pessoas revisados.
 
 **Riscos.**
@@ -1671,7 +1681,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 **Regras de negócio.** Seção 11. As colunas e a gravação do contexto existem desde a E04 (11.1), e a consulta contextual mínima desde a E05 (11.1.1). Esta etapa trata filtros por empresa e unidade, escolha explícita da visão consolidada, índices de leitura medidos, legado e plataforma. Se a E05 tiver saído com a auditoria local bloqueada, esta etapa entrega a consulta contextual e o desbloqueio.
 
 **Escopo técnico.**
-- **Banco:** índices de leitura candidatos (16.3), só com ganho medido; migração de `directory_audit_events` pendentes; remoção posterior das tabelas legadas.
+- **Banco:** índices de leitura candidatos (16.3), só com ganho medido; migração das linhas de `directory_audit_events` e `access_catalog_events`; remoção posterior das tabelas legadas, com aprovação.
 - **Backend:**
   - evolução da consulta contextual da E05 (ou sua entrega e o desbloqueio, se a E05 tiver saído bloqueada);
   - filtros de empresa e unidade em `AuditFilterData`;
@@ -1679,7 +1689,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - **Frontend:** filtros de empresa e unidade (ocultos quando não houver mais de uma opção); detalhe mostra empresa e unidade.
 
 **Componentes envolvidos.**
-- Existentes: `Auditable`, `AuditsChanges`, `AuditLog`, `AuditContext`, `AuditQuery`, `AuditController`, `AuditFilterData`, `DirectoryAudit`, `audit.tsx`, `AuditRecordDetails.tsx`, `CheckAuditCommand`.
+- Existentes: `Auditable`, `AuditsChanges`, `AuditLog`, `AuditContext`, `AuditQuery`, `AuditController`, `AuditFilterData`, `audit.tsx`, `AuditRecordDetails.tsx`, `CheckAuditCommand`.
 
 **Dependências.** E06; E07 recomendada (gera eventos de empresa reais).
 
@@ -1692,7 +1702,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 **Testes.** Cenário 22, consolidação legada sem duplicatas, plataforma conforme PD-02, `audit:check`.
 
 **Critérios de aceite.**
-- Nenhuma escrita em `directory_audit_events`.
+- Nenhuma escrita em `directory_audit_events` (já atendido desde o commit `a661b8d`) nem em `access_catalog_events`.
 - Cenários verdes.
 - Metas da 15.3 cumpridas.
 - Ajuda e tour de Auditoria revisados.
@@ -1859,7 +1869,11 @@ A E07 e a E08 podem ser feitas em paralelo se for necessário, mas a E08 testa m
 | 50 | Administrador de unidade concede e retira cargo, na própria unidade, de pessoa que também atua em outra empresa; as atribuições de lá não aparecem nem mudam | E05 | Feature |
 | 51 | Retirar a última atribuição local não suspende o vínculo nem altera a identidade | E05 | Feature |
 | 52 | Edição de nome e e-mail da pessoa não altera a identidade global; e-mail usado em outro tenant recebe resposta neutra | E05 | Segurança |
-| 53 | Nenhum administrador de tenant altera e-mail de acesso, senha ou situação da identidade, mesmo com vínculo único; troca de e-mail só pelo fluxo da própria pessoa, com confirmação; o administrador apenas dispara o link de redefinição | E05 | Segurança |
+| 53 | Nenhum administrador de tenant altera foto, e-mail de acesso, senha, fatores de autenticação ou situação da identidade, mesmo com vínculo único; troca de e-mail só pelo fluxo da própria pessoa, com confirmação; o administrador apenas dispara o link de redefinição | E05 | Segurança |
+| 54 | Troca do próprio e-mail: a troca só ocorre após a verificação do novo endereço; o anterior recebe aviso; as demais sessões são encerradas e a sessão atual é preservada (I1) | E05 | Segurança |
+| 55 | Respostas neutras: recuperação de acesso, troca do próprio e-mail, criação de usuário e edição de pessoa respondem igual para e-mail existente ou inexistente (I2) | E05 | Segurança |
+| 56 | Limitação de tentativas nas rotas de recuperação de acesso, verificação e troca de e-mail (I2) | E05 | Segurança |
+| 57 | Reativar o vínculo não religa `access_enabled` da identidade; disparar a recuperação não expõe nem define a senha | E05 | Segurança |
 
 Os testes 27, 29, 45 (parte concorrente), 48 e as medições exigem PostgreSQL e, no caso do 48, Octane real. A suíte padrão usa SQLite em memória por regra do projeto (`tests/bootstrap.php`), então ele roda no ambiente isolado do harness, sem alterar esse isolamento. Os demais cenários continuam na suíte padrão em SQLite.
 
@@ -1966,7 +1980,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | Etapa | Estado | Início | Conclusão | Evidências (testes, medições, telas) | Observações |
 | --- | --- | --- | --- | --- | --- |
 | E01 | Concluída | 19/11/2026 | 19/11/2026 | Seção 03, linha de base 15.2, revisões 2 a 4 | Arquitetura e PD-01 a PD-06 aprovadas; refinamentos DA-24 e DA-25 registrados para a E02 |
-| E02 | Em validação | 20/11/2026 | | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registro abaixo) | Aguarda revisão do responsável do produto; DA-26 a DA-30 em validação |
+| E02 | Concluída | 20/11/2026 | 20/11/2026 | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registros abaixo) | DA-26 a DA-30 aprovadas; I1 e I2 atribuídas à E05 |
 | E03 | Pendente | | | | |
 | E04 | Pendente | | | | |
 | E05 | Pendente | | | | |
@@ -2064,6 +2078,19 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
   - definir na E09 a coluna do código da conta para `/contas/{conta}`.
 - **Critérios de aceite da etapa:** os 10 critérios da autorização foram conferidos e estão atendidos, com as pendências acima. A E02 fica em validação até a revisão.
 
+#### E02, revisão 6 e encerramento (20/11/2026)
+
+- **Aprovação:** DA-26 a DA-30 e a publicação das convenções organizacionais, de identidade, contatos, permissões, auditoria e performance.
+- **Ajustes da validação:**
+  - identidade: `account.users.photo` confirmado como nome de rota de leitura da foto (protegida por `account.users.view`), não como permissão; nenhuma permissão `account.*` altera foto, e-mail, senha ou fatores de autenticação do titular; reativar o vínculo não reativa a identidade; `account.users.reset-password` renomeada para `account.users.send-password-reset`, que descreve o envio do link;
+  - contatos: aviso permanente de cadastro compartilhado ao editar contatos e endereço centrais, inclusive com uma empresa só; DA-25 preservada; sem sincronização entre empresas; "Pessoa de contato" por empresa avaliada na E07;
+  - segurança de e-mail: I1 e I2 registradas como tarefas da E05 (verificação do novo endereço, aviso ao anterior, encerramento das demais sessões, respostas neutras, limitação de tentativas e proteção contra enumeração), com os cenários 54 a 57; a correção de I2 é condição para disponibilizar publicamente os fluxos afetados;
+  - URLs: prefixos, formato e imutabilidade dos códigos e o código reservado `todos` aprovados; o identificador técnico do tenant fica para a E09, sem bloquear a E02.
+- **Coerência:** o plano foi atualizado para refletir a remoção de `DirectoryAudit` no commit `a661b8d`, feita em trabalho separado e autorizado (seções A11, 11.4, E05 e E08). A remoção da tabela `directory_audit_events` continua dependendo de aprovação.
+- **Arquivos alterados nesta revisão:** este plano; `AGENTS.md`; `docs/convencoes/identidade-e-vinculos.md`, `permissoes.md`, `pessoas-e-contatos.md` e `contexto-organizacional.md`.
+- **Conferências:** plano, `AGENTS.md`, convenções novas e existentes, registro de decisões, matriz de testes e critérios de performance comparados; termos antigos (`reset-password`, `DirectoryAudit` como pendência) eliminados; nenhum travessão ou meia-risca; links válidos.
+- **Estado:** E02 concluída. E03 a E10 pendentes. Nenhuma alteração de código, banco, migrations, interfaces ou infraestrutura nesta revisão; sem commit.
+
 Cada etapa acrescenta aqui um bloco com:
 
 - data;
@@ -2118,11 +2145,11 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | DA-24 | Identidade global sem alteração direta pelo tenant; fluxos seguros de e-mail e recuperação | Aprovada; detalhamento na E02 | 19/11/2026 | Revisão 4 |
 | DA-25 | Contatos centrais separados dos contatos da relação comercial | Aprovada; política campo a campo na E02 | 19/11/2026 | Revisão 4 |
 | E01 | Fechamento da etapa | Concluída | 19/11/2026 | |
-| DA-26 | Convenções separadas por assunto | Em validação | 20/11/2026 | Revisão 5; desvio do escopo previsto (uma convenção) |
-| DA-27 | Namespaces, serviços de contexto, models e nomes de permissão | Em validação | 20/11/2026 | Revisão 5 |
-| DA-28 | Prefixos de URL, identificadores e terminologia | Em validação | 20/11/2026 | Revisão 5; substitui `emp` e `e` da 12.2 |
-| DA-29 | Fluxos seguros de identidade e respostas neutras | Em validação | 20/11/2026 | Revisão 5; incompatibilidades I1 e I2 |
-| DA-30 | Classificação campo a campo de Pessoas e textos do formulário | Em validação | 20/11/2026 | Revisão 5; I5 |
-| E02 | Execução da etapa | Em validação | 20/11/2026 | Aguarda revisão |
+| DA-26 | Convenções separadas por assunto | Aprovada | 20/11/2026 | Revisão 5; desvio do escopo previsto (uma convenção) |
+| DA-27 | Namespaces, serviços de contexto, models e nomes de permissão | Aprovada | 20/11/2026 | Revisões 5 e 6; `send-password-reset` |
+| DA-28 | Prefixos de URL, identificadores e terminologia | Aprovada | 20/11/2026 | Revisão 5; substitui `emp` e `e` da 12.2 |
+| DA-29 | Fluxos seguros de identidade e respostas neutras | Aprovada | 20/11/2026 | Revisões 5 e 6; I1 e I2 na E05 |
+| DA-30 | Classificação campo a campo de Pessoas e textos do formulário | Aprovada | 20/11/2026 | Revisão 5; I5 |
+| E02 | Fechamento da etapa | Concluída | 20/11/2026 | Revisão 6 |
 
 Decisões novas surgidas durante a execução devem ser registradas aqui antes de alterar o contrato, com a justificativa e o impacto nas etapas.

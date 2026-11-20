@@ -44,7 +44,7 @@ Priorize o código que uma pessoa entende ao bater o olho, mesmo com mais linhas
 - Toda leitura passa por Query com o tenant e o nó ou o descritor autorizado, antes de paginar, contar ou agregar. Não use `Model::find` sem escopo nem escopos globais do Eloquent para isolamento. ID ou código de outro escopo responde 404.
 - O contexto de empresa e estabelecimento vem da URL e é validado no servidor; a sessão nunca é autoridade de contexto. Siga os nomes, prefixos e identificadores fechados em [Contexto organizacional](docs/convencoes/contexto-organizacional.md).
 - Uma conta com uma empresa e um estabelecimento funciona sem seletor nem passo extra.
-- Nenhum administrador de conta, empresa ou estabelecimento altera a identidade de login de outra pessoa (e-mail de acesso, senha, segundo fator, situação). Respostas sobre e-mail e documento nunca revelam dados de outra conta.
+- Nenhum administrador de conta, empresa ou estabelecimento altera a identidade de login de outra pessoa (foto, e-mail de acesso, senha, segundo fator, situação); reativar um vínculo não reativa a identidade. Respostas sobre e-mail e documento nunca revelam dados de outra conta.
 
 ## Performance
 

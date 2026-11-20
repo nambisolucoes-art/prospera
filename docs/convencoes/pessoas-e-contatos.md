@@ -82,16 +82,18 @@ A etiqueta Usuário, o vínculo e as atribuições seguem [Identidade e vínculo
 
 ## Formulário
 
+Ao editar dados centrais de contato ou endereço, a tela sempre informa que eles pertencem ao cadastro compartilhado da conta, com o texto "Estes dados pertencem ao cadastro compartilhado da conta." Isso vale também para contas com uma empresa só. Dados comerciais específicos continuam na relação comercial da empresa correspondente, e nenhuma rotina sincroniza dados entre empresas.
+
 Com mais de uma empresa ativa na conta, o formulário de pessoa separa as seções:
 
 | Seção | Título | Texto de apoio |
 | --- | --- | --- |
-| Identificação, contatos e endereço centrais | **Dados centrais** | "Valem para todas as empresas da conta." |
+| Identificação, contatos e endereço centrais | **Dados centrais** | "Estes dados pertencem ao cadastro compartilhado da conta e valem para todas as empresas." |
 | Relação comercial | **Dados desta empresa: {nome fantasia da empresa}** | "Valem somente para esta empresa. As outras empresas não veem estes dados." |
 
 - A relação de cada empresa aparece apenas para quem pode visualizá-la naquela empresa.
 - O usuário escolhe em quais empresas autorizadas a relação existe.
-- Com uma empresa só, o formulário mantém as seções atuais, sem esses títulos. A escolha de empresa é implícita.
+- Com uma empresa só, o formulário mantém as seções atuais, sem esses títulos, mas com o aviso de cadastro compartilhado nos contatos e no endereço. A escolha de empresa é implícita.
 - Os rótulos de ação seguem o AGENTS.md: **Salvar** e **Cancelar**.
 
 ## Testes obrigatórios
