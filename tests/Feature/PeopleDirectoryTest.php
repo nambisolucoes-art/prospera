@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
@@ -104,7 +105,7 @@ class PeopleDirectoryTest extends TestCase
             'role_id' => Role::where('account_id', auth()->user()->account_id)
                 ->where('system_key', 'member')
                 ->value('id'),
-        ])->assertUnprocessable();
+        ])->assertOk();
         $this->assertDatabaseMissing('people', ['name' => 'Duplicado']);
         $this->assertDatabaseMissing('audit_records', ['entity_type' => 'person', 'entity_name' => 'Duplicado']);
     }
@@ -127,8 +128,10 @@ class PeopleDirectoryTest extends TestCase
             'phone' => '71999999999',
             'tag_ids' => [Tag::userTag($owner->account_id)->id],
         ])->assertRedirect();
-        $this->assertSame('Novo nome', $owner->fresh()->name);
-        $this->assertNull($owner->fresh()->email_verified_at);
+        $this->assertSame($owner->name, $owner->fresh()->name);
+        $this->assertSame($owner->email, $owner->fresh()->email);
+        $this->assertNotNull($owner->fresh()->email_verified_at);
+        $this->assertSame('Novo nome', $owner->person()->sole()->name);
         $this->assertSame('71999999999', $owner->person()->first()->phone);
         $this->assertCount(1, $owner->person()->first()->tags()->where('system_key', 'user')->get());
         $this->assertGreaterThan($count, AuditRecord::count());
@@ -168,18 +171,19 @@ class PeopleDirectoryTest extends TestCase
             'email' => $member->email,
             'tag_ids' => [],
         ])->assertOk();
-        $this->assertFalse($member->fresh()->access_enabled);
+        $this->assertTrue($member->fresh()->access_enabled);
+        $membership = AccountMembership::where('user_id', $member->id)->sole();
+        $this->assertSame('suspended', $membership->status);
         $this->assertDatabaseHas('people', ['id' => $member->person_id]);
-        $event = AuditRecord::where('entity_type', 'user')
-            ->where('entity_id', $member->id)
+        $event = AuditRecord::where('entity_type', 'account-membership')
+            ->where('entity_id', $membership->id)
             ->where('event', 'updated')
             ->latest('id')
             ->firstOrFail();
         $this->assertSame($owner->id, $event->actor_id);
         $this->assertSame($owner->account_id, $event->account_id);
-        $this->assertFalse($event->changes['access_enabled']['after']);
-        $this->actingAs($member->fresh())->getJson('/conta/pessoas')->assertUnauthorized();
-        $this->post('/login', ['email' => $member->email, 'password' => 'password'])->assertSessionHasErrors('email');
+        $this->assertSame('suspended', $event->changes['status']['after']);
+        $this->actingAs($member->fresh())->getJson('/conta/pessoas')->assertForbidden();
         $this->actingAs($owner)->patchJson('/conta/pessoas/'.$member->person_id, [
             'name' => $member->name,
             'email' => $member->email,
@@ -200,7 +204,9 @@ class PeopleDirectoryTest extends TestCase
             'name' => $member->name,
             'email' => $member->email,
             'tag_ids' => [],
-        ])->assertForbidden();
+        ])->assertOk();
+        $membership = AccountMembership::where('user_id', $member->id)->sole();
+        $this->patchJson('/conta/usuarios/'.$membership->id.'/suspender')->assertForbidden();
         $this->assertTrue($member->fresh()->access_enabled);
         $this->assertTrue($member->person->tags()->where('system_key', 'user')->exists());
         $this->assertSame($count, AuditRecord::count());

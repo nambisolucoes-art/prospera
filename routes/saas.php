@@ -34,23 +34,47 @@ Route::middleware('auth')->group(function () {
             ->middleware('can:account.account-data.update');
     });
     Route::middleware(['verified'])->prefix('conta/usuarios')->name('account.users.')->group(function () {
-        Route::get('/', [UserController::class, 'index'])
-            ->name('index')
-            ->middleware('can:account.users.list');
+        Route::get('/', [UserController::class, 'tenantIndex'])
+            ->name('index');
 
         Route::get('cadastrar', [UserController::class, 'create'])
-            ->name('create')
-            ->middleware('can:account.users.create');
+            ->name('create');
 
         Route::get('{userId}/foto/{version}', [ProfilePhotoController::class, 'showDirectory'])
             ->whereNumber('userId')
             ->whereUuid('version')
-            ->name('photo')
-            ->middleware('can:account.users.view');
+            ->name('photo');
 
         Route::post('/', [UserController::class, 'store'])
-            ->name('store')
-            ->middleware('can:account.users.create');
+            ->name('store');
+
+        Route::get('{membershipId}/atribuicoes', [UserController::class, 'assignments'])
+            ->whereNumber('membershipId')
+            ->name('assignments');
+
+        Route::patch('{membershipId}/atribuicoes', [UserController::class, 'saveAssignments'])
+            ->whereNumber('membershipId')
+            ->name('assignments.update');
+
+        Route::patch('{membershipId}/suspender', [UserController::class, 'suspend'])
+            ->whereNumber('membershipId')
+            ->middleware('can:account.users.revoke')
+            ->name('suspend');
+
+        Route::patch('{membershipId}/reativar', [UserController::class, 'reactivate'])
+            ->whereNumber('membershipId')
+            ->middleware('can:account.users.reactivate')
+            ->name('reactivate');
+
+        Route::post('{membershipId}/recuperacao', [UserController::class, 'sendPasswordReset'])
+            ->whereNumber('membershipId')
+            ->middleware(['can:account.users.send-password-reset', 'throttle:5,1'])
+            ->name('send-password-reset');
+
+        Route::post('{membershipId}/convite', [UserController::class, 'resendInvitation'])
+            ->whereNumber('membershipId')
+            ->middleware(['can:account.users.invite', 'throttle:5,1'])
+            ->name('invite');
     });
 });
 
@@ -131,31 +155,25 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.director
     $controller = DirectoryController::class;
 
     Route::get('pessoas', [$controller, 'people'])
-        ->name('people.index')
-        ->middleware('can:account.people.list');
+        ->name('people.index');
 
     Route::get('pessoas/cadastrar', [$controller, 'personForm'])
-        ->name('people.create')
-        ->middleware('can:account.people.create');
+        ->name('people.create');
 
     Route::get('pessoas/{personId}/visualizar', [$controller, 'previewPerson'])
         ->whereNumber('personId')
-        ->name('people.view')
-        ->middleware('can:account.people.view');
+        ->name('people.view');
 
     Route::get('pessoas/{personId}/editar', [$controller, 'personForm'])
         ->whereNumber('personId')
-        ->name('people.edit')
-        ->middleware('can:account.people.update');
+        ->name('people.edit');
 
     Route::post('pessoas', [$controller, 'savePerson'])
-        ->name('people.store')
-        ->middleware('can:account.people.create');
+        ->name('people.store');
 
     Route::patch('pessoas/{personId}', [$controller, 'savePerson'])
         ->whereNumber('personId')
-        ->name('people.update')
-        ->middleware('can:account.people.update');
+        ->name('people.update');
 
     Route::get('etiquetas', [$controller, 'tags'])
         ->name('tags.index')
@@ -194,7 +212,6 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.access.'
     $controller = AccessController::class;
 
     Route::get('cargos', [$controller, 'roles'])
-        ->middleware('can:account.roles.list')
         ->name('roles.index');
 
     Route::get('cargos/cadastrar', [$controller, 'roleForm'])
@@ -208,12 +225,16 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.access.'
 
     Route::get('cargos/{roleId}/visualizar', [$controller, 'rolePreview'])
         ->whereNumber('roleId')
-        ->middleware('can:account.roles.view')
         ->name('roles.view');
 
     Route::post('cargos', [$controller, 'saveRole'])
         ->middleware('can:account.roles.create')
         ->name('roles.store');
+
+    Route::get('cargos/{roleId}/impacto-abrangencia', [AccessController::class, 'roleImpact'])
+        ->whereNumber('roleId')
+        ->middleware('can:account.roles.update')
+        ->name('roles.availability-impact');
 
     Route::patch('cargos/{roleId}', [$controller, 'saveRole'])
         ->whereNumber('roleId')
@@ -223,8 +244,7 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.access.'
 
 Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.companies.')->group(function () {
     Route::get('empresas', [CompanyController::class, 'index'])
-        ->name('index')
-        ->middleware('can:account.companies.list');
+        ->name('index');
 
     Route::get('empresas/cadastrar', [CompanyController::class, 'form'])
         ->name('create')
@@ -232,13 +252,11 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.companie
 
     Route::get('empresas/{companyId}/editar', [CompanyController::class, 'form'])
         ->whereNumber('companyId')
-        ->name('edit')
-        ->middleware('can:account.companies.update');
+        ->name('edit');
 
     Route::get('empresas/{companyId}/visualizar', [CompanyController::class, 'preview'])
         ->whereNumber('companyId')
-        ->name('view')
-        ->middleware('can:account.companies.view');
+        ->name('view');
 
     Route::post('empresas', [CompanyController::class, 'save'])
         ->name('store')
@@ -246,40 +264,32 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.companie
 
     Route::patch('empresas/{companyId}', [CompanyController::class, 'save'])
         ->whereNumber('companyId')
-        ->name('update')
-        ->middleware('can:account.companies.update');
+        ->name('update');
 });
 
 Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.establishments.')->group(function () {
     Route::get('estabelecimentos', [EstablishmentController::class, 'index'])
-        ->name('index')
-        ->middleware('can:account.establishments.list');
+        ->name('index');
 
     Route::get('estabelecimentos/cadastrar', [EstablishmentController::class, 'form'])
-        ->name('create')
-        ->middleware('can:account.establishments.create');
+        ->name('create');
 
     Route::get('estabelecimentos/{establishmentId}/editar', [EstablishmentController::class, 'form'])
         ->whereNumber('establishmentId')
-        ->name('edit')
-        ->middleware('can:account.establishments.update');
+        ->name('edit');
 
     Route::get('estabelecimentos/{establishmentId}/visualizar', [EstablishmentController::class, 'preview'])
         ->whereNumber('establishmentId')
-        ->name('view')
-        ->middleware('can:account.establishments.view');
+        ->name('view');
 
     Route::post('estabelecimentos', [EstablishmentController::class, 'save'])
-        ->name('store')
-        ->middleware('can:account.establishments.create');
+        ->name('store');
 
     Route::patch('estabelecimentos/{establishmentId}', [EstablishmentController::class, 'save'])
         ->whereNumber('establishmentId')
-        ->name('update')
-        ->middleware('can:account.establishments.update');
+        ->name('update');
 
     Route::post('estabelecimentos/{establishmentId}/principal', [EstablishmentController::class, 'promote'])
         ->whereNumber('establishmentId')
-        ->name('promote')
-        ->middleware('can:account.establishments.promote');
+        ->name('promote');
 });

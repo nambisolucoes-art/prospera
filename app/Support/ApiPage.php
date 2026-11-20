@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -24,7 +25,7 @@ final class ApiPage
             ...$data,
             'name' => config('app.name'),
             'auth' => [
-                'permissions' => $user?->permissionSlugs() ?? [],
+                'permissions' => $user === null ? [] : app(EffectivePermissions::class)->visibleSlugsFor($user),
                 'inspection_mode' => AccountInspectionSession::current($request->session())?->mode->value,
                 'user' => $user ? [
                     ...$user->only(['id', 'name', 'email', 'email_verified_at', 'is_account_admin', 'is_saas_admin']),

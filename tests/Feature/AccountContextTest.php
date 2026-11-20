@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -32,8 +33,8 @@ final class AccountContextTest extends TestCase
 
         $response->assertOk()->assertJsonCount(2, 'auth.permissions');
         self::assertContains('account.people.list', $response->json('auth.permissions'));
-        self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "permissions"')));
-        self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "clients"')));
+        self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "permission_role" as "pr"')));
+        self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "role_assignments"')));
         $this->getJson('/conta/cargos')->assertForbidden();
         $this->getJson('/conta/pessoas')->assertOk();
 
@@ -42,7 +43,10 @@ final class AccountContextTest extends TestCase
         $this->getJson('/ajuda')->assertOk()->assertJsonCount(1, 'auth.permissions');
 
         $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
-        $member->forceFill(['role_id' => $owner->role_id])->saveOrFail();
+        $membership = AccountMembership::where('user_id', $member->id)->sole();
+        $this->actingAs($owner)->patchJson('/conta/usuarios/'.$membership->id.'/atribuicoes', [
+            'grants' => [['role_id' => $owner->role_id, 'scope' => 'tenant']],
+        ])->assertOk();
         $this->actingAs($member->fresh())->getJson('/conta/cargos')->assertOk();
 
         $account->update(['active' => false]);

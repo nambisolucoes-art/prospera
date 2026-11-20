@@ -17,6 +17,7 @@ final class AccountInspectionSession
         return $values === null ? null : new AccountInspectionDTO(
             $values['administrator_id'], $values['account_id'], $values['user_id'],
             AccountInspectionMode::tryFrom($values['mode'] ?? '') ?? AccountInspectionMode::ReadOnly,
+            $values['membership_id'] ?? null,
         );
     }
 
@@ -25,13 +26,14 @@ final class AccountInspectionSession
         $session->put(self::KEY, self::context($inspection));
     }
 
-    /** @return array{administrator_id: int, account_id: int, user_id: int, mode: string} */
+    /** @return array{administrator_id: int, account_id: int, user_id: int, mode: string, membership_id: int|null} */
     public static function context(AccountInspectionDTO $inspection): array
     {
         return [
             'administrator_id' => $inspection->administratorId,
             'account_id' => $inspection->accountId,
             'user_id' => $inspection->userId,
+            'membership_id' => $inspection->membershipId,
             'mode' => $inspection->mode->value,
         ];
     }

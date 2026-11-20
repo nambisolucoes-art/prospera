@@ -1,5 +1,6 @@
 <?php
 
+use App\Domains\Usuarios\UI\Controllers\Settings\AccessEmailController;
 use App\Domains\Usuarios\UI\Controllers\Settings\ProfileController;
 use App\Domains\Usuarios\UI\Controllers\Settings\ProfilePhotoController;
 use App\Domains\Usuarios\UI\Controllers\Settings\SecurityController;
@@ -17,6 +18,14 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('settings/profile', [ProfileController::class, 'update'])
         ->name('profile.update')
         ->middleware('can:self.profile.update');
+
+    Route::post('settings/profile/email', [AccessEmailController::class, 'request'])
+        ->name('profile.email.request')
+        ->middleware(['can:self.profile.update', 'throttle:5,1']);
+
+    Route::get('settings/profile/email/confirm', [AccessEmailController::class, 'confirm'])
+        ->name('profile.email.confirm')
+        ->middleware(['can:self.profile.update', 'throttle:6,1', 'signed']);
 
     Route::post('settings/profile/photo', [ProfilePhotoController::class, 'store'])
         ->name('profile.photo.store')

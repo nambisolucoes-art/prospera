@@ -121,6 +121,18 @@ export default function AccessList({
               render: (row) => row.permissions_count,
             },
             {
+              id: 'availability',
+              label: 'Disponibilidade',
+              width: 145,
+              render: (row) => row.availability === 'restricted' ? 'Restrita' : 'Toda a conta',
+            },
+            {
+              id: 'assignments',
+              label: 'Atribuições',
+              width: 110,
+              render: (row) => row.assignments_count ?? 0,
+            },
+            {
               id: 'origin',
               label: 'Origem',
               width: 150,

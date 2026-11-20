@@ -4,6 +4,7 @@ set -euo pipefail
 # Uso: bash tests/Performance/e04-check.sh /caminho/da/copia 1|2
 source_dir=$(realpath "$1")
 workers=${2:-1}
+contextual=${E05_CONTEXTUAL:-0}
 fixture_dir=$(realpath "$(dirname "$0")")
 prefix="prospera-e04-check-$$"
 cleanup() {
@@ -42,8 +43,11 @@ docker run -d --rm --name "$prefix-app" --network "$prefix" --entrypoint sh \
         php artisan permissions:sync
         php artisan audit:check
         php /performance/e04-fixtures.php
+        if [ "$2" = 1 ]; then
+            php /performance/e05-fixtures.php
+        fi
         exec php artisan octane:frankenphp --host=127.0.0.1 --port=8000 --workers="$1" --max-requests=1000
-    ' setup "$workers" >/dev/null
+    ' setup "$workers" "$contextual" >/dev/null
 
 for attempt in {1..45}; do
     if docker exec "$prefix-app" php -r 'exit(@file_get_contents("http://127.0.0.1:8000/up") === false ? 1 : 0);'; then
@@ -62,6 +66,10 @@ foreach (["laravel/framework", "laravel/octane"] as $package) {
 docker exec "$prefix-db" postgres --version
 docker exec "$prefix-app" php artisan organization:check
 docker exec -e E04_ISOLATION="$(( workers == 1 ))" "$prefix-app" php /performance/e04-client.php
+
+if [ "$contextual" = 1 ]; then
+    docker exec -e E05_ISOLATION="$(( workers == 1 ))" "$prefix-app" php /performance/e05-client.php
+fi
 
 docker exec -i "$prefix-db" psql -X -v ON_ERROR_STOP=1 -U postgres -d e04 < "$fixture_dir/e04-index-plans.sql"
 
@@ -112,4 +120,8 @@ if [ "$workers" = 2 ]; then
     [[ "$first_status,$second_status" == 0,42 || "$first_status,$second_status" == 42,0 ]]
     [[ $(sql "select count(*) from companies c join establishments e on e.company_id=c.id where c.account_id=2 and c.tax_root='12ABC345' and e.is_primary and e.active") == 1 ]]
     docker exec "$prefix-app" php artisan organization:check
+
+    if [ "$contextual" = 1 ]; then
+        bash "$fixture_dir/e05-races.sh" "$prefix"
+    fi
 fi

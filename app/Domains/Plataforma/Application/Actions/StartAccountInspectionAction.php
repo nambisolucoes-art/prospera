@@ -2,6 +2,7 @@
 
 namespace App\Domains\Plataforma\Application\Actions;
 
+use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Application\Data\StartAccountInspectionData;
@@ -36,11 +37,17 @@ final readonly class StartAccountInspectionAction
             ]);
         }
 
+        $membership = AccountMembership::where('account_id', $account->id)
+            ->where('user_id', $target->id)
+            ->where('status', 'active')
+            ->firstOrFail();
+
         $inspectionDTO = new AccountInspectionDTO(
             administratorId: $administrator->id,
             accountId: $account->id,
             userId: $target->id,
             mode: $data->mode,
+            membershipId: $membership->id,
         );
 
         $session->invalidate();

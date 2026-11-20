@@ -13,3 +13,5 @@ Página `/settings/profile`. Artigo de referência em [Perfil](../ajuda/perfil.m
 Revise os passos conforme as permissões pessoais do cargo; não demonstre uma operação que o usuário atual não está autorizado a executar.
 
 Executor disponível pelo botão **Tutorial desta tela** na barra superior. Configuração em `resources/js/app/guidance.ts`. Revisar alvos em desktop e mobile a cada alteração.
+
+O passo **E-mail de acesso** destaca o formulário de solicitação e explica que a troca depende da confirmação no novo endereço.

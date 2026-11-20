@@ -3,6 +3,8 @@
 namespace App\Domains\Organizacao\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
 use App\Domains\Organizacao\Application\Actions\SaveCompanyAction;
 use App\Domains\Organizacao\Application\Data\CompanyFiltersData;
@@ -17,12 +19,15 @@ use Illuminate\View\View;
 
 final class CompanyController
 {
-    public function index(Request $request, CompanyDirectoryQuery $companies): JsonResponse|View
+    public function index(Request $request, CompanyDirectoryQuery $companies, EffectivePermissions $permissions): JsonResponse|View
     {
         $accountId = app(AccountContext::class)->requireId();
         $filters = CompanyFiltersData::fromInput($request->query());
 
-        $list = $companies->list($accountId, $filters, '/conta/empresas');
+        $nodes = $permissions->nodesFor($request->user(), 'account.companies.list');
+        abort_if($nodes->isEmpty(), 403);
+
+        $list = $companies->list($accountId, $filters, '/conta/empresas', $nodes);
 
         return ApiPage::respond([
             'companies' => $list->through(fn (Company $company) => [
@@ -33,10 +38,14 @@ final class CompanyController
         ]);
     }
 
-    public function form(CompanyDirectoryQuery $companies, ?int $companyId = null): JsonResponse|View
+    public function form(Request $request, CompanyDirectoryQuery $companies, ?int $companyId = null): JsonResponse|View
     {
         $accountId = app(AccountContext::class)->requireId();
         $company = $companyId === null ? null : $companies->find($accountId, $companyId);
+
+        if ($company !== null) {
+            abort_unless($request->user()->can('account.companies.update', AccessNode::company($accountId, $company->id)), 404);
+        }
 
         return ApiPage::respond([
             'company' => $company === null ? null : [
@@ -48,9 +57,12 @@ final class CompanyController
         ]);
     }
 
-    public function preview(CompanyDirectoryQuery $companies, int $companyId): JsonResponse
+    public function preview(Request $request, CompanyDirectoryQuery $companies, int $companyId): JsonResponse
     {
-        $company = $companies->find(app(AccountContext::class)->requireId(), $companyId);
+        $accountId = app(AccountContext::class)->requireId();
+        abort_if(app(EffectivePermissions::class)->nodesFor($request->user(), 'account.companies.view')->isEmpty(), 403);
+        $company = $companies->find($accountId, $companyId);
+        abort_unless($request->user()->can('account.companies.view', AccessNode::company($accountId, $company->id)), 404);
 
         return response()->json([
             ...$this->summary($company),
@@ -68,6 +80,10 @@ final class CompanyController
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
         $company = $companyId === null ? null : $companies->find($accountId, $companyId);
+
+        if ($company !== null) {
+            abort_unless($request->user()->can('account.companies.update', AccessNode::company($accountId, $company->id)), 404);
+        }
         $data = SaveCompanyData::fromInput($request->all(), $accountId, $company);
 
         if ($company === null) {

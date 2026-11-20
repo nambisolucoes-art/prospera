@@ -33,5 +33,11 @@ export type PersonRow = {
     customer?: { active: boolean } | null;
     has_supplier?: boolean;
     supplier?: SupplierProfile | null;
-    user: { is_account_admin: boolean; role_id: number; role: { name: string } } | null;
+    membership?: {
+      id: number;
+      email: string | null;
+      status: string;
+      can_manage: boolean;
+      assignments: { id: number; role: string; scope: string; location: string; coverage: string }[];
+    } | null;
 };

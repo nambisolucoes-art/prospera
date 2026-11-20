@@ -4,6 +4,8 @@ namespace Tests\Feature\Settings;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ProfileUpdateTest extends TestCase
@@ -25,6 +27,7 @@ class ProfileUpdateTest extends TestCase
     {
         $user = User::factory()->create();
 
+        $email = $user->email;
         $response = $this
             ->actingAs($user)
             ->patch(route('profile.update'), [
@@ -39,51 +42,79 @@ class ProfileUpdateTest extends TestCase
         $user->refresh();
 
         $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
+        $this->assertSame($email, $user->email);
+        $this->assertNotNull($user->email_verified_at);
     }
 
-    public function test_email_is_stored_in_lowercase_so_the_user_can_still_log_in()
+    public function test_email_change_requires_confirmation_and_revokes_other_sessions(): void
     {
         $user = User::factory()->create();
+        $oldEmail = $user->email;
 
-        $this
-            ->actingAs($user)
-            ->patch(route('profile.update'), [
-                'name' => 'Test User',
-                'email' => 'Test@Example.com',
-            ])
-            ->assertSessionHasNoErrors();
-
-        $this->assertSame('test@example.com', $user->refresh()->email);
-
-        $this->post(route('logout'));
-
-        $this->post(route('login.store'), [
-            'email' => 'Test@Example.com',
-            'password' => 'password',
+        DB::table('sessions')->insert([
+            'id' => 'other-session',
+            'user_id' => $user->id,
+            'payload' => '',
+            'last_activity' => now()->timestamp,
         ]);
 
+        $this->actingAs($user)->postJson(route('profile.email.request'), [
+            'email' => 'Test@Example.com',
+            'current_password' => 'password',
+        ])->assertOk();
+        $this->assertSame($oldEmail, $user->fresh()->email);
+        $this->assertDatabaseHas('sessions', ['id' => 'other-session']);
+
+        $transport = Mail::mailer('array')->getSymfonyTransport();
+        $messages = $transport->messages();
+        $this->assertCount(1, $messages);
+        $message = $messages->first()->getOriginalMessage();
+        $this->assertSame('test@example.com', $message->getTo()[0]->getAddress());
+        $link = str($message->getTextBody())->after('neste link: ')->trim()->toString();
+
+        $other = User::factory()->create();
+        $this->actingAs($other)->get($link)->assertForbidden();
+        $this->assertSame($oldEmail, $user->fresh()->email);
+
+        $this->actingAs($user)->get($link)->assertRedirect(route('profile.edit'));
+        $this->assertSame('test@example.com', $user->fresh()->email);
+        $this->assertNotNull($user->fresh()->email_verified_at);
         $this->assertAuthenticatedAs($user);
+        $this->assertDatabaseMissing('sessions', ['id' => 'other-session']);
+        $this->assertSame($oldEmail, $transport->messages()->last()->getOriginalMessage()->getTo()[0]->getAddress());
     }
 
-    public function test_email_must_be_unique_regardless_of_case()
+    public function test_existing_email_has_same_request_response_and_is_not_contacted(): void
     {
         User::factory()->create(['email' => 'taken@example.com']);
-
         $user = User::factory()->create();
 
-        $response = $this
-            ->actingAs($user)
-            ->from(route('profile.edit'))
-            ->patch(route('profile.update'), [
-                'name' => 'Test User',
-                'email' => 'Taken@Example.com',
-            ]);
+        $requested = $this->actingAs($user)->postJson(route('profile.email.request'), [
+            'email' => 'Taken@Example.com',
+            'current_password' => 'password',
+        ])->assertOk();
+        $this->assertCount(0, Mail::mailer('array')->getSymfonyTransport()->messages());
 
-        $response
-            ->assertSessionHasErrors('email')
-            ->assertRedirect(route('profile.edit'));
+        $available = $this->postJson(route('profile.email.request'), [
+            'email' => 'available@example.com',
+            'current_password' => 'password',
+        ])->assertOk();
+
+        $this->assertSame($requested->json(), $available->json());
+        $this->assertSame($user->email, $user->fresh()->email);
+    }
+
+    public function test_access_email_requests_are_rate_limited(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $payload = ['email' => $user->email, 'current_password' => 'password'];
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->postJson(route('profile.email.request'), $payload)->assertOk();
+        }
+
+        $this->postJson(route('profile.email.request'), $payload)->assertTooManyRequests();
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged()

@@ -8,7 +8,14 @@ use Illuminate\Validation\Rule;
 
 final readonly class ProvisionUserData
 {
-    private function __construct(public CreateUserData $user, public UserRole $role, public ?int $roleId = null) {}
+    private function __construct(
+        public CreateUserData $user,
+        public UserRole $role,
+        public ?int $roleId = null,
+        public string $scope = 'tenant',
+        public ?int $companyId = null,
+        public ?int $establishmentId = null,
+    ) {}
 
     /** @param array<string, mixed> $input */
     public static function fromInput(#[\SensitiveParameter] array $input, bool $tenant, ?int $accountId = null): self
@@ -16,6 +23,9 @@ final readonly class ProvisionUserData
         $rules = CreateUserData::rules();
         if ($tenant) {
             $rules['role_id'] = ['required', 'integer', Rule::exists('roles', 'id')->where('account_id', $accountId)];
+            $rules['scope'] = ['sometimes', Rule::in(['tenant', 'company', 'establishment'])];
+            $rules['company_id'] = ['nullable', 'integer', 'min:1'];
+            $rules['establishment_id'] = ['nullable', 'integer', 'min:1'];
         }
 
         $data = Validator::validate(CreateUserData::normalize($input), $rules, [
@@ -30,6 +40,9 @@ final readonly class ProvisionUserData
             CreateUserData::fromValidated($data),
             $tenant ? UserRole::AccountMember : UserRole::PlatformAdministrator,
             $tenant ? (int) $data['role_id'] : null,
+            $data['scope'] ?? 'tenant',
+            isset($data['company_id']) ? (int) $data['company_id'] : null,
+            isset($data['establishment_id']) ? (int) $data['establishment_id'] : null,
         );
     }
 }

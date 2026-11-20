@@ -3,6 +3,7 @@
 namespace App\Domains\Acessos\Application\Queries;
 
 use App\Domains\Acessos\Application\Data\RoleFiltersData;
+use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,14 +30,22 @@ final class AccessDirectoryQuery
         return Role::where('account_id', $accountId)->orderBy('name')->orderBy('id');
     }
 
-    /** @return LengthAwarePaginator<int, Role> */
-    public function roleList(int $accountId, RoleFiltersData $filters): LengthAwarePaginator
-    {
+    /**
+     * @param  list<int>|null  $roleIds
+     * @return LengthAwarePaginator<int, Role>
+     */
+    public function roleList(
+        int $accountId,
+        RoleFiltersData $filters,
+        ?array $roleIds = null,
+        ?AuthorizedNodes $nodes = null,
+    ): LengthAwarePaginator {
         $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters->search);
         $needle = '%'.$escaped.'%';
 
         return $this->roles($accountId)
-            ->withCount('permissions')
+            ->when($roleIds !== null, fn ($query) => $query->whereKey($roleIds))
+            ->withCount(['permissions', 'assignments' => fn (Builder $query) => $nodes?->apply($query)])
             ->when($filters->search !== '', fn ($query) => $query->whereLike('name', $needle))
             ->when($filters->origin === 'system', fn ($query) => $query->whereNotNull('system_key'))
             ->when($filters->origin === 'custom', fn ($query) => $query->whereNull('system_key'))

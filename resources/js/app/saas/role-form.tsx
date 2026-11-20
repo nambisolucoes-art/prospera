@@ -9,15 +9,18 @@ import CardBox from '@/components/CardBox/CardBox';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
 import SaasLayout from './SaasLayout';
+import RoleAvailabilityFields, { type AvailabilityOptions } from './RoleAvailabilityFields';
 import type { RoleRow, PermissionRow } from './Access.types';
 export default function RoleForm({
   role,
   permissions,
   modules,
+  organization,
 }: {
   role: RoleRow | null;
   permissions: PermissionRow[];
   modules: Record<string, string>;
+  organization: AvailabilityOptions;
 }) {
   const { auth } = useApiPage<SessionProps>().props;
   const locked =
@@ -63,6 +66,7 @@ export default function RoleForm({
                     required
                   />
                 </BusinessFormSection>
+                <RoleAvailabilityFields role={role} organization={organization} errors={errors} />
                 <BusinessFormSection
                   title="Permissões por módulo"
                   tourTarget="role-permissions"

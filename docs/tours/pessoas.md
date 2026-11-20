@@ -43,3 +43,5 @@ O passo person-contact inclui os botões de adicionar Telefone e E-mail e o X da
 O passo person-tags explica que Cliente e Fornecedor podem coexistir e compartilham a identidade, endereço e contatos da pessoa. Selecionar Cliente não cria acesso de usuário. Retirar e salvar inativa somente esse papel, com aviso imediatamente abaixo do seletor.
 
 O alvo people-suppliers mantém o identificador existente e agora corresponde ao filtro Tipo de cadastro, com Clientes e Fornecedores conforme as permissões de listar cada papel. O passo se chama Consultar por papel. A sequência e os componentes BusinessListTour e PageHeaderTour são preservados. O tour explica os controles sem selecionar etiquetas, trocar filtros ou gravar dados.
+
+A seção **Acesso de usuário** explica a primeira atribuição e identifica o e-mail de acesso de um vínculo existente.

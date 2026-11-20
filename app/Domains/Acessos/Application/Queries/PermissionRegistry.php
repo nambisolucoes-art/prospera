@@ -20,6 +20,7 @@ final class PermissionRegistry
                 $slugPattern = '((?:account|platform|self)\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*)';
                 $patterns = [
                     '/[\'"]can:'.$slugPattern.'[\'"]/',
+                    '/nodesFor\([^,]+,\s*[\'\"]'.$slugPattern.'[\'\"]/',
                     '/(?:authorize|can|cannot|allows|denies)\\(\\s*[\'"]'.$slugPattern.'[\'"]/',
                 ];
                 if ($file->getPathname() === app_path('Http/Middleware/SelfServicePermissions.php')) {
@@ -37,6 +38,19 @@ final class PermissionRegistry
         $definitions = [];
         foreach (array_keys($slugs) as $slug) {
             [$scope, $module, $action] = explode('.', $slug);
+
+            $targets = config('permissions.targets', [])[$slug] ?? config('permissions.global_targets.'.$scope);
+
+            $validTargets = match ($scope) {
+                'account' => ['tenant', 'company', 'establishment', 'person'],
+                'platform' => ['platform'],
+                'self' => ['identity'],
+                default => [],
+            };
+
+            if (! is_array($targets) || $targets === [] || array_diff($targets, $validTargets) !== []) {
+                throw new \RuntimeException('Declare os alvos admitidos da permissão '.$slug.' em config/permissions.php.');
+            }
 
             $actionName = config('permissions.actions.'.$action) ?? Str::headline($action);
             $moduleName = config('permissions.modules.'.$module) ?? Str::headline($module);

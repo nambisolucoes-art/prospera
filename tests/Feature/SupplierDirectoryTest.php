@@ -147,8 +147,8 @@ class SupplierDirectoryTest extends TestCase
         $this->assertDatabaseHas('people', ['name' => 'Identidade compartilhada']);
         $count = AuditRecord::count();
         $this
-            ->patchJson('/conta/pessoas/'.$supplier->person_id, ['name' => 'Fornecedor de teste', 'tag_ids' => []])
-            ->assertForbidden();
+            ->patchJson('/conta/pessoas/'.$supplier->person_id, ['name' => 'Identidade compartilhada', 'tag_ids' => []])
+            ->assertOk();
         $this->assertTrue($supplier->fresh()->active);
         $this->assertSame($count, AuditRecord::count());
     }

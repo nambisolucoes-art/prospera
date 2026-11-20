@@ -2,6 +2,7 @@
 
 namespace App\Domains\Pessoas\Domain\Models;
 
+use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Clientes\Domain\Models\Customer;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Validation\ValidationException;
 
 /** @property string|null $document */
@@ -150,10 +152,10 @@ class Person extends Model implements Auditable
         return $this->hasOne(Supplier::class);
     }
 
-    /** @return HasOne<User, $this> */
-    public function user(): HasOne
+    /** @return HasOneThrough<User, AccountMembership, $this> */
+    public function user(): HasOneThrough
     {
-        return $this->hasOne(User::class);
+        return $this->hasOneThrough(User::class, AccountMembership::class, 'person_id', 'id', 'id', 'user_id');
     }
 
     /** @return BelongsToMany<Tag, $this> */

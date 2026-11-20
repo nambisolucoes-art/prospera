@@ -2,6 +2,7 @@
 
 namespace App\Domains\Organizacao\Application\Queries;
 
+use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Organizacao\Application\Data\CompanyFiltersData;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Support\TaxDocument;
@@ -23,14 +24,20 @@ final class CompanyDirectoryQuery
     ];
 
     /** @return LengthAwarePaginator<int, Company> */
-    public function list(int $accountId, CompanyFiltersData $filters, string $path): LengthAwarePaginator
-    {
+    public function list(
+        int $accountId,
+        CompanyFiltersData $filters,
+        string $path,
+        ?AuthorizedNodes $nodes = null,
+    ): LengthAwarePaginator {
         $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters->search);
         $needle = '%'.$escaped.'%';
         $document = TaxDocument::normalize($filters->search);
 
-        return Company::where('account_id', $accountId)
-            ->select(self::LIST_COLUMNS)
+        $query = Company::where('account_id', $accountId);
+        $nodes?->apply($query, 'id', null);
+
+        return $query->select(self::LIST_COLUMNS)
             ->withCount('establishments')
             ->when($filters->search !== '', fn ($query) => $query->where(fn ($match) => $match
                 ->whereLike('name', $needle)
@@ -53,10 +60,16 @@ final class CompanyDirectoryQuery
     }
 
     /** @return Collection<int, Company> */
-    public function options(int $accountId): Collection
+    public function options(int $accountId, ?AuthorizedNodes $unitNodes = null): Collection
     {
-        return Company::where('account_id', $accountId)
-            ->orderBy('name')
+        $query = Company::where('account_id', $accountId);
+
+        if ($unitNodes !== null && ! $unitNodes->tenant) {
+            $query->where(fn ($company) => $company->whereIn('id', $unitNodes->companies)
+                ->orWhereHas('establishments', fn ($unit) => $unit->whereIn('id', $unitNodes->establishments)));
+        }
+
+        return $query->orderBy('name')
             ->orderBy('id')
             ->get(['id', 'name', 'trade_name', 'person_type', 'tax_root', 'individual_document', 'active']);
     }

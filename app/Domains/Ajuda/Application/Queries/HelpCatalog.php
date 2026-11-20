@@ -2,6 +2,7 @@
 
 namespace App\Domains\Ajuda\Application\Queries;
 
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -51,20 +52,20 @@ final class HelpCatalog
     {
         // O artigo aparece quando a pessoa tem alguma permissão do módulo.
         $can = fn (string $module): bool => count(array_filter(
-            $user->permissionSlugs(),
+            app(EffectivePermissions::class)->visibleSlugsFor($user),
             fn ($permission) => str_starts_with($permission, $module.'.'),
         )) > 0;
 
         return match ($slug) {
             'central-de-ajuda' => $user->can('self.help.list'),
             'contas' => $user->is_saas_admin && $can('platform.accounts'),
-            'usuarios' => $user->is_saas_admin && $can('platform.users'),
+            'usuarios' => $user->is_saas_admin ? $can('platform.users') : $can('account.users'),
             'inspecao-de-contas' => $user->is_saas_admin && $user->can('platform.inspection.start'),
             'dados-da-conta' => ! $user->is_saas_admin
                 && ($can('account.dashboard') || $can('account.account-data')),
             'organizacao' => ! $user->is_saas_admin
-                && ($user->can('account.account-data.update') || $user->can('account.companies.list')
-                    || $user->can('account.companies.create') || $user->can('account.establishments.list')),
+                && ($user->can('account.account-data.update') || $can('account.companies')
+                    || $user->can('account.companies.create') || $can('account.establishments')),
             'empresas' => ! $user->is_saas_admin && $can('account.companies'),
             'estabelecimentos' => ! $user->is_saas_admin && $can('account.establishments'),
             'clientes' => ! $user->is_saas_admin && $can('account.customers'),
@@ -75,7 +76,7 @@ final class HelpCatalog
             'perfil' => $user->can('self.profile.view'),
             'seguranca' => $user->can('self.security.view'),
             'aparencia' => $user->can('self.appearance.view'),
-            'auditoria' => $user->is_saas_admin ? $user->can('platform.audit.list') : $user->can('account.audit.list'),
+            'auditoria' => $user->is_saas_admin ? $user->can('platform.audit.list') : $can('account.audit'),
             default => false
         };
     }

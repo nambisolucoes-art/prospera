@@ -20,9 +20,7 @@ final class UserDirectoryQuery
                 'users.email',
                 'users.is_account_admin',
                 'users.profile_photo',
-                'users.role_id',
             ])
-            ->with('role:id,name')
             ->orderBy('users.name')
             ->orderBy('users.id')
             ->paginate($pageSize)
@@ -38,6 +36,8 @@ final class UserDirectoryQuery
     /** @return Builder<User> */
     private function scope(?Client $account): Builder
     {
-        return $account ? $account->users()->getQuery() : User::query()->where('is_saas_admin', true);
+        return $account
+            ? User::whereHas('memberships', fn ($membership) => $membership->where('account_id', $account->id))
+            : User::query()->where('is_saas_admin', true);
     }
 }

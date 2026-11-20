@@ -9,9 +9,16 @@ use Illuminate\Support\Str;
 
 final class AccountDirectoryQuery
 {
-    public function activeAccount(int $accountId): ?Client
+    public function activeAccount(int $accountId, int $userId): ?Client
     {
-        return Client::whereKey($accountId)->where('active', true)->first();
+        return Client::whereKey($accountId)
+            ->where('active', true)
+            ->whereExists(fn ($membership) => $membership->selectRaw('1')
+                ->from('account_memberships')
+                ->whereColumn('account_memberships.account_id', 'clients.id')
+                ->where('user_id', $userId)
+                ->where('status', 'active'))
+            ->first();
     }
 
     /** @return LengthAwarePaginator<int, Client> */

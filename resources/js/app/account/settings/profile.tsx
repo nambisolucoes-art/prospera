@@ -30,7 +30,7 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
           key={JSON.stringify([user.id, user.name, user.email])}
           business wideLabels inlineActions action="/settings/profile" method="patch" fields={[
             { name: 'name', label: 'Nome', autoComplete: 'name', value: user.name },
-            { name: 'email', label: 'E-mail', type: 'email', autoComplete: 'email', value: user.email },
+
           ]}
         />
         {mustVerifyEmail && !user.email_verified_at && (
@@ -39,6 +39,19 @@ export default function Profile({ mustVerifyEmail, status }: ProfileProps) {
             <AccountForm action="/email/verification-notification" submit="Reenviar link" submitTone="white" />
           </div>
         )}
+      </BusinessFormSection>
+
+      <BusinessFormSection as="section" title="E-mail de acesso" tourTarget="profile-access-email">
+        <div className="business-form business-form--wide-labels">
+          <Field label="E-mail atual" value={user.email} readOnly />
+        </div>
+        {status === 'email-change-unavailable' && (
+          <p role="status">O link de confirmação está indisponível. Solicite uma nova troca de e-mail.</p>
+        )}
+        <AccountForm business wideLabels inlineActions action="/settings/profile/email" submit="Enviar link" fields={[
+          { name: 'email', label: 'Novo e-mail', type: 'email', autoComplete: 'email' },
+          { name: 'current_password', label: 'Senha atual', type: 'password', autoComplete: 'current-password' },
+        ]} />
       </BusinessFormSection>
 
       <BusinessFormSection as="section" title="Excluir conta" tourTarget="profile-delete">

@@ -206,10 +206,32 @@ export function tourFor(
         'Defina o nome que aparecerá no acesso de usuário.',
       ),
       at(
+        'role-availability',
+        'Abrangência do cargo',
+        'Escolha onde o cargo pode ser atribuído. Ao restringir um cargo existente, verifique e confirme as atribuições que serão removidas.',
+      ),
+      at(
         'role-permissions',
         'Permissões por ação',
         'Selecione cada ação permitida. O catálogo é sincronizado pelo sistema, sem cadastro manual de permissões.',
       ),
+    ]);
+  } else if (path === '/conta/usuarios') {
+    title = 'Usuários da conta';
+    help = 'usuarios';
+    steps = [
+      ...businessListTourSteps({ filters: 'Busque pelo nome da pessoa ou pelo e-mail de acesso.' }),
+      at(
+        'user-access-actions',
+        'Atribuições e acesso',
+        'Consulte os cargos e seus locais. As ações disponíveis dependem do seu escopo e das suas permissões.',
+      ),
+    ];
+  } else if (path === '/conta/usuarios/cadastrar') {
+    title = 'Cadastrar usuário da conta';
+    help = 'usuarios';
+    steps = form([
+      at('user-assignment', 'Primeira atribuição', 'Escolha Onde e Cargo para conceder acesso no local selecionado.'),
     ]);
   } else if (path === '/saas/usuarios') {
     title = 'Usuários da plataforma';
@@ -233,6 +255,11 @@ export function tourFor(
         'profile-details',
         'Seu perfil',
         'Atualize sua identificação e foto de perfil.',
+      ),
+      at(
+        'profile-access-email',
+        'E-mail de acesso',
+        'Informe o novo endereço e sua senha atual. A troca ocorre depois que você abre o link no novo e-mail.',
       ),
     ]);
   } else if (path === '/settings/security') {

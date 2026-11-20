@@ -2,6 +2,7 @@
 
 namespace App\Domains\Organizacao\Application\Queries;
 
+use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Organizacao\Application\Data\EstablishmentFiltersData;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Support\TaxDocument;
@@ -29,13 +30,16 @@ final class EstablishmentDirectoryQuery
         EstablishmentFiltersData $filters,
         string $path,
         string $pageName = 'page',
+        ?AuthorizedNodes $nodes = null,
     ): LengthAwarePaginator {
         $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters->search);
         $needle = '%'.$escaped.'%';
         $document = TaxDocument::normalize($filters->search);
 
-        return Establishment::where('account_id', $accountId)
-            ->select(self::LIST_COLUMNS)
+        $query = Establishment::where('account_id', $accountId);
+        $nodes?->apply($query, 'company_id', 'id');
+
+        return $query->select(self::LIST_COLUMNS)
             ->with('company:id,name,trade_name,person_type,tax_root,individual_document,active')
             ->when($filters->companyId !== null, fn ($query) => $query->where('company_id', $filters->companyId))
             ->when($filters->search !== '', fn ($query) => $query->where(fn ($match) => $match

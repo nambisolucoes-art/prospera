@@ -9,3 +9,5 @@ Artigo de referência em [Usuários](../ajuda/usuarios.md).
 Na conta, use o tour de [Pessoas](pessoas.md); a seleção da etiqueta Usuário abre a seção de acesso. Usuários no menu da plataforma mantém o cadastro próprio de administradores.
 
 Executor disponível pelo botão **Tutorial desta tela** na barra superior. Configuração em `resources/js/app/guidance.ts`. Revisar alvos em desktop e mobile a cada alteração.
+
+O tour da conta explica busca, atribuições por local, suspensão, reativação e envio de links. No cadastro, **Onde** e **Cargo** definem a primeira atribuição.

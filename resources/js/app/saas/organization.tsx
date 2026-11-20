@@ -15,7 +15,7 @@ import SaasLayout from './SaasLayout';
 import '@/components/BusinessList/BusinessList.css';
 import './Organization.css';
 
-type Company = { id: number; name: string; trade_name: string | null; active: boolean };
+type Company = { id: number; name: string; trade_name: string | null; active: boolean; can_view?: boolean; can_update?: boolean; can_add_establishments?: boolean };
 type Establishment = Company & { is_primary: boolean; classification: Classification; company_name: string };
 type Page<T> = { data: T[]; current_page: number; last_page: number; prev_page_url: string | null; next_page_url: string | null };
 type Preview = { kind: 'company' | 'establishment'; row: { id: number; name: string } };
@@ -77,7 +77,7 @@ export default function Organization({
                   <StatusLabel active={unit.active} masculine />
                 </div>
                 <div className="business-list__actions organization-tree__actions">
-                  {can('account.establishments.view') && (
+                  {(unit.can_view ?? can('account.establishments.view')) && (
                     <Button iconOnly tone="primary" leftIconClass="fa fa-info"
                       title="Visualizar cadastro" aria-label={`Visualizar estabelecimento ${unit.name}`} aria-haspopup="dialog"
                       onClick={(event) => {
@@ -85,7 +85,7 @@ export default function Organization({
                         setPreview({ kind: 'establishment', row: unit });
                       }} />
                   )}
-                  {writable && can('account.establishments.update') && (
+                  {writable && (unit.can_update ?? can('account.establishments.update')) && (
                     <Button iconOnly tone="primary" leftIconClass="fa fa-pencil"
                       title="Editar cadastro" aria-label={`Editar estabelecimento ${unit.name}`}
                       href={`/conta/estabelecimentos/${unit.id}/editar?${origin}`} />
@@ -144,7 +144,7 @@ export default function Organization({
                           <StatusLabel active={company.active} />
                         </div>
                         <div className="business-list__actions organization-tree__actions">
-                          {can('account.companies.view') && (
+                          {(company.can_view ?? can('account.companies.view')) && (
                             <Button iconOnly tone="primary" leftIconClass="fa fa-info"
                               title="Visualizar cadastro" aria-label={`Visualizar empresa ${label}`} aria-haspopup="dialog"
                               onClick={(event) => {
@@ -152,12 +152,12 @@ export default function Organization({
                                 setPreview({ kind: 'company', row: company });
                               }} />
                           )}
-                          {writable && can('account.companies.update') && (
+                          {writable && (company.can_update ?? can('account.companies.update')) && (
                             <Button iconOnly tone="primary" leftIconClass="fa fa-pencil"
                               title="Editar cadastro" aria-label={`Editar empresa ${label}`}
                               href={`/conta/empresas/${company.id}/editar?${origin}`} />
                           )}
-                          {writable && company.active && can('account.establishments.create') && (
+                          {writable && company.active && (company.can_add_establishments ?? can('account.establishments.create')) && (
                             <Button iconOnly tone="primary" leftIconClass="fa fa-plus"
                               title="Cadastrar estabelecimento" aria-label={`Cadastrar estabelecimento em ${label}`}
                               href={`/conta/estabelecimentos/cadastrar?empresa=${company.id}&${origin}`} />

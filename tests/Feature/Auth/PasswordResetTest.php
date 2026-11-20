@@ -92,4 +92,20 @@ class PasswordResetTest extends TestCase
 
         $response->assertSessionHasErrors('email');
     }
+
+    public function test_recovery_uses_a_neutral_response_and_throttles_requests(): void
+    {
+        $user = User::factory()->create();
+        Notification::fake();
+
+        $existing = $this->postJson('/forgot-password', ['email' => $user->email])->assertOk();
+        $unknown = $this->postJson('/forgot-password', ['email' => 'unknown@example.test'])->assertOk();
+        $this->assertSame($existing->json(), $unknown->json());
+
+        for ($attempt = 0; $attempt < 4; $attempt++) {
+            $this->postJson('/forgot-password', ['email' => 'unknown@example.test'])->assertOk();
+        }
+
+        $this->postJson('/forgot-password', ['email' => 'unknown@example.test'])->assertTooManyRequests();
+    }
 }

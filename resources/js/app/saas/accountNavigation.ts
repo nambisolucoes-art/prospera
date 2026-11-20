@@ -74,6 +74,7 @@ export function accountNavigation(tenant: boolean, permissions: string[] = []) {
     ...(permissions.includes('account.dashboard.view') ? accountEntries : []),
     ...(records.length ? [{ key: 'records', title: 'Cadastros' }, ...records] : []),
     ...organization,
+    ...entry(permissions, 'users', { key: 'users', label: 'Usuários', href: '/conta/usuarios', iconClass: 'ti-user' }, '/conta/usuarios/cadastrar'),
     ...shared,
   ];
 }

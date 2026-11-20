@@ -14,3 +14,5 @@ Finalize em Salvar. Pule ações não autorizadas, cargos protegidos e gravaçõ
 No modal, confira primeiro Dados do cargo e depois Permissões por módulo, com rótulos e valores no padrão de Contas. Revise o alinhamento no desktop e no mobile.
 
 Executor disponível pelo botão **Tutorial desta tela** na barra superior. Configuração em `resources/js/app/guidance.ts`. Revisar alvos em desktop e mobile a cada alteração.
+
+O passo **Abrangência do cargo** explica o local de disponibilidade e a revisão do impacto antes de salvar.

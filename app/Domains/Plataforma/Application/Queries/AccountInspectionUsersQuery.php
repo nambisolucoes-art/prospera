@@ -13,10 +13,11 @@ final class AccountInspectionUsersQuery
     public function list(Client $account): Collection
     {
         return $this->eligible($account)
-            ->with('role:id,name')
+            ->with(['memberships' => fn ($memberships) => $memberships->where('account_id', $account->id)
+                ->with('assignments.role:id,name,system_key')])
             ->orderBy('name')
             ->orderBy('id')
-            ->get(['id', 'name', 'email', 'is_account_admin', 'profile_photo', 'role_id']);
+            ->get(['id', 'name', 'email', 'profile_photo']);
     }
 
     public function find(Client $account, int $userId): ?User
@@ -27,8 +28,9 @@ final class AccountInspectionUsersQuery
     /** @return Builder<User> */
     private function eligible(Client $account): Builder
     {
-        return $account->users()
-            ->getQuery()
+        return User::whereHas('memberships', fn ($membership) => $membership
+            ->where('account_id', $account->id)
+            ->where('status', 'active'))
             ->where('access_enabled', true)
             ->where('is_saas_admin', false)
             ->whereNotNull('email_verified_at');

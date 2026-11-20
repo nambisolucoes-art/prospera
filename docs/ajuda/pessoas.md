@@ -15,7 +15,7 @@ Abra **Cadastrar pessoa**. Informe nome, e-mail opcional e telefone opcional. As
 
 ## Conceder acesso pela etiqueta Usuário
 
-Selecione **Usuário** no campo Etiquetas para exibir **Acesso de usuário**. Informe e-mail, cargo cadastrado na conta e a forma de acesso: convite por e-mail ou senha inicial com confirmação. Retirar a etiqueta antes da criação oculta a seção e cancela a criação do acesso. O e-mail do usuário deve ser exclusivo no sistema. A gravação cria o acesso para a mesma pessoa; qualquer erro impede a gravação conjunta.
+Selecione **Usuário** no campo Etiquetas para exibir **Acesso de usuário**. Informe e-mail, cargo cadastrado na conta e a forma de acesso: convite por e-mail ou senha inicial com confirmação. Retirar a etiqueta antes da criação oculta a seção e cancela a criação do acesso. O cadastro é gravado junto com o acesso. A confirmação é a mesma para uma solicitação com endereço já usado. Nesse caso, o vínculo novo fica indisponível.
 
 Para conceder acesso a uma pessoa existente, use **Editar cadastro** e selecione **Usuário**. Não existe item Usuários no menu da conta.
 
@@ -48,3 +48,4 @@ O telefone e o e-mail principais permanecem nos seus campos. E-mails adicionais 
 ## Papel de cliente
 
 Selecione a etiqueta especial Cliente para identificar um cliente da conta. Os dados já informados pertencem à pessoa e são compartilhados com Fornecedor e outros papéis. Retirar Cliente e salvar inativa somente esse vínculo; selecionar novamente reativa o mesmo registro, conforme as permissões específicas de Clientes. O filtro Tipo de cadastro oferece Clientes aos usuários autorizados. Consulte [Clientes](clientes.md).
+\n## Editar atribuições\n\nNo cadastro de uma pessoa com vínculo, use **Editar atribuições** para gerir os cargos nos locais que você administra. **E-mail de acesso** é somente leitura. Alterações no nome, no e-mail de contato e nos outros dados de Pessoas ficam no cadastro da conta.\n

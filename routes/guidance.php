@@ -15,12 +15,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('help.show');
 
     Route::get('/conta/auditoria', [AuditController::class, 'index'])
-        ->middleware('can:account.audit.list')
         ->name('account.audit.index');
 
     Route::get('/conta/auditoria/{recordId}/visualizar', [AuditController::class, 'show'])
         ->whereNumber('recordId')
-        ->middleware('can:account.audit.view')
         ->name('account.audit.show');
 
     Route::get('/saas/auditoria', [AuditController::class, 'index'])

@@ -3,9 +3,12 @@
 namespace App\Domains\Auditoria\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Data\AuditFilterData;
 use App\Domains\Auditoria\Application\Queries\AuditQuery;
 use App\Domains\Auditoria\Application\Queries\AuditValueFormatter;
+use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Support\ApiPage;
 use App\Support\PageSize;
@@ -15,11 +18,15 @@ use Illuminate\View\View;
 
 final class AuditController
 {
-    public function index(Request $request, AuditQuery $query): JsonResponse|View
+    public function index(Request $request, AuditQuery $query, EffectivePermissions $permissions): JsonResponse|View
     {
         $platform = $request->is('saas/*');
         $filters = AuditFilterData::fromInput($request->query(), $platform)->values;
-        $scope = $query->scoped($platform ? null : app(AccountContext::class)->requireId(), $platform);
+        $accountId = $platform ? null : app(AccountContext::class)->requireId();
+        $nodes = $platform ? null : $permissions->nodesFor($request->user(), 'account.audit.list');
+        abort_if($nodes?->isEmpty(), 403);
+
+        $scope = $query->scoped($accountId, $platform, $nodes);
 
         // As opções de filtro usam a mesma consulta com escopo da listagem.
         $actors = (clone $scope)
@@ -57,7 +64,12 @@ final class AuditController
             ->orderByDesc('id')
             ->paginate(PageSize::fromInput($request->query('per_page')))
             ->withQueryString()
-            ->through(fn ($record) => $query->summary($record));
+            ->through(fn (AuditRecord $record) => [
+                ...$query->summary($record),
+                'can_view' => $platform
+                    ? $request->user()->can('platform.audit.view')
+                    : $request->user()->can('account.audit.view', $this->node($record)),
+            ]);
 
         return ApiPage::respond([
             'records' => $records,
@@ -77,14 +89,26 @@ final class AuditController
         AuditQuery $query,
         int $recordId,
         AuditValueFormatter $formatter,
+        EffectivePermissions $permissions,
     ): JsonResponse {
         $platform = $request->is('saas/*');
         $accountId = $platform ? null : app(AccountContext::class)->requireId();
-        $record = $query->scoped($accountId, $platform)->findOrFail($recordId);
+        $user = $request->user();
+        $nodes = $platform ? null : $permissions->nodesFor($user, 'account.audit.list');
+        abort_if($nodes?->isEmpty(), 403);
 
+        $scope = $query->scoped($accountId, $platform, $nodes);
+
+        if (! $platform) {
+            $view = $permissions->nodesFor($user, 'account.audit.view');
+            abort_if($view->isEmpty(), 403);
+            $view->apply($scope);
+        }
+
+        $record = $scope->findOrFail($recordId);
         $technical = $platform
-            ? $request->user()->can('platform.audit.technical')
-            : $request->user()->can('account.audit.technical');
+            ? $user->can('platform.audit.technical')
+            : $user->can('account.audit.technical', $this->node($record));
 
         $technicalData = $technical
             ? $record->only([
@@ -95,6 +119,9 @@ final class AuditController
                 'account_id',
                 'context',
                 'represented_user_id',
+                'membership_id',
+                'company_id',
+                'establishment_id',
             ])
             : null;
 
@@ -106,5 +133,16 @@ final class AuditController
             ],
             headers: ['Cache-Control' => 'private, no-store'],
         );
+    }
+
+    private function node(AuditRecord $record): AccessNode
+    {
+        if ($record->establishment_id !== null && $record->company_id !== null) {
+            return AccessNode::establishment($record->account_id, $record->company_id, $record->establishment_id);
+        }
+
+        return $record->company_id === null
+            ? AccessNode::tenant($record->account_id)
+            : AccessNode::company($record->account_id, $record->company_id);
     }
 }

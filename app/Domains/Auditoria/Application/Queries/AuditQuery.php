@@ -2,19 +2,21 @@
 
 namespace App\Domains\Auditoria\Application\Queries;
 
+use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use Illuminate\Database\Eloquent\Builder;
 
 final class AuditQuery
 {
     /** @return Builder<AuditRecord> */
-    public function scoped(?int $accountId, bool $platform): Builder
+    public function scoped(?int $accountId, bool $platform, ?AuthorizedNodes $nodes = null): Builder
     {
         $query = AuditRecord::query();
 
         if (! $platform) {
             abort_unless($accountId !== null, 403);
             $query->where('account_id', $accountId);
+            ($nodes ?? new AuthorizedNodes)->apply($query);
         }
 
         return $query;

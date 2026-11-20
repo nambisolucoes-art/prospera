@@ -15,6 +15,9 @@ return [
         'customer' => 'Cliente',
         'user' => 'Usuário',
         'role' => 'Cargo',
+        'account-membership' => 'Vínculo com a conta',
+        'role-assignment' => 'Atribuição de cargo',
+        'role-availability' => 'Abrangência do cargo',
         'tag' => 'Etiqueta',
         'permission-catalog' => 'Catálogo de permissões',
     ],
@@ -26,6 +29,8 @@ return [
         'logout' => 'Saída',
         'inspection-started' => 'Inspeção iniciada',
         'inspection-ended' => 'Inspeção encerrada',
+        'password-reset-requested' => 'Redefinição de senha solicitada',
+        'invitation-requested' => 'Reenvio de convite solicitado',
         'catalog-synchronized' => 'Sincronização',
     ],
     'excluded_models' => [

@@ -30,3 +30,4 @@ Use a aba [Segurança](seguranca.md) para gerenciar sua senha e os métodos de a
 ## Permissões do cargo
 
 Dentro da conta, visualizar e executar cada ação desta tela dependem das permissões pessoais do cargo. Alterar dados, foto, senha, chaves de acesso, segundo fator ou códigos de recuperação são operações distintas; o servidor verifica a autorização específica. Consulte [Cargos e permissões](cargos-permissoes.md).
+\n## Alterar o e-mail de acesso\n\nInforme seu novo e-mail e sua senha atual em **E-mail de acesso**. Use **Enviar link**. A alteração ocorre após abrir o link no novo endereço enquanto estiver autenticado. O endereço anterior recebe um aviso, e as demais sessões da identidade são encerradas. O endereço atual continua válido até a confirmação.\n

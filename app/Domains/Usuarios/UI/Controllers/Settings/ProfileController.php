@@ -33,7 +33,7 @@ class ProfileController extends Controller
     public function update(Request $request, UpdateProfileAction $update): RedirectResponse
     {
         $user = $request->user();
-        $update->execute($user, UpdateProfileData::fromInput($request->all(), $user));
+        $update->execute($user, UpdateProfileData::fromInput($request->all()));
 
         ApiPage::toast('Perfil atualizado.');
 

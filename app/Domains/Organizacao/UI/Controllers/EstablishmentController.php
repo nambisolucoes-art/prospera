@@ -3,6 +3,9 @@
 namespace App\Domains\Organizacao\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Organizacao\Application\Actions\PromotePrimaryEstablishmentAction;
 use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
 use App\Domains\Organizacao\Application\Data\EstablishmentFiltersData;
@@ -25,12 +28,14 @@ final class EstablishmentController
         Request $request,
         EstablishmentDirectoryQuery $establishments,
         CompanyDirectoryQuery $companies,
+        EffectivePermissions $permissions,
     ): JsonResponse|View {
         $accountId = app(AccountContext::class)->requireId();
         $filters = EstablishmentFiltersData::fromInput($request->query());
-        $options = $this->companyOptions($companies, $accountId, $filters->companyId);
-
-        $list = $establishments->list($accountId, $filters, '/conta/estabelecimentos');
+        $nodes = $permissions->nodesFor($request->user(), 'account.establishments.list');
+        abort_if($nodes->isEmpty(), 403);
+        $options = $this->companyOptions($companies, $accountId, $filters->companyId, $nodes);
+        $list = $establishments->list($accountId, $filters, '/conta/estabelecimentos', nodes: $nodes);
 
         return ApiPage::respond([
             'establishments' => $list->through(fn (Establishment $establishment) => [
@@ -46,10 +51,19 @@ final class EstablishmentController
         Request $request,
         EstablishmentDirectoryQuery $establishments,
         CompanyDirectoryQuery $companies,
+        EffectivePermissions $permissions,
         ?int $establishmentId = null,
     ): JsonResponse|View {
         $accountId = app(AccountContext::class)->requireId();
         $establishment = $establishmentId === null ? null : $establishments->find($accountId, $establishmentId);
+        $nodes = $permissions->nodesFor($request->user(), 'account.establishments.create');
+
+        if ($establishment !== null) {
+            abort_unless($request->user()->can('account.establishments.update', $this->node($establishment)), 404);
+        } else {
+            abort_if(! $nodes->tenant && $nodes->companies === [], 403);
+        }
+
         $selectedCompany = $establishment === null ? ($request->integer('empresa') ?: null) : null;
 
         return ApiPage::respond([
@@ -57,14 +71,16 @@ final class EstablishmentController
                 ...$this->details($establishment),
                 'company' => $this->companyLabel($establishment->company),
             ],
-            'companies' => $this->companyOptions($companies, $accountId, $selectedCompany),
+            'companies' => $establishment ? [] : $this->companyOptions($companies, $accountId, $selectedCompany, $nodes),
             'selectedCompany' => $selectedCompany,
         ]);
     }
 
-    public function preview(EstablishmentDirectoryQuery $establishments, int $establishmentId): JsonResponse
+    public function preview(Request $request, EstablishmentDirectoryQuery $establishments, int $establishmentId): JsonResponse
     {
         $establishment = $establishments->find(app(AccountContext::class)->requireId(), $establishmentId);
+
+        abort_unless($request->user()->can('account.establishments.view', $this->node($establishment)), 404);
 
         return response()->json([
             ...$this->details($establishment),
@@ -89,10 +105,13 @@ final class EstablishmentController
             }
 
             $establishment = null;
+            abort_if(app(EffectivePermissions::class)->nodesFor($request->user(), 'account.establishments.create')->isEmpty(), 403);
             $company = $companies->find($accountId, $companyId);
+            abort_unless($request->user()->can('account.establishments.create', AccessNode::company($accountId, $company->id)), 404);
         } else {
             // A empresa proprietária é fixa: a edição nunca move a unidade para outra pessoa jurídica.
             $establishment = $establishments->find($accountId, $establishmentId);
+            abort_unless($request->user()->can('account.establishments.update', $this->node($establishment)), 404);
             $company = $establishment->company;
         }
 
@@ -118,8 +137,11 @@ final class EstablishmentController
         PromotePrimaryEstablishmentAction $promote,
         int $establishmentId,
     ): RedirectResponse {
-        $establishment = $establishments->find(app(AccountContext::class)->requireId(), $establishmentId);
-
+        $accountId = app(AccountContext::class)->requireId();
+        abort_if(app(EffectivePermissions::class)->nodesFor($request->user(), 'account.establishments.promote')->isEmpty(), 403);
+        $establishment = $establishments->find($accountId, $establishmentId);
+        $node = AccessNode::company($establishment->account_id, $establishment->company_id);
+        abort_unless($request->user()->can('account.establishments.promote', $node), 404);
         $promote->execute($establishment);
         ApiPage::toast('Estabelecimento principal alterado.');
 
@@ -128,6 +150,11 @@ final class EstablishmentController
         }
 
         return redirect('/conta/estabelecimentos');
+    }
+
+    private function node(Establishment $unit): AccessNode
+    {
+        return AccessNode::establishment($unit->account_id, $unit->company_id, $unit->id);
     }
 
     /** @return array<string,mixed> */
@@ -187,8 +214,9 @@ final class EstablishmentController
         CompanyDirectoryQuery $companies,
         int $accountId,
         ?int $referencedCompanyId,
+        AuthorizedNodes $nodes,
     ): array {
-        $options = $companies->options($accountId);
+        $options = $companies->options($accountId, $nodes);
 
         if ($referencedCompanyId !== null) {
             abort_unless($options->contains($referencedCompanyId), 404);

@@ -14,8 +14,7 @@ final class PeopleDirectoryQuery
         'customer',
         'supplier',
         'tags',
-        'user:id,person_id,is_account_admin,role_id',
-        'user.role:id,name',
+        'user:users.id',
     ];
 
     /** @return LengthAwarePaginator<int, Person> */

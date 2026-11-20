@@ -2,6 +2,7 @@
 
 namespace App\Domains\Organizacao\Application\Actions;
 
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
 use App\Domains\Organizacao\Application\Queries\AvailableOrganizationCodeQuery;
@@ -83,11 +84,11 @@ final readonly class SaveEstablishmentAction
 
             // Cada slug fica literal na chamada para que permissions:sync o descubra.
             if ($activationChanged && $lockedEstablishment->active) {
-                Gate::authorize('account.establishments.activate');
+                Gate::authorize('account.establishments.activate', AccessNode::company($lockedCompany->account_id, $lockedCompany->id));
             }
 
             if ($activationChanged && ! $lockedEstablishment->active) {
-                Gate::authorize('account.establishments.deactivate');
+                Gate::authorize('account.establishments.deactivate', AccessNode::company($lockedCompany->account_id, $lockedCompany->id));
             }
 
             if ($activationChanged && $lockedEstablishment->active && ! $lockedCompany->active) {

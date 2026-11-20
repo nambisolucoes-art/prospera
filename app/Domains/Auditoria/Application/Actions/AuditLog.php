@@ -120,6 +120,12 @@ final class AuditLog
             $values['establishment_id'] = $establishmentId;
         }
 
+        $membershipId = $context->membershipIdFor($actor, $accountId);
+
+        if ($membershipId !== null) {
+            $values['membership_id'] = $membershipId;
+        }
+
         if ($existing) {
             $existing->fill($values)->saveOrFail();
         } else {

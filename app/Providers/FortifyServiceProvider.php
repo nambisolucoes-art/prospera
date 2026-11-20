@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Domains\Usuarios\UI\Fortify\ConfirmTwoFactorSetup;
+use App\Domains\Usuarios\UI\Fortify\NeutralFailedPasswordResetResponse;
+use App\Domains\Usuarios\UI\Fortify\NeutralPasswordLinkResponse;
 use App\Domains\Usuarios\UI\Fortify\ResetUserPassword;
 use App\Models\User;
 use App\Support\ApiPage;
@@ -14,6 +16,9 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Actions\ConfirmTwoFactorAuthentication;
+use Laravel\Fortify\Contracts\FailedPasswordResetLinkRequestResponse;
+use Laravel\Fortify\Contracts\FailedPasswordResetResponse;
+use Laravel\Fortify\Contracts\SuccessfulPasswordResetLinkRequestResponse;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
 
@@ -25,6 +30,9 @@ class FortifyServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ConfirmTwoFactorAuthentication::class, ConfirmTwoFactorSetup::class);
+        $this->app->bind(FailedPasswordResetLinkRequestResponse::class, NeutralPasswordLinkResponse::class);
+        $this->app->bind(SuccessfulPasswordResetLinkRequestResponse::class, NeutralPasswordLinkResponse::class);
+        $this->app->bind(FailedPasswordResetResponse::class, NeutralFailedPasswordResetResponse::class);
     }
 
     /**
@@ -87,6 +95,8 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureRateLimiting(): void
     {
+        RateLimiter::for('access-recovery', fn (Request $request) => Limit::perMinute(6)->by($request->ip()));
+
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });

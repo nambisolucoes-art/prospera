@@ -821,7 +821,7 @@ final class OrganizationTest extends TestCase
         DB::disableQueryLog();
         DB::flushQueryLog();
 
-        $this->assertCount(1, array_filter($log, fn (string $sql) => str_contains($sql, 'from "permissions"')));
+        $this->assertCount(1, array_filter($log, fn (string $sql) => str_contains($sql, 'from "permission_role" as "pr"')));
         $this->assertCount(1, array_filter($log, fn (string $sql) => str_contains($sql, 'from "clients"')));
     }
 

@@ -2010,7 +2010,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E02 | Concluída | 20/11/2026 | 20/11/2026 | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registros abaixo) | DA-26 a DA-30 aprovadas; I1 e I2 atribuídas à E05 |
 | E03 | Concluída | 20/11/2026 | 20/11/2026 | Registro E03 e relatório de medições | Concorrência e custos de migrations em bases maiores ficam para trabalho futuro |
 | E04 | Concluída | 20/11/2026 | 20/11/2026 | Registro de execução e homologação final da E04 na seção 26 | Implantação pendente de conferência da base oficial, backup e confirmação fiscal legada |
-| E05 | Pendente | | | | |
+| E05 | Em validação | 20/11/2026 | | Registro de execução da E05 na seção 26 | Aguardando homologação do produto |
 | E06 | Pendente | | | | |
 | E07 | Pendente | | | | |
 | E08 | Pendente | | | | |
@@ -2190,6 +2190,46 @@ Na conta com 50 unidades, filtrar uma empresa devolveu 10 linhas em 9 consultas,
 **Pendências de implementação.** Nenhuma para fechar a E04.
 
 **Pendências de implantação.** Obter autorização para conferir contagens de `clients`, `establishments`, `points`, `users` e `directory_audit_events` na base oficial e guardar backup recuperável, incluindo permissões personalizadas. Se houver dados em Pontos ou na tabela legada de estabelecimentos, analisar e aprovar a destinação antes da implantação. Confirmar a identificação fiscal da empresa inicial legada com o responsável pela conta. A homologação usou ambientes descartáveis e dados sintéticos.
+
+### Registro da E05 em 20/11/2026
+
+**Estado: Em validação.** A E03 está versionada em `00f04d6`. A implementação e a homologação da E04 estão versionadas em `cad33d8` e `abd35bb`, na branch remota. A E05 parte de `abd35bb` e permanece na árvore de trabalho para homologação. E06 a E10 continuam pendentes.
+
+#### Implementação
+
+- A migration `2026_11_20_000007_create_contextual_access.php` cria `account_memberships`, `role_availability` e `role_assignments`, acrescenta a disponibilidade de cargos, a situação de convite nas identidades e o identificador do vínculo de autoria em `audit_records`. FKs compostas protegem o tenant, a pessoa, o cargo e o par empresa e estabelecimento. Os CHECKs validam a situação do vínculo e a forma de cada escopo. Índices parciais impedem atribuições e disponibilidades duplicadas. Os índices de conta e cargo, empresa e unidade sustentam a revisão de abrangência e as consultas de escopo. Nenhuma tabela histórica foi removida.
+- `AccountMembership`, `RoleAssignment`, `RoleAvailability`, `SaveRoleAssignmentsAction` e `SetMembershipStatusAction` implementam concessão, revogação e suspensão por tenant. A trava da conta serializa alterações de disponibilidade, atribuições e suspensão. A ação valida a abrangência do cargo e a autoridade do operador no nó, inclusive para remoção. `SaveRoleAction` lista as atribuições descobertas e exige a confirmação dos IDs afetados dentro da transação que grava a mudança.
+- `EffectivePermissions` continua com binding `scoped`. Carrega as atribuições válidas do vínculo ativo e as permissões dos cargos distintos, em duas consultas. O Gate aceita o recurso-alvo e o resolvedor disponibiliza descritores para SQL antes da paginação. Operações sem alvo explícito ficam limitadas a atribuições de tenant. A sincronização valida os alvos em `config/permissions.php`, preserva a concessão automática ao administrador integral e mantém `account.users.photo` como rota de leitura protegida por `account.users.view`.
+- `AuditQuery` aplica o descritor na listagem, na contagem e nas opções de filtro. O detalhe exige cobertura de listagem e visualização para o mesmo evento, e os dados técnicos exigem a autorização própria. Atribuições, disponibilidade, suspensão e disparos de links são auditados. A inspeção referencia o vínculo ativo e mantém a autoria real do administrador SaaS.
+- `ChangeAccessEmailAction` e `AccessEmailController` verificam a senha atual, enviam link assinado temporário ao novo endereço, confirmam a identidade autenticada e notificam o endereço anterior. O Fortify permanece responsável pela redefinição. As respostas públicas de recuperação e as respostas de solicitação de acesso são neutras, com limitação de tentativas nos fluxos de recuperação e troca de e-mail. A revisão da sessão protege requisições de sessões antigas após troca de e-mail ou senha. A edição de Pessoas mantém nome e contato no cadastro do tenant. Reativar o vínculo preserva a situação da identidade global.
+- Cargos, Usuários, Pessoas e Perfil usam os componentes de formulário, listagem, modal e tour existentes. A interface distingue disponibilidade, atribuição e permissões efetivas. Usuários apresenta o escopo das atribuições, busca e ações conforme a autoridade. Ajuda e tours foram atualizados.
+
+#### Migração e reversão
+
+A migração reproduz o cargo anterior em escopo tenant e mantém a disponibilidade inicial de toda a conta. `users.account_id`, `users.person_id` e `users.role_id` ficam preservados para a transição. O escopo de autorização usa o vínculo e as atribuições. A identificação da rota atual usa a conta legada como referência até a seleção da E09 e valida a existência do vínculo ativo. O esquema suporta mais de um vínculo por identidade.
+
+O ensaio em PostgreSQL 18.7 aplicou, reverteu e reaplicou a E05 após inserir um vínculo legado sintético no esquema da E04. O vínculo, a atribuição tenant e o cargo espelhado sobreviveram à ida e volta. A reversão direta é recusada quando há vínculos ou atribuições que o modelo anterior perderia, incluindo suspensão, vários cargos ou disponibilidades restritas. Após uso contextual, preservar a exportação e seguir o procedimento de recuperação aprovado antes de reverter. Histórico de auditoria da organização e dados fiscais da E04 preservados.
+
+#### Verificações e medições
+
+- 170 testes e 1.548 asserções em SQLite em memória no contêiner PHP 8.5.13 com GD. A prova dedicada de orçamento de consultas acrescentou 45 asserções. PHPStan, Pint no escopo, build, arquitetura, TypeScript, `permissions:sync`, `audit:check` e `organization:check` aprovados em ambiente isolado.
+- FrankenPHP 1.13.6 com PostgreSQL 18.7. Um worker passou por 300 requisições da regressão entre contas e mais 300 da E05 alternando perfis de 1, 5 e 30 atribuições com administração integral e erros 404. A regressão entre contas também exercitou 403 e 422. Com dois workers, duas concessões duplicadas disputaram a trava da conta. Uma retornou 200 e a outra 422, com uma única atribuição persistida. As duas suspensões concorrentes de administradores retornaram 200 e 403, preservando um administrador integral ativo.
+- Em 5 empresas e 50 estabelecimentos, Estabelecimentos manteve 10 consultas nos quatro perfis abaixo e nenhuma consulta duplicada nas amostras. Empresas manteve 8 consultas como comportamento regular. A E04 tinha 9 e 7 consultas, respectivamente. A consulta adicional é a carga separada das atribuições. A estimativa de linhas das duas consultas vem das cardinalidades das fixtures. Tempos são medianas de 10 amostras após aquecimento, em sequência, em ambiente descartável. Medições HTTP e planos de consulta ficam no runner `E05_CONTEXTUAL=1 bash tests/Performance/e04-check.sh <cópia> 1|2`. Carga simultânea sustentada e entrega real de e-mail não foram medidas.
+
+| Perfil | Linhas de atribuições + permissões | Autorização 1 / 2 workers (ms) | HTTP da listagem 1 / 2 workers (ms) | Memória mediana da autorização (bytes) |
+| --- | --- | --- | --- | --- |
+| 1 atribuição local | 1 + 2 | 1,306 / 1,490 | 7,139 / 7,392 | 5.416 |
+| 5 atribuições, 2 cargos | 5 + 4 | 1,541 / 1,687 | 7,739 / 8,282 | 5.416 |
+| 30 atribuições, 2 cargos | 30 + 4 | 2,127 / 2,243 | 9,956 / 10,718 | 6.376 |
+| Administrador integral | 1 + 69 | 1,508 / 1,674 | 10,239 / 10,747 | 23.160 |
+
+- Chromium em 1440, 390 e 320 px contra instância descartável com dados sintéticos. Foram conferidos Cargos, Usuários, Pessoas, Perfil e abertura dos tours. No desktop, o percurso gravou cargo, usuário, segunda atribuição e redução de abrangência com confirmação, preservando a atribuição coberta. O modal de atribuições foi aberto nas três larguras. Logs e capturas em `/tmp/prospera-e05/`.
+
+#### Pendências de homologação e implantação
+
+- Homologar a matriz de papéis com operadores reais e a configuração de entrega de e-mail do ambiente. Convites criados antes do marcador de senha pendente preservam o fluxo de recuperação de senha. A migração não tenta inferir o estado deles a partir de hashes.
+- Antes da E07, relações comerciais legadas não identificam empresa. Para pessoa com relação ativa em conta com mais de uma empresa e sem identificação inequívoca do vínculo comercial, a edição dos dados centrais fica reservada ao escopo tenant. A tela apresenta os dados para leitura quando permitida. O cadastro sem relação e o caso de empresa única usam a cobertura do operador.
+- Antes da implantação, revisar backup e sequência de migração, sincronização de permissões e reinício dos workers. As verificações desta entrega usaram somente bancos descartáveis e dados sintéticos.
 
 ## 27. Contrato para módulos futuros
 

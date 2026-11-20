@@ -30,3 +30,9 @@ A permissão de editar uma pessoa não concede automaticamente permissão para e
 ## Orientação na tela
 
 Use **Tutorial desta tela** na barra superior. O tutorial apresenta o cadastro quando permitido, os filtros, as colunas, as ações e a paginação. Ele abre opções e demonstra a largura das colunas no desktop, restaurando as preferências ao sair. **Ver todos os passos** permite escolher um assunto. Esc fecha o tutorial.
+
+## Definir a abrangência de um cargo
+
+Em **Abrangência**, escolha **Toda a conta** ou **Restrita a empresas ou estabelecimentos selecionados**. A disponibilidade indica onde o cargo pode ser usado. A atribuição em **Usuários** concede o cargo a um vínculo no local escolhido. As permissões do cargo são avaliadas sobre o recurso da ação e seguem o alcance do local da atribuição.
+
+Ao restringir um cargo existente, selecione os locais e escolha **Verificar impacto**. Revise a lista e confirme a remoção das atribuições que ficarem fora da abrangência antes de escolher **Salvar**. Se a lista mudar desde a conferência, faça a verificação novamente. Cargos de sistema abrangem toda a conta.

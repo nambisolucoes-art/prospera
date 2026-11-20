@@ -29,6 +29,7 @@ export type AuditRow = {
   account_id: number | null;
   context: string;
   represented_user_id: number | null;
+  can_view?: boolean;
 };
 export type AuditDetail = AuditRow & {
   changes: { label: string; before: unknown; after: unknown }[];
@@ -119,7 +120,7 @@ export default function Audit({
               locked: true,
               render: (r) => (
                 <div className="business-list__actions">
-                  {canView && (
+                  {(r.can_view ?? canView) && (
                     <Button
                       iconOnly
                       tone="primary"

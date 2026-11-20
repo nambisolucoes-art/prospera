@@ -18,13 +18,19 @@ final class AccountInspectionController
     {
         abort_unless($client->active, 404);
 
-        $options = $users->list($client)->map(fn (User $user): array => [
-            ...$user->only(['id', 'name', 'email', 'is_account_admin']),
-            'role_name' => $user->role?->name,
-            'photo_url' => $user->profile_photo ? route('saas.accounts.inspection.photo', [
-                'client' => $client, 'userId' => $user->id, 'version' => $user->profile_photo,
-            ], absolute: false) : null,
-        ]);
+        $options = $users->list($client)->map(function (User $user) use ($client): array {
+            $assignments = $user->memberships->firstOrFail()->assignments;
+
+            return [
+                ...$user->only(['id', 'name', 'email']),
+                'is_account_admin' => $assignments->contains(fn ($assignment) => $assignment->scope === 'tenant'
+                    && $assignment->role->system_key === 'administrator'),
+                'role_name' => $assignments->pluck('role.name')->unique()->implode(', '),
+                'photo_url' => $user->profile_photo ? route('saas.accounts.inspection.photo', [
+                    'client' => $client, 'userId' => $user->id, 'version' => $user->profile_photo,
+                ], absolute: false) : null,
+            ];
+        });
 
         return response()->json($options, headers: ['Cache-Control' => 'private, no-store']);
     }

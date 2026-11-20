@@ -3,6 +3,7 @@
 namespace App\Domains\Plataforma\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
@@ -93,14 +94,19 @@ final class ClientController
                 'account.companies.list' => '/conta/organizacao',
                 'account.establishments.list' => '/conta/organizacao?nivel=estabelecimentos',
                 'account.roles.list' => '/conta/cargos',
+                'account.users.list' => '/conta/usuarios',
+                'account.users.create' => '/conta/usuarios/cadastrar',
+                'account.audit.list' => '/conta/auditoria',
                 'account.people.create' => '/conta/pessoas/cadastrar',
                 'account.tags.create' => '/conta/etiquetas/cadastrar',
                 'account.roles.create' => '/conta/cargos/cadastrar',
                 'self.profile.view' => '/settings/profile',
             ];
 
+            $visible = app(EffectivePermissions::class)->visibleSlugsFor($request->user());
+
             foreach ($fallbacks as $ability => $path) {
-                if ($request->user()->can($ability)) {
+                if (in_array($ability, $visible, true)) {
                     return redirect($path);
                 }
             }

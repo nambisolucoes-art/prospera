@@ -11,6 +11,9 @@ export type RoleRow = {
   name: string;
   system_key: string | null;
   permissions_count: number;
+  assignments_count?: number;
+  availability?: 'tenant' | 'restricted';
+  availability_nodes?: { company_id: number; establishment_id: number | null }[];
   permissions?: PermissionRow[];
   modules?: Record<string, string>;
 };

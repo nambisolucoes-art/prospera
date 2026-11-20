@@ -4,11 +4,12 @@ namespace App\Domains\Acessos\Application\Context;
 
 use App\Domains\Plataforma\Application\Queries\AccountDirectoryQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 
 final class AccountContext
 {
-    /** @var array<int, Client|null> */
+    /** @var array<string, Client|null> */
     private array $accounts = [];
 
     public function __construct(private readonly AccountDirectoryQuery $directory) {}
@@ -16,7 +17,22 @@ final class AccountContext
     // O vínculo também identifica eventos de autenticação de contas inativas.
     public function linkedId(?User $user): ?int
     {
-        return $user?->account_id;
+        if ($user === null) {
+            return null;
+        }
+
+        $inspection = request()->hasSession() ? AccountInspectionSession::current(request()->session()) : null;
+
+        if ($inspection?->userId === $user->id) {
+            return $inspection->accountId;
+        }
+
+        return $user->account_id;
+    }
+
+    public function forget(): void
+    {
+        $this->accounts = [];
     }
 
     public function requireId(): int
@@ -32,11 +48,13 @@ final class AccountContext
             return null;
         }
 
-        if (! array_key_exists($id, $this->accounts)) {
-            $this->accounts[$id] = $this->directory->activeAccount($id);
+        $key = $user->id.':'.$id;
+
+        if (! array_key_exists($key, $this->accounts)) {
+            $this->accounts[$key] = $this->directory->activeAccount($id, $user->id);
         }
 
-        return $this->accounts[$id];
+        return $this->accounts[$key];
     }
 
     public function requireAccount(int $status = 403): Client

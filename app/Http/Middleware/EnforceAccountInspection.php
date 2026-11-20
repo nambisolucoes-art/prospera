@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use Closure;
@@ -25,7 +25,11 @@ final class EnforceAccountInspection
         if (
             $user === null
             || $user->id !== $inspection->userId
-            || app(AccountContext::class)->linkedId($user) !== $inspection->accountId
+            || ! AccountMembership::where('user_id', $user->id)
+                ->where('account_id', $inspection->accountId)
+                ->whereKey($inspection->membershipId)
+                ->where('status', 'active')
+                ->exists()
             || $user->is_saas_admin
             || ! $user->hasVerifiedEmail()
         ) {
@@ -38,7 +42,7 @@ final class EnforceAccountInspection
 
         if ($request->isMethodSafe()) {
             abort_if($request->routeIs(
-                'verification.verify', 'two-factor.qr-code', 'two-factor.secret-key', 'two-factor.recovery-codes',
+                'profile.email.confirm', 'verification.verify', 'two-factor.qr-code', 'two-factor.secret-key', 'two-factor.recovery-codes',
             ), 403);
 
             return $next($request);

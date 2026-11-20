@@ -181,11 +181,10 @@ class AccessControlTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect();
         $this->assertDatabaseHas('audit_records', [
-            'entity_type' => 'user',
-            'event' => 'updated',
+            'entity_type' => 'role-assignment',
+            'event' => 'created',
             'actor_id' => $owner->id,
             'account_id' => $owner->account_id,
-            'entity_id' => $second->id,
         ]);
         $this->assertSame($member->id, $second->fresh()->role_id);
     }
@@ -231,7 +230,7 @@ class AccessControlTest extends TestCase
             ->actingAs($operator)
             ->getJson('/conta/pessoas/'.$owner->person_id.'/editar')
             ->assertOk()
-            ->assertJsonPath('person.user.role_id', $owner->role_id);
+            ->assertJsonPath('person.membership.assignments.0.scope', 'tenant');
         $this->getJson('/conta/pessoas/'.$owner->person_id.'/visualizar')->assertOk()->assertJsonPath('user', null);
     }
 

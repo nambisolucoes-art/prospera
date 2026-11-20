@@ -18,13 +18,9 @@ Use middleware da própria ação em cada rota. Ações compostas também usam `
 
 O escopo do catálogo (`account`, `platform`, `self`) diz a quem a permissão pode ser concedida. Ele não é o nível organizacional da checagem: esse é dado pelo recurso-alvo (E05). Não volte ao modelo de um nível fixo por slug.
 
-## Modelo atual
+## Transição de dados
 
-Cargos pertencem a uma conta. Cada usuário da conta recebe um cargo persistido (`users.role_id`), de alcance da conta inteira. Os cargos iniciais são Administrador da conta, com as permissões de conta e pessoais do catálogo, e Usuário, com Minha conta, listagem de pontos e operações pessoais. O administrador inicial é protegido; os demais cargos podem ser personalizados.
-
-`is_account_admin` permanece apenas para compatibilidade e provisionamento. A autorização usa cargo e vínculos com definições do sistema. Cargos da conta nunca recebem permissões da plataforma ou de outra conta. Registros legados de permissões manuais não são exibidos, atribuídos nem considerados na autorização; seu histórico permanece preservado.
-
-Atribuir cargo exige `account.users.assign-role`. Só é possível atribuir cargos ou conceder permissões que o operador possui. O último administrador não pode receber um cargo diferente. A inspeção somente leitura bloqueia todas as gravações.
+Os cargos pertencem à conta. A autorização usa o vínculo ativo e as atribuições. Os campos legados de usuários permanecem durante a transição. `users.role_id` espelha a atribuição de tenant para a compatibilidade de reversão e não define as permissões efetivas. Os registros de permissões manuais permanecem fora do catálogo ativo.
 
 ## Modelo contextual
 
@@ -100,9 +96,7 @@ Administradores de empresa e de estabelecimento não criam nem alteram cargos, n
 
 `AccountContext` e `EffectivePermissions` usam binding `scoped`. Na E03, o contexto resolve a conta ativa a partir do vínculo atual, inclusive quando o guard contém o usuário representado em inspeção. O contexto de auditoria identifica o autor real separadamente. O modo de inspeção continua bloqueando escritas no middleware.
 
-Na primeira checagem para um usuário da conta, o resolvedor consulta a conta ativa e carrega os slugs do cargo dessa conta. Gate, Central de Ajuda e `auth.permissions` reutilizam o resultado. Perfis globais consultam apenas o catálogo dos escopos aplicáveis. Os privilégios do administrador integral continuam provisionados pela sincronização do cargo protegido. A próxima requisição resolve tudo novamente.
-
-Ao alterar o pivô de um cargo, a Action invalida os slugs da requisição atual para preservar as checagens após a escrita. Nesse fluxo uma nova leitura de slugs pode ser necessária, com a conta ativa já resolvida. A meta de até duas consultas vale para a resolução inicial e para as rotas de leitura medidas. Detalhes em [Performance](performance.md).
+Na primeira checagem para um usuário da conta, o resolvedor carrega as atribuições do vínculo ativo e os slugs dos cargos distintos em duas consultas. O resultado é indexado por permissão e compartilhado pelo Gate e pelos descritores de consulta na mesma requisição. As ações de alteração de cargo, atribuições e vínculo invalidam o resultado local. A próxima requisição resolve tudo novamente.
 
 ## Nomes fechados na E02
 

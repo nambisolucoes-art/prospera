@@ -41,6 +41,10 @@ final readonly class SavePersonData
             $input['phone'] = preg_replace('/[.\/()\s-]+/', '', $input['phone']);
         }
 
+        if (! array_key_exists('email', $input) && $existingPerson !== null) {
+            $input['email'] = $existingPerson->email;
+        }
+
         $input['email'] = is_string($input['email'] ?? null) ? mb_strtolower(trim($input['email'])) : null;
 
         // Etiquetas inativas só são aceitas quando a pessoa já as possui.
@@ -56,7 +60,7 @@ final readonly class SavePersonData
 
         $values = Validator::validate($input, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => [$hasUser ? 'required' : 'nullable', 'email', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
             'role_id' => ['sometimes', 'integer', Rule::exists('roles', 'id')->where('account_id', $accountId)],
             'tag_ids' => ['sometimes', 'array'],
@@ -67,7 +71,6 @@ final readonly class SavePersonData
             'name.required' => 'Informe o nome.',
             'name.string' => 'Informe um nome válido.',
             'name.max' => 'O nome deve ter até 255 caracteres.',
-            'email.required' => 'Informe o e-mail para o acesso de usuário.',
             'email.email' => 'Informe um e-mail válido.',
             'email.max' => 'O e-mail deve ter até 255 caracteres.',
             'phone.string' => 'Informe um telefone válido.',

@@ -89,12 +89,18 @@ export default function PersonPreview({
           </PreviewSection>
           {person.customer && <PreviewSection title="Cliente"><dt>Situação</dt><dd><StatusLabel active={person.customer.active} /></dd></PreviewSection>}
           {person.supplier && <PreviewSection title="Fornecedor"><dt>Situação</dt><dd><StatusLabel active={person.supplier.active} /></dd></PreviewSection>}
-          {person.user && (
+          {person.membership && (
             <section className="account-preview__section">
               <h3>Acesso de usuário</h3>
               <dl>
-                <dt>Papel na conta</dt>
-                <dd>{person.user.role.name}</dd>
+                <dt>E-mail de acesso</dt>
+                <dd>{person.membership.email}</dd>
+                {person.membership.assignments.map((assignment) => (
+                  <div key={assignment.id}>
+                    <dt>{assignment.location}</dt>
+                    <dd>{assignment.role}</dd>
+                  </div>
+                ))}
               </dl>
             </section>
           )}

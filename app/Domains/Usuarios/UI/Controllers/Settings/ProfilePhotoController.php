@@ -3,6 +3,8 @@
 namespace App\Domains\Usuarios\UI\Controllers\Settings;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Application\Queries\MembershipDirectoryQuery;
 use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Actions\SaveProfilePhotoAction;
@@ -38,11 +40,21 @@ final class ProfilePhotoController extends Controller
     public function showDirectory(
         Request $request,
         UserDirectoryQuery $directory,
+        MembershipDirectoryQuery $memberships,
+        EffectivePermissions $permissions,
         string $userId,
         string $version,
     ): StreamedResponse {
-        $account = $request->routeIs('account.users.*') ? app(AccountContext::class)->requireAccount(404) : null;
-        $user = $directory->findWithPhoto($account, (int) $userId, $version);
+        if ($request->routeIs('account.users.*')) {
+            $accountId = app(AccountContext::class)->requireId();
+            $nodes = $permissions->nodesFor($request->user(), 'account.users.view');
+            abort_if($nodes->isEmpty(), 403);
+            $membership = $memberships->visible($accountId, $nodes)->where('user_id', $userId)->firstOrFail();
+            $user = $membership->identity()->firstOrFail();
+            abort_unless($user->profile_photo === $version, 404);
+        } else {
+            $user = $directory->findWithPhoto(null, (int) $userId, $version);
+        }
 
         return $this->image($user, $version);
     }

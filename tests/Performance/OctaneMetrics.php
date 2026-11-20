@@ -28,7 +28,8 @@ final class OctaneMetrics
             $signatures = array_map(fn ($query) => serialize([$query['query'], $query['bindings']]), $queries);
             $permissionQueries = array_filter(
                 $queries,
-                fn ($query) => str_starts_with($query['query'], 'select "slug" from "permissions"'),
+                fn ($query) => str_starts_with($query['query'], 'select "slug" from "permissions"')
+                    || str_contains($query['query'], 'from "permission_role" as "pr"'),
             );
             $body = $response->getContent();
             $data = is_string($body) ? json_decode($body, true) : null;
@@ -37,6 +38,11 @@ final class OctaneMetrics
                 'worker' => $worker,
                 'queries' => count($queries),
                 'permission_queries' => count($permissionQueries),
+                'assignment_queries' => count(array_filter(
+                    $queries,
+                    fn ($query) => str_contains($query['query'], 'from "role_assignments"')
+                        && str_contains($query['query'], 'join "clients" as "c"'),
+                )),
                 'duplicates' => count($queries) - count(array_unique($signatures)),
                 'db_ms' => array_sum(array_column($queries, 'time')),
                 'php_ms' => (hrtime(true) - $start) / 1e6,

@@ -48,7 +48,8 @@ final class AccountRequestsTest extends TestCase
             $signatures = array_map(fn (QueryExecuted $query) => serialize([$query->sql, $query->bindings]), $queries);
             $permissionQueries = count(array_filter(
                 $queries,
-                fn (QueryExecuted $query) => str_starts_with($query->sql, 'select "slug" from "permissions"'),
+                fn (QueryExecuted $query) => str_starts_with($query->sql, 'select "slug" from "permissions"')
+                    || str_contains($query->sql, 'from "permission_role" as "pr"'),
             ));
 
             if (! getenv('E03_BASELINE')) {

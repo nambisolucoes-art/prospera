@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Models\User;
@@ -61,12 +62,18 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Gate::define('access-saas', fn (User $user): bool => $user->is_saas_admin === true);
-        Gate::before(function (User $user, string $ability): ?bool {
+        Gate::before(function (User $user, string $ability, array $arguments): ?bool {
             if (! preg_match('/^(account|platform|self)\\.[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$/', $ability)) {
                 return null;
             }
 
-            return app(EffectivePermissions::class)->allows($user, $ability);
+            $node = $arguments[0] ?? null;
+
+            if ($node !== null && ! $node instanceof AccessNode) {
+                return false;
+            }
+
+            return app(EffectivePermissions::class)->allows($user, $ability, $node);
         });
     }
 
