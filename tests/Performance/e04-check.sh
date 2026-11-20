@@ -5,6 +5,7 @@ set -euo pipefail
 source_dir=$(realpath "$1")
 workers=${2:-1}
 contextual=${E05_CONTEXTUAL:-0}
+organization=${E06_CONTEXT:-0}
 fixture_dir=$(realpath "$(dirname "$0")")
 prefix="prospera-e04-check-$$"
 cleanup() {
@@ -46,9 +47,12 @@ docker run -d --rm --name "$prefix-app" --network "$prefix" --entrypoint sh \
         if [ "$2" = 1 ]; then
             php /performance/e05-fixtures.php
         fi
+        if [ "$3" = 1 ]; then
+            php /performance/e06-fixtures.php
+        fi
         # A prova de sessão vem após as 600 requisições de isolamento e a carga das listagens.
         exec php artisan octane:frankenphp --host=127.0.0.1 --port=8000 --workers="$1" --max-requests=1200
-    ' setup "$workers" "$contextual" >/dev/null
+    ' setup "$workers" "$contextual" "$organization" >/dev/null
 
 for attempt in {1..45}; do
     if docker exec "$prefix-app" php -r 'exit(@file_get_contents("http://127.0.0.1:8000/up") === false ? 1 : 0);'; then
@@ -70,6 +74,10 @@ docker exec -e E04_ISOLATION="$(( workers == 1 ))" "$prefix-app" php /performanc
 
 if [ "$contextual" = 1 ]; then
     docker exec -e E05_ISOLATION="$(( workers == 1 ))" "$prefix-app" php /performance/e05-client.php
+fi
+
+if [ "$organization" = 1 ]; then
+    docker exec -e E06_ISOLATION="$(( workers == 1 ))" "$prefix-app" php /performance/e06-client.php
 fi
 
 docker exec -i "$prefix-db" psql -X -v ON_ERROR_STOP=1 -U postgres -d e04 < "$fixture_dir/e04-index-plans.sql"

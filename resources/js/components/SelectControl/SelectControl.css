@@ -67,6 +67,19 @@
   font-weight: 700;
 }
 
+.selectControl__options li.selectControl__group {
+  padding: 8px 14px 2px;
+  color: var(--bold-color-text-muted, #98a6ad);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: default;
+}
+
+.selectControl__options li.selectControl__group:hover {
+  background: transparent;
+}
+
 .selectControl__search {
   position: relative;
   padding-bottom: 4px;

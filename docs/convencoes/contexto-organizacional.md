@@ -111,11 +111,21 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 
 ## Contexto da requisição
 
-- O contexto organizacional vem da URL e é validado no servidor a cada requisição (DA-11). A sessão nunca é autoridade de contexto; guarda no máximo o último contexto usado, para redirecionar após o login.
+- O contexto organizacional vem da URL e é validado no servidor a cada requisição (DA-11). A área de trabalho da aba é mantida em `sessionStorage`, por usuário e conta, e revalidada contra a lista autorizada nas telas da conta. Nas consultas e escritas operacionais, a URL explícita determina o escopo da requisição. O padrão fica no vínculo entre usuário e conta e só é usado na entrada sem código.
 - O middleware de contexto confere, nesta ordem: vínculo ativo; empresa e unidade pertencentes ao tenant; alguma atribuição que cubra o nó; empresa e unidade ativas nas rotas operacionais. O contexto não concede permissões: a rota ou a Action verifica a permissão da operação.
 - Toda escrita vai para uma URL que contém o contexto, e o servidor confere que o recurso alterado pertence a ele. Uma aba nunca usa o contexto de outra.
 - O frontend monta as URLs relativas à página atual e não guarda estado global de contexto.
 - Jobs futuros levam `account_id`, `company_id`, `establishment_id`, `membership_id` e `actor_id` e reautorizam ao executar. Chaves de cache incluem o tenant e o nó.
+
+### Implementação (E06)
+
+- **Serviço:** `OrganizationContext` (`scoped`) informa `mode()` (`tenant`, `company`, `establishment` ou `consolidated`), `accountId()`, `membershipId()`, `actorId()` (na inspeção, o administrador SaaS), `company()`, `establishment()`, `node()` e `scopeFor($user, $permissao)`, o descritor que a Query aplica no SQL já restrito à URL. Fora dos grupos com contexto, o modo é `tenant`.
+- **Acesso ao contexto:** é a cobertura do nó por alguma atribuição válida do vínculo ativo (`EffectivePermissions::navigableNodes`), calculada com as atribuições já carregadas, sem consulta extra. Uma atribuição de estabelecimento não abre o contexto da empresa.
+- **Middleware:** `organization:company` ou `organization:establishment`, com as opções `consolidated` (o módulo aceita `todos` com `?unidades=codigo-a,codigo-b`, somente leitura) e `history` (leitura em empresa ou unidade inativa). Código inexistente, de outro tenant ou sem atribuição responde 404; contexto inativo responde 403 com orientação; vínculo suspenso responde 403. A abertura direta pelo navegador recebe só o HTML inicial, e a aplicação valida o contexto na requisição JSON.
+- **Rotas:** `routes/context.php` define as rotas `account.*` com códigos de `OrganizationCode::ROUTE_PATTERN`. A entrada `/conta/estabelecimento` abre o padrão filtrado pelas unidades ainda navegáveis ou a primeira delas. `?para=modulo` é destinado a módulos que suportam as duas formas de URL. `GET /conta/area-de-trabalho/padrao` consulta o padrão efetivo e `PUT` grava os códigos no vínculo próprio ativo. A gravação fica indisponível durante inspeção.
+- **Leitura consolidada:** `todos` sem parâmetro consulta todas as unidades navegáveis. Com `unidades`, qualquer código inválido ou indisponível retorna 404. O módulo chama `scopeFor($user, $ability)` e aplica o descritor a partir de uma consulta já filtrada pelo tenant, antes da paginação, contagem ou agregação. O descritor consolidado contém apenas IDs de estabelecimentos ativos selecionados cobertos pela permissão da operação.
+- **Escrita:** o módulo verifica a permissão da ação sobre `node()` e filtra por `account_id` e pelo nó da URL (`where establishment_id = ?`). Um registro de outra unidade responde 404. A seleção e o padrão não concedem permissões.
+- **Frontend:** endereços `~/` são resolvidos no contexto da página que os declarou por `ApiLink`, `ApiForm`, `useApiForm` e `useContextUrl`. Links e filtros relativos ao consolidado preservam `unidades`. Ao abrir uma unidade do resumo, `voltar-unidades` preserva o link de retorno e não interfere no destino das operações. O seletor na `TopBarPrimary` é alimentado por `organization_context` das rotas `account.*` e aparece a partir de duas unidades autorizadas.
 
 ## Nomenclatura
 
@@ -149,7 +159,7 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 | Cadastro de empresas e estabelecimentos | `/conta/empresas`, `/conta/estabelecimentos` | `/conta/estabelecimentos/12/editar` | E04 |
 | Módulo de empresa | `/conta/empresa/{empresa}/...` | `/conta/empresa/gartan/clientes` | E06 |
 | Módulo de estabelecimento | `/conta/estabelecimento/{estabelecimento}/...` | `/conta/estabelecimento/gartan-guanambi/vendas` | E06 |
-| Consolidado | código reservado `todos`, somente em telas que declaram suporte | `/conta/estabelecimento/todos/vendas` | por módulo |
+| Consolidado | código reservado `todos`, somente em telas que declaram suporte | `/conta/estabelecimento/todos?unidades=guanambi,janauba` | por módulo |
 | Tenant na URL (PD-04) | `/contas/{conta}/...` no lugar de `/conta/...`, só com vários vínculos; as URLs sem prefixo redirecionam para a conta escolhida | `/contas/grupo-gartan/pessoas` | E09 |
 | Plataforma | `/saas/...` preservado | `/saas/contas` | atual |
 | Configurações pessoais e ajuda | `/settings/...` e `/ajuda`, sem prefixo de conta | `/settings/security` | atual |

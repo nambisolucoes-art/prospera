@@ -73,6 +73,31 @@ export function tourFor(
         'Conta e organização',
         'Os cartões levam à Organização. Abra a conta, as empresas ou seus estabelecimentos conforme suas permissões.',
       ),
+      at(
+        'organization-switcher',
+        'Configurar a área de trabalho',
+        'Marque uma ou várias unidades. A caixa no fim da linha marca toda a empresa. Clique fora da lista para aplicar a seleção nesta aba e salvá-la como padrão.',
+      ),
+    ];
+  } else if (/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}$/.test(path)) {
+    title = path.endsWith('/todos') ? 'Área de trabalho' : 'Início do estabelecimento';
+    help = 'estabelecimento-atual';
+    steps = [
+      at(
+        'organization-switcher',
+        'Configurar a área de trabalho',
+        'Marque uma ou várias unidades. A caixa no fim da linha marca toda a empresa. Clique fora da lista para aplicar a seleção nesta aba e salvá-la como padrão.',
+      ),
+      at(
+        'establishment-home-summary',
+        'Estabelecimentos da área de trabalho',
+        'Confira as unidades desta aba. Ao abrir uma unidade, Ver cadastro e Editar aparecem conforme as permissões do seu cargo.',
+      ),
+      at(
+        'establishment-home-tabs',
+        'Contexto desta aba',
+        'O endereço mantém a seleção ao atualizar a página. Para salvar um registro operacional, abra o estabelecimento de destino.',
+      ),
     ];
   } else if (path === '/conta/organizacao') {
     title = 'Organização';

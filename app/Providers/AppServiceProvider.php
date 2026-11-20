@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
@@ -28,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(AuditContext::class);
         $this->app->scoped(AccountContext::class);
         $this->app->scoped(EffectivePermissions::class);
+        $this->app->scoped(OrganizationContext::class);
     }
 
     /**

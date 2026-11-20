@@ -40,7 +40,10 @@ final class AccountMembership extends Model implements Auditable
     /** @return array<string,string> */
     public static function unauditedFields(): array
     {
-        return ['last_used_at' => 'Metadado de navegação, sem efeito sobre o acesso.'];
+        return [
+            'last_used_at' => 'Metadado de navegação, sem efeito sobre o acesso.',
+            'workspace_establishments' => 'Preferência pessoal de navegação, sem efeito sobre o acesso.',
+        ];
     }
 
     public static function register(User $user, int $accountId, int $personId): self

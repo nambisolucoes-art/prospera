@@ -2,6 +2,7 @@
 
 // Carregado somente na cópia descartável preparada pelo runner.
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -39,3 +40,22 @@ Route::get('/_e05/authorize', function (Request $request, EffectivePermissions $
         'authorization_bytes' => memory_get_usage() - $memory,
     ];
 });
+
+// E06: custo da resolução do contexto e da montagem do seletor, separados do restante da página.
+Route::get('/_e06/context/{code}', function (Request $request, OrganizationContext $context, string $code) {
+    $user = $request->user();
+    $start = hrtime(true);
+    $memory = memory_get_usage();
+    $context->enterEstablishment($user, $code, false, true);
+    $resolved = (hrtime(true) - $start) / 1e6;
+
+    $start = hrtime(true);
+    $units = $context->navigable($user);
+
+    return [
+        'resolve_ms' => $resolved,
+        'selector_ms' => (hrtime(true) - $start) / 1e6,
+        'context_bytes' => memory_get_usage() - $memory,
+        'units' => count($units),
+    ];
+})->middleware('auth');

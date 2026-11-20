@@ -17,6 +17,7 @@ import {
   markAppPageTransitionReady,
   startAppPageTransition,
 } from '@/utils/appPageTransition';
+import { contextBase } from '@/utils/organizationContext';
 import {
   clearPageAssetRetry,
   isPageAssetError,
@@ -26,7 +27,7 @@ import {
 const screens = import.meta.glob<{ default: ComponentType }>([
   './account/{auth,settings}/*.tsx',
   './saas/{clients,account-form,home,users,user-form,people,person-form,tags,roles,role-form,audit,help}.tsx',
-  './saas/{organization,companies,company-form,establishments,establishment-form}.tsx',
+  './saas/{organization,companies,company-form,establishments,establishment-form,establishment-home}.tsx',
 ]);
 
 const routes: Array<[RegExp, string]> = [
@@ -38,6 +39,7 @@ const routes: Array<[RegExp, string]> = [
   [/^\/conta\/empresas$/, 'saas/companies'],
   [/^\/conta\/empresas\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/company-form'],
   [/^\/conta\/estabelecimentos$/, 'saas/establishments'],
+  [/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}$/, 'saas/establishment-home'],
   [/^\/conta\/estabelecimentos\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/establishment-form'],
   [
     /^\/(?:saas\/contas\/(?:cadastrar|\d+\/editar)|conta\/editar)$/,
@@ -81,6 +83,7 @@ export default function ApiApplication(): JSX.Element {
   const [page, setPage] = useState<Page>();
   const [error, setError] = useState('');
   const [failedAssetUrl, setFailedAssetUrl] = useState('');
+  const [contextFailure, setContextFailure] = useState(false);
   const request = useRef<AbortController>(null);
   const currentPageUrl = useRef<string | undefined>(undefined);
 
@@ -95,6 +98,7 @@ export default function ApiApplication(): JSX.Element {
       let committed = false;
       setError('');
       setFailedAssetUrl('');
+      setContextFailure(false);
 
       try {
         let target = new URL(url, location.origin);
@@ -120,6 +124,19 @@ export default function ApiApplication(): JSX.Element {
             ) {
               target = new URL('/email/verify', location.origin);
               continue;
+            }
+            // Unidade inexistente, sem acesso ou inativa: orienta sem revelar se o código existe.
+            if (
+              failure instanceof ApiError &&
+              [403, 404].includes(failure.status) &&
+              contextBase(target.href)
+            ) {
+              setContextFailure(true);
+              throw new Error(
+                failure.status === 403 && failure.message.includes('inativ')
+                  ? failure.message
+                  : 'A seleção contém um estabelecimento indisponível. Abra uma área de trabalho autorizada.',
+              );
             }
             throw failure;
           }
@@ -215,13 +232,25 @@ export default function ApiApplication(): JSX.Element {
             </button>
           </p>
         )}
+        {contextFailure && (
+          <p>
+            <a href="/conta/estabelecimento">Abrir área de trabalho</a>
+          </p>
+        )}
         <a href="/dashboard">Voltar ao painel</a>
       </main>
     );
   if (!page) return <p role="status">Carregando…</p>;
 
-  const { Component, component, props } = page;
-  const content = <Component key={component} {...props} />;
+  const { Component, component, props, url } = page;
+  const base = contextBase(url);
+  const selection = base?.endsWith('/estabelecimento/todos')
+    ? new URL(url, window.location.origin).searchParams.get('unidades')
+    : null;
+  // Formulários e modais são vinculados ao contexto da página em que abriram.
+  const content = (
+    <Component key={`${component}:${base ?? ''}:${selection ?? ''}`} {...props} />
+  );
 
   return (
     <ApiPageContext.Provider value={{ ...page, navigate }}>

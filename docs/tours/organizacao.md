@@ -12,4 +12,4 @@ Os tours são abertos em **Tutorial desta tela**. Os passos comuns de título, n
 | Estabelecimentos | Busca, filtros, classificação, selo Principal e ação de promoção quando disponível. |
 | Cadastro e edição de estabelecimento | Empresa e identificação da unidade, classificação conforme o documento da empresa, endereço, contatos e ações do formulário. |
 
-Artigos relacionados em [Dados da conta](../ajuda/dados-da-conta.md), [Empresas](../ajuda/empresas.md) e [Estabelecimentos](../ajuda/estabelecimentos.md).
+Artigos relacionados em [Dados da conta](../ajuda/dados-da-conta.md), [Empresas](../ajuda/empresas.md), [Estabelecimentos](../ajuda/estabelecimentos.md) e [Área de trabalho e estabelecimentos](../ajuda/estabelecimento-atual.md). O seletor da barra superior e o início do estabelecimento estão em [Tour da área de trabalho](estabelecimento-atual.md).

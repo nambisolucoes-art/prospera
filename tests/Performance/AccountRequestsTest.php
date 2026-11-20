@@ -55,7 +55,12 @@ final class AccountRequestsTest extends TestCase
             if (! getenv('E03_BASELINE')) {
                 self::assertSame(1, $permissionQueries, $path);
                 self::assertCount(count(array_unique($signatures)), $queries, $path);
-                self::assertLessThanOrEqual($path === '/ajuda' ? 2 : 9, count($queries), $path);
+                // As telas da conta somam 1 consulta do seletor de estabelecimento (E06, meta 15.3.1).
+                self::assertLessThanOrEqual($path === '/ajuda' ? 2 : 10, count($queries), $path);
+                self::assertLessThanOrEqual(1, count(array_filter(
+                    $queries,
+                    fn (QueryExecuted $query) => str_contains($query->sql, 'from "establishments" as "e"'),
+                )), $path);
             }
 
             fwrite(STDERR, json_encode([

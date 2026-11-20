@@ -19,6 +19,7 @@ O Prospera roda em workers persistentes do FrankenPHP (`octane:frankenphp`). Um 
 - As permissões efetivas são resolvidas uma vez por requisição, na primeira checagem, em no máximo 2 queries (atribuições do vínculo e permissões dos cargos distintos). Esse número não cresce com o número de checagens, atribuições ou estabelecimentos.
 - As linhas retornadas são atribuições mais as permissões dos cargos distintos, nunca o produto das duas.
 - O resultado de cada checagem é memorizado na requisição.
+- O seletor organizacional custa 1 consulta nas telas da conta, que enumera as unidades navegáveis numa junção de `establishments` com `companies`, sem laço por unidade (E06). A resolução do código da URL custa mais 1 consulta, só nos grupos com contexto.
 - Consultas consolidadas usam o descritor autorizado (`tenant inteiro` ou `company_id in (...) or establishment_id in (...)`), derivado das atribuições já carregadas, sem query extra e sem laço sobre os estabelecimentos.
 
 ## Consultas

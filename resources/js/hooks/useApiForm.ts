@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useApiPage, type NavigationOptions } from '@/hooks/useApiPage';
 import { ApiError, apiRequest, type ApiErrors } from '@/utils/apiRequest';
+import { contextualUrl } from '@/utils/organizationContext';
 
 type Values = Record<string, string | number | boolean | File | null>;
 export type SubmitOptions = NavigationOptions & {
@@ -34,7 +35,7 @@ export function useApiForm<T extends Values>(initial: T) {
     setRecentlySuccessful(false);
   }
 
-  async function submit(method: Method, endpoint: string, options: SubmitOptions = {}, submitted?: FormData) {
+  async function submit(method: Method, address: string, options: SubmitOptions = {}, submitted?: FormData) {
     if (busy.current) return;
     busy.current = true;
     setProcessing(true);
@@ -42,6 +43,8 @@ export function useApiForm<T extends Values>(initial: T) {
     setErrors({});
 
     try {
+      // O destino é fixado pela página que montou o formulário, nunca pela unidade aberta em outra aba.
+      const endpoint = contextualUrl(address, pageUrl);
       const body = submitted ?? new FormData();
       if (!submitted) Object.entries(data).forEach(([key, value]) => {
         if (value !== null) body.append(key, value instanceof File ? value : String(value));

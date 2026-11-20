@@ -14,6 +14,9 @@ final class OrganizationCode
 {
     public const PATTERN = '/^[a-z0-9][a-z0-9-]{1,39}$/';
 
+    // Mesmo formato, sem delimitadores, para as restrições de rota.
+    public const ROUTE_PATTERN = '[a-z0-9][a-z0-9-]{1,39}';
+
     public const RESERVED = ['todos', 'cadastrar', 'editar', 'visualizar'];
 
     public const MAX_LENGTH = 40;

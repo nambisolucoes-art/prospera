@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 concluída em 19/11/2026. E02 concluída em 20/11/2026 |
+| Situação do documento | Aprovado. E01 concluída em 19/11/2026. E02 a E05 concluídas em 20/11/2026. E06 em validação. E07 a E10 pendentes |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
 | Revisão | 6 (20/11/2026): encerramento da E02. Revisão 5 (20/11/2026): execução da E02. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
@@ -840,20 +840,16 @@ A permissão da operação continua sendo verificada pela rota ou Action. São v
 
 - **Frontend:** `apiRequest`, `ApiLink`, `ApiForm` e `navigate` montam URLs relativas ao contexto da página atual. Nenhum estado global de contexto é guardado no frontend.
 - **Escrita:** toda escrita vai para uma URL que contém o contexto, e o servidor valida que o recurso alterado pertence a ele (`where account_id = ? and establishment_id = ?`).
-- **Sessão:** guarda no máximo o "último contexto usado", e só para redirecionar após o login.
+- **Seleção temporária:** acompanha a navegação da aba pelo armazenamento da sessão do navegador. A URL explícita determina o escopo operacional.
 
 Resultado: uma operação da aba 1 nunca usa o contexto da aba 2 (cenário 24).
 
 ### 12.4 Seletor organizacional
 
-- **Onde:** na `TopBarPrimary`, reutilizando `SelectControl` ou `DropdownMenu` (o `DropdownMenu` já existe e ainda não é usado pela aplicação).
-- **O que lista:** só os contextos onde existe alguma atribuição, a partir de uma única query de empresas e estabelecimentos autorizados, ordenada por empresa.
-- **Simplificação:**
-  - uma empresa e uma unidade: o seletor fica oculto;
-  - uma empresa e várias unidades: lista só as unidades;
-  - várias empresas: agrupa por empresa.
-- **Consolidado:** a opção "Todos os autorizados" aparece só em telas que declaram suporte e quando há permissão em mais de uma unidade.
-- **Troca:** navega para a mesma rota com outro código. A sidebar é a mesma; o contexto só muda os dados exibidos.
+- A área de trabalho na barra superior lista as unidades ativas e navegáveis, com caixas de seleção agrupadas por empresa. É possível marcar um subconjunto, uma empresa inteira ou todas as unidades. Fechar a lista aplica a seleção nesta aba e a salva como padrão, exceto em inspeção. Uma seleção vazia mantém a seleção anterior. O seletor fica à esquerda do tutorial. A seleção acompanha a navegação nas telas da conta. Com uma unidade autorizada, o seletor fica oculto.
+- O padrão pertence ao vínculo usuário e conta. O acesso sem código usa o padrão revalidado e, se ele estiver vazio, a primeira unidade disponível. Inspeções não editam o padrão.
+- Uma unidade usa uma URL com seu código. Várias unidades usam `/conta/estabelecimento/todos?unidades=codigo-a,codigo-b` nas telas com suporte. O código reservado aceita somente leitura. Uma seleção explícita contendo unidade indisponível responde 404.
+- Consultas compatíveis aplicam no SQL a interseção do tenant, da seleção e da permissão específica da operação. Escritas usam uma URL com destino inequívoco. O contexto de empresa e a administração da conta mantêm seus próprios escopos.
 
 ---
 
@@ -1622,7 +1618,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
   - seletor na barra superior;
   - URLs relativas ao contexto em `apiRequest`, `ApiLink` e `ApiForm`;
   - `ApiPage` passa a enviar os contextos autorizados só quando a página usa o seletor.
-- **Banco:** nenhuma alteração.
+- **Banco:** preferência de navegação em coluna JSON opcional do vínculo `account_memberships`, com chave única existente por usuário e conta.
 
 **Componentes envolvidos.**
 - Existentes: `bootstrap/app.php`, `ApiPage`, `routes/*`, `TopBarPrimary`, `apiRequest.ts`, `ApiLink`, `ApiForm`, `useApiPage`, `SaasLayout`, `guidance.ts`.
@@ -1637,7 +1633,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 **Segurança.** Manipulação de código na URL; código de outro tenant; abas simultâneas; consolidado restrito ao conjunto autorizado.
 
 **Testes.**
-- Cenários 17, 18, 19, 20, 23, 24 e 28.
+- Cenários 17, 18, 19, 20, 23, 24 e 28, mais seleção múltipla, persistência isolada e revalidação após revogação.
 - Navegador: duas abas em unidades diferentes executando escritas.
 
 **Critérios de aceite.**
@@ -1647,9 +1643,11 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 
 **Riscos.** Rotas existentes quebrando com o novo middleware. Mitigação: ele só se aplica aos novos grupos.
 
-**Reversão.** Remover os grupos de rota e o middleware. Não há alteração de banco.
+**Reversão.** Remover os grupos de rota e o middleware. A reversão da migration remove somente os padrões salvos.
 
 **Entregáveis.** Código, testes, artigo sobre troca de contexto, tours, relatório.
+
+**Estado:** Em validação desde 20/11/2026. Execução, medições e desvios no registro da E06 na seção 26.
 
 ---
 
@@ -2010,8 +2008,8 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E02 | Concluída | 20/11/2026 | 20/11/2026 | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registros abaixo) | DA-26 a DA-30 aprovadas; I1 e I2 atribuídas à E05 |
 | E03 | Concluída | 20/11/2026 | 20/11/2026 | Registro E03 e relatório de medições | Concorrência e custos de migrations em bases maiores ficam para trabalho futuro |
 | E04 | Concluída | 20/11/2026 | 20/11/2026 | Registro de execução e homologação final da E04 na seção 26 | Implantação pendente de conferência da base oficial, backup e confirmação fiscal legada |
-| E05 | Em validação | 20/11/2026 | | Execução, auditoria e revisão da E05 na seção 26 | Correções disponíveis para revisão |
-| E06 | Pendente | | | | |
+| E05 | Concluída | 20/11/2026 | 20/11/2026 | Registro, auditoria, revisão, verificação da inspeção e homologação final da E05 na seção 26 | Implantação pendente de provedor de e-mail, backup, migrations e reinício controlado dos workers; `users.account_id` preservada até a E09 |
+| E06 | Em validação | 20/11/2026 | | Registro de execução da E06 na seção 26 | Aguarda revisão; pendências de implantação e de módulos operacionais registradas |
 | E07 | Pendente | | | | |
 | E08 | Pendente | | | | |
 | E09 | Pendente | | | | |
@@ -2309,6 +2307,165 @@ O teste fez dois logins independentes pelo Fortify. Depois da revogação, o coo
 
 A E05 está tecnicamente pronta para aceite no ambiente de desenvolvimento validado e permanece **Em validação** até a aprovação formal de produto. A matriz foi exercitada com perfis sintéticos, pois o Prospera ainda não tem clientes reais. A entrega do provedor de e-mail externo e a sequência de backup, migração e reinício dos workers ficam para a implantação. A restrição sobre relações comerciais legadas está documentada para a E07. E06 a E10 continuam pendentes.
 
+### Homologação final da E05 em 20/11/2026
+
+**Resultado: Concluída.** A homologação técnica foi aprovada sobre `c476de6`, com a implementação em `1a8a84d` e a árvore limpa. E06 a E10 continuam **Pendentes**. A implementação da E05 só é reaberta diante de evidência de nova falha.
+
+**Bloqueadores da auditoria resolvidos.**
+
+- `SaveRoleAssignmentsAction` recusa a alteração sem autoridade para gerenciar atribuições antes de consultar o vínculo-alvo, e não há mais sincronização de cargo legado. Solicitações vazias retornam 403 para quem não tem a permissão e 422 para quem tem, com ou sem vínculo existente, sem consulta ao vínculo nem gravação.
+- `EnforceAccountInspection` revalida o autor real a cada requisição. A revogação da autoridade SaaS encerra a inspeção na requisição seguinte, torna anônima a sessão do inspetor e não interfere nas sessões legítimas e independentes do usuário representado.
+
+**Contração aprovada.** A remoção definitiva de `users.role_id`, `users.is_account_admin` e `users.person_id` pela migration `2026_11_20_000008_remove_single_role_from_users.php` foi aprovada. `users.account_id` permanece até a E09 como referência explícita da conta para `AccountContext::linkedId` e para o contexto dos eventos de autenticação, sem conceder acesso, conforme a Revisão da E05 após a auditoria.
+
+**Resultado final.** SQLite em memória com 174 testes e 1.731 asserções, mais 45 asserções da prova de orçamento de consultas. PHPStan, Pint, build, TypeScript, checagem de arquitetura, `permissions:sync`, `audit:check` e `organization:check` aprovados nas rodadas registradas acima.
+
+**Evidências de sessão, revogação e isolamento no FrankenPHP.** FrankenPHP 1.13.6 com PostgreSQL 18.7 descartável e sessões em banco:
+
+- após a perda da autoridade SaaS, a primeira requisição da sessão em inspeção retornou 401, removeu a identidade do guard e o estado de `AccountInspectionSession`, destruiu o registro da sessão anterior e renovou o ID e o token CSRF. As requisições seguintes ficaram anônimas e o cookie anterior continuou sem acesso mesmo após a restauração da autoridade;
+- a sessão do usuário representado, aberta por login independente no Fortify, manteve ID, token CSRF, identidade e token de lembrança, e continuou a ler e a editar a conta no mesmo worker;
+- um worker processou 300 requisições alternadas da E04 e 300 da E05, com perfis de 1, 5 e 30 atribuições, administração integral e respostas 403, 404 e 422, sem vazamento de permissões entre requisições. A resolução ficou em duas consultas nas listagens;
+- com dois workers, a concessão duplicada retornou 200 e 422 e persistiu uma atribuição, e a suspensão concorrente retornou 200 e 403, preservando um administrador integral ativo.
+
+**Limitações das medições e dos testes concorrentes.** Os tempos são medianas de 10 requisições sequenciais após aquecimento, com dados sintéticos em 5 empresas e 50 estabelecimentos, em ambiente descartável. Não representam carga simultânea sustentada nem uma base de produção. A concorrência cobriu apenas pares de operações em dois workers (concessão duplicada e suspensão de administradores). A suíte usa SQLite em memória; o PostgreSQL foi exercitado em ensaios separados. A passkey foi verificada na configuração e no bloqueio em inspeção, sem autenticador físico. A matriz de papéis usou perfis sintéticos, pois o Prospera ainda não tem clientes reais.
+
+**Pendências operacionais de implantação.**
+
+- Verificar a entrega pelo provedor externo de e-mail no ambiente de destino (convite, reenvio, recuperação, confirmação e aviso de troca de e-mail). Os ensaios usaram somente Mailpit.
+- Guardar backup recuperável antes de migrar, incluindo `role_assignments`, `role_availability`, o marcador de convite pendente e a referência de autoria ao vínculo. A contração `000008` só se desfaz restaurando essa cópia.
+- Aplicar as migrations na ordem `000007` e `000008`, seguidas de `permissions:sync`, `audit:check` e `organization:check`.
+- Reiniciar os workers de forma controlada após a migração e a sincronização, para que nenhum worker atenda com o esquema ou o código anteriores.
+
+**Pendências preservadas para as próximas etapas.** `users.account_id` sai na E09, depois da seleção do vínculo. Até a E07, a edição de dados centrais de Pessoas com relação comercial legada sem empresa identificável exige escopo de conta. Convites anteriores ao marcador de senha pendente seguem pelo fluxo de recuperação. A homologação com operadores reais acompanha a primeira implantação.
+
+### Registro de execução da E06 em 20/11/2026
+
+**Estado: Em validação.** A execução partiu de `3b27a7e`, com a E05 versionada em `1a8a84d` e `c476de6`. A única alteração local anterior era o registro de encerramento da E05 neste documento, preservado sem commit; a cópia está em `/tmp/prospera-e06/e05-encerramento.patch`. Nenhum commit ou push foi feito. E07 a E10 continuam pendentes.
+
+#### Revisão funcional da área de trabalho
+
+A decisão vigente está na seção 12.4 e substitui o seletor de uma unidade e a última unidade em sessão descritos no registro original abaixo. A revisão das migrations e do código encontrou preferências de colunas de listagem em `localStorage` (`BusinessList`), indexadas por usuário e listagem, sem persistência no servidor nem chave de tenant. `account_memberships` já garante unicidade de `(user_id, account_id)` e guarda metadados de navegação. O padrão é armazenado nesse vínculo, sem tabela ou índice novos. A gravação é uma preferência pessoal e não modifica acessos ou dados de negócio. A integração fica no Início do estabelecimento e nas consultas compatíveis da infraestrutura. A E07 continua pendente. Na revisão visual, as caixas de seleção passaram para o menu compacto do Bold na barra superior, com uma caixa por empresa no fim da linha tracejada e gravação ao clicar fora.
+
+- **Verificação funcional:** a suíte SQLite em memória registrou 191 testes, 1.952 asserções e um teste do Fortify pulado por configuração. A matriz da E06 verifica padrão por usuário e conta, subconjuntos em duas abas, revalidação após revogação, interseção com a permissão da operação, rejeição de parâmetros forjados e escrita com destino explícito. `audit:check` cobre 12 modelos.
+- **Navegador:** Chrome em 1440, 390 e 320 px. Conferidos o seletor na Organização, o resumo consolidado e o Início da unidade. Exercitados marcação individual e por empresa, selecionar todas, salvar e restaurar, recarregar, alternar em duas abas, abrir uma unidade e retornar ao conjunto. Com uma unidade autorizada, o seletor ficou oculto.
+- **PostgreSQL 18.7 e FrankenPHP 1.13.6:** o harness descartável passou com um e dois workers. Com um worker houve 300 requisições intercaladas entre usuários e contas, incluindo 30 leituras de subconjuntos. Em ambos, 40 respostas simultâneas de duas abas respeitaram as URLs. A abertura consolidada de duas unidades retornou duas linhas no resumo, com sete consultas, mediana HTTP de 5,24 ms e pico mediano de 79.544 bytes. Na conta de 50 unidades, o início da unidade permaneceu em oito consultas (mediana de 6,52 ms com um worker, ante 6,50 ms no registro original). A listagem administrativa de estabelecimentos passou de 11 para 12 consultas com a leitura do padrão na barra superior. Medianas atuais de 11,88 ms com um worker e 9,65 ms com dois. Nenhum índice novo.
+- **Entrega:** migration aditiva em `account_memberships`, contrato e ajuda atualizados. A E06 segue em validação para homologação de produto.
+
+#### E06.1 Diagnóstico
+
+Não havia rota com contexto de empresa ou de unidade: todas as telas da conta são administrativas (nó `tenant`) e recebem a conta de `AccountContext`. O `ApiPage` já entregava `auth.permissions` por página; `apiRequest`, `ApiLink`, `ApiForm` e `useApiForm` recebiam URLs absolutas; o `ApiApplication` remontava a tela só quando o componente mudava. `EffectivePermissions` já carregava as atribuições do vínculo em uma consulta, base suficiente para o acesso ao contexto sem consulta nova. `EnforceAccountInspection` libera escritas em inspeção de edição só para rotas `account.*`, por isso os grupos novos usam esse prefixo de nome.
+
+#### E06.2 a E06.4 Backend
+
+- **`OrganizationContext`** (`App\Domains\Acessos\Application\Context`, `scoped`): modo (`tenant`, `company`, `establishment`, `consolidated`), conta, vínculo (`AuditContext::membershipIdFor`), autor real (`AuditContext::actorId`, que preserva o administrador SaaS na inspeção), empresa, unidade, `node()` e `scopeFor($user, $permissao)`. O descritor em modo de unidade só contém a unidade da URL e fica vazio sem a permissão da operação; no consolidado, é o `nodesFor` da permissão. Sem grupo de contexto, o modo é `tenant` e nada fictício é criado.
+- **Acesso ao contexto:** `EffectivePermissions::navigableNodes` deriva da mesma consulta de atribuições os nós cobertos por alguma atribuição válida. Atribuição de estabelecimento não abre o contexto da empresa (herança descendente).
+- **`ResolveOrganizationContext`** (alias `organization`): confere o usuário, a conta e o vínculo ativos (`AccountContext::requireId`, 403), resolve o código dentro do tenant numa consulta com a empresa (FK composta), exige cobertura (404 igual para inexistente, outro tenant ou sem atribuição) e a situação ativa (403 com orientação; `history` aceita leitura). `todos` só é aceito com `consolidated` e só para leitura. Guarda na sessão apenas a última unidade aberta, fora da inspeção, para o redirecionamento sem código. A abertura direta pelo navegador recebe só o HTML inicial; a validação acontece na requisição JSON da aplicação.
+- **Rotas** (`routes/context.php`): `GET /conta/estabelecimento` (escolha automática, com `?para=modulo` validado) e `GET /conta/estabelecimento/{estabelecimento}` (início da unidade). O grupo `/conta/empresa/{empresa}` está implementado no middleware e exercitado pelo módulo-fixture; a primeira rota real de empresa fica com o módulo que a usar (E07). As rotas administrativas `/conta/...` não mudaram.
+- **Contextos navegáveis:** `OrganizationContextQuery::navigable`, uma junção de `establishments` com `companies` filtrada pelo tenant, pela situação e pelos nós cobertos, ordenada por empresa, principal e nome. `ApiPage` entrega `organization_context` (modo, empresa, unidade, suporte ao consolidado e lista com duas ou mais unidades) apenas nas rotas `account.*`.
+- **Central de Ajuda:** o artigo `estabelecimento-atual` aparece para quem tem alguma unidade navegável, sem consulta extra.
+
+#### E06.5 e E06.6 Frontend
+
+- Seletor `OrganizationSwitcher` (pasta de integração) com o `SelectControl` na `TopBarPrimary`, que recebeu um espaço `context`. O `SelectControl` ganhou título de grupo por opção, texto de espera e valor compacto, sem componente paralelo. Busca a partir de 9 opções, teclado (setas, Enter, Esc com retorno do foco), selos Principal e Matriz ou Filial separados, ícone de unidade e opção "Todos os autorizados" só em telas que declaram suporte. Até 400 px o gatilho mostra só o ícone, com 40 px; o nome da unidade continua no título e na trilha.
+- Com uma unidade navegável, o seletor não aparece; `/conta/estabelecimento` leva direto a ela.
+- `~/` em `ApiLink`, `ApiForm`, `useApiForm` e `useContextUrl` resolve o endereço no contexto da página que o declarou. A tela é remontada quando o contexto da URL muda, para que formulários e modais não levem dados da unidade anterior. Nenhum estado global de contexto foi criado.
+- Erros 403 e 404 numa URL de contexto mostram a orientação e o link "Abrir um estabelecimento autorizado".
+- Início do estabelecimento (`establishment-home.tsx`): `PreviewSection` com unidade, empresa e classificação; Ver cadastro abre o modal existente (`EstablishmentPreview`) e Editar leva ao cadastro, cada um conforme a permissão no nó; aviso de que a unidade vale só para a aba.
+
+#### Arquivos
+
+- **Criados:** `app/Domains/Acessos/Application/Context/OrganizationContext.php`, `app/Http/Middleware/ResolveOrganizationContext.php`, `app/Domains/Organizacao/Application/Queries/OrganizationContextQuery.php`, `app/Domains/Organizacao/Domain/DTOs/NavigableCompany.php`, `app/Domains/Organizacao/Domain/DTOs/NavigableEstablishment.php`, `app/Domains/Organizacao/UI/Controllers/EstablishmentContextController.php`, `routes/context.php`, `resources/js/app/saas/OrganizationSwitcher.tsx`, `resources/js/app/saas/OrganizationSwitcher.css`, `resources/js/app/saas/establishment-home.tsx`, `resources/js/utils/organizationContext.ts`, `resources/js/hooks/useContextUrl.ts`, `tests/Feature/OrganizationContextTest.php`, `tests/Performance/e06-fixtures.php`, `tests/Performance/e06-client.php`, `docs/ajuda/estabelecimento-atual.md`, `docs/tours/estabelecimento-atual.md`.
+- **Alterados:** `EffectivePermissions.php`, `OrganizationCode.php` (`ROUTE_PATTERN`), `HelpCatalog.php`, `ApiPage.php`, `AppServiceProvider.php`, `bootstrap/app.php`, `routes/web.php`, `ApiApplication.tsx`, `App.tsx`, `guidance.ts`, `Organization.css`, `ApiLink.tsx`, `useApiForm.ts`, `SelectControl.tsx` e `.css`, `TopBarPrimary.tsx`, `Session.types.ts`, `tests/Performance/AccountRequestsTest.php`, `octane-routes.php`, `e04-check.sh`, `e04-stack.sh`, `docs/convencoes/contexto-organizacional.md`, `docs/convencoes/performance.md`, `docs/tours/organizacao.md`, `README.md` e este plano.
+- **Banco:** nenhuma migration, tabela ou índice.
+
+#### E06.7 Testes
+
+`tests/Feature/OrganizationContextTest.php` registra, só no teste, um módulo de estoque por unidade e de produtos por empresa (cenários 17 a 20 e 24). São 14 testes que conferem os dados retornados e o registro alterado, não apenas o status:
+
+| Itens da matriz pedida | Cobertura |
+| --- | --- |
+| 1 a 4, 17, 18 | Resolução de conta, empresa e unidade por código; mesmo código em outro tenant resolve só no próprio; códigos inválidos, `todos`, outra empresa e outro tenant respondem 404 sem dados, na leitura e na escrita |
+| 5 a 8, 13, 14 | Seletor da Ana (gerente na Gartan Roupas e operadora em Janaúba da Gartan Express) com três unidades, agrupadas e ordenadas; unidade criada depois coberta pela empresa; administrador integral com 6 unidades; administrador local sem seletor e com redirecionamento à própria unidade |
+| 9 a 12 | Cargo retirado, unidade inativa (403 com orientação, histórico declarado legível e escrita recusada), empresa inativa e vínculo suspenso, todos na requisição seguinte |
+| 15, 16 | Inspeção de leitura com os contextos do representado, escrita recusada, preferência não gravada e encerramento com 401 após a revogação; inspeção de edição grava na unidade da URL com o administrador SaaS como autor e o vínculo representado |
+| 19, 20, 25 | Consolidado restrito às unidades com a permissão; módulo sem suporte e escrita em `todos` recusados |
+| 21 a 24 | Duas abas em empresas e unidades diferentes: leituras e escritas pertencem à URL; o modal da aba 1 não lê o registro da aba 2; a preferência da sessão só define o destino sem código |
+| 26 | Requisições alternadas entre duas contas, com `forgetScopedInstances` entre elas |
+| 27, 28 | Auditoria continua filtrada pelo RBAC dentro do contexto; artigo de ajuda disponível e sem `organization_context` fora das rotas da conta |
+| 29 | Seletor com 5 e 50 unidades: duas consultas sobre `establishments as e` (código e lista), sem repetição e com o mesmo total de consultas |
+| 30 | Acesso ao contexto não concede edição; suíte da E05 inalterada |
+
+Resultados no contêiner descartável `prospera-dev`, sem rede e com o código atual:
+
+- `php artisan test`: **188 testes e 1.917 asserções** (E05: 174 e 1.731). Executado com `MAIL_MAILER=array`, porque o ambiente Docker define `MAIL_MAILER=smtp`, que prevalece sobre o `phpunit.xml` e derruba um teste de e-mail da E05 mesmo sem a E06.
+- `tests/Performance/AccountRequestsTest.php`: verde, com o limite das telas da conta ajustado de 9 para 10 pela consulta do seletor e uma asserção nova de no máximo 1 consulta de unidades por página.
+- PHPStan sem erros; Pint sem pendências nos arquivos da etapa; `npm run check` (arquitetura e TypeScript) e `npm run build` aprovados; `permissions:sync` (81 permissões, nenhuma criada), `audit:check` (12 modelos) e `organization:check` aprovados em SQLite descartável.
+
+#### PostgreSQL e FrankenPHP
+
+`E05_CONTEXTUAL=1 E06_CONTEXT=1 bash tests/Performance/e04-check.sh <cópia> 1|2`, com FrankenPHP 1.13.6, PHP 8.5.13, Laravel 13.43.0, Octane 2.25.0 e PostgreSQL 18.7 descartável, dados sintéticos e `ANALYZE`. A cópia anterior (`3b27a7e`) passou pelo mesmo runner como linha de base.
+
+- **Um worker:** 300 requisições alternadas da E06 entre a Ana (Gartan, 3 unidades), um operador de uma unidade e o administrador de uma conta de unidade única, intercaladas com 404 de outra empresa e de outro tenant. Cada resposta trouxe a unidade pedida e exatamente o conjunto de unidades esperado. As provas de 300 requisições da E04 e da E05 continuaram verdes.
+- **Revogação no mesmo worker:** a retirada da atribuição de Janaúba deu 404 na requisição seguinte, e a unidade saiu do seletor.
+- **Inspeção:** o inspetor viu os contextos da Ana, recebeu 404 fora deles e 401 depois da revogação da autoridade SaaS, com a sessão anônima; a sessão própria da Ana continuou com acesso no mesmo worker.
+- **Concorrência:** 40 requisições simultâneas de duas abas da mesma sessão em unidades diferentes, com 1 e com 2 workers; cada resposta correspondeu à própria URL. As disputas da E04 e da E05 com 2 workers mantiveram os resultados homologados.
+
+| Tela (administrador integral) | Consultas antes / depois | HTTP 1 worker antes / depois (ms) |
+| --- | --- | --- |
+| `/conta`, 1x1 | 8 / 9 | 5,21 / 5,65 |
+| `/conta`, 50 unidades | 8 / 9 | 5,32 / 6,19 |
+| Empresas, 50 unidades | 8 / 9 | 5,79 / 6,70 |
+| Estabelecimentos, 50 unidades | 10 / 11 | 9,52 / 9,33 |
+| Central de Ajuda | 5 / 5 | 7,24 / 7,54 |
+
+Listagem de Estabelecimentos nos perfis da E05, 1 worker: 1 atribuição 6,38 / 6,96 ms; 5 atribuições 7,58 / 7,33 ms; 30 atribuições 8,38 / 10,71 ms; integral 9,44 / 10,40 ms, com 10 / 11 consultas. Com 2 workers, depois: 6,76; 7,20; 10,01 e 10,34 ms. A resolução continua em 1 consulta de atribuições e 1 de permissões, sem consultas repetidas.
+
+| Perfil (início da unidade) | Unidades no seletor | Consultas | HTTP 1 / 2 workers (ms) | Resolução / seletor (ms) | Memória do contexto (bytes) |
+| --- | --- | --- | --- | --- | --- |
+| Integral, 1 empresa e 1 unidade | 1 (oculto) | 8 | 6,95 / 5,50 | 2,38 / 0,51 | 31.904 |
+| Integral, 1 empresa e 3 unidades | 3 | 8 | 6,88 / 5,62 | 2,53 / 0,58 | 32.856 |
+| Integral, 3 empresas e 10 unidades | 10 | 8 | 6,58 / 6,11 | 2,54 / 0,61 | 36.376 |
+| Integral, 5 empresas e 50 unidades | 50 | 8 | 6,50 / 6,21 | 2,45 / 0,70 | 56.448 |
+| Uma unidade | 1 (oculto) | 8 | 6,64 / 5,46 | 2,46 / 0,64 | 14.664 |
+| Várias unidades | 5 | 8 | 7,01 / 5,44 | 2,62 / 0,64 | 16.592 |
+| Empresa inteira | 10 | 8 | 6,47 / 5,73 | 2,42 / 0,59 | 20.352 |
+| Vários cargos | 13 | 8 | 6,78 / 5,88 | 2,54 / 0,70 | 23.104 |
+
+- **Leitura:** a resolução inclui as 2 consultas de permissões da requisição e a consulta do código; o seletor é 1 consulta com linhas iguais às unidades navegáveis. O pico de memória de `/conta` com 50 unidades foi de 116 KB para 180 KB. A troca de unidade é uma navegação comum: mediana de 6,66 ms com 1 worker e 5,65 ms com 2.
+- **Planos:** com 80 unidades na base, o planejador escolheu varredura sequencial com hash join para a lista (0,15 a 0,23 ms) e para o código (0,02 ms). Nenhum índice foi criado.
+
+#### Validação visual
+
+Chrome headless contra o ambiente descartável (`STACK_PREFIX=prospera-e06-visual E06_CONTEXT=1 bash tests/Performance/e04-stack.sh up 8096`), dados sintéticos, em 1440, 390 e 320 px. Capturas e roteiro em `/tmp/prospera-e06/`.
+
+- Início da unidade e seletor aberto nas três larguras, com grupos Gartan Express e Gartan Roupas, selos e unidade atual destacada; sem rolagem horizontal e com a topbar em 60 px.
+- Teclado: setas, Enter e Esc com o foco de volta ao gatilho.
+- Duas abas: a aba 2 trocou para Janaúba da Gartan Express e o modal Ver cadastro da aba 1 mostrou Guanambi da Gartan Roupas.
+- Unidade sem acesso aberta diretamente: orientação e link para uma unidade autorizada.
+- Conta de 50 unidades: busca por "caetite" com 11 opções agrupadas.
+- Conta de unidade única em 1440 e 320 px: sem seletor e com redirecionamento direto.
+- Tour em 1440 e 390 px: Início do estabelecimento, trilha, ações, Escolher o estabelecimento, Unidade atual e Uma unidade por aba.
+- Tela administrativa (Organização) com o seletor sem unidade atual ("Selecionar estabelecimento").
+- Correções feitas durante a validação: grid do resumo da unidade, rótulos quebrados no celular e topbar em duas linhas a 320 px.
+
+#### Desvios e decisões para revisão
+
+- **Início do estabelecimento:** o plano não listava uma tela; ela foi criada como destino do seletor e base das futuras rotas da unidade. Mostra só dados já presentes no seletor e ações condicionadas às permissões, sem permissão própria: o acesso é a cobertura do nó.
+- **Empresa inativa ou unidade inativa:** 403 com orientação para quem tem atribuição, em vez de 404, porque a existência já é conhecida por quem tem acesso. Quem não tem atribuição continua recebendo 404.
+- **Consolidado somente leitura:** escritas em `todos` respondem 403.
+- **Seletor em todas as telas da conta:** custa 1 consulta por página, como prevê a meta 15.3.1. Com uma unidade, a lista não é enviada.
+- **Abertura direta pelo navegador:** devolve o HTML inicial sem dados, para que a orientação apareça na aplicação. As respostas JSON mantêm 401, 403 e 404.
+- **Preferência após o login:** a sessão é invalidada no logout, por isso a última unidade só vale dentro da sessão. O destino do login não mudou (`/dashboard`, que leva ao Início da conta).
+- **Primeiras rotas de empresa:** a infraestrutura de `/conta/empresa/{empresa}` está pronta e testada com o fixture; nenhuma tela real de empresa foi criada, para não antecipar a E07.
+
+#### Riscos e pendências
+
+- Rever o desempenho do seletor em contas com centenas de unidades: a lista vai inteira à página, com busca no cliente.
+- Módulos operacionais futuros precisam filtrar as escritas pelo nó da URL; o contrato e o fixture servem de modelo, mas cada módulo comprova isso nos próprios testes.
+- `make test` no Docker herda `MAIL_MAILER=smtp`; ajustar o ambiente de testes é uma tarefa separada da E06.
+- Durante a execução, o container `app` do Compose local foi recriado em modo de produção por outra sessão. A E06 não alterou esse ambiente e executou testes e medições em containers descartáveis.
+- A implantação continua sujeita às pendências da E05 (e-mail externo, backup, migrations e reinício controlado dos workers); a E06 não tem migration, mas o reinício dos workers é necessário para carregar o código novo.
+
 ## 27. Contrato para módulos futuros
 
 ### 27.1 Checklist oficial
@@ -2357,5 +2514,8 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | DA-29 | Fluxos seguros de identidade e respostas neutras | Aprovada | 20/11/2026 | Revisões 5 e 6; I1 e I2 na E05 |
 | DA-30 | Classificação campo a campo de Pessoas e textos do formulário | Aprovada | 20/11/2026 | Revisão 5; I5 |
 | E02 | Fechamento da etapa | Concluída | 20/11/2026 | Revisão 6 |
+| E05 | Remoção de `users.role_id`, `users.is_account_admin` e `users.person_id`; `users.account_id` mantida até a E09 | Aprovada | 20/11/2026 | Homologação final da E05 |
+| E05 | Fechamento da etapa | Concluída | 20/11/2026 | Homologação final da E05 |
+| E06 | Início do estabelecimento como destino do seletor; 403 orientado para contexto inativo; consolidado somente leitura; seletor em todas as telas da conta | Proposta, em validação | 20/11/2026 | Registro de execução da E06 |
 
 Decisões novas surgidas durante a execução devem ser registradas aqui antes de alterar o contrato, com a justificativa e o impacto nas etapas.

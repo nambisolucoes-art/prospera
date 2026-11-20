@@ -22,6 +22,7 @@ import RouteContent from './RouteContent';
 import './App.css';
 import { markAppPageTransitionReady } from '@/utils/appPageTransition';
 import AccountInspectionBanner from '@/app/saas/AccountInspectionBanner';
+import OrganizationSwitcher from '@/app/saas/OrganizationSwitcher';
 
 export default function App({ children, navigation }: { children?: ReactNode | ((sidebar: SidebarState) => ReactNode); navigation?: { entries: SidebarEntry[]; currentKey?: string } }): JSX.Element {
   const { props } = useApiPage<SessionProps>();
@@ -64,8 +65,14 @@ export default function App({ children, navigation }: { children?: ReactNode | (
         <div key={layout?.key ?? 'primary'} className={`app-page ${activeSidebarCollapsed ? 'app-page--sidebarCollapsed' : ''} ${mobileSidebarOpen ? 'app-page--mobile-sidebar-open' : ''} ${layout ? 'app-page--layout' : ''} ${layout?.sidebar === 'small' ? 'app-page--menuSmall' : ''}`}>
           <AppHeader>
             <AccountInspectionBanner />
-            <TopBarPrimary tour={tourFor(pathname,props.auth.permissions)} sidebarCollapsed={activeSidebarCollapsed} sidebarExpanded={sidebar.mobile ? mobileSidebarOpen : !activeSidebarCollapsed}
-              onToggleSidebar={sidebar.mobile || !layout ? sidebar.toggle : layoutSidebar.toggle} smallMenu={!sidebar.mobile && layout?.sidebar === 'small'} />
+            <TopBarPrimary
+              tour={tourFor(pathname, props.auth.permissions)}
+              context={props.organization_context && <OrganizationSwitcher context={props.organization_context} />}
+              sidebarCollapsed={activeSidebarCollapsed}
+              sidebarExpanded={sidebar.mobile ? mobileSidebarOpen : !activeSidebarCollapsed}
+              onToggleSidebar={sidebar.mobile || !layout ? sidebar.toggle : layoutSidebar.toggle}
+              smallMenu={!sidebar.mobile && layout?.sidebar === 'small'}
+            />
           </AppHeader>
           {mobileSidebarOpen && <button type="button" className="app-page__sidebar-backdrop" aria-label="Fechar menu lateral"
             onClick={() => { closeMobile(); document.getElementById('primary-sidebar-toggle')?.focus(); }} />}

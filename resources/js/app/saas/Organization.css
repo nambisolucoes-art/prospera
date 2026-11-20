@@ -173,3 +173,16 @@
 .organization-home .dashboardTwoStatCard__icon .text-primary {
   color: var(--prospera-title-accent);
 }
+
+.establishment-home {
+  max-width: 1120px;
+}
+
+.establishment-home .account-preview__section dl {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.establishment-home__note {
+  margin: 16px 0 0;
+  color: var(--bold-color-text-muted);
+}

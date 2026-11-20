@@ -68,6 +68,9 @@ final class HelpCatalog
                     || $user->can('account.companies.create') || $can('account.establishments')),
             'empresas' => ! $user->is_saas_admin && $can('account.companies'),
             'estabelecimentos' => ! $user->is_saas_admin && $can('account.establishments'),
+            // Quem tem algum cargo em uma unidade navega por contexto, mesmo sem cadastrar estabelecimentos.
+            'estabelecimento-atual' => ! $user->is_saas_admin
+                && ! app(EffectivePermissions::class)->navigableNodes($user)->isEmpty(),
             'clientes' => ! $user->is_saas_admin && $can('account.customers'),
             'fornecedores' => ! $user->is_saas_admin && $can('account.suppliers'),
             'pessoas' => ! $user->is_saas_admin && $can('account.people'),

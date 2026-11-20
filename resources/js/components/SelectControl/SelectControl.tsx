@@ -1,4 +1,5 @@
 import {
+  Fragment,
   useEffect,
   useRef,
   useState,
@@ -12,6 +13,8 @@ export type SelectOption = {
   value: string;
   label: string;
   searchText?: string;
+  // Opções consecutivas com o mesmo grupo recebem um título, como a empresa de cada estabelecimento.
+  group?: string;
 };
 
 export type SelectControlProps<Option extends SelectOption = SelectOption> = {
@@ -25,6 +28,8 @@ export type SelectControlProps<Option extends SelectOption = SelectOption> = {
   required?: boolean;
   maxVisible?: number;
   renderOption?: (option: Option) => ReactNode;
+  renderValue?: (option: Option) => ReactNode;
+  placeholder?: string;
 };
 
 function searchKey(value: string) {
@@ -48,6 +53,8 @@ export default function SelectControl<Option extends SelectOption>({
   searchable,
   required,
   renderOption = (option) => option.label,
+  renderValue = renderOption,
+  placeholder = 'Selecione',
   maxVisible,
 }: SelectControlProps<Option> & {
   id: string;
@@ -70,8 +77,8 @@ export default function SelectControl<Option extends SelectOption>({
   const selected = options.find((option) => option.value === current);
   const match = searchKey(query.trim());
   const matches = match
-    ? options.filter(({ value, label, searchText }) =>
-        searchKey(`${value} ${label} ${searchText ?? ''}`).includes(match),
+    ? options.filter(({ value, label, searchText, group }) =>
+        searchKey(`${value} ${label} ${searchText ?? ''} ${group ?? ''}`).includes(match),
       )
     : options;
   const visible = maxVisible ? matches.slice(0, maxVisible) : matches;
@@ -189,7 +196,7 @@ export default function SelectControl<Option extends SelectOption>({
         onClick={() => (open ? close() : show())}
         onKeyDown={onKeyDown}
       >
-        {selected ? renderOption(selected) : 'Selecione'}
+        {selected ? renderValue(selected) : placeholder}
       </SelectTrigger>
 
       <SelectMenu open={open} data-tour={menuTourTarget}>
@@ -222,18 +229,25 @@ export default function SelectControl<Option extends SelectOption>({
           className="selectControl__options"
         >
           {visible.map((option, index) => (
-            <li
-              key={option.value}
-              id={`${listId}-${index}`}
-              ref={index === active ? activeOption : undefined}
-              role="option"
-              aria-selected={option.value === current}
-              data-active={index === active || undefined}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => choose(option)}
-            >
-              {renderOption(option)}
-            </li>
+            <Fragment key={option.value}>
+              {option.group && option.group !== visible[index - 1]?.group && (
+                <li role="presentation" className="selectControl__group">
+                  {option.group}
+                </li>
+              )}
+              <li
+                id={`${listId}-${index}`}
+                ref={index === active ? activeOption : undefined}
+                role="option"
+                aria-selected={option.value === current}
+                aria-label={option.group ? `${option.label}, ${option.group}` : undefined}
+                data-active={index === active || undefined}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => choose(option)}
+              >
+                {renderOption(option)}
+              </li>
+            </Fragment>
           ))}
         </ul>
         {!visible.length && (

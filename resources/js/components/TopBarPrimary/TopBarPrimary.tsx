@@ -1,6 +1,6 @@
 import { useApiPage as usePage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import './TopBarPrimary.css';
 import GuidedTour, { type TourDefinition } from '@/components/GuidedTour/GuidedTour';
 import TopBarNotificationsDropdown from './TopBarNotificationsDropdown';
@@ -13,9 +13,11 @@ interface TopBarPrimaryProps {
   sidebarExpanded: boolean;
   smallMenu?: boolean;
   tour?: TourDefinition;
+  // Seletor de contexto montado pela tela, como o de estabelecimento das telas da conta.
+  context?: ReactNode;
 }
 
-export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onToggleSidebar, smallMenu = false, tour }: TopBarPrimaryProps): JSX.Element {
+export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onToggleSidebar, smallMenu = false, tour, context }: TopBarPrimaryProps): JSX.Element {
   const [tourOpen,setTourOpen]=useState(false);
   useEffect(()=>setTourOpen(false),[tour?.id]);
   const { name } = usePage<SessionProps>().props;
@@ -97,6 +99,7 @@ export default function TopBarPrimary({ sidebarCollapsed, sidebarExpanded, onTog
           </form>
 
           <ul className="topbar__navList nav navbar-nav navbar-right pull-right">
+            {context && <li className="topbar__navItem topbar__context">{context}</li>}
             {tour && <li className="topbar__navItem"><button type="button" className="topbar__navLink waves-effect topbar__tour" aria-label="Tutorial desta tela" title="Tutorial desta tela" onClick={()=>{setNotificationsOpen(false);setProfileOpen(false);setTourOpen(true);}}><i className="icon-info" aria-hidden="true"/></button></li>}
             <TopBarNotificationsDropdown
               ref={notificationsRef}

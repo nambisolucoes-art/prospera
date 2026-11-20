@@ -1,0 +1,67 @@
+.organization-switcher {
+  display: flex;
+  align-items: center;
+  height: var(--bold-topbar-height);
+  width: 180px;
+  margin-inline-end: 6px;
+}
+
+.organization-switcher > .selectControl__trigger {
+  height: 34px;
+}
+
+.organization-switcher__label {
+  margin-inline: 6px;
+}
+
+.organization-switcher__menu {
+  left: var(--select-menu-offset, 0px);
+  right: auto;
+  width: min(340px, calc(100vw - 16px));
+  max-height: calc(100dvh - var(--bold-topbar-height) - 8px);
+  overflow-y: auto;
+}
+
+.organization-switcher__groups {
+  max-height: min(260px, 45dvh);
+}
+
+.organization-switcher__company-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.organization-switcher__company-rule {
+  flex: 1;
+  border-top: 1px dashed var(--bold-color-border);
+}
+
+.organization-switcher__company-heading .checkbox {
+  flex: none;
+}
+
+.organization-switcher__company-heading .checkbox label {
+  width: 6px;
+}
+
+.organization-switcher__error {
+  margin: 4px 10px;
+}
+
+@media (max-width: 767px) {
+  .organization-switcher {
+    width: 66px;
+    margin-inline-end: 0;
+  }
+
+  .organization-switcher > .selectControl__trigger {
+    gap: 4px;
+    padding-inline: 6px;
+  }
+
+  .organization-switcher__label {
+    display: none;
+  }
+}

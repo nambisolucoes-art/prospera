@@ -17,6 +17,9 @@ final class EffectivePermissions
     /** @var array<string,bool> */
     private array $checks = [];
 
+    /** @var array<string, AuthorizedNodes> */
+    private array $navigable = [];
+
     public function __construct(
         private readonly AccountContext $accounts,
         private readonly EffectivePermissionSlugsQuery $global,
@@ -100,10 +103,27 @@ final class EffectivePermissions
         return array_values(array_unique($slugs));
     }
 
+    /**
+     * Nós cobertos por alguma atribuição válida do vínculo ativo: é o acesso ao contexto (E06).
+     * Não concede permissão de operação; usa as atribuições já carregadas, sem consulta extra.
+     */
+    public function navigableNodes(User $user): AuthorizedNodes
+    {
+        $this->indexFor($user);
+
+        return $this->navigable[$this->keyFor($user)] ?? new AuthorizedNodes;
+    }
+
     public function forget(): void
     {
         $this->permissions = [];
         $this->checks = [];
+        $this->navigable = [];
+    }
+
+    private function keyFor(User $user): string
+    {
+        return implode(':', [$user->id, $this->accounts->linkedId($user), (int) $user->is_saas_admin]);
     }
 
     /** @return array<string, AuthorizedNodes> */
@@ -114,17 +134,17 @@ final class EffectivePermissions
         }
 
         $accountId = $this->accounts->linkedId($user);
-        $key = implode(':', [$user->id, $accountId, (int) $user->is_saas_admin]);
+        $key = $this->keyFor($user);
 
         return $this->permissions[$key] ??= match (true) {
             $user->is_saas_admin => array_fill_keys($this->global->globalSlugs(['platform', 'self']), new AuthorizedNodes(true)),
             $accountId === null => array_fill_keys($this->global->globalSlugs(['self']), new AuthorizedNodes(true)),
-            default => $this->resolveMembership($user->id, $accountId),
+            default => $this->resolveMembership($key, $user->id, $accountId),
         };
     }
 
     /** @return array<string, AuthorizedNodes> */
-    private function resolveMembership(int $userId, int $accountId): array
+    private function resolveMembership(string $key, int $userId, int $accountId): array
     {
         $assignments = $this->memberships->assignments($userId, $accountId);
         $roles = array_values($assignments
@@ -133,8 +153,17 @@ final class EffectivePermissions
             ->all());
         $permissions = $this->memberships->permissions($roles, $accountId);
         $coverage = [];
+        $navigable = ['tenant' => false, 'companies' => [], 'establishments' => []];
 
         foreach ($assignments as $assignment) {
+            if ($assignment->scope === 'tenant') {
+                $navigable['tenant'] = true;
+            } elseif ($assignment->company_id !== null && $assignment->scope === 'company') {
+                $navigable['companies'][$assignment->company_id] = $assignment->company_id;
+            } elseif ($assignment->establishment_id !== null) {
+                $navigable['establishments'][$assignment->establishment_id] = $assignment->establishment_id;
+            }
+
             foreach ($permissions[$assignment->role_id] ?? [] as $slug => $_) {
                 if ($assignment->scope === 'tenant' || str_starts_with($slug, 'self.')) {
                     $coverage[$slug]['tenant'] = true;
@@ -145,6 +174,12 @@ final class EffectivePermissions
                 }
             }
         }
+
+        $this->navigable[$key] = new AuthorizedNodes(
+            tenant: $navigable['tenant'],
+            companies: array_values($navigable['companies']),
+            establishments: array_values($navigable['establishments']),
+        );
 
         $index = [];
 

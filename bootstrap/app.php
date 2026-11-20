@@ -5,6 +5,7 @@ use App\Http\Middleware\EnforceAudit;
 use App\Http\Middleware\EnsureIdentitySessionCurrent;
 use App\Http\Middleware\EnsureUserAccessEnabled;
 use App\Http\Middleware\JsonNavigation;
+use App\Http\Middleware\ResolveOrganizationContext;
 use App\Http\Middleware\SelfServicePermissions;
 use App\Http\Middleware\ThrottleAccessRecovery;
 use Illuminate\Foundation\Application;
@@ -20,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias(['organization' => ResolveOrganizationContext::class]);
 
         $middleware->web(append: [
             EnsureUserAccessEnabled::class,
