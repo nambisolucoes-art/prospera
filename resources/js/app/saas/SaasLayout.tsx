@@ -29,9 +29,10 @@ const sections: Array<[string, string]> = [
   ['/conta/cargos', 'roles'],
   ['/conta/pessoas', 'people'],
   ['/conta/etiquetas', 'tags'],
-  ['/conta/empresas', 'companies'],
-  ['/conta/estabelecimentos', 'establishments'],
-  ['/conta/editar', 'account-data'],
+  ['/conta/organizacao', 'organization'],
+  ['/conta/empresas', 'organization'],
+  ['/conta/estabelecimentos', 'organization'],
+  ['/conta/editar', 'organization'],
 ];
 
 function sectionFor(path: string, tenant: boolean, userPage: boolean): string {

@@ -19,10 +19,6 @@ export type CompanyRow = CompanyLabel & {
   main_cnae?: string | null;
 };
 
-export type CompanyDetails = CompanyRow & {
-  establishments: { id: number; name: string; classification: Classification; is_primary: boolean; active: boolean }[] | null;
-};
-
 export type EstablishmentRow = {
   id: number;
   company_id: number;

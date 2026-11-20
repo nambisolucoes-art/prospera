@@ -19,7 +19,7 @@ Use a lupa à direita ou pressione Enter para buscar. A busca também atualiza a
 
 ## Adicionar contatos
 
-Use **Adicionar telefone** e **Adicionar e-mail** para incluir mais contatos. O primeiro campo extra recebe o número 2, e os seguintes aparecem em sequência.
+Use **Adicionar telefone** e **Adicionar e-mail** para incluir mais contatos. O primeiro telefone extra aparece como **Telefone 2**. Os e-mails extras aparecem como **E-mail 2**, **E-mail 3** e assim por diante.
 
 ## Inspecionar uma conta
 

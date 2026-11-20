@@ -11,7 +11,7 @@ Abra **Organização** e expanda a empresa para consultar seus estabelecimentos.
 
 ## Cadastrar ou editar um estabelecimento
 
-Use **Cadastrar estabelecimento**, o botão de adição na linha da empresa ativa. Quando há apenas uma opção ela pode vir selecionada. Informe nome, nome fantasia quando aplicável, classificação jurídica, endereço e contatos. Matriz e filial requerem CNPJ completo com a raiz da empresa. Cada empresa pode ter apenas uma matriz. Durante a edição, a empresa proprietária fica fixa.
+Use **Cadastrar estabelecimento**, o botão de adição na linha da empresa ativa. Quando há apenas uma opção ela pode vir selecionada. Informe nome, nome fantasia quando aplicável, classificação jurídica, endereço e contatos. Matriz e filial requerem CNPJ completo com a raiz da empresa. Se a empresa tiver CPF ou estiver sem identificação fiscal, a classificação é **Sem CNPJ próprio**. Para habilitar Matriz e Filial em uma pessoa jurídica com identificação pendente, informe o CNPJ em **Editar empresa**. Cada empresa pode ter apenas uma matriz. Durante a edição, a empresa proprietária fica fixa.
 
 ## Trocar o estabelecimento principal
 

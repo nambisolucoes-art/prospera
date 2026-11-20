@@ -92,7 +92,7 @@ export default function ContactFields({ client, values, errors, required, namePr
       </BusinessFormRow>
       <AdditionalContacts kind="phone" initial={(own ? values.additional_phones : client?.details?.additional_phones) ?? []}
         errors={errors} namePrefix={prefix} errorPrefix={errorRoot} />
-      <Field label="E-mail de contato" name={emailName} type="email" trailingIcon="fa fa-envelope-o"
+      <Field label="E-mail" name={emailName} type="email" trailingIcon="fa fa-envelope-o"
         defaultValue={(own ? values.email : client?.email) ?? ''} error={emailError} />
       <AdditionalContacts kind="email" initial={(own ? values.additional_emails : client?.details?.additional_emails) ?? []}
         errors={errors} namePrefix={prefix} errorPrefix={errorRoot} />

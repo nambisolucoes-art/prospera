@@ -8,9 +8,7 @@ use App\Domains\Organizacao\Application\Actions\SaveCompanyAction;
 use App\Domains\Organizacao\Application\Data\CompanyFiltersData;
 use App\Domains\Organizacao\Application\Data\SaveCompanyData;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
-use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
-use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -50,30 +48,14 @@ final class CompanyController
         ]);
     }
 
-    public function preview(
-        Request $request,
-        CompanyDirectoryQuery $companies,
-        EstablishmentDirectoryQuery $establishments,
-        int $companyId,
-    ): JsonResponse {
-        $accountId = app(AccountContext::class)->requireId();
-        $company = $companies->find($accountId, $companyId);
-
-        $units = $request->user()->can('account.establishments.list')
-            ? $establishments->forCompany($accountId, $company->id)->map(fn (Establishment $establishment) => [
-                'id' => $establishment->id,
-                'name' => $establishment->name,
-                'classification' => $establishment->legalClassification(),
-                'is_primary' => $establishment->is_primary,
-                'active' => $establishment->active,
-            ])
-            : null;
+    public function preview(CompanyDirectoryQuery $companies, int $companyId): JsonResponse
+    {
+        $company = $companies->find(app(AccountContext::class)->requireId(), $companyId);
 
         return response()->json([
             ...$this->summary($company),
             'tax_regime' => $company->tax_regime === null ? null : Company::TAX_REGIMES[$company->tax_regime],
             'main_cnae' => $company->main_cnae,
-            'establishments' => $units,
         ]);
     }
 

@@ -11,7 +11,7 @@ export default function PersonContactFields({ person, errors, access }: { person
       <MaskedField mask="phone" label="WhatsApp" name="whatsapp" type="tel" leadingIcon="fa fa-whatsapp" defaultValue={person?.whatsapp ?? ''} error={errors.whatsapp} />
     </BusinessFormRow>
     <AdditionalContacts kind="phone" initial={person?.additional_phones ?? []} errors={errors} namePrefix="" errorPrefix="" />
-    <Field label="E-mail de contato" name="email" type="email" trailingIcon="fa fa-envelope-o" defaultValue={person?.email ?? ''} required={access} error={errors.email} />
+    <Field label="E-mail" name="email" type="email" trailingIcon="fa fa-envelope-o" defaultValue={person?.email ?? ''} required={access} error={errors.email} />
     <AdditionalContacts kind="email" initial={person?.additional_emails ?? []} errors={errors} namePrefix="" errorPrefix="" />
     <Field label="Pessoa de contato" name="contact_name" defaultValue={person?.contact_name ?? ''} error={errors.contact_name} />
     <Field label="Site" name="website" type="url" placeholder="https://" defaultValue={person?.website ?? ''} error={errors.website} />

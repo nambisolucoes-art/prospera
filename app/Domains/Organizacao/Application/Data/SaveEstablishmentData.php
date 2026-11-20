@@ -117,12 +117,12 @@ final readonly class SaveEstablishmentData
         unset($values['code']);
 
         $values['tax_document'] = $registered ? $companyDocument->value() : null;
-        $values['classification'] = $registered ? ($values['classification'] ?? 'headquarters') : 'unregistered';
+        $values['classification'] = $registered ? ($values['classification'] ?? null) : 'unregistered';
         $values['active'] = true;
         $values['name'] ??= self::primaryName($values['address']['city'] ?? null);
 
         $validated = self::validate($values, [
-            'classification' => ['required', Rule::in(['headquarters', 'branch', 'unregistered'])],
+            'classification' => ['required', Rule::in($registered ? ['headquarters', 'branch'] : ['unregistered'])],
             'tax_document' => ['nullable', 'string'],
             'active' => ['boolean'],
         ]);

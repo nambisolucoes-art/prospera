@@ -50,7 +50,7 @@ export default function AccountPreview({ id, name, onClose }: { id: number; name
               <dd>{account.details.additional_phones.map((phone) => formatMasked(phone, 'phone')).join(', ')}</dd>
             </>}
             <dt>WhatsApp</dt><dd>{formatMasked(contactNumber(account.details, 'whatsapp'), 'phone') || 'Não informado'}</dd>
-            <dt>E-mail de contato</dt><dd>{account.email || 'Não informado'}</dd>
+            <dt>E-mail</dt><dd>{account.email || 'Não informado'}</dd>
             {!!account.details?.additional_emails?.length && <>
               <dt>E-mails adicionais</dt>
               <dd>{account.details.additional_emails.join(', ')}</dd>

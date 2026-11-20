@@ -2009,7 +2009,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E01 | Concluída | 19/11/2026 | 19/11/2026 | Seção 03, linha de base 15.2, revisões 2 a 4 | Arquitetura e PD-01 a PD-06 aprovadas; refinamentos DA-24 e DA-25 registrados para a E02 |
 | E02 | Concluída | 20/11/2026 | 20/11/2026 | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registros abaixo) | DA-26 a DA-30 aprovadas; I1 e I2 atribuídas à E05 |
 | E03 | Concluída | 20/11/2026 | 20/11/2026 | Registro E03 e relatório de medições | Concorrência e custos de migrations em bases maiores ficam para trabalho futuro |
-| E04 | Em validação | 20/11/2026 | | Registro da E04 na seção 26 | Estrutura validada em ambiente isolado. Identificação fiscal legada a confirmar |
+| E04 | Concluída | 20/11/2026 | 20/11/2026 | Registro de execução e homologação final da E04 na seção 26 | Implantação pendente de conferência da base oficial, backup e confirmação fiscal legada |
 | E05 | Pendente | | | | |
 | E06 | Pendente | | | | |
 | E07 | Pendente | | | | |
@@ -2132,7 +2132,7 @@ Cada etapa acrescenta aqui um bloco com:
 
 ### Registro da E04 em 20/11/2026
 
-**Estado: Em validação.** A retomada encontrou a E03 versionada em `00f04d6`, com staging vazio. A E04 foi continuada na árvore de trabalho existente, sem commit.
+**Estado na entrega: Em validação.** A retomada encontrou a E03 versionada em `00f04d6`, com staging vazio. A E04 foi continuada na árvore de trabalho existente, sem commit.
 
 **Implementação e arquivos.**
 
@@ -2175,7 +2175,21 @@ Na conta com 50 unidades, filtrar uma empresa devolveu 10 linhas em 9 consultas,
 
 **Testes e verificações.** A suíte SQLite isolada em container com GD passou com 156 testes e 1.420 asserções. O teste dedicado de performance da E03 passou com 45 asserções e manteve uma consulta de permissões nas rotas medidas. PHPStan, build com checagem de arquitetura e TypeScript, `permissions:sync`, `audit:check` e Pint no escopo da E04 passaram. O Pint global sinalizou a ordem de imports e um nome qualificado já presentes em `bootstrap/app.php` no checkpoint da E03.
 
-**Pendências para validação.** Confirmar o documento e os dados da empresa inicial legada. Fazer as contagens de pré-implantação em ambiente oficial com autorização própria e guardar backup recuperável, incluindo as permissões personalizadas. O ensaio de migração usou somente a cópia local. Nenhuma implantação foi executada.
+**Pendências registradas na entrega.** Confirmar o documento e os dados da empresa inicial legada. Fazer as contagens de pré-implantação em ambiente oficial com autorização própria e guardar backup recuperável, incluindo as permissões personalizadas. O ensaio de migração usou somente a cópia local. Nenhuma implantação foi executada.
+
+### Homologação final da E04 em 20/11/2026
+
+**Resultado: Concluída.** Revisão do diff desde a E03 (`00f04d6`), incluindo o commit da E04 (`cad33d8`) e as alterações locais. O escopo termina na gestão administrativa da organização por conta. E05 a E10 continuam pendentes.
+
+- **Integridade e acesso.** As FKs impedem vínculos inconsistentes com a conta, os índices parciais limitam a uma principal e a uma matriz por empresa, e o CHECK exige que a unidade principal permaneça ativa. O provisionamento e a promoção usam transações auditadas. As escritas concorrentes seguem a trava da empresa e o cadastro também trava a conta. A leitura usa `AccountContext` e queries com escopo de tenant. A suíte confirmou separação de ações, rejeição de IDs externos, administração integral sem acesso à plataforma, preservação de atribuições e autoria SaaS em inspeção.
+- **Banco, Fiscal e Pontos.** PostgreSQL 18.7 descartável aplicou, reverteu e reaplicou as cinco migrations a partir do esquema da E03. O ensaio preservou o documento do contratante e o evento sintético em `directory_audit_events`. A empresa legada entrou com identificação fiscal pendente e unidade principal ativa. `organization:check` reportou a pendência fiscal e confirmou os invariantes. A remoção de Pontos exige tabela vazia e retira suas permissões. A suíte cobre CPF, CNPJ numérico e alfanumérico, comparação pela raiz, bloqueio da remoção de Pontos com registros e o mapeamento de permissões de Dados da conta.
+- **Suíte e análise estática.** O registro de entrega conserva as 156 execuções e 1.420 asserções da rodada anterior. A repetição com PHP 8.5.13, GD e SQLite em memória passou com 157 testes e 1.448 asserções. A prova dedicada de custo de permissões passou com 45 asserções. PHPStan, Pint nos arquivos PHP da E04, build, checagem de arquitetura, TypeScript, `permissions:sync`, `audit:check` e `git diff --check` passaram.
+- **FrankenPHP e desempenho.** Com FrankenPHP 1.13.6, um worker repetiu 300 requisições alternadas entre contas após respostas 403, 404 e 422. Dois workers repetiram os conflitos entre promoções, entre promoção e inativação e entre cadastros fiscais duplicados. A repetição manteve uma consulta de permissões por requisição e nenhuma consulta duplicada nas listagens. Empresas manteve 7 consultas e Estabelecimentos teve 9 como comportamento regular, com uma amostra de 10 em um worker. As medianas HTTP com um ou dois workers nos cinco cenários foram de 4,39 a 5,38 ms em Empresas e de 5,14 a 8,44 ms em Estabelecimentos. A execução usou amostras sequenciais após aquecimento, com dados sintéticos. Custos de escrita em volume e carga sustentada permanecem fora das medições.
+- **Interface e documentação.** Chromium com aplicação real, PostgreSQL descartável e dados sintéticos em 1440, 390 e 320 px. Conferidos Início, Organização, Empresas, Estabelecimentos, Dados da conta, cadastro de empresa, edição de estabelecimento e tours. Foram repetidos a expansão da árvore, o modal de detalhes, a escolha de classificação, a inclusão e remoção de e-mail e a ocultação do filtro com uma empresa. A conta de 50 unidades confirmou filtro por empresa e situação. A revisão corrigiu o destaque de Organização no menu, a referência ao controle de expansão na ajuda e a classificação explícita no fixture de concorrência. Logs e capturas da repetição em `/tmp/prospera-e04-homologacao/`.
+
+**Pendências de implementação.** Nenhuma para fechar a E04.
+
+**Pendências de implantação.** Obter autorização para conferir contagens de `clients`, `establishments`, `points`, `users` e `directory_audit_events` na base oficial e guardar backup recuperável, incluindo permissões personalizadas. Se houver dados em Pontos ou na tabela legada de estabelecimentos, analisar e aprovar a destinação antes da implantação. Confirmar a identificação fiscal da empresa inicial legada com o responsável pela conta. A homologação usou ambientes descartáveis e dados sintéticos.
 
 ## 27. Contrato para módulos futuros
 

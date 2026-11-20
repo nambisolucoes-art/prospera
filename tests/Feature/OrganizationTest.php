@@ -235,8 +235,8 @@ final class OrganizationTest extends TestCase
 
         $this->getJson('/conta/empresas/'.$second->id.'/visualizar')
             ->assertOk()
-            ->assertJsonCount(2, 'establishments')
-            ->assertJsonPath('establishments.0.is_primary', true);
+            ->assertJsonPath('id', $second->id)
+            ->assertJsonMissingPath('establishments');
 
         $thirdPrimary = $third->primaryEstablishment()->sole();
 
@@ -429,6 +429,12 @@ final class OrganizationTest extends TestCase
     {
         [, $owner] = $this->account();
         $this->actingAs($owner);
+
+        foreach ([null, 'unregistered'] as $classification) {
+            $this->post('/conta/empresas', $this->companyPayload([
+                'primary' => ['classification' => $classification],
+            ]))->assertSessionHasErrors('primary.classification');
+        }
 
         $this->post('/conta/empresas', $this->companyPayload(['document' => '11.222.333/0001-82']))
             ->assertSessionHasErrors(['document' => 'Informe um CNPJ completo ou a raiz com 8 caracteres.']);

@@ -67,6 +67,7 @@ if (isset($argv[1])) {
             'person_type' => 'company',
             'name' => 'Empresa concorrente',
             'document' => '12.ABC.345/01DE-35',
+            'primary' => ['classification' => 'headquarters'],
         ]),
     };
     echo json_encode(['operation' => $operation, 'unit' => $unit, 'status' => $status, ...$metrics],

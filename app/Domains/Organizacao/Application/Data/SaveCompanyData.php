@@ -189,6 +189,7 @@ final readonly class SaveCompanyData
         }
 
         $primaryInput = $contractorIsCompany ? [
+            'classification' => 'headquarters',
             'address' => $details['address'] ?? null,
             'phone' => $details['phone'] ?? null,
             'whatsapp' => $details['whatsapp'] ?? null,

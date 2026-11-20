@@ -176,8 +176,7 @@ export default function Organization({
         {!companies && establishments && renderUnits(establishments)}
       </CardBox>
       {preview?.kind === 'company' && (
-        <CompanyPreview company={preview.row} onClose={closePreview}
-          establishmentsHref={`${treePath}?empresa=${preview.row.id}${companyPageParam}`} />
+        <CompanyPreview company={preview.row} onClose={closePreview} />
       )}
       {preview?.kind === 'establishment' && <EstablishmentPreview establishment={preview.row} onClose={closePreview} />}
     </SaasLayout>

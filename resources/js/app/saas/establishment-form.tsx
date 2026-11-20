@@ -111,12 +111,29 @@ export default function EstablishmentForm({
                   )}
                 </BusinessFormSection>
                 <BusinessFormSection title="Identificação fiscal" tourTarget="establishment-fiscal">
-                  <Select label="Classificação" name="classification" required value={classification} error={errors.classification}
-                    onChange={setClassification}
-                    options={legalEntity
-                      ? [{ value: 'headquarters', label: 'Matriz' }, { value: 'branch', label: 'Filial' }, { value: 'unregistered', label: 'Sem CNPJ próprio' }]
-                      : [{ value: 'unregistered', label: 'Sem CNPJ próprio' }]} />
-                  {classification !== 'unregistered' && (
+                  {legalEntity ? (
+                    <Select label="Classificação" name="classification" required value={classification}
+                      error={errors.classification} onChange={setClassification}
+                      options={[
+                        { value: 'headquarters', label: 'Matriz' },
+                        { value: 'branch', label: 'Filial' },
+                        { value: 'unregistered', label: 'Sem CNPJ próprio' },
+                      ]} />
+                  ) : (
+                    <>
+                      <Field label="Classificação" value={company ? 'Sem CNPJ próprio' : 'Selecione a empresa'}
+                        readOnly error={errors.classification} />
+                      <input type="hidden" name="classification" value="unregistered" />
+                      {company && (
+                        <FormHelp className="business-form__control-start">
+                          {company.person_type === 'individual'
+                            ? 'Empresas identificadas por CPF têm unidades sem CNPJ próprio.'
+                            : 'Informe o CNPJ no cadastro da empresa para poder classificar a unidade como Matriz ou Filial.'}
+                        </FormHelp>
+                      )}
+                    </>
+                  )}
+                  {legalEntity && classification !== 'unregistered' && (
                     <Field label="CNPJ" name="tax_document" compact required maxLength={18}
                       placeholder={company?.document_label ? `${company.document_label}/0000-00` : undefined}
                       value={document ? formatTaxDocument(document, 'company') : ''}

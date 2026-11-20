@@ -104,7 +104,7 @@ export function tourFor(
     help = 'empresas';
     steps = businessListTourSteps({
       filters: 'Busque por razão social, nome fantasia, código, CNPJ ou CPF e filtre pela situação. A lista se atualiza automaticamente.',
-      table: 'Cada linha é uma pessoa jurídica da conta, com a quantidade de estabelecimentos. Visualizar mostra os dados e as unidades da empresa.',
+      table: 'Cada linha é uma empresa da conta, com a quantidade de estabelecimentos. Visualizar mostra os dados da empresa. Para abrir as unidades, expanda a empresa em Organização.',
     });
   } else if (/^\/conta\/empresas\/(cadastrar|\d+\/editar)$/.test(path)) {
     title = 'Cadastro de empresa';
@@ -113,13 +113,13 @@ export function tourFor(
       at(
         'company-identity',
         'Identificação da empresa',
-        'Escolha Pessoa jurídica ou Pessoa física e informe a razão social ou o nome. O CNPJ aceita o número completo ou a raiz com 8 caracteres, inclusive alfanumérico. O código é gerado pelo nome fantasia e não muda depois do cadastro.',
+        'Escolha Pessoa jurídica ou Pessoa física. Em CNPJ, use a lupa com um número completo para preencher os nomes que estiverem em branco. O cadastro também aceita raiz e CNPJ alfanumérico com preenchimento manual.',
       ),
       at('company-fiscal', 'Dados fiscais', 'Regime tributário e CNAE principal valem para a empresa inteira. A situação aparece na edição conforme suas permissões.'),
       at(
         'company-primary',
         'Estabelecimento principal',
-        'A empresa nasce com o estabelecimento principal, criado junto no mesmo salvamento. Com o CNPJ completo, escolha se ele é a matriz ou uma filial.',
+        'A empresa nasce com o estabelecimento principal, criado junto no mesmo salvamento. Com o CNPJ completo, responda: A unidade deste CNPJ é a sede ou uma filial? Escolha Matriz para a sede ou Filial. Ao informar somente a raiz, a unidade é cadastrada sem CNPJ próprio.',
       ),
       at('company-primary-address', 'Endereço da unidade', 'O endereço e os contatos pertencem ao estabelecimento principal. A consulta de CEP é opcional.'),
     ]);
@@ -142,7 +142,7 @@ export function tourFor(
       at(
         'establishment-fiscal',
         'Identificação fiscal',
-        'Matriz e Filial exigem CNPJ com a mesma raiz da empresa. A empresa tem no máximo uma matriz. O principal fica sempre ativo.',
+        'Matriz e Filial exigem que a empresa tenha CNPJ e que o da unidade tenha a mesma raiz. Uma empresa com CPF ou identificação fiscal pendente só tem unidades sem CNPJ próprio.',
       ),
       at('establishment-address', 'Endereço', 'Endereço da unidade, com consulta opcional de CEP.'),
       at('establishment-contact', 'Contatos', 'Telefone, WhatsApp e e-mails da unidade, no mesmo padrão do cadastro da conta.'),

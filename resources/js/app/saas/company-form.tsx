@@ -5,14 +5,16 @@ import BusinessForm, {
 } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
 import CardBox from '@/components/CardBox/CardBox';
+import FormHelp from '@/components/FormHelp/FormHelp';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
 import { formatTaxDocument } from '@/utils/formatTaxDocument';
-import { AddressFields } from './ClientFormFields';
+import { AddressFields, LookupButton } from './ClientFormFields';
 import ContactFields from './ContactFields';
 import SaasLayout from './SaasLayout';
 import { organizationFormNavigation } from './organizationNavigation';
 import type { CompanyRow } from './Organization.types';
+import { useCnpjLookup } from './useCnpjLookup';
 export default function CompanyForm({
   company,
   taxRegimes,
@@ -27,6 +29,9 @@ export default function CompanyForm({
     auth.permissions.includes(`account.companies.${action}`);
   const [type, setType] = useState<string>(company?.person_type ?? 'company');
   const [document, setDocument] = useState(company?.document ?? '');
+  const [name, setName] = useState(company?.name ?? '');
+  const [tradeName, setTradeName] = useState(company?.trade_name ?? '');
+  const cnpjLookup = useCnpjLookup(setName, setTradeName);
   const legalEntity = type === 'company';
   const fullCnpj = legalEntity && document.replace(/[.\/\s-]/g, '').length === 14;
   const listHref = navigation.back ?? (can('list') ? '/conta/empresas' : undefined);
@@ -56,14 +61,28 @@ export default function CompanyForm({
                 >
                   <Select label="Tipo de pessoa" name="person_type" value={type} required error={errors.person_type}
                     options={[{ value: 'company', label: 'Pessoa jurídica' }, { value: 'individual', label: 'Pessoa física' }]}
-                    onChange={(value) => { setType(value); setDocument(value === company?.person_type ? company.document ?? '' : ''); }} />
-                  <Field label={legalEntity ? 'Razão social' : 'Nome'} name="name" defaultValue={company?.name} error={errors.name} required />
-                  <Field label="Nome fantasia" name="trade_name" defaultValue={company?.trade_name ?? ''} error={errors.trade_name} />
+                    onChange={(value) => {
+                      setType(value);
+                      setDocument(value === company?.person_type ? company.document ?? '' : '');
+                      cnpjLookup.reset();
+                    }} />
                   <Field label={legalEntity ? 'CNPJ' : 'CPF'} name="document" compact required maxLength={18}
                     inputMode={legalEntity ? 'text' : 'numeric'}
                     placeholder={legalEntity ? 'CNPJ completo ou raiz' : '000.000.000-00'}
                     value={document ? formatTaxDocument(document, type) : ''}
-                    onChange={(event) => setDocument(event.target.value)} error={errors.document} />
+                    onChange={(event) => {
+                      setDocument(event.target.value);
+                      cnpjLookup.reset();
+                    }}
+                    action={legalEntity && (
+                      <LookupButton label="Buscar CNPJ" loading={cnpjLookup.loading}
+                        onClick={() => void cnpjLookup.lookup(document)} />
+                    )}
+                    error={cnpjLookup.error || errors.document} />
+                  <Field label={legalEntity ? 'Razão social' : 'Nome'} name="name" value={name}
+                    onChange={(event) => setName(event.target.value)} error={errors.name} required />
+                  <Field label="Nome fantasia" name="trade_name" value={tradeName}
+                    onChange={(event) => setTradeName(event.target.value)} error={errors.trade_name} />
                   {company ? (
                     <Field label="Código" value={company.code} readOnly compact
                       title="O código identifica a empresa nos endereços e não muda depois do cadastro." />
@@ -91,15 +110,19 @@ export default function CompanyForm({
                     >
                       <Field label="Nome" name="primary[name]" placeholder="Unidade principal" error={errors['primary.name']} />
                       {fullCnpj ? (
-                        <Select label="Classificação" name="primary[classification]" defaultValue="headquarters"
+                        <Select label="A unidade deste CNPJ é a sede ou uma filial?" name="primary[classification]" required defaultValue=""
                           error={errors['primary.classification']}
-                          options={[{ value: 'headquarters', label: 'Matriz' }, { value: 'branch', label: 'Filial' }]} />
+                          options={[
+                            { value: '', label: 'Selecione Matriz ou Filial' },
+                            { value: 'headquarters', label: 'Matriz' },
+                            { value: 'branch', label: 'Filial' },
+                          ]} />
                       ) : (
-                        <p className="business-form__control-start">
+                        <FormHelp className="business-form__control-start">
                           {legalEntity
-                            ? 'Com o CNPJ completo, ele fica registrado como matriz ou filial. Com a raiz, a unidade fica sem CNPJ próprio.'
+                            ? 'Informe o CNPJ completo para escolher Matriz ou Filial. Só com a raiz, a unidade é cadastrada sem CNPJ próprio.'
                             : 'Empresas identificadas por CPF não têm matriz nem filial.'}
-                        </p>
+                        </FormHelp>
                       )}
                     </BusinessFormSection>
                     <AddressFields errors={errors} namePrefix="primary[address]" errorPrefix="primary.address"

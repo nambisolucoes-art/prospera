@@ -5,7 +5,6 @@ namespace App\Domains\Organizacao\Application\Queries;
 use App\Domains\Organizacao\Application\Data\EstablishmentFiltersData;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Support\TaxDocument;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 final class EstablishmentDirectoryQuery
@@ -57,17 +56,6 @@ final class EstablishmentDirectoryQuery
         return Establishment::where('account_id', $accountId)
             ->with('company:id,account_id,name,trade_name,person_type,tax_root,individual_document,active')
             ->findOrFail($id);
-    }
-
-    /** @return Collection<int, Establishment> */
-    public function forCompany(int $accountId, int $companyId): Collection
-    {
-        return Establishment::where('account_id', $accountId)
-            ->where('company_id', $companyId)
-            ->orderByDesc('is_primary')
-            ->orderBy('name')
-            ->orderBy('id')
-            ->get(['id', 'company_id', 'code', 'name', 'tax_document', 'is_headquarters', 'is_primary', 'active']);
     }
 
     public function count(int $accountId): int
