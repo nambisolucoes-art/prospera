@@ -1,15 +1,18 @@
 # Prospera: ambiente Docker local
 #
-# O código e os assets ficam dentro da imagem. Ao subir, docker/start.sh executa
-# as migrations, permissions:sync e audit:check. Por isso o fluxo principal é make up.
+# make up: o código e os assets (npm run build) ficam dentro da imagem, como em produção.
+# make dev: o código é montado no container, o Vite atualiza o frontend com HMR e o Octane
+# reinicia os workers quando o PHP muda. Nos dois, docker/start.sh executa as migrations,
+# permissions:sync e audit:check.
 
-COMPOSE := docker compose
-APP     := $(COMPOSE) exec app
-ARTISAN := $(APP) php artisan
+COMPOSE     := docker compose
+DEV_COMPOSE := APP_UID=$$(id -u) APP_GID=$$(id -g) $(COMPOSE) -f compose.yaml -f compose.dev.yaml
+APP         := $(COMPOSE) exec app
+ARTISAN     := $(APP) php artisan
 
 .DEFAULT_GOAL := help
 
-.PHONY: help up update down restart build rebuild ps logs logs-all shell tinker art \
+.PHONY: help up dev dev-logs update down restart build rebuild ps logs logs-all shell tinker art \
         migrate migrate-status rollback fresh permissions-sync audit-check clear \
         test lint create-user prepare-sqlite
 
@@ -19,15 +22,22 @@ help: ## Lista os comandos disponíveis
 # Aplicação
 
 up: ## Sobe tudo, recompila a imagem e os assets se o código mudou e roda as migrations
-	$(COMPOSE) up --build --wait
+	$(COMPOSE) up --build --wait --remove-orphans
 	@echo "Aplicação: http://localhost:$${APP_PORT:-8000}  Mailpit: http://localhost:$${MAILPIT_PORT:-8025}"
+
+dev: ## Sobe em desenvolvimento: Vite com HMR e Octane --watch, sem rebuild a cada alteração
+	$(DEV_COMPOSE) up --build --wait --remove-orphans
+	@echo "Aplicação: http://localhost:$${APP_PORT:-8000}  Vite: http://localhost:$${VITE_PORT:-5174}  Mailpit: http://localhost:$${MAILPIT_PORT:-8025}"
+
+dev-logs: ## Acompanha os logs do app e do Vite no desenvolvimento
+	$(DEV_COMPOSE) logs -f --tail=100 app vite
 
 update: ## Atualiza o código pelo git (somente fast-forward) e executa make up
 	git pull --ff-only
 	@$(MAKE) --no-print-directory up
 
-down: ## Para os containers e preserva os volumes
-	$(COMPOSE) down
+down: ## Para os containers, inclusive os do make dev, e preserva os volumes
+	$(DEV_COMPOSE) down
 
 restart: ## Reinicia o app sem rebuild e roda as migrations da inicialização
 	$(COMPOSE) restart app

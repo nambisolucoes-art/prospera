@@ -15,6 +15,22 @@ make up
 
 Abra [http://localhost:8000](http://localhost:8000). O Laravel aguarda o PostgreSQL 18 ficar pronto e executa as migrações na inicialização. Os dados do banco ficam no volume `postgres-data`, e a chave da aplicação fica no volume `app-data`.
 
+### Desenvolvimento com Vite
+
+```sh
+make dev
+# Equivale a docker compose -f compose.yaml -f compose.dev.yaml up --build --wait
+```
+
+No `make dev`, o código do host é montado no container e não há rebuild a cada alteração:
+
+- o serviço `vite` roda `npm run dev` em [http://localhost:5174](http://localhost:5174). Alterações em `resources/js` e nos estilos chegam ao navegador na hora, por HMR, e mudanças em Blade ou rotas recarregam a página;
+- o Octane roda com `--watch`, e o FrankenPHP reinicia os workers quando muda um arquivo listado em `watch` de `config/octane.php`;
+- o `.env` da raiz é usado pelo container, e `vendor` e `node_modules` ficam em volumes próprios, reinstalados quando `composer.lock` ou `package-lock.json` mudam. Os arquivos gerados pertencem ao seu usuário;
+- `VITE_PORT` altera a porta do Vite. Em sistemas de arquivos sem eventos (por exemplo, WSL com o código no Windows), use `VITE_USE_POLLING=true`.
+
+`make dev-logs` acompanha o app e o Vite. O `make up` volta à imagem de produção, que roda `npm run build` e ignora o `public/hot` do desenvolvimento.
+
 O banco é acessível pela rede interna do Compose pelo nome `postgres`. Para definir o nome do banco e as credenciais antes da primeira inicialização, use `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD` no `.env` da raiz. Defina `APP_PORT` para alterar a porta do frontend.
 
 A raiz encaminha para o login ou para o painel correspondente ao usuário. O cadastro de contas é restrito à administração SaaS. Os exemplos do Bold ficam disponíveis às contas administrativas da plataforma em suas URLs `.html`.
@@ -31,14 +47,14 @@ A raiz encaminha para o login ou para o painel correspondente ao usuário. O cad
 - As rotas de tela retornam HTML no acesso direto pelo navegador e dados quando a aplicação solicita `Accept: application/json`. As requisições de escrita usam a sessão e a proteção CSRF do Laravel. Erros de validação retornam HTTP 422 com mensagens por campo.
 - O catálogo em `resources/data/municipios-ibge.json` guarda códigos, nomes e UFs do snapshot de novembro de 2026 da API de Localidades do IBGE. O seletor consulta esse arquivo pelo endpoint interno `/api/localidades/municipios`. [Fonte do catálogo](https://servicodados.ibge.gov.br/api/docs/localidades)
 
-Após editar a aplicação, use `docker compose up --build --wait` para reconstruir e substituir o container.
+No `make up`, use `docker compose up --build --wait` após editar a aplicação para reconstruir e substituir o container. No `make dev`, as alterações são aplicadas sem rebuild.
 
 ```sh
 docker compose logs -f app
 docker compose exec app php artisan test
 ```
 
-`docker compose down` para o ambiente e preserva os volumes.
+`make down` para o ambiente, inclusive o serviço `vite`, e preserva os volumes.
 
 ## Administrar a plataforma SaaS
 

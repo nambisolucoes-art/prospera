@@ -7,6 +7,21 @@ WORKDIR /app
 RUN install-php-extensions gd iconv pcntl pdo_pgsql pdo_sqlite
 RUN printf 'upload_max_filesize=5M\npost_max_size=6M\n' > "$PHP_INI_DIR/conf.d/profile-uploads.ini"
 
+# Desenvolvimento: o código vem do bind mount; vendor e node_modules ficam em volumes do usuário do host.
+FROM php-runtime AS dev
+ARG APP_UID=1000
+ARG APP_GID=1000
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends unzip \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /app/vendor /app/node_modules \
+    && chown -R "$APP_UID:$APP_GID" /app /config/caddy /data/caddy
+ENV HOME=/tmp
+
 FROM php-runtime AS build
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY --from=node /usr/local/bin/node /usr/local/bin/node

@@ -1,0 +1,42 @@
+# Desenvolvimento com Vite (HMR) e Octane --watch. Use make dev; o compose.yaml sozinho gera a imagem com npm run build.
+x-dev: &dev
+  image: prospera-dev
+  build:
+    context: .
+    target: dev
+    args:
+      APP_UID: ${APP_UID:-1000}
+      APP_GID: ${APP_GID:-1000}
+  entrypoint: ["/bin/sh", "/app/docker/dev.sh"]
+  user: "${APP_UID:-1000}:${APP_GID:-1000}"
+  volumes:
+    - .:/app
+    - ./storage/app:/app/storage/app
+    - vendor:/app/vendor
+    - node-modules:/app/node_modules
+
+services:
+  app:
+    <<: *dev
+    command: ["app"]
+    healthcheck:
+      start_period: 120s
+
+  vite:
+    <<: *dev
+    command: ["vite"]
+    environment:
+      VITE_PORT: ${VITE_PORT:-5174}
+    ports:
+      # A mesma porta dentro e fora: o public/hot informa ao navegador o endereço do Vite.
+      - "127.0.0.1:${VITE_PORT:-5174}:${VITE_PORT:-5174}"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent --output /dev/null http://127.0.0.1:$$VITE_PORT/@vite/client"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 120s
+
+volumes:
+  vendor:
+  node-modules:

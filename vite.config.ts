@@ -19,4 +19,15 @@ export default defineConfig({
     resolve: {
         alias: { '@': fileURLToPath(new URL('./resources/js', import.meta.url)) },
     },
+    // Usado só pelo npm run dev (make dev); o build de produção ignora este bloco.
+    server: {
+        port: Number(process.env.VITE_PORT ?? 5173),
+        strictPort: true,
+        // O navegador acessa o container pela porta publicada no host.
+        hmr: { host: 'localhost' },
+        watch: {
+            usePolling: process.env.VITE_USE_POLLING === 'true',
+            ignored: ['**/vendor/**', '**/storage/**', '**/public/build/**', '**/.git/**'],
+        },
+    },
 });
