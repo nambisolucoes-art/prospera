@@ -46,7 +46,8 @@ docker run -d --rm --name "$prefix-app" --network "$prefix" --entrypoint sh \
         if [ "$2" = 1 ]; then
             php /performance/e05-fixtures.php
         fi
-        exec php artisan octane:frankenphp --host=127.0.0.1 --port=8000 --workers="$1" --max-requests=1000
+        # A prova de sessão vem após as 600 requisições de isolamento e a carga das listagens.
+        exec php artisan octane:frankenphp --host=127.0.0.1 --port=8000 --workers="$1" --max-requests=1200
     ' setup "$workers" "$contextual" >/dev/null
 
 for attempt in {1..45}; do

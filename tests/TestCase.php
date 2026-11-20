@@ -2,6 +2,8 @@
 
 namespace Tests;
 
+use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Testing\TestResponse;
@@ -29,6 +31,11 @@ abstract class TestCase extends BaseTestCase
         $this->app->forgetScopedInstances();
 
         return parent::call($method, $uri, $parameters, $cookies, $files, $server, $content);
+    }
+
+    protected function membership(User $user): AccountMembership
+    {
+        return $user->memberships()->where('account_id', $user->account_id)->sole();
     }
 
     protected function skipUnlessFortifyHas(string $feature, ?string $message = null): void

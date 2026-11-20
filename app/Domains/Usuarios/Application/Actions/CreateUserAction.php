@@ -2,9 +2,10 @@
 
 namespace App\Domains\Usuarios\Application\Actions;
 
+use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
+use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
 use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
 use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -26,6 +27,8 @@ final readonly class CreateUserAction
     public function __construct(
         private UserEmailExistsQuery $emailExists,
         private SaveRoleAssignmentsAction $assignments,
+        private DefaultRolesAction $defaultRoles,
+        private RegisterAccountMembershipAction $registerMembership,
     ) {}
 
     public function execute(
@@ -37,15 +40,17 @@ final readonly class CreateUserAction
         ?AccessNode $node = null,
     ): User {
         return AuditLog::transaction(function () use ($data, $role, $account, $person, $roleId, $node): User {
-            if ($role->requiresAccount() !== ($account !== null)) {
+            if ($role->requiresAccount() !== ($account !== null) || ($node === null) !== ($roleId === null)) {
                 throw new InvalidArgumentException('O contexto da conta não corresponde ao papel do usuário.');
             }
+
+            $assignedRole = null;
 
             if ($node !== null) {
                 abort_unless($account?->id === $node->accountId && $roleId !== null, 403);
                 Client::whereKey($node->accountId)->lockForUpdate()->firstOrFail();
                 Gate::authorize('account.users.create', $node);
-                $this->assignments->assertAssignable($node->accountId, $roleId, $node);
+                $assignedRole = $this->assignments->assertAssignable($node->accountId, $roleId, $node);
             }
 
             if ($this->emailExists->execute($data->email)) {
@@ -71,31 +76,12 @@ final readonly class CreateUserAction
             $user->applyIdentity($identityDTO);
             $user->account()->associate($account);
 
-            if ($node !== null) {
-                $user->prepareInitialAssignment($node);
-            }
-
-            if ($person !== null) {
-                if ($person->account_id !== $account?->id || $person->user()->exists()) {
-                    throw new InvalidArgumentException('Pessoa indisponível para este acesso.');
-                }
-
-                $user->person()->associate($person);
-            }
-
-            $assignedRole = $roleId === null
-                ? null
-                : Role::where('account_id', $account?->id)->findOrFail($roleId);
-
-            if ($assignedRole !== null) {
-                $user->role_id = $assignedRole->id;
+            if ($person !== null && ($person->account_id !== $account?->id || $person->user()->exists())) {
+                throw new InvalidArgumentException('Pessoa indisponível para este acesso.');
             }
 
             $user->forceFill([
                 'is_saas_admin' => $role === UserRole::PlatformAdministrator,
-                'is_account_admin' => $assignedRole !== null
-                    ? $assignedRole->system_key === 'administrator'
-                    : $role === UserRole::AccountAdministrator,
                 'email_verified_at' => now(),
                 'password_setup_pending' => $data->setup === PasswordSetup::Invite,
             ]);
@@ -108,6 +94,20 @@ final readonly class CreateUserAction
                 }
 
                 throw ValidationException::withMessages(['email' => 'Não foi possível criar o acesso com os dados informados.']);
+            }
+
+            if ($account !== null) {
+                if ($assignedRole === null) {
+                    [$administrator, $member] = $this->defaultRoles->execute($account->id);
+                    $assignedRole = $role === UserRole::AccountAdministrator ? $administrator : $member;
+                }
+
+                $this->registerMembership->execute(
+                    $user,
+                    $assignedRole,
+                    $node ?? AccessNode::tenant($account->id),
+                    $person,
+                );
             }
 
             return $user;

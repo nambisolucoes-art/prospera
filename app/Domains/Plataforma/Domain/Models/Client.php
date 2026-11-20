@@ -2,10 +2,10 @@
 
 namespace App\Domains\Plataforma\Domain\Models;
 
+use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Plataforma\Domain\DTOs\AccountDTO;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -91,9 +91,9 @@ class Client extends Model implements Auditable
         return ['active' => 'boolean', 'details' => 'array'];
     }
 
-    /** @return HasMany<User, $this> */
-    public function users(): HasMany
+    /** @return HasMany<AccountMembership, $this> */
+    public function memberships(): HasMany
     {
-        return $this->hasMany(User::class, 'account_id');
+        return $this->hasMany(AccountMembership::class, 'account_id');
     }
 }

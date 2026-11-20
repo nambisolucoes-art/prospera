@@ -62,12 +62,9 @@ final readonly class SavePersonData
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'role_id' => ['sometimes', 'integer', Rule::exists('roles', 'id')->where('account_id', $accountId)],
             'tag_ids' => ['sometimes', 'array'],
             'tag_ids.*' => ['integer', 'distinct', $selectableTag],
         ], [
-            'role_id.exists' => 'Selecione um cargo desta conta.',
-            'role_id.integer' => 'Selecione um cargo válido.',
             'name.required' => 'Informe o nome.',
             'name.string' => 'Informe um nome válido.',
             'name.max' => 'O nome deve ter até 255 caracteres.',

@@ -26,7 +26,7 @@ final readonly class StartAccountInspectionAction
         StartAccountInspectionData $data,
         Session $session,
     ): void {
-        abort_unless($administrator->can('access-saas') && $administrator->hasVerifiedEmail(), 403);
+        abort_unless($this->users->administrator($administrator->id) !== null, 403);
         abort_if(AccountInspectionSession::current($session) !== null, 403);
 
         $target = $account->active ? $this->users->find($account, $data->userId) : null;

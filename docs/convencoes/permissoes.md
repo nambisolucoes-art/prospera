@@ -20,7 +20,7 @@ O escopo do catálogo (`account`, `platform`, `self`) diz a quem a permissão po
 
 ## Transição de dados
 
-Os cargos pertencem à conta. A autorização usa o vínculo ativo e as atribuições. Os campos legados de usuários permanecem durante a transição. `users.role_id` espelha a atribuição de tenant para a compatibilidade de reversão e não define as permissões efetivas. Os registros de permissões manuais permanecem fora do catálogo ativo.
+Os cargos pertencem à conta. A autorização usa o vínculo ativo e as atribuições. A E05 remove as colunas de cargo único e o indicador de administrador de `users`. A administração integral é identificada pela atribuição do cargo de sistema no escopo da conta. Os registros de permissões manuais permanecem fora do catálogo ativo.
 
 ## Modelo contextual
 
@@ -110,7 +110,7 @@ Na primeira checagem para um usuário da conta, o resolvedor carrega as atribui�
 
 ## Auditoria
 
-Cargos e atribuições são auditados apenas em `audit_records`: o cargo pelo próprio Model, as permissões do cargo por `recordAuditFieldChange('permission_ids', ...)` e a troca de cargo do usuário como alteração de `role_id`. Alterações sem mudanças não geram evento. `access_catalog_events` registra sincronizações globais e a retirada das antigas permissões de manutenção do catálogo, com autoria de sistema, escopo plataforma e contas afetadas. Ela é consolidada em `audit_records` na E08. Atribuições gravam a empresa e o estabelecimento do escopo ([Auditoria](auditoria.md)).
+Cargos e atribuições são auditados apenas em `audit_records`: o cargo pelo próprio Model, as permissões do cargo por `recordAuditFieldChange('permission_ids', ...)` e os cargos do vínculo pela criação ou remoção de `role_assignments`. Alterações sem mudanças não geram evento. `access_catalog_events` registra sincronizações globais e a retirada das antigas permissões de manutenção do catálogo, com autoria de sistema, escopo plataforma e contas afetadas. Ela é consolidada em `audit_records` na E08. Atribuições gravam a empresa e o estabelecimento do escopo ([Auditoria](auditoria.md)).
 
 ## Verificação
 

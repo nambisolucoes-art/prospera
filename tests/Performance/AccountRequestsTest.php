@@ -19,9 +19,9 @@ final class AccountRequestsTest extends TestCase
     public function test_account_pages(): void
     {
         $account = Client::create(['name' => 'Conta sintética', 'active' => true]);
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
         $role = Role::where('account_id', $account->id)->where('system_key', 'member')->sole();
-        User::factory()->count(39)->create(['account_id' => $account->id, 'role_id' => $role->id]);
+        User::factory()->count(39)->forAccount($account->id, $role)->create();
         $queries = [];
         DB::listen(function (QueryExecuted $query) use (&$queries): void {
             $queries[] = $query;

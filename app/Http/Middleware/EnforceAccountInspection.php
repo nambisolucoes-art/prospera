@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use Closure;
@@ -11,19 +12,22 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-final class EnforceAccountInspection
+final readonly class EnforceAccountInspection
 {
+    public function __construct(private AccountInspectionUsersQuery $users) {}
+
     /** @param Closure(Request): Response $next */
     public function handle(Request $request, Closure $next): Response
     {
         $inspection = $request->hasSession() ? AccountInspectionSession::current($request->session()) : null;
-        if ($inspection === null || $request->routeIs('account.inspection.end', 'logout')) {
+        if ($inspection === null) {
             return $next($request);
         }
 
         $user = $request->user();
         if (
-            $user === null
+            $this->users->administrator($inspection->administratorId) === null
+            || $user === null
             || $user->id !== $inspection->userId
             || ! AccountMembership::where('user_id', $user->id)
                 ->where('account_id', $inspection->accountId)
@@ -33,11 +37,17 @@ final class EnforceAccountInspection
             || $user->is_saas_admin
             || ! $user->hasVerifiedEmail()
         ) {
-            Auth::guard('web')->logout();
+            Auth::guard('web')->logoutCurrentDevice();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return to_route('login');
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Sessão de inspeção encerrada.'], 401)
+                : to_route('login');
+        }
+
+        if ($request->routeIs('account.inspection.end', 'logout')) {
+            return $next($request);
         }
 
         if ($request->isMethodSafe()) {

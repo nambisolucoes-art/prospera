@@ -170,7 +170,7 @@ final class OrganizationTest extends TestCase
             ->assertRedirect('/conta/organizacao?nivel=conta');
 
         $member = Role::where('account_id', $company->account_id)->where('system_key', 'member')->sole();
-        $reader = User::factory()->create(['account_id' => $company->account_id, 'role_id' => $member->id]);
+        $reader = User::factory()->forAccount($company->account_id, $member)->create();
 
         $this->actingAs($reader)->getJson('/conta/organizacao')
             ->assertOk()
@@ -619,7 +619,7 @@ final class OrganizationTest extends TestCase
     public function test_initial_roles_and_the_renamed_account_data_permission(): void
     {
         [$account, $owner] = $this->account();
-        $member = User::factory()->create(['account_id' => $account->id]);
+        $member = User::factory()->forAccount($account->id)->create();
 
         $this->assertNull(Permission::where('slug', 'account.establishment.update')->first());
         $this->assertNull(Permission::where('slug', 'like', 'account.points.%')->first());
@@ -742,7 +742,7 @@ final class OrganizationTest extends TestCase
     {
         [$account, $owner] = $this->account();
         $this->createCompany($owner);
-        $member = User::factory()->create(['account_id' => $account->id]);
+        $member = User::factory()->forAccount($account->id)->create();
 
         $this->actingAs($owner)
             ->getJson('/conta')
@@ -841,7 +841,7 @@ final class OrganizationTest extends TestCase
     private function account(string $name = 'Conta Gartan'): array
     {
         $account = Client::create(['name' => $name, 'active' => true]);
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
 
         return [$account, $owner];
     }
@@ -852,7 +852,7 @@ final class OrganizationTest extends TestCase
         $role = Role::create(['account_id' => $account->id, 'name' => 'Cargo '.implode(' ', $slugs)]);
         $role->permissions()->sync(Permission::whereIn('slug', $slugs)->pluck('id'));
 
-        return User::factory()->create(['account_id' => $account->id, 'role_id' => $role->id]);
+        return User::factory()->forAccount($account->id, $role)->create();
     }
 
     /** @param array<string,mixed> $overrides */

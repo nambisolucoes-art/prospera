@@ -29,7 +29,7 @@ foreach (['Leitura de unidades', 'Histórico local'] as $name) {
 
 $scenarios = [];
 foreach ([1, 5, 30] as $count) {
-    $user = User::factory()->create(['account_id' => $account->id]);
+    $user = User::factory()->forAccount($account->id)->create();
     $membership = AccountMembership::where('user_id', $user->id)->sole();
     $membership->assignments()->delete();
 
@@ -47,8 +47,11 @@ foreach ([1, 5, 30] as $count) {
     ];
 }
 
-$owner = User::where('account_id', $account->id)->where('is_account_admin', true)->sole();
-$membership = AccountMembership::where('user_id', $owner->id)->sole();
+$membership = AccountMembership::where('account_id', $account->id)
+    ->whereHas('assignments', fn ($assignments) => $assignments->where('scope', 'tenant')
+        ->whereHas('role', fn ($role) => $role->where('system_key', 'administrator')))
+    ->sole();
+$owner = $membership->identity()->sole();
 $scenarios['integral'] = [
     'user' => $owner->id,
     'rows' => 50,
@@ -59,7 +62,7 @@ $scenarios['integral'] = [
 
 file_put_contents('/tmp/prospera-e05-scenarios.json', json_encode($scenarios, JSON_THROW_ON_ERROR));
 
-$secondAdmin = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+$secondAdmin = User::factory()->asAccountAdministrator($account->id)->create();
 $secondMembership = AccountMembership::where('user_id', $secondAdmin->id)->sole();
 $target = AccountMembership::where('user_id', $scenarios[1]['user'])->sole();
 $unit = $units->last();
@@ -77,4 +80,15 @@ file_put_contents('/tmp/prospera-e05-race.json', json_encode([
         ['actor' => $owner->id, 'membership' => $secondMembership->id],
         ['actor' => $secondAdmin->id, 'membership' => $membership->id],
     ],
+], JSON_THROW_ON_ERROR));
+
+$platform = User::factory()->create(['is_saas_admin' => true]);
+file_put_contents('/tmp/prospera-e05-inspection.json', json_encode([
+    'account' => $account->id,
+    'platform' => $platform->id,
+    'platform_email' => $platform->email,
+    'owner' => $owner->id,
+    'owner_email' => $owner->email,
+    'operator' => $target->user_id,
+    'membership' => $membership->id,
 ], JSON_THROW_ON_ERROR));

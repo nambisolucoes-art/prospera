@@ -2,6 +2,7 @@
 
 // Carregado somente na cópia descartável preparada pelo runner.
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,18 @@ Route::get('/_e03/session/{id?}', function (Request $request, ?int $id = null) {
     }
 
     return ['token' => $request->session()->token()];
+});
+
+Route::get('/_e05/session-state', function (Request $request) {
+    $session = $request->session();
+
+    return [
+        'id' => $session->getId(),
+        'token' => $session->token(),
+        'guard_user' => $request->user()?->id,
+        'session_user' => $session->get(Auth::guard('web')->getName()),
+        'inspecting' => AccountInspectionSession::current($session) !== null,
+    ];
 });
 
 Route::get('/_e05/authorize', function (Request $request, EffectivePermissions $permissions) {

@@ -88,12 +88,12 @@ class SaasPlatformTest extends TestCase
             ->assertJsonPath('details.additional_phones', ['11988882222'])
             ->assertJsonPath('details.additional_emails', [])
             ->assertJsonPath('details.address.postal_code', '01001000');
-        $owner = $client->users()->sole();
-        $this->assertTrue($owner->is_account_admin);
+        $owner = User::where('account_id', $client->id)->sole();
+        $this->assertSame('administrator', $this->membership($owner)->assignments()->sole()->role()->sole()->system_key);
         $this->assertFalse($owner->is_saas_admin);
-        $this->assertSame($owner->name, $owner->person()->sole()->name);
+        $this->assertSame($owner->name, $this->membership($owner)->person()->sole()->name);
         $this->assertTrue(Hash::check('SenhaForte123!', $owner->password));
-        $member = User::factory()->create(['account_id' => $client->id]);
+        $member = User::factory()->forAccount($client->id)->create();
         $this->actingAs($member)->patch('/conta', ['name' => 'Inválido'])->assertForbidden();
         $this->post('/conta/empresas', ['name' => 'Inválida'])->assertForbidden();
         $this->actingAs($owner)->get('/dashboard')->assertRedirect(route('account.dashboard'));
@@ -144,9 +144,9 @@ class SaasPlatformTest extends TestCase
             'message' => 'Conta criada. O link para definir a senha foi enviado ao administrador.',
         ]);
 
-        $owner = Client::query()->sole()->users()->sole();
+        $owner = User::where('account_id', Client::query()->sole()->id)->sole();
         Notification::assertSentTo($owner, ResetPassword::class);
-        $this->assertSame('invite@example.test', $owner->person()->sole()->email);
+        $this->assertSame('invite@example.test', $this->membership($owner)->person()->sole()->email);
     }
 
     public function test_missing_administrator_passwords_have_friendly_validation_messages(): void
@@ -176,7 +176,7 @@ class SaasPlatformTest extends TestCase
         $platform = User::factory()->create(['is_saas_admin' => true]);
         $account = Client::query()->create(['name' => 'Conta A', 'active' => true]);
         $other = Client::query()->create(['name' => 'Conta B', 'active' => true]);
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
         $this->actingAs($platform)->post('/saas/usuarios', [
             'name' => 'Operador SaaS', 'email' => 'platform@example.test', 'mode' => 'manual',
             'password' => 'SenhaForte123!', 'password_confirmation' => 'SenhaForte123!',
@@ -200,8 +200,8 @@ class SaasPlatformTest extends TestCase
         $member = User::query()->where('email', 'member@example.test')->sole();
         $this->assertSame($account->id, $member->account_id);
         $this->assertFalse($member->is_saas_admin);
-        $this->assertFalse($member->is_account_admin);
-        $this->assertSame('Colaborador', $member->person()->sole()->name);
+        $this->assertSame('member', $this->membership($member)->assignments()->sole()->role()->sole()->system_key);
+        $this->assertSame('Colaborador', $this->membership($member)->person()->sole()->name);
         $this->getJson('/conta/usuarios')->assertJsonCount(2, 'users.data');
         $this->actingAs($member)->get('/conta/usuarios')->assertForbidden();
     }

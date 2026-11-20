@@ -23,7 +23,7 @@ class SupplierDirectoryTest extends TestCase
     {
         $account = Client::create(['name' => 'Conta de fornecedores', 'active' => true]);
 
-        return User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        return User::factory()->asAccountAdministrator($account->id)->create();
     }
 
     /** @return array<string,mixed> */
@@ -129,7 +129,7 @@ class SupplierDirectoryTest extends TestCase
             'account.people.view',
             'account.people.list',
         ])->pluck('id'));
-        $editor = User::factory()->create(['account_id' => $owner->account_id, 'role_id' => $role->id]);
+        $editor = User::factory()->forAccount($owner->account_id, $role)->create();
         $count = AuditRecord::count();
         $this->actingAs($editor)->postJson('/conta/pessoas', $payload)->assertForbidden();
         $this->assertDatabaseMissing('people', ['name' => $payload['name']]);
@@ -215,7 +215,7 @@ class SupplierDirectoryTest extends TestCase
             'name' => 'Fornecedor',
             'color' => '#123456',
         ]);
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
         $special = Tag::supplierTag($account->id);
         $this->assertNotSame($custom->id, $special->id);
         $this->assertNull($custom->fresh()->system_key);

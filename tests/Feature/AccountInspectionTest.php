@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Tests\TestCase;
@@ -18,9 +20,9 @@ class AccountInspectionTest extends TestCase
         $account = Client::query()->create(['name' => 'Conta ativa', 'active' => true]);
         $inactive = Client::query()->create(['name' => 'Conta inativa', 'active' => false]);
         $platform = User::factory()->create(['is_saas_admin' => true]);
-        $member = User::factory()->create(['account_id' => $account->id, 'profile_photo' => (string) Str::uuid()]);
-        User::factory()->unverified()->create(['account_id' => $account->id]);
-        $outsider = User::factory()->create(['account_id' => $inactive->id]);
+        $member = User::factory()->forAccount($account->id)->create(['profile_photo' => (string) Str::uuid()]);
+        User::factory()->unverified()->forAccount($account->id)->create();
+        $outsider = User::factory()->forAccount($inactive->id)->create();
 
         $options = route('saas.accounts.inspection.options', $account);
         $start = route('saas.accounts.inspection.start', $account);
@@ -49,7 +51,7 @@ class AccountInspectionTest extends TestCase
     {
         $account = Client::query()->create(['name' => 'Conta ativa', 'active' => true]);
         $platform = User::factory()->create(['is_saas_admin' => true]);
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
 
         $this->actingAs($platform)->withSession(['auth.password_confirmed_at' => time()])
             ->post(route('saas.accounts.inspection.start', $account), ['user_id' => $owner->id, 'mode' => 'read-only'])
@@ -77,8 +79,8 @@ class AccountInspectionTest extends TestCase
     {
         $account = Client::query()->create(['name' => 'Conta ativa', 'active' => true]);
         $platform = User::factory()->create(['is_saas_admin' => true]);
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
-        $member = User::factory()->create(['account_id' => $account->id]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
+        $member = User::factory()->forAccount($account->id)->create();
         $start = route('saas.accounts.inspection.start', $account);
         $end = route('account.inspection.end');
 
@@ -95,5 +97,45 @@ class AccountInspectionTest extends TestCase
         $platform->forceFill(['is_saas_admin' => false])->saveOrFail();
         $this->post($end)->assertRedirect(route('login'));
         $this->assertGuest();
+    }
+
+    public function test_active_inspection_ends_on_the_next_request_when_saas_authority_is_revoked(): void
+    {
+        $account = Client::create(['name' => 'Conta ativa', 'active' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
+        $start = route('saas.accounts.inspection.start', $account);
+
+        foreach (['is_saas_admin' => false, 'access_enabled' => false, 'email_verified_at' => null] as $field => $value) {
+            $platform = User::factory()->create(['is_saas_admin' => true]);
+
+            $this->actingAs($platform)->post($start, ['user_id' => $owner->id, 'mode' => 'edit'])->assertRedirect();
+            $this->getJson(route('account.dashboard'))->assertOk()->assertJsonPath('auth.user.id', $owner->id);
+
+            $session = $this->app['session.store'];
+            $guardKey = Auth::guard('web')->getName();
+            $inspectionSessionId = $session->getId();
+            $inspectionToken = $session->token();
+            $this->assertSame($owner->id, $session->get($guardKey));
+            $this->assertSame($platform->id, AccountInspectionSession::current($session)?->administratorId);
+
+            $platform->forceFill([$field => $value])->saveOrFail();
+
+            $this->getJson(route('account.dashboard'))->assertUnauthorized()
+                ->assertSessionMissing($guardKey)
+                ->assertSessionMissing('account_inspection');
+            $this->assertGuest();
+            $this->assertNull(AccountInspectionSession::current($session));
+            $this->assertNotSame($inspectionSessionId, $session->getId());
+            $this->assertNotSame($inspectionToken, $session->token());
+
+            $this->getJson(route('account.dashboard'))->assertUnauthorized();
+            $this->getJson(route('account.establishments.index'))->assertUnauthorized();
+            $this->patchJson(route('account.update'), ['name' => 'Alteração pela sessão encerrada'])->assertUnauthorized();
+            $this->postJson(route('account.inspection.end'))->assertUnauthorized();
+            $this->assertGuest();
+        }
+
+        $this->assertTrue($owner->fresh()->access_enabled);
+        $this->assertSame('Conta ativa', $account->fresh()->name);
     }
 }

@@ -14,7 +14,7 @@ Política oficial da DA-24. Separa quem a pessoa é para o login, quem ela é no
 Regras gerais:
 
 - **Sem cópia automática:** nenhuma camada altera outra implicitamente. Editar o nome ou o e-mail da pessoa não altera a identidade (corrige A20 na E05). Na criação do vínculo, a pessoa da conta recebe nome e e-mail iniciais da identidade; depois disso, cada camada segue seu próprio fluxo.
-- **Pessoa por conta:** a mesma identidade tem uma pessoa diferente em cada conta. Dados cadastrais não atravessam contas.
+- **Pessoa por conta:** a mesma identidade tem uma pessoa diferente em cada conta, referenciada pelo vínculo. Uma identidade sem vínculo não cria um cadastro em Pessoas. Dados cadastrais não atravessam contas.
 - **Sem exceção de tenant:** nenhum administrador de tenant, empresa ou estabelecimento altera diretamente a foto, o e-mail de acesso, a senha, o segundo fator, as chaves de acesso ou a situação da identidade de outra pessoa, nem quando ela tem um único vínculo.
 - **Identidade somente leitura:** na interface da conta, o e-mail de acesso aparece apenas para leitura, com o rótulo "E-mail de acesso".
 
@@ -69,11 +69,11 @@ A plataforma pode iniciar a troca em suporte, com autoria registrada. A conclus�
 
 ## Usuários em vários tenants
 
-- Uma identidade pode ter um vínculo por conta (E09, liberado por chave de configuração).
+- Uma identidade pode ter um vínculo por conta (E09, liberado por chave de configuração). Até a E09, `users.account_id` identifica a conta usada na navegação normal e sua autorização sempre depende de um vínculo ativo.
 - Cada vínculo tem pessoa, situação e atribuições independentes. Revogar um vínculo afeta só aquela conta.
 - Um operador de uma conta não vê nem infere os outros vínculos da identidade: listagens, mensagens de erro e auditoria da conta mostram apenas dados da própria conta.
 - Com mais de um vínculo, a conta vem da URL (`/contas/{conta}/...`, PD-04) e a pessoa escolhe a conta após o login.
-- O administrador SaaS não tem vínculo com contas. Ele acessa dados de uma conta apenas por inspeção auditada, com exatamente a autoridade do vínculo representado.
+- O administrador SaaS não tem vínculo com contas. Ele acessa dados de uma conta apenas por inspeção auditada, com exatamente a autoridade do vínculo representado. A autorização SaaS do autor real é consultada em cada requisição. Se perder a autoridade, a sessão de inspeção é encerrada.
 
 ## Respostas neutras
 

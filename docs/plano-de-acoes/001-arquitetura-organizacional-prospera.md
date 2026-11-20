@@ -205,7 +205,7 @@ Decisões consolidadas. O registro formal está na seção 28.
 | DA-03 | Toda empresa tem pelo menos um estabelecimento ativo. A unidade principal é provisionada na mesma transação da empresa | [DP] |
 | DA-04 | Matriz e filial são atributos explícitos do estabelecimento, nunca inferidos do número de ordem do CNPJ | [R] |
 | DA-05 | Documento fiscal tratado por um objeto de valor único (`TaxDocument`): raiz, ordem e dígitos, com suporte a CNPJ alfanumérico; a comparação de pessoa jurídica é feita pela raiz | [R] |
-| DA-06 | Identidade global (`users`) e vínculo por tenant (`account_memberships`) com pessoa própria em cada tenant. `users.account_id`, `role_id` e `person_id` viram legado e são removidos ao final | [DP] + [R] |
+| DA-06 | Identidade global (`users`) e vínculo por tenant (`account_memberships`) com pessoa própria em cada tenant. A E05 remove `users.role_id`, `users.person_id` e `users.is_account_admin`. A E09 substitui `users.account_id` pela seleção do vínculo | [DP] + [R] |
 | DA-07 | O RBAC evolui com três escopos de atribuição (tenant, empresa e estabelecimento). Cada permissão declara os tipos de recurso-alvo admitidos (`tenant`, `company`, `establishment`, `person`). A checagem é feita contra o nó do recurso afetado, e não contra um nível fixo por slug (revisão 2, seção 8.2) | [DP] + [R] |
 | DA-08 | Disponibilidade do cargo e atribuição são tabelas distintas. Disponibilidade nunca concede acesso | [DP] |
 | DA-09 | O Administrador integral do tenant continua recebendo automaticamente todas as permissões de escopo `account` e `self`, nunca as de `platform` | [DP] |
@@ -407,7 +407,7 @@ Regras:
 
 - A pessoa é do tenant: a mesma identidade tem uma pessoa diferente em cada tenant. Dados cadastrais não atravessam tenants.
 - O nome e o e-mail da identidade continuam em `users`. A pessoa do tenant é sincronizada na criação do vínculo, e depois só pelos fluxos do próprio tenant **[R]**.
-- `users.account_id`, `users.person_id` e `users.role_id` ficam como legado durante a transição (expandir, migrar, contrair) e são removidos na E09.
+- A E05 remove `users.person_id`, `users.role_id` e `users.is_account_admin`. `users.account_id` é a referência atual de navegação e atribuição do contexto de auditoria antes da E09. A autorização exige o vínculo ativo correspondente.
 
 ### 7.2 Regras
 
@@ -1027,7 +1027,7 @@ Não é adotado. Se a medição mostrar que a query de permissões efetivas é r
 | --- | --- |
 | `permission_role(permission_id)` | Junção permissão para cargo na resolução e no `whereHas('roles')`; exclusões em cascata |
 | `person_tag(tag_id)` | `withCount('people')` em Etiquetas e a verificação de exclusão de etiqueta |
-| `users(role_id)` | Contagem do último administrador em `AssignRoleAction`; FK. Deixa de ser necessário quando `role_id` for removido (E09) |
+| `users(role_id)` | Contagem do último administrador em `AssignRoleAction`; FK. Removido com a coluna na E05 |
 | `customers(account_id)`, `suppliers(account_id)` | Revisar na E07, quando passam a ter `company_id` (os índices vão para `(company_id, ...)`) |
 
 ### 16.3 Novas tabelas e índices
@@ -1526,6 +1526,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - **Banco:**
   - `account_memberships` (a partir de `users.account_id` e `person_id`);
   - `roles.availability`, `role_availability`, `role_assignments`;
+  - retirada de `users.role_id`, `users.is_account_admin` e `users.person_id` após a migração dos dados;
   - índices da 16.3.
 - **Backend:**
   - `EffectivePermissions` com escopos, alvos e as duas queries da 9.2;
@@ -1590,10 +1591,9 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 
 **Riscos.**
 - Complexidade do formulário de atribuições.
-- Divergência temporária entre `users.role_id` e `role_assignments`. Mitigação: na E05, `role_id` deixa de ser lido e passa a ser só espelho até a E09.
+- Transição em ambientes de desenvolvimento já migrados. Aplicar a migration de retirada das colunas depois da criação e migração dos vínculos.
 
-**Reversão** (23.1). **Reversível com perda.**
-- A `down()` recria a leitura de `users.role_id`, que foi mantido como espelho, a partir da atribuição de escopo tenant de cada vínculo.
+**Reversão** (23.1). A expansão `000007` pode ser revertida antes da contração enquanto os vínculos forem representáveis. A contração `000008` exige restauração de cópia anterior. O `down()` interrompe a reversão antes de alterar o esquema.
 - Atribuições de empresa e de unidade, vários cargos por vínculo e disponibilidades restritas **não têm representação** no modelo anterior e seriam perdidas. Um usuário que só tem atribuição de unidade ficaria sem cargo.
 - Antes de qualquer `down()` em produção: exportar `role_assignments` e `role_availability`, registrar os vínculos afetados e obter aprovação.
 - **Janela de reversão:** enquanto nenhum tenant tiver atribuições fora do escopo tenant, a reversão é sem perda. Depois disso, o caminho preferido é corrigir para frente.
@@ -1759,10 +1759,10 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - Convite de identidade existente para outro tenant cria só o vínculo e a pessoa naquele tenant.
 - Revogar o vínculo afeta só aquele tenant.
 - A liberação de vários vínculos por identidade fica atrás de uma chave de configuração, desligada por padrão, até concluir a validação.
-- A contração das colunas legadas de `users` é a última entrega da etapa e só ocorre depois de um período de estabilidade com a chave ligada.
+- A remoção de `users.account_id` é a última entrega da etapa e só ocorre depois de um período de estabilidade com a chave ligada. As demais colunas citadas na revisão anterior foram removidas na E05.
 
 **Escopo técnico.**
-- **Banco:** remoção de `users.account_id`, `users.role_id`, `users.person_id` e `users.is_account_admin` (contração).
+- **Banco:** remoção de `users.account_id` após a seleção de tenant usar o vínculo.
 - **Backend:** resolução do tenant pela URL ou pelo host; seleção de conta; `EnforceAccountInspection` e `AccountInspectionSession` por vínculo; `CreateUserAction` com identidade existente.
 - **Frontend:** tela de seleção de conta; seletor de conta na barra superior quando houver mais de uma.
 
@@ -1782,7 +1782,7 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 **Riscos.** Configuração de domínio (subdomínio); sessões existentes durante a contração. Mitigação: forçar novo login controlado na implantação.
 
 **Reversão** (23.1).
-- **Antes da contração e enquanto nenhuma identidade tiver dois vínculos:** reversível sem perda. Basta desligar a chave e reverter o código, porque as colunas legadas ainda existem.
+- **Antes da contração e enquanto nenhuma identidade tiver dois vínculos:** reversível sem perda. Basta desligar a chave e reverter o código, porque a referência de conta em `users.account_id` ainda está disponível.
 - **Depois que alguma identidade tiver dois vínculos:** **sem reversão para o modelo anterior.** O e-mail é único em `users` e `users.account_id` só representa um tenant. Voltar exigiria descartar vínculos ou duplicar identidades, que é inaceitável.
   - Nesse ponto, a recuperação é por correção para frente.
   - Em caso de incidente grave, restaurar o backup anterior à liberação da chave, com perda de todas as alterações posteriores, mediante aprovação explícita.
@@ -1947,10 +1947,10 @@ Regras gerais:
 | E04 | `clients.document` | Sem alteração (PD-07) | |
 | E04 | Remoção de `points` | Só com PD-05 aprovada: exportação, conferência de que nenhum módulo depende, migration reversa que recria a tabela e importa a exportação | R (com a exportação) |
 | E04 | Permissões renomeadas e removidas | Mapeamento no pivô na mesma transação, auditado | R |
-| E05 | `account_memberships`, `role_availability`, `role_assignments` | Um vínculo por usuário com conta; uma atribuição de escopo tenant por `users.role_id`; todos os cargos com disponibilidade `tenant`. Reproduz exatamente o acesso atual. `users.role_id` mantido como espelho | R até a primeira atribuição fora do escopo tenant; depois RP |
+| E05 | `account_memberships`, `role_availability`, `role_assignments` | Um vínculo por usuário com conta; uma atribuição de escopo tenant por `users.role_id`; todos os cargos com disponibilidade `tenant`. Reproduz exatamente o acesso atual. `000008` remove o cargo único, o indicador de administrador e o vínculo direto com Pessoa | Expansão reversível com dados representáveis. Contração por restauração de cópia anterior |
 | E07 | `company_id` em `customers` e `suppliers`; etiquetas comerciais derivadas | A empresa única de cada tenant (equivalente ao estado atual) | R até existir pessoa com relação em duas empresas; depois a `down()` aborta (recuperação B) |
 | E08 | Índices de leitura; consolidação legada | Linhas legadas copiadas com `legacy_key`; originais mantidas até a validação | R; a remoção das tabelas legadas é B (com exportação) |
-| E09 | Liberação de vários vínculos; remoção das colunas legadas de `users` | Liberação por chave; contração só depois do período de estabilidade | R até a primeira identidade com dois vínculos; depois B. A contração é B |
+| E09 | Liberação de vários vínculos e remoção de `users.account_id` | Liberação por chave; contração só depois do período de estabilidade | R até a primeira identidade com dois vínculos; depois B. A contração é B |
 
 **Antes da E04**, executar no ambiente de produção, em modo leitura e com autorização, as contagens de `clients`, `establishments`, `points`, `users` e `directory_audit_events`. O banco local tem 1 conta, 0 estabelecimentos, 0 pontos, 2 usuários e 2 cargos.
 
@@ -2010,7 +2010,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E02 | Concluída | 20/11/2026 | 20/11/2026 | Convenções publicadas, `AGENTS.md` emendado, conferência de coerência e de texto (registros abaixo) | DA-26 a DA-30 aprovadas; I1 e I2 atribuídas à E05 |
 | E03 | Concluída | 20/11/2026 | 20/11/2026 | Registro E03 e relatório de medições | Concorrência e custos de migrations em bases maiores ficam para trabalho futuro |
 | E04 | Concluída | 20/11/2026 | 20/11/2026 | Registro de execução e homologação final da E04 na seção 26 | Implantação pendente de conferência da base oficial, backup e confirmação fiscal legada |
-| E05 | Em validação | 20/11/2026 | | Registro de execução da E05 na seção 26 | Aguardando homologação do produto |
+| E05 | Em validação | 20/11/2026 | | Execução, auditoria e revisão da E05 na seção 26 | Correções disponíveis para revisão |
 | E06 | Pendente | | | | |
 | E07 | Pendente | | | | |
 | E08 | Pendente | | | | |
@@ -2193,7 +2193,7 @@ Na conta com 50 unidades, filtrar uma empresa devolveu 10 linhas em 9 consultas,
 
 ### Registro da E05 em 20/11/2026
 
-**Estado: Em validação.** A E03 está versionada em `00f04d6`. A implementação e a homologação da E04 estão versionadas em `cad33d8` e `abd35bb`, na branch remota. A E05 parte de `abd35bb` e permanece na árvore de trabalho para homologação. E06 a E10 continuam pendentes.
+**Estado: Em validação.** A E03 está versionada em `00f04d6`. A implementação e a homologação da E04 estão versionadas em `cad33d8` e `abd35bb`, na branch remota. A E05 partiu de `abd35bb` e foi versionada em `1a8a84d` para homologação. E06 a E10 continuam pendentes.
 
 #### Implementação
 
@@ -2206,7 +2206,7 @@ Na conta com 50 unidades, filtrar uma empresa devolveu 10 linhas em 9 consultas,
 
 #### Migração e reversão
 
-A migração reproduz o cargo anterior em escopo tenant e mantém a disponibilidade inicial de toda a conta. `users.account_id`, `users.person_id` e `users.role_id` ficam preservados para a transição. O escopo de autorização usa o vínculo e as atribuições. A identificação da rota atual usa a conta legada como referência até a seleção da E09 e valida a existência do vínculo ativo. O esquema suporta mais de um vínculo por identidade.
+A primeira entrega migrou o cargo anterior em escopo tenant e preservou temporariamente as colunas de `users`. A contração posterior está registrada na seção Revisão da E05 após a auditoria. O escopo de autorização usa o vínculo e as atribuições, e o esquema suporta mais de um vínculo por identidade.
 
 O ensaio em PostgreSQL 18.7 aplicou, reverteu e reaplicou a E05 após inserir um vínculo legado sintético no esquema da E04. O vínculo, a atribuição tenant e o cargo espelhado sobreviveram à ida e volta. A reversão direta é recusada quando há vínculos ou atribuições que o modelo anterior perderia, incluindo suspensão, vários cargos ou disponibilidades restritas. Após uso contextual, preservar a exportação e seguir o procedimento de recuperação aprovado antes de reverter. Histórico de auditoria da organização e dados fiscais da E04 preservados.
 
@@ -2230,6 +2230,84 @@ O ensaio em PostgreSQL 18.7 aplicou, reverteu e reaplicou a E05 após inserir um
 - Homologar a matriz de papéis com operadores reais e a configuração de entrega de e-mail do ambiente. Convites criados antes do marcador de senha pendente preservam o fluxo de recuperação de senha. A migração não tenta inferir o estado deles a partir de hashes.
 - Antes da E07, relações comerciais legadas não identificam empresa. Para pessoa com relação ativa em conta com mais de uma empresa e sem identificação inequívoca do vínculo comercial, a edição dos dados centrais fica reservada ao escopo tenant. A tela apresenta os dados para leitura quando permitida. O cadastro sem relação e o caso de empresa única usam a cobertura do operador.
 - Antes da implantação, revisar backup e sequência de migração, sincronização de permissões e reinício dos workers. As verificações desta entrega usaram somente bancos descartáveis e dados sintéticos.
+
+### Auditoria final da E05 em 20/11/2026
+
+**Decisão na auditoria.** A E05 permaneceu **Em validação**. A revisão partiu de `1a8a84d`, com a árvore limpa e 122 arquivos alterados desde `abd35bb`. O diff cobre vínculos, identidade, cargos, atribuições, autorização e as integrações previstas. E06 a E10 seguem pendentes. A inspeção SaaS, a auditoria contextual mínima e o preparo dos vínculos para vários tenants já pertencem à E05.
+
+#### Achados identificados na auditoria
+
+| Origem | Evidência na revisão de código | Condição para fechar |
+| --- | --- | --- |
+| E05 | `SaveRoleAssignmentsAction::execute` busca o vínculo antes de verificar a autoridade para gerenciar atribuições. Uma alteração sem concessões ou revogações passa pelas duas verificações por item e ainda executa `syncLegacyRole`. A escrita fica acessível sem a permissão de atribuição e a resposta distingue vínculos existentes na conta. | Verificar a autoridade antes de consultar o vínculo, rejeitar operações vazias e preservar a validação sobre cada atribuição alterada. |
+| Presente em `abd35bb` | `EnforceAccountInspection` verifica o usuário representado. A condição de administrador SaaS do autor real só é conferida no início e em `EndAccountInspectionAction`, ao encerrar. Uma inspeção aberta pode continuar com as permissões do representado após a revogação da autoridade de seu autor. | Revalidar o autor real durante a inspeção e encerrar a sessão de inspeção assim que a autoridade SaaS for revogada. |
+
+#### Matriz executada
+
+A matriz em `tests/Feature/ContextualAccessTest.php` usa duas empresas na mesma conta e uma conta separada. Confere listagem e total, acesso por ID, filtro por empresa, formulário de criação, alteração, concessão e retirada de cargo, listagem e detalhe de auditoria. Verificações complementares cobrem concessão de autoridade superior, revogação fora do escopo, disponibilidade, efeito na requisição seguinte e manutenção do vínculo após retirada da última atribuição local.
+
+| Perfil sintético | Permitido e confirmado | Negado e confirmado |
+| --- | --- | --- |
+| Administrador integral | Listagem das duas empresas por unidade, alterações, atribuições e histórico da conta, inclusive eventos de Pessoas | Unidade de outra conta |
+| Administrador de empresa | Criar, listar e editar unidades da própria empresa, inclusive unidade nova, atribuir e revogar localmente e consultar dados técnicos da auditoria | Unidade, criação e revogação em outra empresa, eventos de conta e de Pessoas |
+| Administrador de estabelecimento | Ler e editar a própria unidade, conceder e revogar cargo nela e consultar auditoria local | Criação de unidade, edição fora do escopo, eventos compartilhados e detalhes técnicos sem permissão |
+| Gerente de unidade | Leitura e auditoria da unidade | Edição, criação e atribuição |
+| Operador em duas unidades | Listar as duas unidades e editar a unidade com o cargo de edição | Editar a unidade em que o cargo é de leitura, gerir atribuições e ler auditoria |
+| Usuário sem atribuição | Vínculo ativo preservado | Listar unidades, cadastrar unidade e acessar auditoria |
+| Usuário com vínculo suspenso | Identidade global preservada, verificada no teste de suspensão | Acesso ao tenant |
+| Administrador SaaS em inspeção de leitura | Leitura e auditoria da unidade representada, retorno ao autor real ao encerrar | Escrita, outra unidade, segredo de segundo fator e registro de passkey |
+
+A consulta de auditoria utiliza o descritor SQL antes da contagem, da paginação e das opções de filtros. O detalhe intersecta os escopos de listagem e visualização, com checagem própria para dados técnicos. A matriz distingue eventos de tenant, empresa, unidade, Pessoa compartilhada e atribuição. A suíte também confere autoria na inspeção. O histórico legado permanece preservado.
+
+#### Identidade e regressão
+
+- Mailpit em rede interna capturou convite, reenvio com token novo, recuperação de senha, confirmação assinada no novo endereço e aviso no endereço anterior. O ensaio verificou destinatários, conteúdo, assinatura, prazo, manutenção da sessão que confirmou a troca, encerramento da outra sessão e autenticação com a senha renovada. As mensagens circularam somente entre serviços descartáveis com endereços sintéticos.
+- A suíte verificou respostas neutras, rate limiting, confirmação por identidade correspondente, preservação do login ao editar Pessoas e reativação do vínculo sem reativar a identidade. O Fortify passou pelos testes do desafio e da configuração de 2FA. A passkey foi verificada na configuração das rotas e no bloqueio de cadastro em inspeção, sem cerimônia com autenticador físico.
+- SQLite em memória, 172 testes e 1.666 asserções. Prova de orçamento de consultas, 45 asserções. PHPStan, Pint no escopo, build, TypeScript, arquitetura, `permissions:sync` (81 permissões), `audit:check` (12 modelos) e `organization:check` aprovados. A revisão de ajuda e tours conferiu textos e alvos de Cargos, Usuários, Pessoas e Perfil. O navegador exercitou as quatro telas, o modal de atribuições e a confirmação de abrangência a 1440, 390 e 320 px.
+
+#### PostgreSQL, reversão e desempenho
+
+A migração foi aplicada, revertida e reaplicada em PostgreSQL 18.7, com vínculo legado sintético. A suíte confirmou equivalência de permissões, rejeição de referência entre tenants e recusa da reversão diante de atribuições contextuais. A reversão direta exige vínculo representável no modelo anterior, disponibilidade de conta e no máximo uma atribuição de tenant por vínculo, sem suspensão ou vínculo adicional. O marcador de convite pendente e a referência de autoria ao vínculo também saem no `down()`. Incluí-los na exportação de recuperação antes de uma eventual reversão. `directory_audit_events` fica preservada.
+
+FrankenPHP 1.13.6 passou por 300 requisições alternadas da regressão da E04 e 300 da E05 no mesmo worker, com os totais restritos aos perfis usados. Com dois workers, concessões duplicadas retornaram 200 e 422 e deixaram uma atribuição. Suspensões simultâneas retornaram 200 e 403 e preservaram um administrador integral ativo.
+
+| Perfil | Linhas de atribuições + permissões nas fixtures | Autorização 1 / 2 workers (ms) | HTTP de Estabelecimentos 1 / 2 workers (ms) | Memória mediana da autorização (bytes) |
+| --- | --- | --- | --- | --- |
+| 1 atribuição | 1 + 2 | 1,245 / 1,292 | 6,629 / 6,517 | 5.416 |
+| 5 atribuições | 5 + 4 | 1,301 / 1,410 | 6,420 / 6,751 | 5.416 |
+| 30 atribuições | 30 + 4 | 1,940 / 1,981 | 8,594 / 8,548 | 6.376 |
+| Administrador integral | 1 + 69 | 1,479 / 1,354 | 9,962 / 8,914 | 23.160 |
+
+Duas consultas de autorização por requisição, sem SQL duplicado nas amostras de listagem. Houve 10 consultas em Estabelecimentos na maioria das amostras e 11 em algumas. Na comparação direta com `abd35bb`, a listagem integral de 50 unidades foi de 9 para 10 consultas, com mediana HTTP de 8,395 para 8,357 ms com um worker. Empresas passou de 7 para 8 consultas na maioria das amostras, com ocorrências de 9 e mediana de 5,216 para 5,362 ms. Tempos são medianas de 10 requisições após aquecimento, em 5 empresas e 50 estabelecimentos. Os dados não representam carga simultânea sustentada nem uma base de produção.
+
+#### Condições de implantação
+
+A entrega por provedor externo continua pendente de verificação no ambiente de destino. Até a E07, a edição de dados centrais de Pessoas com relações comerciais legadas sem empresa identificável exige escopo de conta. A revisão não mudou esse comportamento. A árvore recebeu somente a matriz automatizada e este registro. Nenhum commit ou push foi realizado.
+
+### Revisão da E05 após a auditoria
+
+**Estado: Em validação.** A decisão de desenvolvimento antecipa parte da contração da E09. A migration `2026_11_20_000008_remove_single_role_from_users.php` remove `users.role_id`, `users.is_account_admin` e `users.person_id`, além dos índices e chaves correspondentes. `roles`, `permissions`, `permission_role`, `account_memberships`, `role_assignments`, `role_availability` e o histórico permanecem.
+
+O cadastro de identidade gera a pessoa e a atribuição inicial somente ao provisionar um vínculo. Na plataforma, o resumo de Contas identifica o administrador por atribuição ativa de escopo tenant e conta os vínculos da conta. Editar Pessoas mantém a identidade separada. Para um vínculo existente, as concessões e revogações são feitas por **Editar atribuições**.
+
+`users.account_id` permanece como referência explícita da conta para `AccountContext::linkedId` em requisições normais. Ela também dá o contexto dos eventos de autenticação e não concede acesso. A conta e o vínculo precisam estar ativos para operações do tenant. A E09 substitui a referência pela seleção do vínculo. Nenhum seletor multi-tenant foi acrescentado.
+
+As duas correções da auditoria foram aplicadas. A Action de atribuições recusa solicitações vazias antes de buscar o vínculo e verifica a autoridade para atribuir antes de consultar a pessoa-alvo. As verificações de nó, cargo e delegação continuam por item. A inspeção revalida a identidade SaaS, seu acesso, a verificação do e-mail e a permissão de inspeção em cada requisição. A revogação encerra a sessão de inspeção na requisição seguinte e preserva o acesso original do usuário representado.
+
+A retirada das colunas usa uma migration nova e preserva as migrations compartilhadas. Quem já aplicou a expansão pode aplicar a contração diretamente. A expansão anterior continua verificável em ambiente descartável. Reverter a contração exige restaurar uma cópia anterior, porque o antigo vínculo de Pessoa para identidades sem tenant não é reconstituível com precisão. Nenhum registro de Pessoas foi excluído.
+
+- SQLite em memória, 174 testes e 1.697 asserções, mais 45 asserções de orçamento de consultas. As requisições vazias retornaram 403 para operador sem permissão e 422 para operador autorizado, independentemente da existência do vínculo. O log SQL confirmou ausência de consulta ao vínculo-alvo ou de gravação de usuário, atribuição e auditoria. A inspeção em edição foi encerrada após perda do papel SaaS, desativação da identidade ou perda da verificação de e-mail do autor.
+- PostgreSQL 18.7 descartável aplicou a expansão a partir da E04 com dados sintéticos, reverteu a expansão e reaplicou ambas as migrations. O vínculo, a atribuição e os registros de Pessoas foram preservados. O banco final manteve apenas `account_id` entre as quatro colunas verificadas. A reversão direta da contração foi recusada. `permissions:sync`, `audit:check` e `organization:check` passaram.
+- FrankenPHP 1.13.6 com um worker processou 300 requisições alternadas da E04 e 300 da E05. A inspeção em leitura foi encerrada na requisição seguinte à revogação, e o usuário representado continuou com seu acesso original no mesmo worker. Com dois workers, a concessão duplicada retornou 200 e 422, e a suspensão concorrente retornou 200 e 403, mantendo um administrador integral. A resolução permaneceu em duas consultas nas listagens com 1, 5 e 30 atribuições.
+- PHPStan, Pint no escopo e build aprovados. Atualizados a ajuda de Pessoas e de Inspeção e o tour de Pessoas. Cargos, Usuários, Pessoas, Perfil e tours exercitados em Chromium a 1440, 390 e 320 px, com dados sintéticos.
+
+### Verificação do encerramento da inspeção na E05
+
+A verificação confirma o comportamento existente com sessões em banco. Após a perda da autoridade SaaS, a primeira requisição JSON da sessão em inspeção retorna 401, remove a identidade do guard e o estado de `AccountInspectionSession`, destrói o registro da sessão anterior no PostgreSQL e renova o ID e o token CSRF. Nas requisições seguintes, a sessão fica anônima. O teste recebeu 401 no Início da conta, na listagem de estabelecimentos, na edição dos dados da conta e ao chamar o encerramento da inspeção novamente.
+
+O teste fez dois logins independentes pelo Fortify. Depois da revogação, o cookie anterior da inspeção continuou sem acesso mesmo após a restauração da autoridade SaaS. A sessão legítima do usuário representado manteve seu ID, token CSRF, identidade e token de lembrança. Ela continuou a ler e a editar a conta. O ensaio rodou no mesmo worker FrankenPHP 1.13.6, com PostgreSQL 18.7 descartável. A suíte SQLite em memória passou com 174 testes e 1.731 asserções. A prova de orçamento de consultas, o PHPStan e o Pint dos testes também passaram. Esta verificação acrescentou cobertura e manteve o fluxo de encerramento existente.
+
+A E05 está tecnicamente pronta para aceite no ambiente de desenvolvimento validado e permanece **Em validação** até a aprovação formal de produto. A matriz foi exercitada com perfis sintéticos, pois o Prospera ainda não tem clientes reais. A entrega do provedor de e-mail externo e a sequência de backup, migração e reinício dos workers ficam para a implantação. A restrição sobre relações comerciais legadas está documentada para a E07. E06 a E10 continuam pendentes.
 
 ## 27. Contrato para módulos futuros
 

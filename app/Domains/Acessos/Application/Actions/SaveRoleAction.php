@@ -57,7 +57,7 @@ final readonly class SaveRoleAction
             }
 
             if ($lockedRole->exists) {
-                $affected = $this->availability->uncovered($lockedRole, $availability)->with('membership')->orderBy('id')->get();
+                $affected = $this->availability->uncovered($lockedRole, $availability)->orderBy('id')->get();
 
                 if ($affected->modelKeys() !== $availability->confirmedRevocations) {
                     throw ValidationException::withMessages([
@@ -72,10 +72,6 @@ final readonly class SaveRoleAction
 
                 foreach ($affected as $assignment) {
                     $assignment->delete();
-                }
-
-                foreach ($affected->pluck('membership')->unique('id') as $membership) {
-                    $membership->syncLegacyRole();
                 }
             }
 

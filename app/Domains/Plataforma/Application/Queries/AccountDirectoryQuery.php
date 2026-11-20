@@ -4,11 +4,25 @@ namespace App\Domains\Plataforma\Application\Queries;
 
 use App\Domains\Plataforma\Application\Data\AccountFiltersData;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
 final class AccountDirectoryQuery
 {
+    public function administrator(int $accountId): ?User
+    {
+        return User::where('access_enabled', true)
+            ->whereHas('memberships', fn ($membership) => $membership
+                ->where('account_id', $accountId)
+                ->where('status', 'active')
+                ->whereHas('assignments', fn ($assignment) => $assignment
+                    ->where('scope', 'tenant')
+                    ->whereHas('role', fn ($role) => $role->where('system_key', 'administrator'))))
+            ->orderBy('id')
+            ->first(['name', 'email']);
+    }
+
     public function activeAccount(int $accountId, int $userId): ?Client
     {
         return Client::whereKey($accountId)
@@ -36,6 +50,6 @@ final class AccountDirectoryQuery
                     }
                 });
             })
-            ->withCount('users')->orderBy('name')->orderBy('id')->paginate($filters->pageSize)->withQueryString();
+            ->withCount('memberships as users_count')->orderBy('name')->orderBy('id')->paginate($filters->pageSize)->withQueryString();
     }
 }

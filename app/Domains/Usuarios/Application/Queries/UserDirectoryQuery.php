@@ -15,10 +15,8 @@ final class UserDirectoryQuery
         return $this->scope($account)
             ->select([
                 'users.id',
-                'users.person_id',
                 'users.name',
                 'users.email',
-                'users.is_account_admin',
                 'users.profile_photo',
             ])
             ->orderBy('users.name')

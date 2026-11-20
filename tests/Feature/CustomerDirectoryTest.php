@@ -22,7 +22,7 @@ class CustomerDirectoryTest extends TestCase
     {
         $account = Client::create(['name' => 'Conta de clientes', 'active' => true]);
 
-        return User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        return User::factory()->asAccountAdministrator($account->id)->create();
     }
 
     /** @return array<string,mixed> */
@@ -101,7 +101,7 @@ class CustomerDirectoryTest extends TestCase
         $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Editor de pessoas']);
         $base = ['account.people.create', 'account.people.update', 'account.people.view', 'account.people.list'];
         $role->permissions()->sync(Permission::whereIn('slug', $base)->pluck('id'));
-        $editor = User::factory()->create(['account_id' => $owner->account_id, 'role_id' => $role->id]);
+        $editor = User::factory()->forAccount($owner->account_id, $role)->create();
         $count = AuditRecord::count();
         $this->actingAs($editor)->postJson('/conta/pessoas', $payload)->assertForbidden();
         $this->assertDatabaseMissing('people', ['name' => $payload['name']]);
@@ -157,7 +157,7 @@ class CustomerDirectoryTest extends TestCase
             'name' => 'Cliente',
             'color' => '#123456',
         ]);
-        $newOwner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $newOwner = User::factory()->asAccountAdministrator($account->id)->create();
         $special = Tag::customerTag($account->id);
         $this->assertNotSame($custom->id, $special->id);
         $this->assertNull($custom->fresh()->system_key);

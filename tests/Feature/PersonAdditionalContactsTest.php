@@ -19,7 +19,7 @@ class PersonAdditionalContactsTest extends TestCase
     {
         $account = Client::create(['name' => 'Conta de contatos', 'active' => true]);
 
-        return User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        return User::factory()->asAccountAdministrator($account->id)->create();
     }
 
     public function test_additional_contacts_are_normalized_exposed_and_audited(): void
@@ -56,8 +56,8 @@ class PersonAdditionalContactsTest extends TestCase
     {
         $owner = $this->owner();
         $this->actingAs($owner);
-        $path = '/conta/pessoas/'.$owner->person_id;
-        $tags = $owner->person->tags->pluck('id')->all();
+        $path = '/conta/pessoas/'.$this->membership($owner)->person_id;
+        $tags = $this->membership($owner)->person()->sole()->tags->pluck('id')->all();
         $base = ['name' => $owner->name, 'email' => $owner->email, 'phone' => '7133334444', 'tag_ids' => $tags];
         $payload = [
             ...$base,
@@ -69,9 +69,9 @@ class PersonAdditionalContactsTest extends TestCase
         $this->patchJson($path, $payload)->assertOk();
         $this->assertSame($count, AuditRecord::count());
         $this->patchJson($path, $base)->assertOk();
-        $this->assertSame(['adicional@example.test'], $owner->person()->firstOrFail()->additional_emails);
+        $this->assertSame(['adicional@example.test'], $this->membership($owner)->person()->firstOrFail()->additional_emails);
         $this->patchJson($path, [...$base, 'additional_phones' => [''], 'additional_emails' => ['']])->assertOk();
-        $person = $owner->person()->firstOrFail();
+        $person = $this->membership($owner)->person()->firstOrFail();
         $this->assertSame([], $person->additional_phones);
         $this->assertSame([], $person->additional_emails);
         $this->assertSame('7133334444', $person->phone);
@@ -85,11 +85,11 @@ class PersonAdditionalContactsTest extends TestCase
         $other = $this->owner();
         $this->actingAs($owner);
         $count = AuditRecord::count();
-        $path = '/conta/pessoas/'.$owner->person_id;
+        $path = '/conta/pessoas/'.$this->membership($owner)->person_id;
         $base = [
             'name' => 'Nome não deve mudar',
             'email' => $owner->email,
-            'tag_ids' => $owner->person->tags->pluck('id')->all(),
+            'tag_ids' => $this->membership($owner)->person()->sole()->tags->pluck('id')->all(),
         ];
         $this
             ->patchJson($path, [...$base, 'additional_emails' => ['inválido']])
@@ -104,11 +104,11 @@ class PersonAdditionalContactsTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonValidationErrors('additional_emails');
         $this
-            ->patchJson('/conta/pessoas/'.$other->person_id, [...$base, 'additional_phones' => ['71999991234']])
+            ->patchJson('/conta/pessoas/'.$this->membership($other)->person_id, [...$base, 'additional_phones' => ['71999991234']])
             ->assertNotFound();
         $this->assertSame($count, AuditRecord::count());
         $this->assertSame($owner->name, $owner->fresh()->name);
-        $this->assertSame([], $owner->person()->firstOrFail()->additional_emails);
+        $this->assertSame([], $this->membership($owner)->person()->firstOrFail()->additional_emails);
     }
 
     public function test_inspection_keeps_real_actor_for_additional_contacts_and_read_only_blocks_changes(): void
@@ -122,16 +122,16 @@ class PersonAdditionalContactsTest extends TestCase
         $base = [
             'name' => $owner->name,
             'email' => $owner->email,
-            'tag_ids' => $owner->person->tags->pluck('id')->all(),
+            'tag_ids' => $this->membership($owner)->person()->sole()->tags->pluck('id')->all(),
         ];
         $this
             ->patchJson(
-                '/conta/pessoas/'.$owner->person_id,
+                '/conta/pessoas/'.$this->membership($owner)->person_id,
                 [...$base, 'additional_emails' => ['inspecao@example.test']],
             )
             ->assertOk();
         $event = AuditRecord::where('entity_type', 'person')
-            ->where('entity_id', $owner->person_id)
+            ->where('entity_id', $this->membership($owner)->person_id)
             ->where('event', 'updated')
             ->latest('id')
             ->firstOrFail();
@@ -144,8 +144,8 @@ class PersonAdditionalContactsTest extends TestCase
             ->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
             ->assertOk();
         $count = AuditRecord::count();
-        $this->patchJson('/conta/pessoas/'.$owner->person_id, [...$base, 'additional_emails' => []])->assertForbidden();
-        $this->assertSame(['inspecao@example.test'], $owner->person()->firstOrFail()->additional_emails);
+        $this->patchJson('/conta/pessoas/'.$this->membership($owner)->person_id, [...$base, 'additional_emails' => []])->assertForbidden();
+        $this->assertSame(['inspecao@example.test'], $this->membership($owner)->person()->firstOrFail()->additional_emails);
         $this->assertSame($count, AuditRecord::count());
     }
 
@@ -168,14 +168,14 @@ class PersonAdditionalContactsTest extends TestCase
         $owner = $this->owner();
         $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Editor de contatos']);
         $role->permissions()->sync(Permission::where('slug', 'account.people.update')->pluck('id'));
-        $editor = User::factory()->create(['account_id' => $owner->account_id, 'role_id' => $role->id]);
-        $this->actingAs($editor)->patchJson('/conta/pessoas/'.$owner->person_id, [
+        $editor = User::factory()->forAccount($owner->account_id, $role)->create();
+        $this->actingAs($editor)->patchJson('/conta/pessoas/'.$this->membership($owner)->person_id, [
             'name' => $owner->name,
             'email' => $owner->email,
-            'tag_ids' => $owner->person->tags->pluck('id')->all(),
+            'tag_ids' => $this->membership($owner)->person()->sole()->tags->pluck('id')->all(),
             'additional_emails' => ['contato@example.test'],
         ])->assertOk();
         $this->assertSame($owner->email, $owner->fresh()->email);
-        $this->assertSame(['contato@example.test'], $owner->person()->firstOrFail()->additional_emails);
+        $this->assertSame(['contato@example.test'], $this->membership($owner)->person()->firstOrFail()->additional_emails);
     }
 }

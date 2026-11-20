@@ -107,7 +107,7 @@ final class OrganizationMigrationTest extends TestCase
     public function test_points_are_removed_only_when_empty_and_the_reverse_restores_the_initial_access(): void
     {
         $account = Client::create(['name' => 'Conta', 'active' => true]);
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
         $migration = $this->migration('2026_11_20_000002_remove_points');
 
         // A reversão depende da tabela antiga de estabelecimentos, que a estrutura organizacional substitui.

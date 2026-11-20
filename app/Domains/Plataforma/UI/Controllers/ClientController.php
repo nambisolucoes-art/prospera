@@ -57,7 +57,7 @@ final class ClientController
         return to_route('saas.accounts.edit', $client);
     }
 
-    public function preview(Client $client): JsonResponse
+    public function preview(Client $client, AccountDirectoryQuery $directory): JsonResponse
     {
         $details = Arr::only($client->details ?? [], [
             'trade_name',
@@ -69,15 +69,10 @@ final class ClientController
             'additional_emails',
         ]);
 
-        $administrator = $client->users()
-            ->where('is_account_admin', true)
-            ->orderBy('id')
-            ->first(['name', 'email']);
-
         return response()->json([
             ...$client->only(['id', 'name', 'document', 'person_type', 'active', 'plan', 'email']),
             'details' => $details,
-            'administrator' => $administrator,
+            'administrator' => $directory->administrator($client->id),
         ]);
     }
 

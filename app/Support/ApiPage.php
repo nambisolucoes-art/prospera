@@ -28,7 +28,7 @@ final class ApiPage
                 'permissions' => $user === null ? [] : app(EffectivePermissions::class)->visibleSlugsFor($user),
                 'inspection_mode' => AccountInspectionSession::current($request->session())?->mode->value,
                 'user' => $user ? [
-                    ...$user->only(['id', 'name', 'email', 'email_verified_at', 'is_account_admin', 'is_saas_admin']),
+                    ...$user->only(['id', 'name', 'email', 'email_verified_at', 'is_saas_admin']),
                     'photo_url' => $user->profile_photo
                         ? route('profile.photo.show', ['version' => $user->profile_photo], absolute: false)
                         : null,

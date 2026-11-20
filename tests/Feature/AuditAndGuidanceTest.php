@@ -23,7 +23,7 @@ class AuditAndGuidanceTest extends TestCase
     {
         $account = Client::create(['name' => 'Conta de auditoria', 'active' => true]);
 
-        return User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        return User::factory()->asAccountAdministrator($account->id)->create();
     }
 
     public function test_writes_record_actor_account_and_real_before_after_without_noops(): void
@@ -104,7 +104,7 @@ class AuditAndGuidanceTest extends TestCase
         $role
             ->permissions()
             ->sync(Permission::whereIn('slug', ['account.audit.list', 'account.audit.view'])->pluck('id'));
-        $reader = User::factory()->create(['account_id' => $owner->account_id, 'role_id' => $role->id]);
+        $reader = User::factory()->forAccount($owner->account_id, $role)->create();
         $local = AuditRecord::where('entity_type', 'account')->where('entity_id', $owner->account_id)->sole();
         $this
             ->actingAs($reader)
@@ -249,7 +249,7 @@ class AuditAndGuidanceTest extends TestCase
         $this->getJson('/ajuda/pessoas')->assertNotFound();
         $role = Role::create(['name' => 'Sem pessoas', 'account_id' => $owner->account_id]);
         $role->permissions()->sync(Permission::whereIn('slug', ['self.help.list', 'self.help.view'])->pluck('id'));
-        $reader = User::factory()->create(['account_id' => $owner->account_id, 'role_id' => $role->id]);
+        $reader = User::factory()->forAccount($owner->account_id, $role)->create();
         $this->actingAs($reader)->getJson('/ajuda')->assertOk()->assertJsonMissing(['slug' => 'pessoas']);
         $this->getJson('/ajuda/pessoas')->assertNotFound();
         $this->getJson('/ajuda/central-de-ajuda')->assertOk();

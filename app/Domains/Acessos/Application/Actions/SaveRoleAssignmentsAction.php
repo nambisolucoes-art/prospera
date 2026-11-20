@@ -13,7 +13,6 @@ use App\Domains\Acessos\Domain\Models\RoleAssignment;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Domain\Models\Client;
-use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -53,9 +52,18 @@ final readonly class SaveRoleAssignmentsAction
     {
         abort_unless($this->accounts->requireId() === $accountId, 403);
 
-        AuditLog::transaction(function () use ($accountId, $membershipId, $data): void {
+        $operator = auth()->user();
+
+        if ($data->grants === [] && $data->revocations === []) {
+            abort_if($this->permissions->nodesFor($operator, 'account.users.assign-role')->isEmpty(), 403);
+
+            throw ValidationException::withMessages(['grants' => 'Informe uma concessão ou revogação de cargo.']);
+        }
+
+        AuditLog::transaction(function () use ($accountId, $membershipId, $data, $operator): void {
             Client::whereKey($accountId)->lockForUpdate()->firstOrFail();
             $this->permissions->forget();
+            abort_if($this->permissions->nodesFor($operator, 'account.users.assign-role')->isEmpty(), 403);
 
             $membership = AccountMembership::where('account_id', $accountId)
                 ->lockForUpdate()
@@ -103,34 +111,8 @@ final readonly class SaveRoleAssignmentsAction
 
                 abort_unless($assignment->delete() === true, 409);
             }
-
-            $membership->syncLegacyRole();
         });
 
         $this->permissions->forget();
-    }
-
-    public function replaceTenant(User $user, int $roleId): void
-    {
-        $accountId = $this->accounts->requireId();
-        AuditLog::transaction(function () use ($accountId, $user, $roleId): void {
-            Client::whereKey($accountId)->lockForUpdate()->firstOrFail();
-            $membership = AccountMembership::where('account_id', $accountId)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-
-            $tenantAssignments = $membership->assignments()->where('scope', 'tenant')->get();
-
-            if ($tenantAssignments->contains('role_id', $roleId)) {
-                return;
-            }
-
-            $data = new SaveRoleAssignmentsData(
-                grants: [['role_id' => $roleId, 'scope' => 'tenant']],
-                revocations: array_values($tenantAssignments->map(fn (RoleAssignment $assignment): int => $assignment->id)->all()),
-            );
-
-            $this->execute($accountId, $membership->id, $data);
-        });
     }
 }

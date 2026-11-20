@@ -16,7 +16,7 @@ Artigo: [Pessoas e acesso](../ajuda/pessoas.md). Integração do executor dispon
 | --- | --- | --- |
 | person-identity | person-identity | Informe nome, e-mail e telefone. |
 | person-tags | person-tags | Abra o seletor, busque e escolha múltiplas etiquetas. Selecionar Usuário exibe a seção de acesso. Retirar Usuário e salvar revoga o acesso com a permissão específica. |
-| person-access | person-access | Escolha um cargo cadastrado na conta e a forma de acesso. Em usuários existentes, a troca de cargo depende da permissão de atribuir cargo. Este passo só aparece quando Usuário está selecionado. |
+| person-access | person-access | Escolha um cargo cadastrado na conta e a forma de acesso. Para um vínculo existente, use **Editar atribuições** para gerir os cargos por escopo. Este passo aparece quando **Usuário** está selecionado. |
 
 Finalize em Salvar. Preserve dados digitados ao demonstrar o seletor. Pule a seção de acesso quando ausente e as ações indisponíveis na inspeção somente leitura. Ao fechar o modal ou o tour, retorne o foco ao controle de origem.
 

@@ -20,7 +20,7 @@ class AccessControlTest extends TestCase
     {
         $account = Client::create(['name' => 'Conta', 'active' => true]);
 
-        return User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        return User::factory()->asAccountAdministrator($account->id)->create();
     }
 
     private function operator(User $owner, array $slugs): User
@@ -28,7 +28,7 @@ class AccessControlTest extends TestCase
         $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Operador']);
         $role->permissions()->sync(Permission::whereIn('slug', $slugs)->pluck('id'));
 
-        return User::factory()->create(['account_id' => $owner->account_id, 'role_id' => $role->id]);
+        return User::factory()->forAccount($owner->account_id, $role)->create();
     }
 
     public function test_catalog_is_discovered_idempotently_and_preserves_role_assignments(): void
@@ -69,20 +69,18 @@ class AccessControlTest extends TestCase
         $this->assertDatabaseHas('permissions', ['id' => $custom->id]);
     }
 
-    public function test_list_view_create_and_update_are_independent_and_legacy_admin_flag_does_not_bypass(): void
+    public function test_list_view_create_and_update_are_independent(): void
     {
         $owner = $this->owner();
         $user = $this->operator($owner, ['account.people.list']);
-        $user->is_account_admin = true;
-        $user->save();
         $this->actingAs($user);
         $this->getJson('/conta/pessoas')->assertOk()->assertJsonPath('auth.permissions.0', 'account.people.list');
-        $this->getJson('/conta/pessoas/'.$owner->person_id.'/visualizar')->assertForbidden();
-        $this->getJson('/conta/pessoas/'.$owner->person_id.'/editar')->assertForbidden();
+        $this->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/visualizar')->assertForbidden();
+        $this->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/editar')->assertForbidden();
         $this->postJson('/conta/pessoas', ['name' => 'Bloqueado'])->assertForbidden();
         $this->getJson('/conta/cargos')->assertForbidden();
         $this->getJson('/saas/contas')->assertForbidden();
-        $user->role->permissions()->detach();
+        $this->membership($user)->assignments()->sole()->role()->firstOrFail()->permissions()->detach();
         $this->getJson('/conta/pessoas')->assertForbidden();
     }
 
@@ -95,8 +93,8 @@ class AccessControlTest extends TestCase
         $power = Permission::where('slug', 'account.users.assign-role')->sole();
         $this->postJson('/conta/cargos', ['name' => 'Escalada', 'permission_ids' => [$power->id]])->assertForbidden();
         $this->assertDatabaseMissing('roles', ['name' => 'Escalada']);
-        $this->patchJson('/conta/cargos/'.$other->role_id, ['name' => 'Externo'])->assertNotFound();
-        $this->getJson('/conta/cargos/'.$other->role_id.'/visualizar')->assertNotFound();
+        $this->patchJson('/conta/cargos/'.$this->membership($other)->assignments()->sole()->role_id, ['name' => 'Externo'])->assertNotFound();
+        $this->getJson('/conta/cargos/'.$this->membership($other)->assignments()->sole()->role_id.'/visualizar')->assertNotFound();
         $this->patchJson('/conta/permissoes/'.$power->id, [
             'name' => 'Mudou',
             'module' => 'users',
@@ -125,14 +123,14 @@ class AccessControlTest extends TestCase
             'name' => 'Pessoa com acesso',
             'email' => 'pessoa@example.test',
             'mode' => 'invite',
-            'role_id' => $owner->role_id,
+            'role_id' => $this->membership($owner)->assignments()->sole()->role_id,
             'tag_ids' => [Tag::userTag($owner->account_id)->id],
         ];
         $this->postJson('/conta/pessoas', $payload)->assertForbidden();
         $this->assertDatabaseMissing('people', ['name' => 'Pessoa com acesso']);
         $this
             ->actingAs($owner)
-            ->postJson('/conta/pessoas', [...$payload, 'role_id' => $other->role_id])
+            ->postJson('/conta/pessoas', [...$payload, 'role_id' => $this->membership($other)->assignments()->sole()->role_id])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('role_id');
         $this
@@ -150,7 +148,7 @@ class AccessControlTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect();
         $created = User::where('email', 'pessoa@example.test')->sole();
-        $this->assertSame($role->id, $created->role_id);
+        $this->assertSame($role->id, $this->membership($created)->assignments()->sole()->role_id);
         $this->actingAs($created)->getJson('/conta/pessoas')->assertOk();
         $this->getJson('/conta/etiquetas')->assertForbidden();
     }
@@ -160,33 +158,28 @@ class AccessControlTest extends TestCase
         $owner = $this->owner();
         $this->actingAs($owner);
         $member = Role::where('account_id', $owner->account_id)->where('system_key', 'member')->sole();
-        $payload = [
-            'name' => $owner->name,
-            'email' => $owner->email,
-            'tag_ids' => [Tag::userTag($owner->account_id)->id],
-            'role_id' => $member->id,
-        ];
-        $this
-            ->patchJson('/conta/pessoas/'.$owner->person_id, $payload)
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors('role_id');
-        $this->assertSame($owner->role_id, $owner->fresh()->role_id);
-        $second = User::factory()->create(['account_id' => $owner->account_id, 'is_account_admin' => true]);
-        $this
-            ->patch('/conta/pessoas/'.$second->person_id, [
-                ...$payload,
-                'name' => $second->name,
-                'email' => $second->email,
-            ])
-            ->assertSessionHasNoErrors()
-            ->assertRedirect();
+        $membership = $this->membership($owner);
+        $original = $membership->assignments()->sole();
+        $grant = ['role_id' => $member->id, 'scope' => 'tenant'];
+        $this->patchJson('/conta/usuarios/'.$membership->id.'/atribuicoes', [
+            'grants' => [$grant],
+            'revocations' => [$original->id],
+        ])->assertUnprocessable()->assertJsonValidationErrors('role_id');
+        $this->assertSame($original->id, $membership->assignments()->sole()->id);
+
+        $second = User::factory()->asAccountAdministrator($owner->account_id)->create();
+        $secondMembership = $this->membership($second);
+        $this->patchJson('/conta/usuarios/'.$secondMembership->id.'/atribuicoes', [
+            'grants' => [$grant],
+            'revocations' => [$secondMembership->assignments()->sole()->id],
+        ])->assertOk();
         $this->assertDatabaseHas('audit_records', [
             'entity_type' => 'role-assignment',
             'event' => 'created',
             'actor_id' => $owner->id,
             'account_id' => $owner->account_id,
         ]);
-        $this->assertSame($member->id, $second->fresh()->role_id);
+        $this->assertSame($member->id, $secondMembership->assignments()->sole()->role_id);
     }
 
     public function test_read_only_inspection_cannot_change_roles_or_permissions(): void
@@ -228,10 +221,10 @@ class AccessControlTest extends TestCase
         ]);
         $this
             ->actingAs($operator)
-            ->getJson('/conta/pessoas/'.$owner->person_id.'/editar')
+            ->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/editar')
             ->assertOk()
             ->assertJsonPath('person.membership.assignments.0.scope', 'tenant');
-        $this->getJson('/conta/pessoas/'.$owner->person_id.'/visualizar')->assertOk()->assertJsonPath('user', null);
+        $this->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/visualizar')->assertOk()->assertJsonPath('user', null);
     }
 
     public function test_permissions_are_selected_in_roles_and_have_no_management_endpoints(): void
@@ -286,7 +279,7 @@ class AccessControlTest extends TestCase
             'is_system' => false,
             'account_id' => $owner->account_id,
         ]);
-        $owner->role->permissions()->attach($obsolete->id);
+        $this->membership($owner)->assignments()->sole()->role()->sole()->permissions()->attach($obsolete->id);
         $migration = require database_path('migrations/2026_11_18_000003_retire_permission_management.php');
         $migration->up();
         $this->assertDatabaseMissing('permissions', ['id' => $obsolete->id]);

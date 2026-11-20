@@ -38,11 +38,9 @@ $root = 11222000;
 foreach ($scenarios as $key => $units) {
     $account = Client::create(['name' => 'Cenário '.$key, 'active' => true]);
 
-    User::factory()->create([
+    User::factory()->asAccountAdministrator($account->id)->create([
         'name' => 'Administrador '.$key,
         'email' => 'owner-'.strtolower($key).'@e04.test',
-        'account_id' => $account->id,
-        'is_account_admin' => true,
     ]);
 
     foreach ($units as $companyIndex => $total) {

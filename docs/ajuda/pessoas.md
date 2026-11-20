@@ -17,11 +17,11 @@ Abra **Cadastrar pessoa**. Informe nome, e-mail opcional e telefone opcional. As
 
 Selecione **Usuário** no campo Etiquetas para exibir **Acesso de usuário**. Informe e-mail, cargo cadastrado na conta e a forma de acesso: convite por e-mail ou senha inicial com confirmação. Retirar a etiqueta antes da criação oculta a seção e cancela a criação do acesso. O cadastro é gravado junto com o acesso. A confirmação é a mesma para uma solicitação com endereço já usado. Nesse caso, o vínculo novo fica indisponível.
 
-Para conceder acesso a uma pessoa existente, use **Editar cadastro** e selecione **Usuário**. Não existe item Usuários no menu da conta.
+Para conceder acesso a uma pessoa existente, use **Editar cadastro** e selecione **Usuário**.
 
 ## Editar uma pessoa com acesso
 
-Para revogar o acesso, retire a etiqueta Usuário e salve. É necessária a permissão Revogar acesso de Usuários. O cadastro da pessoa e o histórico são preservados. Sessões existentes são bloqueadas na próxima requisição. O último administrador com acesso não pode ser revogado. Selecionar novamente a etiqueta reativa o mesmo usuário, com as permissões de cadastrar usuário e atribuir cargo. O formulário mostra o cargo atual e permite alterá-lo com a permissão específica de atribuir cargo. Consulte [Cargos e permissões](cargos-permissoes.md). Nome e e-mail são sincronizados com o usuário. Mudanças no e-mail exigem nova verificação.
+Para suspender o vínculo com a conta, retire a etiqueta **Usuário** e salve. É necessária a permissão **Revogar acesso**. O cadastro de Pessoas e o histórico são preservados, e o acesso à conta é bloqueado na próxima requisição. O último administrador integral ativo não pode ser suspenso. Para reativar o vínculo, selecione novamente a etiqueta com a permissão **Reativar acesso**. A situação da identidade global fica independente.
 
 Na inspeção somente leitura, a visualização continua disponível e as ações de gravação ficam indisponíveis.
 
@@ -48,4 +48,7 @@ O telefone e o e-mail principais permanecem nos seus campos. E-mails adicionais 
 ## Papel de cliente
 
 Selecione a etiqueta especial Cliente para identificar um cliente da conta. Os dados já informados pertencem à pessoa e são compartilhados com Fornecedor e outros papéis. Retirar Cliente e salvar inativa somente esse vínculo; selecionar novamente reativa o mesmo registro, conforme as permissões específicas de Clientes. O filtro Tipo de cadastro oferece Clientes aos usuários autorizados. Consulte [Clientes](clientes.md).
-\n## Editar atribuições\n\nNo cadastro de uma pessoa com vínculo, use **Editar atribuições** para gerir os cargos nos locais que você administra. **E-mail de acesso** é somente leitura. Alterações no nome, no e-mail de contato e nos outros dados de Pessoas ficam no cadastro da conta.\n
+
+## Editar atribuições
+
+No cadastro de uma pessoa com vínculo, use **Editar atribuições** para gerir os cargos nos locais que você administra. **E-mail de acesso** é somente leitura. Alterações no nome, no e-mail de contato e nos outros dados de Pessoas ficam no cadastro da conta. Consulte [Cargos e permissões](cargos-permissoes.md).

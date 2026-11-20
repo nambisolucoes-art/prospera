@@ -65,13 +65,12 @@ class ProfilePhotoTest extends TestCase
         $disk = Storage::fake('local');
         $account = Client::query()->create(['name' => 'Conta A', 'active' => true]);
         $otherAccount = Client::query()->create(['name' => 'Conta B', 'active' => true]);
-        $owner = User::factory()->create(['name' => 'Zoe', 'account_id' => $account->id, 'is_account_admin' => true]);
-        $member = User::factory()->create([
+        $owner = User::factory()->asAccountAdministrator($account->id)->create(['name' => 'Zoe']);
+        $member = User::factory()->forAccount($account->id)->create([
             'name' => 'Aline',
-            'account_id' => $account->id,
             'profile_photo' => (string) Str::uuid(),
         ]);
-        $other = User::factory()->create(['account_id' => $otherAccount->id, 'profile_photo' => (string) Str::uuid()]);
+        $other = User::factory()->forAccount($otherAccount->id)->create(['profile_photo' => (string) Str::uuid()]);
         $platform = User::factory()->create([
             'name' => 'Aline',
             'is_saas_admin' => true,

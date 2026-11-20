@@ -7,7 +7,7 @@ import ProfileAvatar from '@/components/ProfileAvatar/ProfileAvatar';
 import '@/components/BusinessForm/BusinessForm.css';
 import './AccountInspection.css';
 
-type InspectionUser = { role_name: string; id: number; name: string; email: string; is_account_admin: boolean; photo_url: string | null };
+type InspectionUser = { role_name: string; id: number; name: string; email: string; photo_url: string | null };
 
 const modes = [
   { value: 'read-only', label: 'Somente leitura' },

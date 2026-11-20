@@ -38,9 +38,9 @@ if (($argv[1] ?? '') === 'check-audit') {
 
 $first = Client::create(['name' => 'Conta A', 'active' => true]);
 $second = Client::create(['name' => 'Conta B', 'active' => true]);
-$owner = User::factory()->create(['account_id' => $first->id, 'is_account_admin' => true]);
+$owner = User::factory()->asAccountAdministrator($first->id)->create();
 $member = Role::where('account_id', $first->id)->where('system_key', 'member')->sole();
-User::factory()->count(39)->create(['account_id' => $first->id, 'role_id' => $member->id]);
+User::factory()->count(39)->forAccount($first->id, $member)->create();
 foreach ([10, 40] as $size) {
     $role = Role::create(['account_id' => $second->id, 'name' => 'Perfil '.$size]);
     $ids = Permission::whereIn('scope', ['self', 'account'])
@@ -49,7 +49,7 @@ foreach ([10, 40] as $size) {
         ->limit($size)
         ->pluck('id');
     $role->permissions()->sync($ids);
-    User::factory()->create(['account_id' => $second->id, 'role_id' => $role->id]);
+    User::factory()->forAccount($second->id, $role)->create();
 }
 User::factory()->create(['is_saas_admin' => true]);
 DB::statement('ANALYZE');

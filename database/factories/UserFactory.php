@@ -2,6 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
+use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -46,6 +50,22 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    public function forAccount(int $accountId, ?Role $role = null): static
+    {
+        return $this->state(['account_id' => $accountId])->afterCreating(function (User $user) use ($accountId, $role): void {
+            $role ??= app(DefaultRolesAction::class)->execute($accountId)[1];
+
+            app(RegisterAccountMembershipAction::class)->execute($user, $role, AccessNode::tenant($accountId));
+        });
+    }
+
+    public function asAccountAdministrator(int $accountId): static
+    {
+        [$administrator] = app(DefaultRolesAction::class)->execute($accountId);
+
+        return $this->forAccount($accountId, $administrator);
     }
 
     /* @chisel-2fa */

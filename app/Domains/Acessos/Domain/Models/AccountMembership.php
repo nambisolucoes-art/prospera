@@ -9,7 +9,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -91,23 +90,5 @@ final class AccountMembership extends Model implements Auditable
 
         return (clone $administrators)->where('m.id', $this->id)->exists()
             && ! $administrators->where('m.id', '!=', $this->id)->exists();
-    }
-
-    public function syncLegacyRole(): void
-    {
-        $primaryRole = $this->assignments()
-            ->join('roles', 'roles.id', '=', 'role_assignments.role_id')
-            ->where('scope', 'tenant')
-            ->orderByRaw("case when roles.system_key = 'administrator' then 0 else 1 end")
-            ->orderBy('role_assignments.id')
-            ->first(['roles.id as role_id', 'roles.system_key']);
-
-        DB::table('users')
-            ->where('id', $this->user_id)
-            ->where('account_id', $this->account_id)
-            ->update([
-                'role_id' => $primaryRole?->role_id,
-                'is_account_admin' => $primaryRole?->getAttribute('system_key') === 'administrator',
-            ]);
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Domains\Pessoas\Application\Actions;
 
-use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
@@ -22,7 +21,6 @@ final readonly class SavePersonAction
 {
     public function __construct(
         private SavePersonAccessAction $saveAccess,
-        private SaveRoleAssignmentsAction $assignRole,
         private CreateUserAction $createUser,
         private SaveSupplierAction $saveSupplier,
         private SaveCustomerAction $saveCustomer,
@@ -80,20 +78,6 @@ final readonly class SavePersonAction
 
             if ($user !== null) {
                 $this->saveAccess->execute($account, $lockedPerson, $user, $data);
-            }
-
-            if (
-                $data->access !== null
-                || ($user !== null && isset($data->values['role_id']))
-            ) {
-                Gate::authorize('account.users.assign-role');
-
-                $roleId = $data->access->roleId ?? (int) $data->values['role_id'];
-                $this->assignRole->assertAssignable(accountId: $account->id, roleId: $roleId);
-
-                if ($user !== null) {
-                    $this->assignRole->replaceTenant($user, $roleId);
-                }
             }
 
             if (

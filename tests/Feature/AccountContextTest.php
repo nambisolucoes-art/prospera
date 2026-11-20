@@ -22,7 +22,7 @@ final class AccountContextTest extends TestCase
         $account = Client::create(['name' => 'Conta A', 'active' => true]);
         $role = Role::create(['account_id' => $account->id, 'name' => 'Atendimento']);
         $role->permissions()->sync(Permission::whereIn('slug', ['self.help.list', 'account.people.list'])->pluck('id'));
-        $member = User::factory()->create(['account_id' => $account->id, 'role_id' => $role->id]);
+        $member = User::factory()->forAccount($account->id, $role)->create();
 
         $this->actingAs($member);
         DB::enableQueryLog();
@@ -42,10 +42,10 @@ final class AccountContextTest extends TestCase
         $this->getJson('/conta/pessoas')->assertForbidden();
         $this->getJson('/ajuda')->assertOk()->assertJsonCount(1, 'auth.permissions');
 
-        $owner = User::factory()->create(['account_id' => $account->id, 'is_account_admin' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
         $membership = AccountMembership::where('user_id', $member->id)->sole();
         $this->actingAs($owner)->patchJson('/conta/usuarios/'.$membership->id.'/atribuicoes', [
-            'grants' => [['role_id' => $owner->role_id, 'scope' => 'tenant']],
+            'grants' => [['role_id' => $this->membership($owner)->assignments()->sole()->role_id, 'scope' => 'tenant']],
         ])->assertOk();
         $this->actingAs($member->fresh())->getJson('/conta/cargos')->assertOk();
 
@@ -63,7 +63,7 @@ final class AccountContextTest extends TestCase
         $permissions = Permission::whereIn('slug', ['account.roles.list', 'account.roles.update'])
             ->pluck('id', 'slug');
         $role->permissions()->sync($permissions->values());
-        $operator = User::factory()->create(['account_id' => $account->id, 'role_id' => $role->id]);
+        $operator = User::factory()->forAccount($account->id, $role)->create();
 
         $this->actingAs($operator)->patchJson('/conta/cargos/'.$role->id, [
             'name' => $role->name,
@@ -76,11 +76,11 @@ final class AccountContextTest extends TestCase
     {
         $first = Client::create(['name' => 'Conta A', 'active' => true]);
         $second = Client::create(['name' => 'Conta B', 'active' => true]);
-        $owner = User::factory()->create(['account_id' => $first->id, 'is_account_admin' => true]);
-        $member = User::factory()->create(['account_id' => $second->id]);
+        $owner = User::factory()->asAccountAdministrator($first->id)->create();
+        $member = User::factory()->forAccount($second->id)->create();
         $platform = User::factory()->create(['is_saas_admin' => true]);
         $personal = User::factory()->create();
-        $invalid = User::factory()->create(['account_id' => $second->id, 'role_id' => $owner->role_id]);
+        $withoutMembership = User::factory()->create(['account_id' => $second->id]);
         $context = app(AccountContext::class);
         $permissions = app(EffectivePermissions::class);
 
@@ -90,7 +90,7 @@ final class AccountContextTest extends TestCase
         self::assertTrue($owner->can('account.people.list'));
         self::assertFalse($owner->can('platform.accounts.list'));
         self::assertFalse($member->can('account.people.list'));
-        self::assertFalse($invalid->can('account.people.list'));
+        self::assertFalse($withoutMembership->can('account.people.list'));
         self::assertTrue($platform->can('platform.accounts.list'));
         self::assertFalse($platform->can('account.people.list'));
         self::assertTrue($personal->can('self.help.list'));
