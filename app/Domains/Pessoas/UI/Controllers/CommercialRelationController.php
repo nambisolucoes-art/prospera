@@ -93,7 +93,10 @@ final class CommercialRelationController
                 'person_id' => (int) $row->person_id,
                 'name' => $row->name,
                 'email' => $row->email,
-                'tags' => $pageTags->get((int) $row->id, collect()),
+                'tags' => [
+                    $this->roleTag($commercialRole),
+                    ...$pageTags->get((int) $row->id, collect())->all(),
+                ],
                 'document' => $this->documentLabel($row->person_type, $row->document),
                 'active' => (bool) $row->active,
                 'company' => [
@@ -103,6 +106,8 @@ final class CommercialRelationController
                     'active' => (bool) $row->company_active,
                 ],
                 'can_activate' => $can('activate', (int) $row->company_id),
+                'can_deactivate' => $can('deactivate', (int) $row->company_id),
+                'can_view' => $can('view', (int) $row->company_id),
                 'can_edit' => $can('update', (int) $row->company_id),
             ]),
             'companies' => array_values(array_map(fn (NavigableCompany $company) => [
@@ -115,6 +120,43 @@ final class CommercialRelationController
             'restrictedCompanies' => count($contextCompanies) - count($companies),
             'filters' => $filters->toArray(),
         ]);
+    }
+
+    public function show(
+        Request $request,
+        OrganizationContext $context,
+        EffectivePermissions $permissions,
+        CommercialRelationDirectoryQuery $relations,
+        int $relationId,
+        string $role,
+    ): JsonResponse {
+        $commercialRole = CommercialRole::from($role);
+        $company = $context->company();
+        abort_if($company === null, 404);
+        abort_unless($commercialRole->allows($permissions, $request->user(), 'view', $company->id), 403);
+
+        $accountId = $context->accountId();
+        $personId = $relations->relation($commercialRole, $accountId, $company->id, $relationId);
+        abort_if($personId === null, 404);
+        $person = $relations->centralPerson($accountId, $personId);
+        $canViewCentral = ! $permissions->nodesFor($request->user(), 'account.people.view')->isEmpty();
+
+        return response()->json([
+            ...$person->only($canViewCentral
+                ? [...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]
+                : ['name', 'person_type']),
+            'tags' => [
+                $this->roleTag($commercialRole),
+                ...$relations->tagsForPage($commercialRole, $accountId, [$relationId])
+                    ->get($relationId, collect())->all(),
+            ],
+        ], headers: ['Cache-Control' => 'private, no-store']);
+    }
+
+    /** @return array{id: int, name: string, color: string} */
+    private function roleTag(CommercialRole $role): array
+    {
+        return ['id' => 0, 'name' => $role->label(), 'color' => $role->tagColor()];
     }
 
     public function create(
@@ -328,12 +370,9 @@ final class CommercialRelationController
             abort_if($permissions->nodesFor($request->user(), 'account.people.create')->isEmpty(), 403);
 
             $person = SavePersonData::fromInput(
-                [...$request->except('tag_ids'), 'relations' => [$company->id => [$commercialRole->value => true]]],
+                $request->only([...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]),
                 $account->id,
-                hasUser: false,
-                allowUserTag: false,
             );
-
         }
 
         $register->execute($commercialRole, $account, $company, $person, $tags, $centralChanges);

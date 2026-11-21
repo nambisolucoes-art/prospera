@@ -170,30 +170,6 @@ class Person extends Model implements Auditable
         $this->recordAuditFieldChange('tag_ids', $before, $tagIds, 'Etiquetas');
     }
 
-    /**
-     * Etiquetas convencionais (sem chave de sistema) mudariam com a seleção informada?
-     *
-     * @param  array<int,int>  $tagIds
-     */
-    public function changesConventionalTags(array $tagIds): bool
-    {
-        $current = $this->tags()
-            ->whereNull('tags.system_key')
-            ->pluck('tags.id')
-            ->all();
-
-        $requested = Tag::where('account_id', $this->account_id)
-            ->whereNull('system_key')
-            ->whereIn('id', $tagIds)
-            ->pluck('id')
-            ->all();
-
-        sort($current);
-        sort($requested);
-
-        return $current !== $requested;
-    }
-
     /** @return HasMany<Customer, $this> */
     public function customers(): HasMany
     {

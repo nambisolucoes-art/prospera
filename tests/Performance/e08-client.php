@@ -6,6 +6,7 @@ use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 require_once __DIR__.'/organization-http.php';
 require_once '/app/vendor/autoload.php';
@@ -15,6 +16,20 @@ $application->make(Kernel::class)->bootstrap();
 $data = json_decode(file_get_contents('/tmp/prospera-e08-scenarios.json'), true, flags: JSON_THROW_ON_ERROR);
 $after = getenv('E08_PHASE') !== 'baseline';
 $mode = $argv[1] ?? 'measure';
+
+function registrationPath(int $userId): string
+{
+    // O harness também roda sobre o checkpoint histórico para medir a linha de base da E08.
+    if (Route::has('account.directory.people.store')) {
+        return '/conta/pessoas';
+    }
+
+    $accountId = User::findOrFail($userId)->account_id;
+    $company = DB::table('companies')->where('account_id', $accountId)->orderBy('id')->value('code');
+    verify(is_string($company));
+
+    return '/conta/empresa/'.$company.'/clientes';
+}
 
 function percentile(array $values, float $rank): float
 {
@@ -142,10 +157,11 @@ if ($mode === 'write') {
     $cookies = [];
     [$session] = request('/_e03/session/'.$owner, $cookies);
     $samples = [];
+    $path = registrationPath($owner);
 
     for ($sample = 0; $sample < 31; $sample++) {
         $before = AuditRecord::count();
-        [, $metrics] = request('/conta/pessoas', $cookies, 200, [
+        [, $metrics] = request($path, $cookies, [200, 204], [
             '_token' => $session['token'],
             'name' => 'Pessoa de escrita '.$sample.' '.bin2hex(random_bytes(3)),
         ]);
@@ -176,7 +192,7 @@ if ($mode === 'isolation') {
     foreach ($authors as $author) {
         $cookies = [];
         [$session] = request('/_e03/session/'.$author, $cookies);
-        $sessions[$author] = [$cookies, $session['token']];
+        $sessions[$author] = [$cookies, $session['token'], registrationPath($author)];
     }
 
     $inspector = [];
@@ -197,6 +213,7 @@ if ($mode === 'isolation') {
     ]);
     [$state] = request('/_e05/session-state', $inspector);
     $inspectionToken = $state['token'];
+    $inspectionPath = registrationPath($represented->id);
 
     for ($round = 0; $round < 300; $round++) {
         $inspecting = $round % 5 === 4;
@@ -204,9 +221,9 @@ if ($mode === 'isolation') {
         $name = 'Isolamento E08 '.$round.' '.bin2hex(random_bytes(3));
 
         if ($inspecting) {
-            [, $metrics] = request('/conta/pessoas', $inspector, 200, ['_token' => $inspectionToken, 'name' => $name]);
+            [, $metrics] = request($inspectionPath, $inspector, [200, 204], ['_token' => $inspectionToken, 'name' => $name]);
         } else {
-            [, $metrics] = request('/conta/pessoas', $sessions[$author][0], 200, [
+            [, $metrics] = request($sessions[$author][2], $sessions[$author][0], [200, 204], [
                 '_token' => $sessions[$author][1],
                 'name' => $name,
             ]);
@@ -216,7 +233,7 @@ if ($mode === 'isolation') {
         verify($metrics['worker'] === $worker);
         $memory[] = $metrics['start_bytes'];
 
-        $event = AuditRecord::where('entity_name', $name)->sole();
+        $event = AuditRecord::where('entity_type', 'person')->where('entity_name', $name)->sole();
 
         if ($inspecting) {
             verify((int) $event->actor_id === $platform->id && $event->actor_name === $platform->name);
@@ -246,7 +263,7 @@ if ($mode === 'isolation') {
 
     // Revogação durante a inspeção: a requisição seguinte encerra a sessão e não grava como o representado.
     $platform->forceFill(['is_saas_admin' => false])->saveOrFail();
-    request('/conta/pessoas', $inspector, 401, ['_token' => $inspectionToken, 'name' => 'Após revogação']);
+    request($inspectionPath, $inspector, 401, ['_token' => $inspectionToken, 'name' => 'Após revogação']);
     verify(! AuditRecord::where('entity_name', 'Após revogação')->exists());
 
     if ($after) {
@@ -259,7 +276,7 @@ if ($mode === 'isolation') {
 
     $platform->forceFill(['is_saas_admin' => true])->saveOrFail();
     $owner = $authors[0];
-    request('/conta/pessoas', $sessions[$owner][0], 200, ['_token' => $sessions[$owner][1], 'name' => 'Depois E08']);
+    request($sessions[$owner][2], $sessions[$owner][0], [200, 204], ['_token' => $sessions[$owner][1], 'name' => 'Depois E08']);
     $last = AuditRecord::where('entity_name', 'Depois E08')->sole();
     verify((int) $last->actor_id === (int) $owner && $last->represented_user_id === null && $last->context === 'account');
 
@@ -339,10 +356,15 @@ if ($mode === 'endurance') {
 if ($mode === 'race-setup') {
     $cookies = [];
     [$session] = request('/_e03/session/'.$data['scenarios']['integral']['user'], $cookies);
-    request('/conta/pessoas', $cookies, 200, ['_token' => $session['token'], 'name' => 'Concorrência E08']);
+    $path = registrationPath($data['scenarios']['integral']['user']);
+    request($path, $cookies, [200, 204], ['_token' => $session['token'], 'name' => 'Concorrência E08']);
     $person = DB::table('people')->where('name', 'Concorrência E08')->value('id');
+    $id = Route::has('account.directory.people.store')
+        ? $person
+        : DB::table('customers')->where('person_id', $person)->sole()->id;
     file_put_contents('/tmp/prospera-e08-race.json', json_encode([
         'person' => $person,
+        'url' => $path.'/'.$id,
         'cookies' => $cookies,
         'token' => $session['token'],
     ], JSON_THROW_ON_ERROR));
@@ -352,7 +374,7 @@ if ($mode === 'race') {
     // Cada processo altera a mesma Pessoa com um nome próprio, ao mesmo tempo que os demais.
     $race = json_decode(file_get_contents('/tmp/prospera-e08-race.json'), true, flags: JSON_THROW_ON_ERROR);
     $cookies = $race['cookies'];
-    [, , $status] = request('/conta/pessoas/'.$race['person'], $cookies, [200, 409, 422], [
+    [, , $status] = request($race['url'], $cookies, [200, 204, 409, 422], [
         '_token' => $race['token'],
         'name' => 'Concorrência E08 '.$argv[2],
     ], 'PATCH');

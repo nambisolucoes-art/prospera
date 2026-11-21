@@ -88,7 +88,6 @@ final class EffectivePermissions
             'account.establishments.list',
             'account.users.list',
             'account.users.create',
-            'account.people.list',
             'account.people.view',
             'account.people.create',
             'account.people.update',

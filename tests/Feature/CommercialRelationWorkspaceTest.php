@@ -53,15 +53,15 @@ final class CommercialRelationWorkspaceTest extends TestCase
         $this->jequie = $this->express->primaryEstablishment()->sole();
         $this->owner = $this->administrator($this->gartan);
 
-        $this->actingAs($this->owner)->postJson('/conta/pessoas', [
+        $this->actingAs($this->owner)->postJson('/conta/empresa/'.$this->roupas->code.'/clientes', [
             'name' => 'João da Silva',
             'document' => '52998224725',
-            'relations' => [
-                $this->roupas->id => ['customer' => '1', 'supplier' => '1'],
-                $this->express->id => ['customer' => '1'],
-            ],
-        ])->assertOk();
+        ])->assertNoContent();
         $this->joao = Person::where('document', '52998224725')->sole();
+        $this->postJson('/conta/empresa/'.$this->roupas->code.'/fornecedores', ['person_id' => $this->joao->id])
+            ->assertNoContent();
+        $this->postJson('/conta/empresa/'.$this->express->code.'/clientes', ['person_id' => $this->joao->id])
+            ->assertNoContent();
     }
 
     /** @param list<Establishment> $units */
@@ -146,17 +146,14 @@ final class CommercialRelationWorkspaceTest extends TestCase
         $this->postJson('/conta/estabelecimento/'.$this->guanambi->code.'/clientes', ['person_id' => $maria->id])
             ->assertStatus(405);
         $this->patchJson('/conta/pessoas/'.$maria->id, ['name' => 'Maria', 'relations' => ['customer' => '1']])
-            ->assertUnprocessable();
+            ->assertNotFound();
         $this->assertDatabaseMissing('customers', ['person_id' => $maria->id]);
 
         $this->postJson('/conta/empresa/'.$this->express->code.'/clientes', ['person_id' => $maria->id])->assertNoContent();
         $this->assertSame([$this->express->id], Customer::where('person_id', $maria->id)->pluck('company_id')->all());
 
-        // Na conta, a escolha é por empresa: a relação não se propaga para as demais selecionadas.
-        $this->patchJson('/conta/pessoas/'.$maria->id, [
-            'name' => 'Maria',
-            'relations' => [$this->roupas->id => ['supplier' => '1']],
-        ])->assertOk();
+        $this->postJson('/conta/empresa/'.$this->roupas->code.'/fornecedores', ['person_id' => $maria->id])
+            ->assertNoContent();
         $this->assertSame([$this->roupas->id], Supplier::where('person_id', $maria->id)->pluck('company_id')->all());
         $this->assertSame(1, Customer::where('person_id', $maria->id)->count());
     }
@@ -356,7 +353,7 @@ final class CommercialRelationWorkspaceTest extends TestCase
 
     public function test_listings_have_constant_queries_regardless_of_rows(): void
     {
-        // Item 45: sem N+1 nas etiquetas derivadas nem na listagem comercial.
+        // Item 45: sem N+1 nas etiquetas da listagem comercial.
         $this->actingAs($this->owner);
         $count = function (string $url): int {
             DB::flushQueryLog();
@@ -369,15 +366,11 @@ final class CommercialRelationWorkspaceTest extends TestCase
         };
 
         $this->createRelations(3);
-        $peopleSmall = $count('/conta/pessoas?per_page=50');
         $listSmall = $count($this->consolidated('clientes', [$this->guanambi, $this->jequie]).'&per_page=50');
         $this->createRelations(40);
-        $peopleLarge = $count('/conta/pessoas?per_page=50');
         $listLarge = $count($this->consolidated('clientes', [$this->guanambi, $this->jequie]).'&per_page=50');
 
-        $this->assertSame($peopleSmall, $peopleLarge);
         $this->assertSame($listSmall, $listLarge);
-        $this->assertLessThanOrEqual(14, $peopleLarge);
         $this->assertLessThanOrEqual(12, $listLarge);
     }
 

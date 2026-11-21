@@ -139,7 +139,7 @@ export function tourFor(
       ),
       ...businessListTourSteps({
         filters: 'Busque por nome, e-mail, CPF ou CNPJ e filtre pela situação e, com várias empresas, pela empresa.',
-        table: 'Cada linha é a relação de uma pessoa com uma empresa. Use Editar para alterar o cadastro ou Ativar para reativar a relação, conforme seu cargo.',
+        table: 'Cada linha é a relação de uma pessoa com uma empresa. Use Visualizar cadastro para abrir a ficha, Editar para alterar os dados e Ativar ou Inativar para mudar a situação da relação, conforme seu cargo.',
       }),
     ];
   } else if (path === '/conta/organizacao') {
@@ -220,41 +220,6 @@ export function tourFor(
       at('establishment-address', 'Endereço', 'Endereço da unidade, com consulta opcional de CEP.'),
       at('establishment-contact', 'Contatos', 'Telefone, WhatsApp e e-mails da unidade, no mesmo padrão do cadastro da conta.'),
     ]);
-  } else if (path === '/conta/pessoas') {
-    title = 'Pessoas';
-    help = 'pessoas';
-    steps = list('pessoas', 'people-search', 'people-list');
-    steps.splice(1, 0,
-      { ...at('people-suppliers', 'Consultar por papel', 'Escolha Clientes ou Fornecedores para listar as pessoas com relação ativa nas empresas em que você pode consultar esse papel. As etiquetas Cliente e Fornecedor seguem a mesma regra.'), group: 'Filtros' },
-      { ...at('people-company', 'Escolher a empresa', 'Com mais de uma empresa autorizada, restrinja o papel a uma delas. A lista nunca mostra relações de empresas fora do seu acesso.'), group: 'Filtros' },
-    );
-  } else if (/^\/conta\/pessoas\/(cadastrar|\d+\/editar)$/.test(path)) {
-    title = 'Cadastro de pessoa';
-    help = 'pessoas';
-    steps = form([
-      at(
-        'person-identity',
-        'Dados pessoais',
-        'Escolha Pessoa física ou Pessoa jurídica e informe o nome ou razão social. CPF ou CNPJ, nome fantasia e inscrições pertencem à pessoa e não são repetidos por etiqueta.',
-      ),
-      at('person-address', 'Endereço da pessoa', 'O endereço principal pertence à pessoa e é compartilhado por seus papéis. A consulta de CEP é opcional; confira os dados antes de salvar.'),
-      at('person-contact', 'Contatos da pessoa', 'Telefone e WhatsApp usam máscaras e ícones do padrão da conta. Use os botões de adicionar Telefone e E-mail para contatos adicionais; o X remove a linha. O e-mail principal continua sendo o acesso do usuário.'),
-      at(
-        'person-tags',
-        'Etiquetas',
-        'Etiquetas organizam o cadastro compartilhado. Usuário revela a seção de acesso; retirá-la e salvar suspende o acesso. Cliente e Fornecedor não são escolhidos aqui: aparecem conforme as relações comerciais.',
-      ),
-      at(
-        'person-relations',
-        'Relações comerciais',
-        'Marque Cliente ou Fornecedor em cada empresa. Cada empresa tem a própria relação, com situação independente; marcar numa empresa não cria a relação nas outras. Desmarcar e salvar inativa só aquela relação. Você vê e altera apenas as empresas permitidas pelo seu cargo.',
-      ),
-      at(
-        'person-access',
-        'Acesso de usuário',
-        'Escolha um cargo da conta e a forma de acesso. Esta seção aparece apenas com a etiqueta Usuário.',
-      ),
-    ]);
   } else if (
     /^\/conta\/etiquetas(?:\/(?:cadastrar|\d+\/editar))?$/.test(path)
   ) {
@@ -304,8 +269,8 @@ export function tourFor(
       ...businessListTourSteps({ filters: 'Busque pelo nome da pessoa ou pelo e-mail de acesso.' }),
       at(
         'user-access-actions',
-        'Visualizar usuário e editar pessoa',
-        'Use o ícone de informação para consultar os dados de acesso e os cargos. Use o lápis para abrir o cadastro em Pessoas, conforme suas permissões.',
+        'Consultar acesso e editar atribuições',
+        'Use o ícone de informação para consultar os dados de acesso e os cargos. Use o ícone de atribuições para ajustar os cargos quando tiver permissão. O detalhe também oferece suspensão ou reativação do acesso autorizado.',
       ),
     ];
   } else if (path === '/conta/usuarios/cadastrar') {
@@ -314,6 +279,7 @@ export function tourFor(
     steps = form([
       at('user-registration', 'Tipo de cadastro', 'Escolha Pessoa já cadastrada para buscar e reaproveitar o cadastro. Confira o e-mail de acesso e escolha a forma de acesso.'),
       at('user-assignment', 'Primeira atribuição', 'Escolha Onde e Cargo para conceder acesso no local selecionado.'),
+      at('user-tags', 'Etiqueta automática', 'A etiqueta Usuário é aplicada ao cadastrar o acesso na conta.'),
     ]);
   } else if (path === '/saas/usuarios') {
     title = 'Usuários da plataforma';

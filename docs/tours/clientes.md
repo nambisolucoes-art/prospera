@@ -7,7 +7,7 @@ Artigo: [Clientes](../ajuda/clientes.md). Tela: `/conta/estabelecimento/{codigo|
 | 1 | PageHeaderTour | Moldura | Passos compartilhados da moldura, sem duplicar textos. |
 | 2 | organization-switcher | Empresas da área de trabalho | A lista considera as empresas das unidades marcadas; duas unidades da mesma empresa mostram a relação uma vez. |
 | 3 | commercial-register | Cadastrar | Informe os dados da Pessoa ou busque um documento já cadastrado. O documento fica fixo e os campos autorizados podem ser atualizados. A etiqueta Cliente vem marcada. Selecione a empresa quando houver mais de uma opção e use Salvar. |
-| 4 em diante | BusinessListTour | Buscar, filtrar, colunas e paginação | Busca por nome, e-mail, CPF ou CNPJ; filtros Situação e Empresa; Use Editar para abrir a ficha da linha ou Ativar para reativar a relação. |
+| 4 em diante | BusinessListTour | Buscar, filtrar, colunas e paginação | Busca por nome, e-mail, CPF ou CNPJ; filtros Situação e Empresa; Use Visualizar cadastro para abrir a ficha. Editar abre a edição. Inativar e Ativar mudam a situação na empresa da linha. |
 
 ## Página de cadastro
 

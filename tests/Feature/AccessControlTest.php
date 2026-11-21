@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Domains\Acessos\Application\Queries\PermissionRegistry;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
-use App\Domains\Etiquetas\Domain\Models\Tag;
+use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,7 +43,7 @@ class AccessControlTest extends TestCase
             'account_id' => $owner->account_id,
             'is_system' => false,
         ]);
-        $catalogId = Permission::where('slug', 'account.people.list')->value('id');
+        $catalogId = Permission::where('slug', 'account.audit.list')->value('id');
         $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Atendente']);
         $role->permissions()->sync([$catalogId]);
         $this->artisan('permissions:sync')->assertSuccessful();
@@ -69,19 +69,18 @@ class AccessControlTest extends TestCase
         $this->assertDatabaseHas('permissions', ['id' => $custom->id]);
     }
 
-    public function test_list_view_create_and_update_are_independent(): void
+    public function test_list_and_view_are_independent(): void
     {
         $owner = $this->owner();
-        $user = $this->operator($owner, ['account.people.list']);
+        $user = $this->operator($owner, ['account.audit.list']);
         $this->actingAs($user);
-        $this->getJson('/conta/pessoas')->assertOk()->assertJsonPath('auth.permissions.0', 'account.people.list');
-        $this->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/visualizar')->assertForbidden();
-        $this->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/editar')->assertForbidden();
-        $this->postJson('/conta/pessoas', ['name' => 'Bloqueado'])->assertForbidden();
+        $this->getJson('/conta/auditoria')->assertOk()->assertJsonPath('auth.permissions.0', 'account.audit.list');
+        $record = AuditRecord::where('account_id', $owner->account_id)->firstOrFail();
+        $this->getJson('/conta/auditoria/'.$record->id.'/visualizar')->assertForbidden();
         $this->getJson('/conta/cargos')->assertForbidden();
         $this->getJson('/saas/contas')->assertForbidden();
         $this->membership($user)->assignments()->sole()->role()->firstOrFail()->permissions()->detach();
-        $this->getJson('/conta/pessoas')->assertForbidden();
+        $this->getJson('/conta/auditoria')->assertForbidden();
     }
 
     public function test_role_and_permission_writes_are_scoped_and_cannot_escalate(): void
@@ -124,13 +123,13 @@ class AccessControlTest extends TestCase
             'email' => 'pessoa@example.test',
             'mode' => 'invite',
             'role_id' => $this->membership($owner)->assignments()->sole()->role_id,
-            'tag_ids' => [Tag::userTag($owner->account_id)->id],
+            'scope' => 'tenant',
         ];
-        $this->postJson('/conta/pessoas', $payload)->assertForbidden();
+        $this->postJson('/conta/usuarios', $payload)->assertForbidden();
         $this->assertDatabaseMissing('people', ['name' => 'Pessoa com acesso']);
         $this
             ->actingAs($owner)
-            ->postJson('/conta/pessoas', [...$payload, 'role_id' => $this->membership($other)->assignments()->sole()->role_id])
+            ->postJson('/conta/usuarios', [...$payload, 'role_id' => $this->membership($other)->assignments()->sole()->role_id])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('role_id');
         $this
@@ -138,18 +137,18 @@ class AccessControlTest extends TestCase
                 '/conta/cargos',
                 [
                     'name' => 'Caixa',
-                    'permission_ids' => [Permission::where('slug', 'account.people.list')->value('id')],
+                    'permission_ids' => [Permission::where('slug', 'account.audit.list')->value('id')],
                 ],
             )
             ->assertRedirect();
         $role = Role::where('account_id', $owner->account_id)->where('name', 'Caixa')->sole();
         $this
-            ->post('/conta/pessoas', [...$payload, 'role_id' => $role->id])
+            ->post('/conta/usuarios', [...$payload, 'role_id' => $role->id])
             ->assertSessionHasNoErrors()
             ->assertRedirect();
         $created = User::where('email', 'pessoa@example.test')->sole();
         $this->assertSame($role->id, $this->membership($created)->assignments()->sole()->role_id);
-        $this->actingAs($created)->getJson('/conta/pessoas')->assertOk();
+        $this->actingAs($created)->getJson('/conta/auditoria')->assertOk();
         $this->getJson('/conta/etiquetas')->assertForbidden();
     }
 
@@ -201,14 +200,14 @@ class AccessControlTest extends TestCase
     public function test_create_without_list_returns_to_an_authorized_form(): void
     {
         $owner = $this->owner();
-        $creator = $this->operator($owner, ['account.people.create']);
+        $creator = $this->operator($owner, ['account.tags.create']);
         $this
             ->actingAs($creator)
-            ->post('/conta/pessoas', ['name' => 'Cadastro sem listagem'])
+            ->post('/conta/etiquetas', ['name' => 'Etiqueta sem listagem', 'module' => 'customers', 'color' => '#3563e9'])
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/conta/pessoas/cadastrar');
-        $this->getJson('/conta/pessoas/cadastrar')->assertOk();
-        $this->getJson('/conta/pessoas')->assertForbidden();
+            ->assertRedirect('/conta/etiquetas/cadastrar');
+        $this->getJson('/conta/etiquetas/cadastrar')->assertOk();
+        $this->getJson('/conta/etiquetas')->assertForbidden();
     }
 
     public function test_assigning_a_role_can_read_the_current_choice_without_granting_user_detail_access(): void
@@ -221,10 +220,10 @@ class AccessControlTest extends TestCase
         ]);
         $this
             ->actingAs($operator)
-            ->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/editar')
+            ->getJson('/conta/usuarios/'.$this->membership($owner)->id.'/atribuicoes')
             ->assertOk()
-            ->assertJsonPath('person.membership.assignments.0.scope', 'tenant');
-        $this->getJson('/conta/pessoas/'.$this->membership($owner)->person_id.'/visualizar')->assertOk()->assertJsonPath('user', null);
+            ->assertJsonPath('assignments.0.scope', 'tenant');
+        $this->getJson('/conta/usuarios')->assertForbidden();
     }
 
     public function test_permissions_are_selected_in_roles_and_have_no_management_endpoints(): void
@@ -288,7 +287,7 @@ class AccessControlTest extends TestCase
         $this->assertDatabaseMissing('permissions', ['id' => $obsolete->id]);
         $this->assertDatabaseMissing('permission_role', ['permission_id' => $obsolete->id]);
         $this->assertDatabaseHas('permissions', ['id' => $legacy->id]);
-        $this->assertTrue($owner->can('account.people.list'));
+        $this->assertTrue($owner->can('account.audit.list'));
         $this->assertFalse($owner->can($legacy->slug));
         $this->assertDatabaseHas('access_catalog_events', [
             'event' => 'permission-management.retired',

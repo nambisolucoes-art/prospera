@@ -21,7 +21,7 @@ final class AccountContextTest extends TestCase
     {
         $account = Client::create(['name' => 'Conta A', 'active' => true]);
         $role = Role::create(['account_id' => $account->id, 'name' => 'Atendimento']);
-        $role->permissions()->sync(Permission::whereIn('slug', ['self.help.list', 'account.people.list'])->pluck('id'));
+        $role->permissions()->sync(Permission::whereIn('slug', ['self.help.list', 'account.tags.list'])->pluck('id'));
         $member = User::factory()->forAccount($account->id, $role)->create();
 
         $this->actingAs($member);
@@ -32,14 +32,14 @@ final class AccountContextTest extends TestCase
         DB::flushQueryLog();
 
         $response->assertOk()->assertJsonCount(2, 'auth.permissions');
-        self::assertContains('account.people.list', $response->json('auth.permissions'));
+        self::assertContains('account.tags.list', $response->json('auth.permissions'));
         self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "permission_role" as "pr"')));
         self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "role_assignments"')));
         $this->getJson('/conta/cargos')->assertForbidden();
-        $this->getJson('/conta/pessoas')->assertOk();
+        $this->getJson('/conta/etiquetas')->assertOk();
 
-        $role->permissions()->detach(Permission::where('slug', 'account.people.list')->value('id'));
-        $this->getJson('/conta/pessoas')->assertForbidden();
+        $role->permissions()->detach(Permission::where('slug', 'account.tags.list')->value('id'));
+        $this->getJson('/conta/etiquetas')->assertForbidden();
         $this->getJson('/ajuda')->assertOk()->assertJsonCount(1, 'auth.permissions');
 
         $owner = User::factory()->asAccountAdministrator($account->id)->create();
@@ -87,14 +87,14 @@ final class AccountContextTest extends TestCase
         self::assertSame($first->id, $context->activeAccount($owner)?->id);
         self::assertSame($second->id, $context->activeAccount($member)?->id);
         self::assertNull($context->activeAccount($platform));
-        self::assertTrue($owner->can('account.people.list'));
+        self::assertTrue($owner->can('account.tags.list'));
         self::assertFalse($owner->can('platform.accounts.list'));
-        self::assertFalse($member->can('account.people.list'));
-        self::assertFalse($withoutMembership->can('account.people.list'));
+        self::assertFalse($member->can('account.tags.list'));
+        self::assertFalse($withoutMembership->can('account.tags.list'));
         self::assertTrue($platform->can('platform.accounts.list'));
-        self::assertFalse($platform->can('account.people.list'));
+        self::assertFalse($platform->can('account.tags.list'));
         self::assertTrue($personal->can('self.help.list'));
-        self::assertFalse($personal->can('account.people.list'));
+        self::assertFalse($personal->can('account.tags.list'));
 
         $this->app->forgetScopedInstances();
         self::assertNotSame($permissions, app(EffectivePermissions::class));

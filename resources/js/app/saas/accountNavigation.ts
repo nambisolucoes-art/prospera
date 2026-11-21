@@ -57,7 +57,6 @@ export function accountNavigation(tenant: boolean, permissions: string[] = [], w
   ];
   if (!tenant) return [...platformEntries, ...shared];
   const records: SidebarEntry[] = [
-    ...entry(permissions, 'people', { key: 'people', label: 'Pessoas', href: '/conta/pessoas', iconClass: 'ti-id-badge' }, '/conta/pessoas/cadastrar'),
     ...entry(permissions, 'tags', { key: 'tags', label: 'Etiquetas', href: '/conta/etiquetas', iconClass: 'ti-tag' }, '/conta/etiquetas/cadastrar'),
     // Relações comerciais (E07): abrem na área de trabalho, com as empresas das unidades selecionadas.
     ...entry(permissions, 'customers', { key: 'customers', label: 'Clientes', href: workspaceHref('clientes'), iconClass: 'ti-face-smile' }),

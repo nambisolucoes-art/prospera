@@ -12,7 +12,6 @@ import type { SessionProps } from '@/types/Session.types';
 import { contextualUrl } from '@/utils/organizationContext';
 import PersonPreview from './PersonPreview';
 import SaasLayout from './SaasLayout';
-import type { PersonRow } from './Directory.types';
 import './CommercialRelations.css';
 import './Directory.css';
 
@@ -28,6 +27,8 @@ type Relation = {
   active: boolean;
   company: { id: number; code: string; name: string; active: boolean };
   can_activate: boolean;
+  can_deactivate: boolean;
+  can_view: boolean;
   can_edit: boolean;
 };
 
@@ -46,7 +47,6 @@ export default function CommercialRelations({ role, relations, companies, filter
   const { props, url } = useApiPage<SessionProps>();
   const text = copy[role];
   const writable = props.auth.inspection_mode !== 'read-only';
-  const canViewPeople = props.auth.permissions.includes('account.people.view');
   const canRegister = companies.some((company) => company.can_create);
   const registrationUrl = contextualUrl(`~/${text.segment}/cadastrar`, url);
   const { query, setQuery, submit, apply } = useBusinessListFilters(`~/${text.segment}`, filters.search);
@@ -101,9 +101,9 @@ export default function CommercialRelations({ role, relations, companies, filter
               locked: true,
               render: (relation) => (
                 <div className="business-list__actions">
-                  {canViewPeople && (
+                  {relation.can_view && (
                     <Button iconOnly tone="primary" leftIconClass="fa fa-info" title="Visualizar cadastro"
-                      aria-label={`Visualizar pessoa ${relation.name}`} aria-haspopup="dialog"
+                      aria-label={`Visualizar ${text.singular} ${relation.name}`} aria-haspopup="dialog"
                       onClick={(event) => { trigger.current = event.currentTarget; setPreview(relation); }} />
                   )}
                   {writable && relation.company.active && relation.can_edit && (
@@ -111,10 +111,16 @@ export default function CommercialRelations({ role, relations, companies, filter
                       aria-label={`Editar ${text.singular} ${relation.name} em ${relation.company.name}`}
                       href={contextualUrl(`~/${text.segment}/${relation.company.code}/${relation.id}/editar`, url)} />
                   )}
-                  {writable && relation.company.active && !relation.active && relation.can_activate && (
-                    <Button iconOnly tone="success" leftIconClass="fa fa-check" title={`Ativar ${text.singular}`}
-                      aria-label={`Ativar ${text.singular} ${relation.name} em ${relation.company.name}`} disabled={status.processing}
-                      onClick={() => status.submit('patch', `${base(relation)}/ativar`, { preserveScroll: true })} />
+                  {writable && relation.company.active && (
+                    relation.active && relation.can_deactivate ? (
+                      <Button iconOnly tone="danger" leftIconClass="fa fa-ban" title={`Inativar ${text.singular}`}
+                        aria-label={`Inativar ${text.singular} ${relation.name} em ${relation.company.name}`} disabled={status.processing}
+                        onClick={() => status.submit('patch', `${base(relation)}/inativar`, { preserveScroll: true })} />
+                    ) : !relation.active && relation.can_activate && (
+                      <Button iconOnly tone="success" leftIconClass="fa fa-check" title={`Ativar ${text.singular}`}
+                        aria-label={`Ativar ${text.singular} ${relation.name} em ${relation.company.name}`} disabled={status.processing}
+                        onClick={() => status.submit('patch', `${base(relation)}/ativar`, { preserveScroll: true })} />
+                    )
                   )}
                 </div>
               ),
@@ -148,7 +154,7 @@ export default function CommercialRelations({ role, relations, companies, filter
       </div>
       {status.errors._form && <p className="formField__error" role="alert">{status.errors._form}</p>}
       {preview && (
-        <PersonPreview person={{ id: preview.person_id, name: preview.name } as PersonRow}
+        <PersonPreview name={preview.name} endpoint={`${base(preview)}/visualizar`}
           onClose={() => close(() => setPreview(undefined))} />
       )}
     </SaasLayout>

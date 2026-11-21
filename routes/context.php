@@ -60,6 +60,11 @@ Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.')->grou
             foreach (['clientes' => 'customer', 'fornecedores' => 'supplier'] as $segment => $role) {
                 $name = $role === 'customer' ? 'customers.' : 'suppliers.';
 
+                Route::get($segment.'/{relationId}/visualizar', [CommercialRelationController::class, 'show'])
+                    ->whereNumber('relationId')
+                    ->defaults('role', $role)
+                    ->name($name.'view');
+
                 Route::post($segment.'/pessoa', [CommercialRelationController::class, 'findPerson'])
                     ->defaults('role', $role)
                     ->name($name.'find-person');

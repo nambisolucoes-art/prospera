@@ -2,23 +2,14 @@
 
 namespace App\Domains\Pessoas\Application\Data;
 
-use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Pessoas\Domain\Models\Person;
-use App\Domains\Usuarios\Application\Data\ProvisionUserData;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 final readonly class SavePersonData
 {
     /** @param array<string,mixed> $values */
-    public function __construct(
-        public array $values,
-        public ?ProvisionUserData $access,
-        public bool $userSelected = false,
-        public CommercialRelationsData $relations = new CommercialRelationsData,
-        public bool $centralOnly = false,
-    ) {}
+    public function __construct(public array $values) {}
 
     /** @param array<string,mixed> $input */
     public static function forCommercialReuse(array $input, Person $person): self
@@ -33,23 +24,12 @@ final readonly class SavePersonData
             $input['address'] = array_replace($person->address ?? [], $input['address']);
         }
 
-        $data = self::fromInput($input, $person->account_id, hasUser: false, existingPerson: $person);
-
-        return new self($data->values, access: null, centralOnly: true);
+        return self::fromInput($input, $person->account_id, $person);
     }
 
-    /**
-     * @param  array<string,mixed>  $input
-     * @param  array<int,int>  $existingTagIds
-     */
-    public static function fromInput(
-        array $input,
-        int $accountId,
-        bool $hasUser,
-        array $existingTagIds = [],
-        ?Person $existingPerson = null,
-        bool $allowUserTag = true,
-    ): self {
+    /** @param array<string,mixed> $input */
+    public static function fromInput(array $input, int $accountId, ?Person $existingPerson = null): self
+    {
         // Identificação somente leitura não é enviada pelo formulário e mantém o valor atual.
         if (! array_key_exists('name', $input) && $existingPerson !== null) {
             $input['name'] = $existingPerson->name;
@@ -72,24 +52,10 @@ final readonly class SavePersonData
 
         $input['email'] = is_string($input['email'] ?? null) ? mb_strtolower(trim($input['email'])) : null;
 
-        // Etiquetas inativas só são aceitas quando a pessoa já as possui. Cliente e Fornecedor são
-        // derivadas das relações comerciais (E07) e não são selecionadas.
-        $selectableTag = Rule::exists('tags', 'id')
-            ->where('account_id', $accountId)
-            ->where('module', 'people')
-            ->where(fn ($query) => $query
-                ->where('active', true)
-                ->orWhereIn('id', $existingTagIds))
-            ->where(fn ($query) => $query
-                ->whereNull('system_key')
-                ->when($allowUserTag, fn ($tags) => $tags->orWhere('system_key', 'user')));
-
         $values = Validator::validate($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'tag_ids' => ['sometimes', 'array'],
-            'tag_ids.*' => ['integer', 'distinct', $selectableTag],
         ], [
             'name.required' => 'Informe o nome.',
             'name.string' => 'Informe um nome válido.',
@@ -98,34 +64,9 @@ final readonly class SavePersonData
             'email.max' => 'O e-mail deve ter até 255 caracteres.',
             'phone.string' => 'Informe um telefone válido.',
             'phone.max' => 'O telefone deve ter até 30 caracteres.',
-            'tag_ids.array' => 'Selecione etiquetas válidas.',
-            'tag_ids.*' => 'Selecione etiquetas do módulo Pessoas desta conta.',
         ]);
-        $tagIds = $values['tag_ids'] ?? [];
-
-        $userSelected = self::selectsSpecialTag($accountId, $tagIds, 'user');
-        $access = ! $hasUser && $userSelected
-            ? ProvisionUserData::fromInput($input, true, $accountId)
-            : null;
-
         $details = SavePersonDetailsData::fromInput($input, $accountId, $existingPerson);
-        $relations = CommercialRelationsData::fromInput($input['relations'] ?? null, $accountId);
 
-        return new self(
-            [...$values, ...$details->values],
-            $access,
-            $userSelected,
-            $relations,
-        );
-    }
-
-    /** @param array<int,int> $tagIds */
-    private static function selectsSpecialTag(int $accountId, array $tagIds, string $systemKey): bool
-    {
-        return Tag::where('account_id', $accountId)
-            ->where('module', 'people')
-            ->where('system_key', $systemKey)
-            ->whereIn('id', $tagIds)
-            ->exists();
+        return new self([...$values, ...$details->values]);
     }
 }

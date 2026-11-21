@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Select } from '@/components/BusinessForm/BusinessFormFields';
 import UserPersonPicker, { type PersonCandidate } from './UserPersonPicker';
 import BusinessForm, { BusinessFormActions, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
+import TagSelect from '@/components/TagSelect/TagSelect';
 import CardBox from '@/components/CardBox/CardBox';
 import SaasLayout from './SaasLayout';
 import UserFields from './UserFields';
@@ -40,6 +41,16 @@ export default function UserForm({ tenant, assignmentOptions = [], canReusePerso
               {tenant && (
                 <BusinessFormSection title="Primeira atribuição" tourTarget="user-assignment">
                   <AssignmentFields options={assignmentOptions} errors={errors} required />
+                </BusinessFormSection>
+              )}
+              {tenant && (
+                <BusinessFormSection title="Etiquetas" tourTarget="user-tags">
+                  <TagSelect
+                    options={[{ id: 0, name: 'Usuário', color: '#3563e9', locked: true, displayOnly: true }]}
+                    selected={[0]}
+                    onChange={() => undefined}
+                    disabled
+                  />
                 </BusinessFormSection>
               )}
               <BusinessFormActions processing={processing || (existing && !person)} cancelHref={action} />

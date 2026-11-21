@@ -73,7 +73,6 @@ final class HelpCatalog
                 && ! app(EffectivePermissions::class)->navigableNodes($user)->isEmpty(),
             'clientes' => ! $user->is_saas_admin && $can('account.customers'),
             'fornecedores' => ! $user->is_saas_admin && $can('account.suppliers'),
-            'pessoas' => ! $user->is_saas_admin && $can('account.people'),
             'etiquetas' => ! $user->is_saas_admin && $can('account.tags'),
             'cargos-permissoes' => ! $user->is_saas_admin && $can('account.roles'),
             'perfil' => $user->can('self.profile.view'),

@@ -84,7 +84,6 @@ final class ClientController
         if (! $request->user()->can('account.dashboard.view')) {
             // Sem acesso ao Início, a pessoa vai para a primeira tela que pode abrir.
             $fallbacks = [
-                'account.people.list' => '/conta/pessoas',
                 'account.tags.list' => '/conta/etiquetas',
                 'account.companies.list' => '/conta/organizacao',
                 'account.establishments.list' => '/conta/organizacao?nivel=estabelecimentos',
@@ -92,7 +91,6 @@ final class ClientController
                 'account.users.list' => '/conta/usuarios',
                 'account.users.create' => '/conta/usuarios/cadastrar',
                 'account.audit.list' => '/conta/auditoria',
-                'account.people.create' => '/conta/pessoas/cadastrar',
                 'account.tags.create' => '/conta/etiquetas/cadastrar',
                 'account.roles.create' => '/conta/cargos/cadastrar',
                 'self.profile.view' => '/settings/profile',

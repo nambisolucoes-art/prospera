@@ -26,7 +26,7 @@ import {
 
 const screens = import.meta.glob<{ default: ComponentType }>([
   './account/{auth,settings}/*.tsx',
-  './saas/{clients,account-form,home,users,user-form,people,person-form,tags,roles,role-form,audit,help}.tsx',
+  './saas/{clients,account-form,home,users,user-form,tags,roles,role-form,audit,help}.tsx',
   './saas/{organization,companies,company-form,establishments,establishment-form,establishment-home}.tsx',
   './saas/{commercial-relations,commercial-registration}.tsx',
 ]);
@@ -50,8 +50,6 @@ const routes: Array<[RegExp, string]> = [
   ],
   [/^\/conta\/cargos$/, 'saas/roles'],
   [/^\/conta\/cargos\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/role-form'],
-  [/^\/conta\/pessoas$/, 'saas/people'],
-  [/^\/conta\/pessoas\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/person-form'],
   [/^\/conta\/etiquetas$/, 'saas/tags'],
   [/^\/conta\/etiquetas\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/tags'],
   [/^\/(?:saas|conta)\/usuarios$/, 'saas/users'],

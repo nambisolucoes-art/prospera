@@ -1,6 +1,6 @@
 # Pessoas e contatos
 
-Política oficial da DA-25. Pessoas é o cadastro central do tenant. Cada empresa mantém, na relação comercial, os dados e contatos que só interessam a ela. Uma alteração local nunca modifica, em silêncio, dados de outra empresa. Contexto geral em [Contexto organizacional](contexto-organizacional.md).
+Política oficial da DA-25. A tabela `people` guarda a identificação compartilhada do tenant. Clientes, Fornecedores e Usuários são as entradas do produto para seus respectivos cadastros. A busca pelo CPF ou CNPJ completo nos módulos comerciais pode reaproveitar o mesmo registro e registrar um segundo papel. A etiqueta especial deriva do papel da relação, cujo escopo é a empresa. Cada empresa mantém, na relação comercial, os dados e contatos que só interessam a ela. Uma alteração local nunca modifica, em silêncio, dados de outra empresa. Contexto geral em [Contexto organizacional](contexto-organizacional.md).
 
 Esta política classifica os campos existentes e reserva o lugar dos campos futuros. Ela não move campos nem tabelas: os campos atuais de `people` continuam onde estão, e qualquer mudança de classe exige decisão própria, registrada no plano.
 

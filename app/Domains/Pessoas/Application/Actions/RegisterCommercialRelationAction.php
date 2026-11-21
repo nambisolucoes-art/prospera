@@ -37,11 +37,12 @@ final readonly class RegisterCommercialRelationAction
                     $this->savePerson->execute($account, $existing, $changes);
                 }
 
-                $this->set->execute($role, $company, $person, active: true, link: true);
                 $personId = $person;
             } else {
                 $personId = $this->savePerson->execute($account, null, $person)->id;
             }
+
+            $this->set->execute($role, $company, $personId, active: true, link: true);
 
             if ($selection->ids === []) {
                 return;

@@ -77,7 +77,6 @@ return [
         'account.establishments.update' => ['establishment'],
         'account.establishments.view' => ['tenant', 'company', 'establishment'],
         'account.people.create' => ['tenant', 'company', 'establishment'],
-        'account.people.list' => ['tenant', 'company', 'establishment'],
         'account.people.update' => ['person'],
         'account.people.view' => ['tenant', 'company', 'establishment'],
         'account.roles.create' => ['tenant'],
@@ -104,7 +103,6 @@ return [
         'account.users.reactivate' => ['tenant'],
         'account.users.revoke' => ['tenant'],
         'account.users.send-password-reset' => ['tenant'],
-        'account.users.update' => ['tenant'],
         'account.users.view' => ['tenant', 'company', 'establishment'],
     ],
     'global_targets' => [

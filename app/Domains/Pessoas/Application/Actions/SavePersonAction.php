@@ -3,7 +3,6 @@
 namespace App\Domains\Pessoas\Application\Actions;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Pessoas\Application\Data\SavePersonData;
 use App\Domains\Pessoas\Application\Queries\PersonAccessQuery;
@@ -11,16 +10,11 @@ use App\Domains\Pessoas\Application\Queries\PersonDocumentExistsQuery;
 use App\Domains\Pessoas\Domain\DTOs\PersonDTO;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
-use App\Domains\Usuarios\Application\Actions\CreateUserAction;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 final readonly class SavePersonAction
 {
     public function __construct(
-        private SavePersonAccessAction $saveAccess,
-        private CreateUserAction $createUser,
-        private SaveCommercialRelationsAction $saveRelations,
         private PersonDocumentExistsQuery $documentExists,
         private PersonAccessQuery $permissions,
         private EffectivePermissions $effective,
@@ -77,17 +71,10 @@ final readonly class SavePersonAction
             // Um envio forjado não altera dados centrais fora da autoridade do operador (seção 10.2.1).
             if ($authority !== null) {
                 $changesIdentification = $lockedPerson->isDirty(Person::IDENTIFICATION_FIELDS);
-                $changesContacts = $lockedPerson->isDirty(Person::CONTACT_FIELDS)
-                    || (! $data->centralOnly && $lockedPerson->changesConventionalTags($data->values['tag_ids'] ?? []));
+                $changesContacts = $lockedPerson->isDirty(Person::CONTACT_FIELDS);
 
                 abort_if($changesIdentification && ! $authority->identification, 403);
                 abort_if($changesContacts && ! $authority->contacts, 403);
-            }
-
-            $user = $data->centralOnly ? null : $lockedPerson->user()->first();
-
-            if ($user !== null) {
-                $this->saveAccess->execute($account, $lockedPerson, $user, $data);
             }
 
             if (
@@ -104,30 +91,6 @@ final readonly class SavePersonAction
             }
 
             $lockedPerson->saveOrFail();
-
-            if ($data->access !== null) {
-                Gate::authorize('account.users.create');
-
-                if ($user !== null) {
-                    throw ValidationException::withMessages([
-                        'tag_ids' => 'Esta pessoa já possui acesso. Atualize o cadastro antes de continuar.',
-                    ]);
-                }
-
-                $this->createUser->execute(
-                    data: $data->access->user,
-                    role: $data->access->role,
-                    account: $account,
-                    person: $lockedPerson,
-                    roleId: $data->access->roleId,
-                    node: AccessNode::tenant($account->id),
-                );
-            }
-
-            if (! $data->centralOnly) {
-                $this->saveRelations->execute($lockedPerson, $data->relations);
-                $lockedPerson->assignTags($data->values['tag_ids'] ?? []);
-            }
 
             return $lockedPerson;
         });

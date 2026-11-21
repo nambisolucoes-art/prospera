@@ -31,7 +31,6 @@ export default function SaasLayout({ title, children, tenant = false, actions, u
 
 const sections: Array<[string, string]> = [
   ['/conta/cargos', 'roles'],
-  ['/conta/pessoas', 'people'],
   ['/conta/etiquetas', 'tags'],
   ['/conta/organizacao', 'organization'],
   ['/conta/empresas', 'organization'],

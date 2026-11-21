@@ -182,7 +182,7 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 | Onde | Coluna da atribuição: "Toda a conta", nome da empresa ou nome do estabelecimento |
 | Acesso à conta | Vínculo. Ações "Suspender acesso" e "Reativar acesso" |
 | E-mail de acesso | E-mail da identidade, sempre somente leitura para administradores |
-| Dados centrais e Dados desta empresa | Seções do formulário de Pessoas ([Pessoas e contatos](pessoas-e-contatos.md)) |
+| Dados centrais e Dados desta empresa | Seções dos formulários comerciais ([Pessoas e contatos](pessoas-e-contatos.md)) |
 | Todos os autorizados | Opção consolidada do seletor |
 
 Sidebar da conta, a partir das etapas indicadas:

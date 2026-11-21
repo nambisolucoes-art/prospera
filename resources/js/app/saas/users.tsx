@@ -4,8 +4,10 @@ import BusinessList, { type BusinessColumn, type PageSummary } from '@/component
 import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
 import { useBusinessListFilters } from '@/components/BusinessList/useBusinessListFilters';
 import Modal from '@/components/Modal/Modal';
-import type { AssignmentSummary } from './MembershipAssignmentsModal';
+import MembershipAssignmentsModal, { type AssignmentSummary } from './MembershipAssignmentsModal';
+import { useApiForm } from '@/hooks/useApiForm';
 import Button from '@/components/Button/Button';
+import TagLabel from '@/components/TagLabel/TagLabel';
 import ProfileAvatar from '@/components/ProfileAvatar/ProfileAvatar';
 import type { SessionProps } from '@/types/Session.types';
 import PreviewSection from './PreviewSection';
@@ -15,13 +17,13 @@ import './UserDirectory.css';
 
 type UserRow = {
   id: number;
-  person_id?: number;
   name: string;
   email: string;
   photo_url: string | null;
   status?: string;
   assignments?: AssignmentSummary[];
   can_view?: boolean;
+  can_assign?: boolean;
 };
 
 export default function Users({ users, tenant, search = '' }: {
@@ -33,12 +35,15 @@ export default function Users({ users, tenant, search = '' }: {
   const readOnly = auth.inspection_mode === 'read-only';
   const can = (permission: string) => auth.permissions.includes(permission);
   const base = tenant ? '/conta/usuarios' : '/saas/usuarios';
+  const [assignments, setAssignments] = useState<UserRow>();
+  const status = useApiForm({});
   const [preview, setPreview] = useState<UserRow>();
   const trigger = useRef<HTMLElement | null>(null);
   const { query, setQuery, submit } = useBusinessListFilters(base, search);
 
   function close() {
     setPreview(undefined);
+    setAssignments(undefined);
     requestAnimationFrame(() => trigger.current?.focus());
   }
 
@@ -51,9 +56,10 @@ export default function Users({ users, tenant, search = '' }: {
               aria-label={`Visualizar usuário ${user.name}`} aria-haspopup="dialog"
               onClick={(event) => { trigger.current = event.currentTarget; setPreview(user); }} />
           )}
-          {!readOnly && user.person_id && can('account.people.update') && (
-            <Button href={`/conta/pessoas/${user.person_id}/editar`} iconOnly tone="primary" leftIconClass="fa fa-pencil"
-              title="Editar pessoa" aria-label={`Editar pessoa ${user.name}`} />
+          {!readOnly && user.can_assign && (
+            <Button iconOnly tone="primary" leftIconClass="fa fa-sitemap" title="Editar atribuições"
+              aria-label={`Editar atribuições de ${user.name}`} aria-haspopup="dialog"
+              onClick={(event) => { trigger.current = event.currentTarget; setAssignments(user); }} />
           )}
         </div>
       ),
@@ -80,6 +86,7 @@ export default function Users({ users, tenant, search = '' }: {
         filters={tenant ? <BusinessListSearch label="Pesquisar usuários" placeholder="Nome ou e-mail de acesso"
           value={query} onChange={setQuery} onSubmit={submit} /> : undefined}
         columns={columns} rowKey={(user) => user.id} empty="Nenhum usuário cadastrado." />
+      {assignments && <MembershipAssignmentsModal membership={assignments.id} name={assignments.name} onClose={close} />}
       {preview && (
         <Modal open title={preview.name} onClose={close} size="default" contentClassName="account-preview"
           bootstrap manageFocus>
@@ -99,6 +106,23 @@ export default function Users({ users, tenant, search = '' }: {
                 : 'Sem atribuição'}
             </dd>
           </PreviewSection>
+          {preview.status === 'active' && <PreviewSection title="Etiquetas">
+            <dt>Etiqueta automática</dt>
+            <dd><TagLabel name="Usuário" color="#3563e9" /></dd>
+          </PreviewSection>}
+          {!readOnly && can(preview.status === 'active' ? 'account.users.revoke' : 'account.users.reactivate') && (
+            <Button
+              tone={preview.status === 'active' ? 'danger' : 'success'}
+              leftIconClass={preview.status === 'active' ? 'fa fa-ban' : 'fa fa-check'}
+              disabled={status.processing}
+              onClick={() => status.submit('patch', `${base}/${preview.id}/${preview.status === 'active' ? 'suspender' : 'reativar'}`, {
+                onSuccess: close,
+              })}
+            >
+              {preview.status === 'active' ? 'Suspender acesso' : 'Reativar acesso'}
+            </Button>
+          )}
+          {Object.values(status.errors).map((message) => <p key={message} role="alert">{message}</p>)}
         </Modal>
       )}
     </SaasLayout>

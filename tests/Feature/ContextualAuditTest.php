@@ -8,6 +8,7 @@ use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Auditoria\Domain\Exceptions\AuditWriteFailed;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
+use App\Domains\Clientes\Domain\Models\Customer;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Domains\Pessoas\Domain\Models\Person;
@@ -67,19 +68,31 @@ final class ContextualAuditTest extends TestCase
         return AccessNode::establishment($this->gartan->id, $unit->company_id, $unit->id);
     }
 
+    private function customersUrl(?Person $person = null): string
+    {
+        $base = '/conta/empresa/'.$this->roupas->code.'/clientes';
+
+        if ($person === null) {
+            return $base;
+        }
+
+        $relation = Customer::where('account_id', $person->account_id)
+            ->where('company_id', $this->roupas->id)
+            ->where('person_id', $person->id)
+            ->sole();
+
+        return $base.'/'.$relation->id;
+    }
+
     /** Operações reais em cada nível: conta, pessoa compartilhada, empresa, unidade, relação e acesso. */
     private function produceEvents(): Person
     {
         $this->actingAs($this->owner);
 
-        $this->postJson('/conta/pessoas', [
-            'name' => 'Ana Compartilhada',
-            'relations' => [
-                $this->roupas->id => ['customer' => '1'],
-                $this->express->id => ['customer' => '1'],
-            ],
-        ])->assertOk();
+        $this->postJson($this->customersUrl(), ['name' => 'Ana Compartilhada'])->assertNoContent();
         $ana = Person::where('name', 'Ana Compartilhada')->sole();
+        $this->postJson('/conta/empresa/'.$this->express->code.'/clientes', ['person_id' => $ana->id])
+            ->assertNoContent();
 
         $this->patchJson('/conta/empresas/'.$this->roupas->id, ['name' => 'Gartan Roupas Ltda'])->assertOk();
         $this->patchJson('/conta/estabelecimentos/'.$this->janauba->id, ['name' => 'Janaúba Centro'])->assertOk();
@@ -155,7 +168,7 @@ final class ContextualAuditTest extends TestCase
         $this->assertNotSame($changes[0]->operation_id, $changes[1]->operation_id);
 
         // Cargo da conta, concessão e revogação no nó da atribuição.
-        $role = $this->role($this->gartan, 'Conferente', ['account.people.list']);
+        $role = $this->role($this->gartan, 'Conferente', ['account.people.view']);
         $this->patchJson('/conta/cargos/'.$role->id, ['name' => 'Conferente geral'])->assertOk();
         $roleEvent = AuditRecord::where('entity_type', 'role')
             ->where('entity_id', $role->id)
@@ -194,8 +207,8 @@ final class ContextualAuditTest extends TestCase
         $ana = $this->produceEvents();
         $before = AuditRecord::count();
 
-        $this->patchJson('/conta/pessoas/'.$ana->id, ['name' => 'Ana Compartilhada', 'phone' => '77998521027'])
-            ->assertOk();
+        $this->patchJson($this->customersUrl($ana), ['name' => 'Ana Compartilhada', 'phone' => '77998521027'])
+            ->assertNoContent();
 
         $events = AuditRecord::where('id', '>', AuditRecord::orderBy('id')->skip($before - 1)->value('id'))->get();
         $this->assertCount(1, $events, 'A alteração central não é duplicada por empresa relacionada.');
@@ -224,7 +237,7 @@ final class ContextualAuditTest extends TestCase
 
         // Autor renomeado, vínculo suspenso, pessoa renomeada, empresa renomeada e unidade inativada.
         $this->owner->forceFill(['name' => 'Nome novo do titular'])->saveOrFail();
-        $this->patchJson('/conta/pessoas/'.$ana->id, ['name' => 'Ana Renomeada'])->assertOk();
+        $this->patchJson($this->customersUrl($ana), ['name' => 'Ana Renomeada'])->assertNoContent();
         $this->patchJson('/conta/empresas/'.$this->roupas->id, ['name' => 'Roupas Renomeada'])->assertOk();
         $this->patchJson('/conta/estabelecimentos/'.$this->janauba->id, ['active' => '0'])->assertOk();
 
@@ -312,8 +325,8 @@ final class ContextualAuditTest extends TestCase
         $before = AuditRecord::count();
 
         // Atualização sem mudança efetiva e requisição recusada.
-        $this->patchJson('/conta/pessoas/'.$ana->id, ['name' => 'Ana Compartilhada'])->assertOk();
-        $this->postJson('/conta/pessoas', ['name' => ''])->assertUnprocessable();
+        $this->patchJson($this->customersUrl($ana), ['name' => 'Ana Compartilhada'])->assertNoContent();
+        $this->postJson($this->customersUrl(), ['name' => ''])->assertUnprocessable();
         $this->assertSame($before, AuditRecord::count());
 
         // Falha na operação depois da escrita: nada do histórico permanece.
@@ -334,7 +347,7 @@ final class ContextualAuditTest extends TestCase
             "create trigger e08_audit_failure before insert on audit_records begin select raise(abort, 'falha'); end",
         );
         Log::spy();
-        $this->postJson('/conta/pessoas', ['name' => 'Sem histórico', 'email' => 'privado@example.test'])
+        $this->postJson($this->customersUrl(), ['name' => 'Sem histórico', 'email' => 'privado@example.test'])
             ->assertServerError()
             ->assertDontSee('privado@example.test');
         DB::statement('drop trigger e08_audit_failure');
@@ -457,7 +470,7 @@ final class ContextualAuditTest extends TestCase
                 'mode' => 'read-only',
             ])
             ->assertOk();
-        $this->postJson('/conta/pessoas', ['name' => 'Bloqueada'])->assertForbidden();
+        $this->postJson($this->customersUrl(), ['name' => 'Bloqueada'])->assertForbidden();
         $this->assertFalse(AuditRecord::where('entity_name', 'Bloqueada')->exists());
         $this->postJson('/conta/inspecao/encerrar')->assertOk();
 
@@ -465,7 +478,7 @@ final class ContextualAuditTest extends TestCase
         $this->actingAs($platform)
             ->postJson('/saas/contas/'.$this->gartan->id.'/inspecao', ['user_id' => $this->owner->id, 'mode' => 'edit'])
             ->assertOk();
-        $this->postJson('/conta/pessoas', ['name' => 'Criada na inspeção'])->assertOk();
+        $this->postJson($this->customersUrl(), ['name' => 'Criada na inspeção'])->assertNoContent();
 
         $started = AuditRecord::where('event', 'inspection-started')->latest('id')->firstOrFail();
         $write = AuditRecord::where('entity_name', 'Criada na inspeção')->sole();
@@ -498,7 +511,7 @@ final class ContextualAuditTest extends TestCase
             ->postJson('/saas/contas/'.$this->gartan->id.'/inspecao', ['user_id' => $this->owner->id, 'mode' => 'edit'])
             ->assertOk();
         $platform->forceFill(['is_saas_admin' => false])->saveOrFail();
-        $this->postJson('/conta/pessoas', ['name' => 'Após revogação'])->assertUnauthorized();
+        $this->postJson($this->customersUrl(), ['name' => 'Após revogação'])->assertUnauthorized();
 
         $automatic = AuditRecord::where('event', 'inspection-ended')->latest('id')->firstOrFail();
         $this->assertFalse(AuditRecord::where('entity_name', 'Após revogação')->exists());
@@ -507,7 +520,7 @@ final class ContextualAuditTest extends TestCase
         $this->assertStringStartsWith('Automático', $automatic->changes['ending']['after']);
 
         // A requisição normal seguinte não herda autor, representado nem inspeção.
-        $this->actingAs($this->owner)->postJson('/conta/pessoas', ['name' => 'Depois da inspeção'])->assertOk();
+        $this->actingAs($this->owner)->postJson($this->customersUrl(), ['name' => 'Depois da inspeção'])->assertNoContent();
         $normal = AuditRecord::where('entity_name', 'Depois da inspeção')->sole();
         $this->assertSame([$this->owner->id, null, null, null, 'account'], [
             $normal->actor_id,
@@ -534,8 +547,11 @@ final class ContextualAuditTest extends TestCase
 
         $other = $this->account('Outra conta');
         $otherOwner = $this->administrator($other);
-        $this->actingAs($otherOwner)->postJson('/conta/pessoas', ['name' => 'Pessoa de outra conta'])->assertOk();
-        $foreign = AuditRecord::where('entity_name', 'Pessoa de outra conta')->sole();
+        $this->actingAs($otherOwner)
+            ->postJson('/conta/empresa/'.$this->company($other, 'Comércio', '11222333')->code.'/clientes', [
+                'name' => 'Pessoa de outra conta',
+            ])->assertNoContent();
+        $foreign = AuditRecord::where('entity_type', 'person')->where('entity_name', 'Pessoa de outra conta')->sole();
 
         $account = AuditRecord::where('account_id', $this->gartan->id);
         $expected = [
@@ -617,7 +633,7 @@ final class ContextualAuditTest extends TestCase
 
         // Sem permissão de auditoria, nada é consultado, nem detalhe nem opções.
         $reader = $this->operator($this->gartan, [[
-            $this->role($this->gartan, 'Leitura', ['account.people.list']),
+            $this->role($this->gartan, 'Leitura', ['account.people.view']),
             AccessNode::tenant($this->gartan->id),
         ]]);
         $this->actingAs($reader);
@@ -689,7 +705,7 @@ final class ContextualAuditTest extends TestCase
         $this->actingAs($platform)
             ->postJson('/saas/contas/'.$this->gartan->id.'/inspecao', ['user_id' => $this->owner->id, 'mode' => 'edit'])
             ->assertOk();
-        $this->postJson('/conta/pessoas', ['name' => 'Escrita em inspeção'])->assertOk();
+        $this->postJson($this->customersUrl(), ['name' => 'Escrita em inspeção'])->assertNoContent();
         $this->postJson('/conta/inspecao/encerrar')->assertOk();
         $inspectionWrite = AuditRecord::where('entity_name', 'Escrita em inspeção')->sole();
 
@@ -771,7 +787,7 @@ final class ContextualAuditTest extends TestCase
         }
 
         // Disponibilidade restrita: evento do nó restrito (E08-D4).
-        $role = $this->role($this->gartan, 'Restrito', ['account.people.list']);
+        $role = $this->role($this->gartan, 'Restrito', ['account.people.view']);
         $this->actingAs($this->owner)->patchJson('/conta/cargos/'.$role->id, [
             'name' => $role->name,
             'permission_ids' => $role->permissionIds(),
@@ -789,7 +805,7 @@ final class ContextualAuditTest extends TestCase
 
     public function test_restricted_availability_is_visible_only_at_the_affected_nodes(): void
     {
-        $role = $this->role($this->gartan, 'Disponibilidade local', ['account.people.list']);
+        $role = $this->role($this->gartan, 'Disponibilidade local', ['account.people.view']);
         $this->actingAs($this->owner)->patchJson('/conta/cargos/'.$role->id, [
             'name' => $role->name,
             'permission_ids' => $role->permissionIds(),
@@ -968,7 +984,7 @@ final class ContextualAuditTest extends TestCase
         // A sincronização do catálogo não grava mais na trilha legada.
         $legacy = DB::table('access_catalog_events')->count();
         $central = AuditRecord::where('event', 'catalog-synchronized')->count();
-        DB::table('permissions')->where('slug', 'account.people.list')->update(['name' => 'Nome antigo']);
+        DB::table('permissions')->where('slug', 'account.people.update')->update(['name' => 'Nome antigo']);
         $this->artisan('permissions:sync')->assertSuccessful();
         $this->assertSame($central + 1, AuditRecord::where('event', 'catalog-synchronized')->count());
         $this->assertSame($legacy, DB::table('access_catalog_events')->count());

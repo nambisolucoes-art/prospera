@@ -13,7 +13,7 @@ As permissões são disponibilizadas automaticamente pelos módulos do sistema. 
 
 ## Cadastrar um cargo
 
-Em **Cargos > Cadastrar**, informe o nome e marque cada ação permitida, agrupada por módulo. Por exemplo, **Listar: Pessoas** permite consultar a lista; **Visualizar: Pessoas** permite abrir o modal; **Cadastrar: Pessoas** permite criar pessoas; **Editar: Pessoas** permite alterar o cadastro. Salve em **Salvar**.
+Em **Cargos > Cadastrar**, informe o nome e marque cada ação permitida, agrupada por módulo. Por exemplo, **Listar: Clientes** permite consultar a lista de clientes e **Visualizar: Clientes** permite abrir a ficha da relação. As permissões de Pessoas que permanecem controlam os dados compartilhados nos fluxos dos módulos. Salve em **Salvar**.
 
 O cargo vale somente na conta atual. Permissões não marcadas ficam bloqueadas. Você só pode conceder permissões que já possui. O administrador inicial da conta é protegido para preservar o acesso administrativo. O cargo inicial Usuário oferece acesso básico e pode ser editado, assim como cargos personalizados.
 

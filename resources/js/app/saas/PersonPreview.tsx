@@ -4,22 +4,23 @@ import { formatMasked } from './ClientFormFields';
 import { formatTaxDocument } from '@/utils/formatTaxDocument';
 import PreviewSection from './PreviewSection';
 import TagLabel from '@/components/TagLabel/TagLabel';
-import { PersonRelationsTable } from './CommercialRelations';
 import type { PersonRow } from './Directory.types';
 import './AccountPreview.css';
 import './Directory.css';
 export default function PersonPreview({
-  person: row,
+  name,
+  endpoint,
   onClose,
 }: {
-  person: PersonRow;
+  name: string;
+  endpoint: string;
   onClose: () => void;
 }) {
   const [person, setPerson] = useState<PersonRow>();
   const [error, setError] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`/conta/pessoas/${row.id}/visualizar`, {
+    fetch(endpoint, {
       signal: controller.signal,
       headers: { Accept: 'application/json' },
     })
@@ -31,11 +32,11 @@ export default function PersonPreview({
         if (!controller.signal.aborted) setError(true);
       });
     return () => controller.abort();
-  }, [row.id]);
+  }, [endpoint]);
   return (
     <Modal
       open
-      title={row.name}
+      title={name}
       onClose={onClose}
       size="large"
       contentClassName="account-preview"
@@ -44,7 +45,7 @@ export default function PersonPreview({
     >
       {!person ? (
         <p role={error ? 'alert' : 'status'}>
-          {error ? 'Não foi possível abrir a pessoa.' : 'Carregando…'}
+          {error ? 'Não foi possível abrir o cadastro.' : 'Carregando…'}
         </p>
       ) : (
         <>
@@ -87,27 +88,6 @@ export default function PersonPreview({
             <dt>Site</dt><dd>{person.website || 'Não informado'}</dd>
             <dt>Endereço</dt><dd>{[person.address?.street, person.address?.number, person.address?.complement, person.address?.neighborhood, person.address?.city, person.address?.state, person.address?.postal_code ? formatMasked(person.address.postal_code, 'cep') : null].filter(Boolean).join(', ') || 'Não informado'}</dd>
           </PreviewSection>
-          {!!person.relations?.length && (
-            <section className="account-preview__section" data-tour="person-preview-relations">
-              <h3>Relações comerciais</h3>
-              <PersonRelationsTable relations={person.relations} />
-            </section>
-          )}
-          {person.membership && (
-            <section className="account-preview__section">
-              <h3>Acesso de usuário</h3>
-              <dl>
-                <dt>E-mail de acesso</dt>
-                <dd>{person.membership.email}</dd>
-                {person.membership.assignments.map((assignment) => (
-                  <div key={assignment.id}>
-                    <dt>{assignment.location}</dt>
-                    <dd>{assignment.role}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          )}
         </>
       )}{' '}
     </Modal>

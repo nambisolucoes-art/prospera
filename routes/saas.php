@@ -156,27 +156,6 @@ Route::middleware(['auth', 'can:access-saas', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified'])->prefix('conta')->name('account.directory.')->group(function () {
     $controller = DirectoryController::class;
 
-    Route::get('pessoas', [$controller, 'people'])
-        ->name('people.index');
-
-    Route::get('pessoas/cadastrar', [$controller, 'personForm'])
-        ->name('people.create');
-
-    Route::get('pessoas/{personId}/visualizar', [$controller, 'previewPerson'])
-        ->whereNumber('personId')
-        ->name('people.view');
-
-    Route::get('pessoas/{personId}/editar', [$controller, 'personForm'])
-        ->whereNumber('personId')
-        ->name('people.edit');
-
-    Route::post('pessoas', [$controller, 'savePerson'])
-        ->name('people.store');
-
-    Route::patch('pessoas/{personId}', [$controller, 'savePerson'])
-        ->whereNumber('personId')
-        ->name('people.update');
-
     Route::get('etiquetas', [$controller, 'tags'])
         ->name('tags.index')
         ->middleware('can:account.tags.list');

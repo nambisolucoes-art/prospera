@@ -57,6 +57,7 @@ final class UserController
         abort_if($nodes->isEmpty(), 403);
 
         $view = $permissions->nodesFor($user, 'account.users.view');
+        $assign = $permissions->nodesFor($user, 'account.users.assign-role');
         $search = mb_substr(trim($request->string('search')->toString()), 0, 100);
         $pageSize = PageSize::fromInput($request->query('per_page'));
         $memberships = $directory->list($accountId, $nodes, $pageSize, $search);
@@ -64,13 +65,12 @@ final class UserController
         return ApiPage::respond([
             'tenant' => true,
             'search' => $search,
-            'users' => $memberships->through(function (AccountMembership $membership) use ($view, $directory): array {
+            'users' => $memberships->through(function (AccountMembership $membership) use ($view, $assign, $directory): array {
                 $canView = $view->tenant || $membership->assignments
                     ->contains(fn ($assignment) => $view->covers($assignment->node()));
 
                 return [
                     'id' => $membership->id,
-                    'person_id' => $membership->person_id,
                     'name' => $membership->person->name,
                     'email' => $membership->identity->email,
                     'status' => $membership->status,
@@ -82,6 +82,8 @@ final class UserController
                         ) : null,
                     'assignments' => $membership->assignments->map($directory->assignment(...)),
                     'can_view' => $canView,
+                    'can_assign' => $assign->tenant || $membership->assignments
+                        ->contains(fn ($assignment) => $assign->covers($assignment->node())),
                 ];
             }),
         ]);

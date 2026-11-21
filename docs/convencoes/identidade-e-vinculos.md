@@ -95,7 +95,6 @@ Validações de unicidade de documento seguem a mesma regra: são sempre limitad
 | --- | --- | --- |
 | `account.users.list`, `account.users.view` | tenant, company, establishment | Lista vínculos com atribuição no escopo do operador, mostrando só as atribuições desse escopo |
 | `account.users.create` | tenant, company, establishment | Cria identidade nova, vínculo e a primeira atribuição no escopo do operador. Nunca altera identidade existente |
-| `account.users.update` | tenant | Dados do vínculo na conta. Não inclui a identidade |
 | `account.users.revoke`, `account.users.reactivate` | tenant | Suspender e reativar o acesso à conta |
 | `account.users.send-password-reset` | tenant | Disparar o link de redefinição de senha ao e-mail do titular |
 | `account.users.invite` | tenant | Reenviar o convite |
