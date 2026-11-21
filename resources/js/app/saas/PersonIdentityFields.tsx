@@ -24,7 +24,7 @@ export default function PersonIdentityFields({
   useEffect(() => setDocumentError(errors.document), [errors]);
   const company = type === 'company';
   return <BusinessFormSection title="Dados da pessoa" tourTarget="person-identity">
-    {documentLocked ? (
+    {documentLocked || identificationDisabled ? (
       <Field label="Tipo de pessoa" value={company ? 'Pessoa jurídica' : 'Pessoa física'} readOnly />
     ) : (
       <Select label="Tipo de pessoa" name="person_type" value={type} required error={errors.person_type}
@@ -40,7 +40,7 @@ export default function PersonIdentityFields({
     )}
     <Field label={company ? 'Razão social' : 'Nome'} name="name" defaultValue={person?.name}
       error={errors.name} required disabled={identificationDisabled} />
-    <TaxDocumentField personType={type} name={documentLocked ? undefined : 'document'} readOnly={documentLocked}
+    <TaxDocumentField personType={type} name={documentLocked ? undefined : 'document'} readOnly={documentLocked} disabled={identificationDisabled}
       info={documentLocked ? 'Documento usado para localizar o cadastro.' : 'Documento opcional. Quando informado, deve ser válido e único nesta conta. CNPJ numérico ou alfanumérico é aceito.'}
       action={documentAction?.(document, type)} controlAside={documentAside} value={document}
       onChange={(event) => {

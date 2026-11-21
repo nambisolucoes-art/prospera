@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Domains\Clientes\Domain\Models\Customer;
@@ -100,5 +101,149 @@ final class RoleBasedRegistrationTest extends TestCase
             ->latest('id')->firstOrFail();
         $this->assertSame('Listar: Pessoas', $record->changes['account.people.list']['before']);
         $this->assertNull($record->changes['account.people.list']['after']);
+    }
+
+    public function test_commercial_edit_updates_status_and_shared_document_with_separate_authority(): void
+    {
+        $account = $this->account();
+        $owner = $this->administrator($account);
+        $company = $this->company($account, 'Comercial', '11222333');
+        $base = '/conta/empresa/'.$company->code;
+
+        $this->actingAs($owner)->postJson($base.'/clientes', [
+            'name' => 'João',
+            'document' => '52998224725',
+        ])->assertNoContent();
+
+        $person = Person::where('document', '52998224725')->sole();
+        $this->postJson($base.'/fornecedores', ['person_id' => $person->id])->assertNoContent();
+        $customer = $person->customers()->sole();
+        $supplier = $person->suppliers()->sole();
+        $customerPath = $base.'/clientes/'.$customer->id;
+        $supplierPath = $base.'/fornecedores/'.$supplier->id;
+
+        $role = $this->role($account, 'Editor comercial', ['account.customers.update']);
+        $editor = $this->operator($account, [[$role, AccessNode::company($account->id, $company->id)]]);
+        $this->actingAs($editor)->patchJson($customerPath, ['active' => '0'])->assertForbidden();
+        $this->assertTrue($customer->fresh()->active);
+
+        $this->actingAs($owner)->patchJson($customerPath, ['active' => '0', 'document' => '390.533.447-05'])
+            ->assertNoContent();
+        $this->assertFalse($customer->fresh()->active);
+        $this->assertTrue($supplier->fresh()->active);
+        $this->assertSame('39053344705', $supplier->person()->sole()->document);
+
+        $this->patchJson($supplierPath, ['active' => '0'])->assertNoContent();
+        $this->assertFalse($supplier->fresh()->active);
+        $this->patchJson($customerPath, ['active' => '1'])->assertNoContent();
+        $this->assertTrue($customer->fresh()->active);
+        $this->assertFalse($supplier->fresh()->active);
+    }
+
+    public function test_multiple_company_registration_and_edit_keep_independent_audited_links(): void
+    {
+        $account = $this->account();
+        $owner = $this->administrator($account);
+        $first = $this->company($account, 'Primeira', '11222333');
+        $second = $this->company($account, 'Segunda', '44555666');
+        $third = $this->company($account, 'Terceira', '66777888');
+
+        foreach (['clientes' => 'customer', 'fornecedores' => 'supplier'] as $segment => $type) {
+            $base = '/conta/empresa/'.$first->code.'/'.$segment;
+            $name = 'Cadastro '.$segment;
+            $this->actingAs($owner)->postJson($base, [
+                'name' => $name,
+                'add_companies' => [$second->code],
+            ])->assertNoContent();
+
+            $person = Person::where('account_id', $account->id)->where('name', $name)->sole();
+            $links = $type === 'customer' ? $person->customers() : $person->suppliers();
+            $this->assertEqualsCanonicalizing([$first->id, $second->id], (clone $links)->pluck('company_id')->all());
+            $firstLink = (clone $links)->where('company_id', $first->id)->sole();
+
+            $this->patchJson($base.'/'.$firstLink->id, [
+                'person_type' => 'company',
+                'document' => '11.222.333/0001-81',
+                'add_companies' => [$third->code],
+                'remove_companies' => [$second->code],
+            ])->assertNoContent();
+
+            $this->assertSame('company', $person->fresh()->person_type);
+            $this->assertEqualsCanonicalizing(
+                [$first->id, $third->id],
+                (clone $links)->where('active', true)->pluck('company_id')->all(),
+            );
+            $this->assertFalse((clone $links)->where('company_id', $second->id)->sole()->active);
+            $events = AuditRecord::where('entity_type', $type)
+                ->whereIn('entity_id', (clone $links)->pluck('id'))
+                ->latest('id')->take(2)->get();
+            $this->assertEqualsCanonicalizing([$second->id, $third->id], $events->pluck('company_id')->all());
+            $this->assertCount(1, $events->pluck('operation_id')->unique());
+
+            $this->patchJson($base.'/'.$firstLink->id, ['person_type' => 'individual'])
+                ->assertUnprocessable()->assertJsonValidationErrors('document');
+            $this->patchJson($base.'/'.$firstLink->id, ['person_type' => 'individual', 'document' => null])
+                ->assertNoContent();
+        }
+    }
+
+    public function test_forged_company_changes_leave_no_partial_relationships_or_identity_update(): void
+    {
+        $account = $this->account();
+        $first = $this->company($account, 'Visível', '11222333');
+        $second = $this->company($account, 'Restrita', '44555666');
+        $foreign = $this->company($this->account('Outra conta'), 'Externa', '66777888');
+        $owner = $this->administrator($account);
+        $base = '/conta/empresa/'.$first->code.'/clientes';
+
+        $this->actingAs($owner)->postJson($base, [
+            'name' => 'Fora da conta',
+            'add_companies' => [$foreign->code],
+        ])->assertNotFound();
+        $this->assertDatabaseMissing('people', ['name' => 'Fora da conta']);
+
+        $permissions = [
+            'account.customers.create',
+            'account.customers.update',
+            'account.customers.deactivate',
+            'account.people.create',
+            'account.people.view',
+            'account.people.update',
+        ];
+        $role = $this->role($account, 'Local', $permissions);
+        $operator = $this->operator($account, [[$role, AccessNode::company($account->id, $first->id)]]);
+        $this->actingAs($operator)->postJson($base, [
+            'name' => 'Escrita proibida',
+            'add_companies' => [$second->code],
+        ])->assertForbidden();
+        $this->assertDatabaseMissing('people', ['name' => 'Escrita proibida']);
+
+        $this->postJson($base, ['name' => 'Registro original'])->assertNoContent();
+        $person = Person::where('name', 'Registro original')->sole();
+        $relation = $person->customers()->sole();
+        $this->patchJson($base.'/'.$relation->id, [
+            'name' => 'Escrita revertida',
+            'active' => '0',
+            'add_companies' => [$second->code],
+        ])->assertForbidden();
+
+        $this->assertSame('Registro original', $person->fresh()->name);
+        $this->assertTrue($relation->fresh()->active);
+        $this->assertCount(1, $person->customers()->get());
+        $this->assertDatabaseMissing('audit_records', ['entity_name' => 'Escrita revertida']);
+
+        $this->actingAs($owner)
+            ->postJson('/conta/empresa/'.$second->code.'/clientes', ['person_id' => $person->id])
+            ->assertNoContent();
+        $this->actingAs($operator)
+            ->patchJson($base.'/'.$relation->id, ['remove_companies' => [$second->code]])
+            ->assertForbidden();
+        $this->patchJson($base.'/'.$relation->id, [
+            'person_type' => 'company',
+            'document' => '11.222.333/0001-81',
+        ])->assertForbidden();
+        $this->assertSame('individual', $person->fresh()->person_type);
+        $this->assertTrue($person->customers()->where('company_id', $second->id)->sole()->active);
+
     }
 }

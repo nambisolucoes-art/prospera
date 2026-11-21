@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import BusinessForm, { BusinessFormActions, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
+import SelectChecklist from '@/components/SelectControl/SelectChecklist';
 import TaxDocumentField from '@/components/BusinessForm/TaxDocumentField';
 import Button from '@/components/Button/Button';
 import FormHelp from '@/components/FormHelp/FormHelp';
@@ -38,6 +39,7 @@ function isCompleteDocument(document: string, type: PersonDocumentType) {
 type Props = {
   role: 'customer' | 'supplier';
   companies: { code: string; name: string }[];
+  companyOptions?: { code: string; name: string; active: boolean; disabled: boolean }[];
   registrationTags: Tag[];
   roleTagColor: string;
   canCreatePeople: boolean;
@@ -48,6 +50,8 @@ type Props = {
     can_edit_identification: boolean;
     can_edit_contacts: boolean;
     tag_ids: number[];
+    active: boolean;
+    can_change_status: boolean;
   };
 };
 
@@ -55,18 +59,27 @@ export default function CommercialRegistration(props: Props) {
   return <RegistrationForm key={`${props.role}:${props.companies[0]?.code}:${props.editing?.id ?? 'new'}`} {...props} />;
 }
 
-function RegistrationForm({ role, companies, registrationTags, roleTagColor, canCreatePeople, editing }: Props) {
+function RegistrationForm({ role, companies, companyOptions, registrationTags, roleTagColor, canCreatePeople, editing }: Props) {
   const { url } = useApiPage();
   const singular = role === 'customer' ? 'cliente' : 'fornecedor';
   const listTitle = role === 'customer' ? 'Clientes' : 'Fornecedores';
   const segment = listTitle.toLowerCase();
   const listUrl = contextualUrl(`~/${segment}`, url);
   const [draft, setDraft] = useState(0);
-  const [companyCode, setCompanyCode] = useState(companies.length === 1 ? companies[0].code : '');
+  const [selectedCompanies, setSelectedCompanies] = useState(() =>
+    editing
+      ? (companyOptions ?? []).filter((option) => option.active).map((option) => option.code)
+      : companies.length === 1 ? [companies[0].code] : [],
+  );
+  const companyCode = editing ? companies[0].code : selectedCompanies[0];
+  const options = companyOptions ?? companies.map((option) => ({ ...option, active: false, disabled: false }));
+  const isActive = selectedCompanies.includes(companyCode);
+
   const [selectedTags, setSelectedTags] = useState(editing?.tag_ids ?? []);
   const [document, setDocument] = useState('');
   const [documentType, setDocumentType] = useState<PersonDocumentType>('individual');
   const [found, setFound] = useState<FoundPerson>();
+  const blocksLink = Boolean(found?.relation) && selectedCompanies.length < 2;
   const [departingPerson, setDepartingPerson] = useState<FoundPerson>();
   const [lookupError, setLookupError] = useState('');
   const [searching, setSearching] = useState(false);
@@ -93,6 +106,12 @@ function RegistrationForm({ role, companies, registrationTags, roleTagColor, can
     if (found) setDepartingPerson(found);
     setFound(undefined);
     setLookupError('');
+  }
+
+  function selectCompany(code: string, checked: boolean) {
+    const next = checked ? [...selectedCompanies, code] : selectedCompanies.filter((value) => value !== code);
+    setSelectedCompanies(next);
+    if (!editing && next[0] !== companyCode) resetLookup();
   }
 
   function changeDocument(value: string, type: PersonDocumentType) {
@@ -191,8 +210,8 @@ function RegistrationForm({ role, companies, registrationTags, roleTagColor, can
                 <strong>{noticePerson.name}</strong> já tem cadastro
                 {noticePerson.other_role ? ` como ${noticePerson.other_role.toLowerCase()}` : ''}.
               </span>
-              {noticePerson.relation === 'active' && ` Já está cadastrada como ${singular} nesta empresa.`}
-              {noticePerson.relation === 'inactive' && ' O cadastro está inativo. Use Ativar na listagem.'}
+              {noticePerson.relation === 'active' && ` Já está cadastrada como ${singular} na primeira empresa selecionada.`}
+              {noticePerson.relation === 'inactive' && ' O vínculo na primeira empresa selecionada está inativo.'}
             </FormHelp>
             <FormHelp>
               Deseja utilizar outro{' '}
@@ -230,17 +249,41 @@ function RegistrationForm({ role, companies, registrationTags, roleTagColor, can
           className="business-form--wide-labels" data-tour="commercial-registration-form">
           {({ errors, processing }) => (
             <>
-              {companies.length > 1 && (
-                <BusinessFormSection title="Empresa" tourTarget="commercial-registration-company">
-                  <Select label="Empresa responsável" required value={companyCode} placeholder="Escolha a empresa"
-                    options={companies.map((option) => ({ value: option.code, label: option.name }))}
-                    onChange={(value) => { setCompanyCode(value); resetLookup(); }} />
-                </BusinessFormSection>
-              )}
-              {editing && (
-                <BusinessFormSection title="Empresa" tourTarget="commercial-registration-company">
-                  <Field label="Empresa responsável" value={company?.name ?? ''} readOnly />
-                  {!editing.central && <Field label="Nome" value={editing.name} readOnly />}
+              {(editing || companies.length > 1) && (
+                <BusinessFormSection title="Empresas" tourTarget="commercial-registration-company">
+                  {editing && <Field label="Empresa desta ficha" value={company?.name ?? ''} readOnly />}
+                  {options.length > 1 && (
+                    <>
+                      <SelectChecklist label="Empresas do cadastro" menuLabel="Selecionar empresas"
+                        options={options.map((option) => ({
+                          id: option.code,
+                          label: option.name,
+                          checked: selectedCompanies.includes(option.code),
+                          disabled: option.disabled || processing,
+                        }))}
+                        onChange={selectCompany} />
+                      <FormHelp className="business-form__control-start">
+                        {options.filter((option) => selectedCompanies.includes(option.code)).map((option) => option.name).join(', ')
+                          || 'Nenhuma empresa selecionada'}
+                      </FormHelp>
+                      {editing && <FormHelp className="business-form__control-start">Desmarcar uma empresa inativa o vínculo nela.</FormHelp>}
+                    </>
+                  )}
+                  {Object.entries(errors).filter(([key]) => /^(add|remove)_companies(?:\.|$)/.test(key)).map(([key, error]) =>
+                    <p className="formField__error" role="alert" key={key}>{error}</p>)}
+                  {editing && (editing.can_change_status ? (
+                    <Select label="Situação" value={isActive ? '1' : '0'} error={errors.active}
+                      onChange={(value) => selectCompany(companyCode, value === '1')}
+                      options={[{ value: '1', label: 'Ativo' }, { value: '0', label: 'Inativo' }]} />
+                  ) : <Field label="Situação" value={editing.active ? 'Ativo' : 'Inativo'} readOnly />)}
+                  {editing && isActive !== editing.active && (
+                    <input type="hidden" name="active" value={isActive ? '1' : '0'} />
+                  )}
+                  {editing && !editing.central && <Field label="Nome" value={editing.name} readOnly />}
+                  {options.filter((option) => option.code !== companyCode
+                    && selectedCompanies.includes(option.code) !== option.active).map((option) =>
+                    <input key={option.code} type="hidden" value={option.code}
+                      name={selectedCompanies.includes(option.code) ? 'add_companies[]' : 'remove_companies[]'} />)}
                 </BusinessFormSection>
               )}
               {canCreatePeople && (
@@ -270,13 +313,13 @@ function RegistrationForm({ role, companies, registrationTags, roleTagColor, can
               )}
               {existing?.central && (
                 <div key={existing.id}>
-                  <PersonIdentityFields person={existing.central} errors={errors} documentLocked
-                    identificationDisabled={!existing.can_edit_identification || Boolean(found?.relation) || processing}
+                  <PersonIdentityFields person={existing.central} errors={errors} documentLocked={!editing}
+                    identificationDisabled={!existing.can_edit_identification || blocksLink || processing}
                     documentAction={editing ? undefined : (value, type) => searchButton(value, type, true)}
                     documentLookupError={errors.person_id}
                     documentAside={documentNotice(processing)} />
                   <fieldset className="person-form__group"
-                    disabled={!existing.can_edit_contacts || Boolean(found?.relation) || processing}>
+                    disabled={!existing.can_edit_contacts || blocksLink || processing}>
                     <AddressFields initial={existing.central.address ?? undefined}
                       errors={errors} namePrefix="address" errorPrefix="address" tourTarget="person-address" />
                     <PersonContactFields person={existing.central} errors={errors} access={false} />
@@ -287,20 +330,20 @@ function RegistrationForm({ role, companies, registrationTags, roleTagColor, can
                 <AddressFields errors={errors} namePrefix="address" errorPrefix="address" tourTarget="person-address" />
                 <PersonContactFields person={null} errors={errors} access={false} />
               </>}
-              {found && !found.relation && <input type="hidden" name="person_id" value={found.id} />}
+              {found && !blocksLink && <input type="hidden" name="person_id" value={found.id} />}
               <BusinessFormSection title="Etiquetas" tourTarget="person-tags">
                 {editing && <input type="hidden" name="edit_tags" value="1" />}
                 <TagSelect
                   options={[roleTag, ...registrationTags]}
                   selected={[roleTag.id, ...selectedTags]}
                   onChange={(ids) => setSelectedTags(ids.filter((id) => id !== roleTag.id))}
-                  disabled={Boolean(found?.relation) || processing}
+                  disabled={blocksLink || processing}
                   error={Object.entries(errors).find(([key]) => key === 'tag_ids' || key.startsWith('tag_ids.'))?.[1]}
                 />
               </BusinessFormSection>
               <BusinessFormActions
                 processing={processing}
-                submitDisabled={!company || searching || Boolean(found?.relation) || (!editing && !found && !canCreatePeople)}
+                submitDisabled={!company || searching || blocksLink || (!editing && !found && !canCreatePeople)}
                 cancelHref={listUrl}
               />
             </>

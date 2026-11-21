@@ -6,7 +6,7 @@ Artigo: [Fornecedores](../ajuda/fornecedores.md). Tela: `/conta/estabelecimento/
 | --- | --- | --- | --- |
 | 1 | PageHeaderTour | Moldura | Passos compartilhados da moldura, sem duplicar textos. |
 | 2 | organization-switcher | Empresas da área de trabalho | A lista considera as empresas das unidades marcadas; duas unidades da mesma empresa mostram a relação uma vez. |
-| 3 | commercial-register | Cadastrar | Informe os dados da Pessoa ou busque um documento já cadastrado. O documento fica fixo e os campos autorizados podem ser atualizados. A etiqueta Fornecedor vem marcada. Selecione a empresa quando houver mais de uma opção e use Salvar. |
+| 3 | commercial-register | Cadastrar | Informe os dados da Pessoa ou busque um documento já cadastrado. O documento fica fixo e os campos autorizados podem ser atualizados. A etiqueta Fornecedor vem marcada. Marque uma ou mais empresas quando houver opções e use Salvar. |
 | 4 em diante | BusinessListTour | Buscar, filtrar, colunas e paginação | Busca por nome, e-mail, CPF ou CNPJ; filtros Situação e Empresa; Use Visualizar cadastro para abrir a ficha. Editar abre a edição. Inativar e Ativar mudam a situação na empresa da linha. |
 
 ## Página de cadastro
@@ -17,4 +17,4 @@ Revisar alvos e ordem quando a posição de Cadastrar, dos filtros ou das açõe
 
 ## Página de edição
 
-A ação **Editar** abre a ficha da empresa da linha. O tutorial destaca a empresa, os campos disponíveis, as etiquetas e as ações **Salvar** e **Cancelar**.
+A ação **Editar** abre a ficha da empresa da linha. O tutorial destaca as empresas selecionáveis, a situação do vínculo, a identificação compartilhada, as etiquetas e as ações **Salvar** e **Cancelar**.

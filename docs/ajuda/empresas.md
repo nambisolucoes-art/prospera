@@ -21,4 +21,6 @@ Use **Editar** e escolha **Salvar** após revisar os campos. A situação pode s
 
 ## Orientações nos campos
 
-O ícone de informação do documento explica a raiz de CNPJ, o CNPJ completo e a consulta cadastral. A consulta exige CNPJ numérico completo e preenche somente os nomes vazios. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.
+O ícone de informação do documento explica a raiz de CNPJ, o CNPJ completo e a consulta cadastral. A consulta exige CNPJ numérico completo e mostra os nomes oficiais antes de preencher os campos vazios. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha a dica sem alterar os dados do formulário.
+
+Em **Identificação do estabelecimento**, preencha o nome, o endereço e os contatos da primeira unidade. Se consultar o CNPJ pela lupa, confira os nomes retornados antes de usar **Preencher nomes em branco**. A empresa guarda a raiz de oito posições do CNPJ. O CNPJ completo, quando informado, fica no estabelecimento identificado como Matriz ou Filial.

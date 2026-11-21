@@ -27,6 +27,42 @@ final class CommercialRelationLinkData
         return ['person_type' => $personType, 'document' => $valid->value()];
     }
 
+    /** @param array<string,mixed> $input */
+    public static function optionalStatus(array $input): ?bool
+    {
+        $values = Validator::validate($input, [
+            'active' => ['sometimes', 'required', 'boolean'],
+        ], [
+            'active.required' => 'Selecione a situação.',
+            'active.boolean' => 'Selecione uma situação válida.',
+        ]);
+
+        return array_key_exists('active', $values) ? (bool) $values['active'] : null;
+    }
+
+    /**
+     * @param  array<string,mixed>  $input
+     * @return array{add: list<string>, remove: list<string>}
+     */
+    public static function companies(array $input, string $origin): array
+    {
+        $values = Validator::validate($input, [
+            'add_companies' => ['sometimes', 'array', 'list'],
+            'add_companies.*' => ['required', 'string', 'distinct', 'max:40', 'regex:/^[a-z0-9][a-z0-9-]+$/D'],
+            'remove_companies' => ['sometimes', 'array', 'list'],
+            'remove_companies.*' => ['required', 'string', 'distinct', 'max:40', 'regex:/^[a-z0-9][a-z0-9-]+$/D'],
+        ]);
+
+        $add = $values['add_companies'] ?? [];
+        $remove = $values['remove_companies'] ?? [];
+
+        if (in_array($origin, [...$add, ...$remove], true) || array_intersect($add, $remove) !== []) {
+            throw ValidationException::withMessages(['add_companies' => 'Revise a seleção de empresas.']);
+        }
+
+        return ['add' => $add, 'remove' => $remove];
+    }
+
     public static function personId(mixed $input): int
     {
         $message = 'Busque a pessoa pelo CPF ou CNPJ antes de salvar.';

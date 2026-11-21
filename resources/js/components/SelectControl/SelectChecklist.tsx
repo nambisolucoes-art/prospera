@@ -14,8 +14,10 @@ export default function SelectChecklist({
   label,
   options,
   onChange,
+  menuLabel = 'Colunas visíveis',
 }: {
   label: string;
+  menuLabel?: string;
   options: ChecklistOption[];
   onChange: (id: string, checked: boolean) => void;
 }) {
@@ -83,9 +85,9 @@ export default function SelectChecklist({
 
       <SelectMenu open={open}
         id={id}
-        data-tour="business-columns-options"
+        data-tour={menuLabel === 'Colunas visíveis' ? 'business-columns-options' : undefined}
         role="dialog"
-        aria-label="Colunas visíveis"
+        aria-label={menuLabel}
       >
         <div className="selectControl__checklist">
           {options.map((option) => (

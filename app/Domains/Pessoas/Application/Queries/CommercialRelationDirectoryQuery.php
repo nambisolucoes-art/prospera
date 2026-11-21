@@ -70,13 +70,34 @@ final class CommercialRelationDirectoryQuery
 
     public function relation(CommercialRole $role, int $accountId, int $companyId, int $relationId): ?int
     {
-        $personId = DB::table($role->table())
+        return $this->relationDetails($role, $accountId, $companyId, $relationId)['person_id'] ?? null;
+    }
+
+    /** @return array{person_id: int, active: bool}|null */
+    public function relationDetails(CommercialRole $role, int $accountId, int $companyId, int $relationId): ?array
+    {
+        $relation = DB::table($role->table())
             ->where('account_id', $accountId)
             ->where('company_id', $companyId)
             ->where('id', $relationId)
-            ->value('person_id');
+            ->first(['person_id', 'active']);
 
-        return $personId === null ? null : (int) $personId;
+        return $relation === null ? null : ['person_id' => (int) $relation->person_id, 'active' => (bool) $relation->active];
+    }
+
+    /**
+     * @param  list<int>  $companyIds
+     * @return array<int,bool>
+     */
+    public function companyStatuses(CommercialRole $role, int $accountId, int $personId, array $companyIds): array
+    {
+        return DB::table($role->table())
+            ->where('account_id', $accountId)
+            ->where('person_id', $personId)
+            ->whereIn('company_id', $companyIds)
+            ->pluck('active', 'company_id')
+            ->map(fn ($active): bool => (bool) $active)
+            ->all();
     }
 
     /**

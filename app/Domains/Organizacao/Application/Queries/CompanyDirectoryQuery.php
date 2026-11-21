@@ -95,6 +95,28 @@ final class CompanyDirectoryQuery
             ->get();
     }
 
+    /**
+     * @param  list<string>  $codes
+     * @return Collection<int, Company>
+     */
+    public function lockActiveCodes(int $accountId, array $codes): Collection
+    {
+        if ($codes === []) {
+            return new Collection;
+        }
+
+        $companies = Company::where('account_id', $accountId)
+            ->whereIn('code', $codes)
+            ->where('active', true)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get();
+
+        abort_unless($companies->count() === count($codes), 404);
+
+        return $companies;
+    }
+
     /** @return Collection<int, Company> */
     public function options(int $accountId, ?AuthorizedNodes $unitNodes = null): Collection
     {

@@ -23,9 +23,10 @@ final readonly class SetCommercialRelationAction
         private SaveSupplierAction $saveSupplier,
     ) {}
 
-    public function execute(CommercialRole $role, Company $company, int $personId, bool $active, bool $link): void
+    // link nulo permite criar ou reativar, conforme a escolha de empresas.
+    public function execute(CommercialRole $role, Company $company, int $personId, bool $active, ?bool $link): bool
     {
-        AuditLog::transaction(function () use ($role, $company, $personId, $active, $link): void {
+        return AuditLog::transaction(function () use ($role, $company, $personId, $active, $link): bool {
             $lockedPerson = Person::where('account_id', $company->account_id)
                 ->lockForUpdate()
                 ->findOrFail($personId);
@@ -35,14 +36,14 @@ final readonly class SetCommercialRelationAction
                 ->where('person_id', $lockedPerson->id)
                 ->exists();
 
-            if ($link && $exists) {
+            if ($link === true && $exists) {
                 throw ValidationException::withMessages([
                     'person_id' => 'Esta pessoa já tem relação de '.mb_strtolower($role->label())
                         .' com esta empresa. Use Ativar na listagem se ela estiver inativa.',
                 ]);
             }
 
-            if (! $link && ! $exists) {
+            if ($link === false && ! $exists) {
                 abort(404);
             }
 
@@ -51,6 +52,8 @@ final readonly class SetCommercialRelationAction
             } else {
                 $this->saveSupplier->execute($lockedPerson, $company, $active);
             }
+
+            return ! $exists && $active;
         });
     }
 }

@@ -4,6 +4,7 @@ import BusinessForm, {
   BusinessFormSection,
 } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
+import Button from '@/components/Button/Button';
 import CardBox from '@/components/CardBox/CardBox';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import { useApiPage } from '@/hooks/useApiPage';
@@ -31,7 +32,7 @@ export default function CompanyForm({
   const [document, setDocument] = useState(company?.document ?? '');
   const [name, setName] = useState(company?.name ?? '');
   const [tradeName, setTradeName] = useState(company?.trade_name ?? '');
-  const cnpjLookup = useCnpjLookup(setName, setTradeName);
+  const cnpjLookup = useCnpjLookup(setName, setTradeName, true);
   const legalEntity = type === 'company';
   const fullCnpj = legalEntity && document.replace(/[.\/\s-]/g, '').length === 14;
   const listHref = navigation.back ?? (can('list') ? '/conta/empresas' : undefined);
@@ -67,7 +68,18 @@ export default function CompanyForm({
                       cnpjLookup.reset();
                     }} />
                   <CompanyDocumentField name="document" type={type} document={document}
-                    onChange={setDocument} lookup={cnpjLookup} errors={errors} />
+                    onChange={setDocument} lookup={cnpjLookup} errors={errors} confirmNames />
+                  {cnpjLookup.suggestion && (
+                    <div className="business-form__control-start" role="group" aria-label="Nomes encontrados no CNPJ">
+                      {cnpjLookup.suggestion.razao_social && <p>Razão social encontrada: {cnpjLookup.suggestion.razao_social}</p>}
+                      {cnpjLookup.suggestion.nome_fantasia && <p>Nome fantasia encontrado: {cnpjLookup.suggestion.nome_fantasia}</p>}
+                      {(!name.trim() || !tradeName.trim()) && (
+                        <Button type="button" tone="white" onClick={() => cnpjLookup.applyNames()}>
+                          Preencher nomes em branco
+                        </Button>
+                      )}
+                    </div>
+                  )}
                   <Field label={legalEntity ? 'Razão social' : 'Nome'} name="name" value={name}
                     onChange={(event) => setName(event.target.value)} error={errors.name} required />
                   <Field label="Nome fantasia" name="trade_name" value={tradeName}
@@ -93,7 +105,7 @@ export default function CompanyForm({
                 {!company && (
                   <>
                     <BusinessFormSection
-                      title="Estabelecimento principal"
+                      title="Identificação do estabelecimento"
                       tourTarget="company-primary"
                       note="Criado junto com a empresa. Você poderá ajustá-lo e cadastrar outros em Estabelecimentos."
                     >
@@ -113,10 +125,9 @@ export default function CompanyForm({
                             : 'Empresas identificadas por CPF não têm matriz nem filial.'}
                         </FormHelp>
                       )}
+                      <AddressFields embedded errors={errors} namePrefix="primary[address]" errorPrefix="primary.address" />
+                      <ContactFields embedded values={{}} errors={errors} required={false} namePrefix="primary" errorPrefix="primary" />
                     </BusinessFormSection>
-                    <AddressFields errors={errors} namePrefix="primary[address]" errorPrefix="primary.address"
-                      title="Endereço do estabelecimento principal" tourTarget="company-primary-address" />
-                    <ContactFields values={{}} errors={errors} required={false} namePrefix="primary" errorPrefix="primary" />
                   </>
                 )}
               </fieldset>

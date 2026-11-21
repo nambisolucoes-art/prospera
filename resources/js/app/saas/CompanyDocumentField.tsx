@@ -1,9 +1,10 @@
 import type { Errors } from '@/components/BusinessForm/BusinessFormFields';
 import TaxDocumentField from '@/components/BusinessForm/TaxDocumentField';
+import { normalizeTaxDocument } from '@/utils/formatTaxDocument';
 import { LookupButton } from './ClientFormFields';
 import type { useCnpjLookup } from './useCnpjLookup';
 
-export default function CompanyDocumentField({ name, type, document, onChange, lookup, errors, errorKey }: {
+export default function CompanyDocumentField({ name, type, document, onChange, lookup, errors, errorKey, confirmNames = false }: {
   name: string;
   type: string;
   document: string;
@@ -11,6 +12,7 @@ export default function CompanyDocumentField({ name, type, document, onChange, l
   lookup: ReturnType<typeof useCnpjLookup>;
   errors: Errors;
   errorKey?: string;
+  confirmNames?: boolean;
 }) {
   const legalEntity = type === 'company';
 
@@ -18,8 +20,11 @@ export default function CompanyDocumentField({ name, type, document, onChange, l
     <TaxDocumentField
       personType={legalEntity ? 'company' : 'individual'}
       name={name}
+      label={confirmNames && legalEntity && normalizeTaxDocument(document).length === 8 ? 'Raiz do CNPJ' : undefined}
       info={legalEntity
-        ? 'Informe a raiz de 8 posições ou o CNPJ completo de 14 posições. A consulta cadastral exige o CNPJ numérico completo e preenche os nomes que ainda estiverem vazios.'
+        ? (confirmNames
+          ? 'Informe a raiz de 8 posições ou o CNPJ completo de 14 posições. A lupa consulta os nomes oficiais para você decidir se quer usar.'
+          : 'Informe a raiz de 8 posições ou o CNPJ completo de 14 posições. A consulta cadastral exige o CNPJ numérico completo e preenche os nomes que ainda estiverem vazios.')
         : 'Informe um CPF válido para identificar a empresa.'}
       required
       placeholder={legalEntity ? 'CNPJ completo ou raiz' : undefined}

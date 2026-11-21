@@ -215,18 +215,48 @@ final class CommercialRelationController
         abort_unless($commercialRole->allows($permissions, $user, 'update', $company->id), 403);
 
         $accountId = $context->accountId();
-        $personId = $relations->relation($commercialRole, $accountId, $company->id, $relationId);
-        abort_if($personId === null, 404);
+        $relation = $relations->relationDetails($commercialRole, $accountId, $company->id, $relationId);
+        abort_if($relation === null, 404);
 
-        $person = $relations->centralPerson($accountId, $personId);
+        $person = $relations->centralPerson($accountId, $relation['person_id']);
         $canView = ! $permissions->nodesFor($user, 'account.people.view')->isEmpty();
         $authority = $access->authority($user, $person);
         $tagIds = array_values($relations->tagsForPage($commercialRole, $accountId, [$relationId])
             ->get($relationId, collect())->pluck('id')->map(fn ($id): int => (int) $id)->all());
 
+        $available = [];
+        foreach ($context->navigable($user) as $unit) {
+            $candidate = $unit->company;
+            if ($candidate->active && (
+                $candidate->id === $company->id || $commercialRole->allows($permissions, $user, 'list', $candidate->id)
+            )) {
+                $available[$candidate->id] = $candidate;
+            }
+        }
+
+        $available[$company->id] = $company;
+        $statuses = $relations->companyStatuses($commercialRole, $accountId, $person->id, array_keys($available));
+        $options = [];
+
+        foreach ($available as $id => $candidate) {
+            $active = $statuses[$id] ?? false;
+            $action = $active ? 'deactivate' : (isset($statuses[$id]) ? 'activate' : 'create');
+            $allowed = $commercialRole->allows($permissions, $user, $action, $id);
+
+            if ($id === $company->id || $active || $allowed) {
+                $options[] = [
+                    'code' => $candidate->code,
+                    'name' => $candidate->name,
+                    'active' => $active,
+                    'disabled' => ! $allowed,
+                ];
+            }
+        }
+
         return ApiPage::respond([
             'role' => $commercialRole->value,
             'companies' => [['code' => $company->code, 'name' => $company->name]],
+            'companyOptions' => $options,
             'canCreatePeople' => false,
             'registrationTags' => $this->registrationTags($people, $accountId, $commercialRole, $tagIds),
             'roleTagColor' => $commercialRole->tagColor(),
@@ -238,6 +268,13 @@ final class CommercialRelationController
                 ]) : null,
                 'can_edit_identification' => $canView && $authority->identification,
                 'can_edit_contacts' => $canView && $authority->contacts,
+                'active' => $relation['active'],
+                'can_change_status' => $commercialRole->allows(
+                    $permissions,
+                    $user,
+                    $relation['active'] ? 'deactivate' : 'activate',
+                    $company->id,
+                ),
                 'tag_ids' => $tagIds,
             ],
         ]);
@@ -366,6 +403,9 @@ final class CommercialRelationController
         if ($request->has('person_id')) {
             $person = CommercialRelationLinkData::personId($request->input('person_id'));
             $centralChanges = $request->only([...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]);
+            if ($centralChanges !== []) {
+                abort_if($permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(), 403);
+            }
         } else {
             abort_if($permissions->nodesFor($request->user(), 'account.people.create')->isEmpty(), 403);
 
@@ -375,7 +415,10 @@ final class CommercialRelationController
             );
         }
 
-        $register->execute($commercialRole, $account, $company, $person, $tags, $centralChanges);
+        $changes = CommercialRelationLinkData::companies($request->all(), $company->code);
+        abort_if($changes['remove'] !== [], 422);
+
+        $register->execute($commercialRole, $account, $company, $person, $tags, $centralChanges, $changes['add']);
         ApiPage::toast($commercialRole->label().' cadastrado.');
 
         return response()->noContent();
@@ -404,6 +447,8 @@ final class CommercialRelationController
             ? CommercialTagsData::fromInput($request->input('tag_ids'))
             : null;
 
+        $changes = CommercialRelationLinkData::companies($request->all(), $company->code);
+
         $update->execute(
             $commercialRole,
             $accountContext->requireAccount(404),
@@ -411,6 +456,9 @@ final class CommercialRelationController
             $relationId,
             $tags,
             $centralChanges,
+            CommercialRelationLinkData::optionalStatus($request->all()),
+            $changes['add'],
+            $changes['remove'],
         );
         ApiPage::toast($commercialRole->label().' atualizado.');
 

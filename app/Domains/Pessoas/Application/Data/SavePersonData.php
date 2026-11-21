@@ -12,9 +12,16 @@ final readonly class SavePersonData
     public function __construct(public array $values) {}
 
     /** @param array<string,mixed> $input */
-    public static function forCommercialReuse(array $input, Person $person): self
-    {
-        if (array_key_exists('document', $input) || array_key_exists('person_type', $input)) {
+    public static function forCommercialReuse(
+        array $input,
+        Person $person,
+        bool $allowIdentificationChange = false,
+    ): self {
+        if (! $allowIdentificationChange && array_key_exists('person_type', $input)) {
+            throw ValidationException::withMessages(['person_type' => 'O tipo de pessoa usado para localizar o cadastro permanece fixo nesta etapa.']);
+        }
+
+        if (! $allowIdentificationChange && array_key_exists('document', $input)) {
             throw ValidationException::withMessages([
                 'document' => 'O CPF ou CNPJ usado para localizar a pessoa permanece fixo neste cadastro.',
             ]);

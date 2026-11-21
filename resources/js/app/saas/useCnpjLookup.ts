@@ -1,16 +1,27 @@
 import { useRef, useState, type Dispatch, type SetStateAction } from 'react';
 
+type CompanyNames = { razao_social?: string; nome_fantasia?: string };
+
 type SetText = Dispatch<SetStateAction<string>>;
 
-export function useCnpjLookup(setName: SetText, setTradeName: SetText) {
+export function useCnpjLookup(setName: SetText, setTradeName: SetText, confirmNames = false) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [suggestion, setSuggestion] = useState<CompanyNames>();
   const version = useRef(0);
 
   function reset() {
     version.current++;
     setLoading(false);
     setError('');
+    setSuggestion(undefined);
+  }
+
+  function applyNames(details: CompanyNames | undefined = suggestion) {
+    if (!details) return;
+    setName((current) => current.trim() ? current : details.razao_social ?? '');
+    setTradeName((current) => current.trim() ? current : details.nome_fantasia ?? '');
+    setSuggestion(undefined);
   }
 
   async function lookup(document: string) {
@@ -21,6 +32,7 @@ export function useCnpjLookup(setName: SetText, setTradeName: SetText) {
     }
 
     const request = ++version.current;
+    setSuggestion(undefined);
     setLoading(true);
     setError('');
 
@@ -36,11 +48,11 @@ export function useCnpjLookup(setName: SetText, setTradeName: SetText) {
       }
       if (!response.ok) throw new Error();
 
-      const details: { razao_social?: string; nome_fantasia?: string } = await response.json();
+      const details: CompanyNames = await response.json();
       if (request !== version.current) return;
 
-      setName((current) => current.trim() ? current : details.razao_social ?? '');
-      setTradeName((current) => current.trim() ? current : details.nome_fantasia ?? '');
+      if (confirmNames) setSuggestion(details);
+      else applyNames(details);
     } catch {
       if (request === version.current) setError('Consulta indisponível. Preencha os dados da empresa manualmente.');
     } finally {
@@ -48,5 +60,5 @@ export function useCnpjLookup(setName: SetText, setTradeName: SetText) {
     }
   }
 
-  return { lookup, reset, loading, error };
+  return { lookup, reset, loading, error, suggestion, applyNames };
 }

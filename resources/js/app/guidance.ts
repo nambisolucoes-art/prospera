@@ -113,10 +113,10 @@ export function tourFor(
     help = customers ? 'clientes' : 'fornecedores';
     steps = form([
       at('commercial-registration-company', 'Empresa responsável', editing
-        ? 'Confira a empresa deste cadastro.'
-        : 'Escolha a empresa quando houver mais de uma opção.'),
+        ? 'Confira a empresa desta ficha. Marque empresas para criar ou reativar vínculos e desmarque para inativá-los, conforme suas permissões.'
+        : 'Marque uma ou mais empresas para cadastrar os vínculos em um único salvamento.'),
       at('person-identity', 'Identificação', editing
-        ? 'Confira a ficha e altere os campos autorizados. O documento permanece fixo.'
+        ? 'Confira a ficha e altere os campos autorizados. Corrigir o tipo de pessoa ou o CPF ou CNPJ vale para todos os vínculos.'
         : 'Selecione Pessoa física para buscar por CPF ou Pessoa jurídica para buscar por CNPJ. Ao preencher o documento completo, aguarde a busca automática ou use a lupa para buscar na hora.'),
       at('person-address', 'Endereço', 'Complete o endereço do cadastro compartilhado conforme suas permissões.'),
       at('person-contact', 'Contato', 'Informe os dados gerais de contato da pessoa.'),
@@ -186,15 +186,14 @@ export function tourFor(
       at(
         'company-identity',
         'Identificação da empresa',
-        'Escolha Pessoa jurídica ou Pessoa física. Em CNPJ, use a lupa com um número completo para preencher os nomes que estiverem em branco. O cadastro também aceita raiz e CNPJ alfanumérico com preenchimento manual.',
+        'Escolha Pessoa jurídica ou Pessoa física. Em CNPJ, a lupa consulta os nomes oficiais. Confira o resultado e escolha se quer preencher os campos em branco. O cadastro também aceita raiz e CNPJ alfanumérico com preenchimento manual.',
       ),
       at('company-fiscal', 'Dados fiscais', 'Regime tributário e CNAE principal valem para a empresa inteira. A situação aparece na edição conforme suas permissões.'),
       at(
         'company-primary',
-        'Estabelecimento principal',
-        'A empresa nasce com o estabelecimento principal, criado junto no mesmo salvamento. Com o CNPJ completo, responda: A unidade deste CNPJ é a sede ou uma filial? Escolha Matriz para a sede ou Filial. Ao informar somente a raiz, a unidade é cadastrada sem CNPJ próprio.',
+        'Identificação do estabelecimento',
+        'Nome, endereço e contatos ficam no mesmo grupo. A empresa nasce com o estabelecimento principal, criado junto no mesmo salvamento. Com o CNPJ completo, responda: A unidade deste CNPJ é a sede ou uma filial? Escolha Matriz para a sede ou Filial. Ao informar somente a raiz, a unidade é cadastrada sem CNPJ próprio.',
       ),
-      at('company-primary-address', 'Endereço da unidade', 'O endereço e os contatos pertencem ao estabelecimento principal. A consulta de CEP é opcional.'),
     ]);
   } else if (path === '/conta/estabelecimentos') {
     title = 'Estabelecimentos';

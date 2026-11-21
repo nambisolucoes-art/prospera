@@ -4,13 +4,14 @@ import { Field, type Errors, type FieldProps } from './BusinessFormFields';
 
 type Props = Omit<FieldProps, 'label' | 'value' | 'inputMode' | 'maxLength' | 'compact'> & {
   personType: PersonDocumentType;
+  label?: string;
   value: string;
   errors?: Errors;
   errorKey?: string;
 };
 
 export default function TaxDocumentField({
-  personType, value, error, errors, errorKey, name, onChange, placeholder, ...props
+  personType, value, error, errors, errorKey, name, onChange, placeholder, label, ...props
 }: Props) {
   const [dismissedErrors, setDismissedErrors] = useState<Errors>();
   const company = personType === 'company';
@@ -18,7 +19,7 @@ export default function TaxDocumentField({
 
   return (
     <Field {...props}
-      label={company ? 'CNPJ' : 'CPF'}
+      label={label ?? (company ? 'CNPJ' : 'CPF')}
       name={name}
       compact
       inputMode={company ? 'text' : 'numeric'}
