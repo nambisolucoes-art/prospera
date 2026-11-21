@@ -40,6 +40,8 @@ Route::middleware('auth')->group(function () {
         Route::get('cadastrar', [UserController::class, 'create'])
             ->name('create');
 
+        Route::get('pessoas', [UserController::class, 'peopleForAccess'])->name('people');
+
         Route::get('{userId}/foto/{version}', [ProfilePhotoController::class, 'showDirectory'])
             ->whereNumber('userId')
             ->whereUuid('version')

@@ -12,6 +12,7 @@ use App\Domains\Acessos\Application\Queries\AssignmentNodeQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentOptionsQuery;
 use App\Domains\Acessos\Application\Queries\MembershipDirectoryQuery;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Domains\Pessoas\Application\Queries\PeopleDirectoryQuery;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
 use App\Domains\Usuarios\Application\Actions\SendUserInvitationAction;
 use App\Domains\Usuarios\Application\Data\ProvisionUserData;
@@ -154,7 +155,7 @@ final class UserController
         return to_route('account.users.index');
     }
 
-    public function create(Request $request, AssignmentOptionsQuery $options): JsonResponse|View
+    public function create(Request $request, AssignmentOptionsQuery $options, EffectivePermissions $permissions): JsonResponse|View
     {
         if (! $request->routeIs('account.users.*')) {
             return ApiPage::respond(['tenant' => false]);
@@ -164,7 +165,28 @@ final class UserController
         $available = $options->forOperator($request->user(), $accountId, creating: true);
         abort_if($available === [], 403);
 
-        return ApiPage::respond(['tenant' => true, 'assignmentOptions' => $available]);
+        return ApiPage::respond([
+            'tenant' => true,
+            'assignmentOptions' => $available,
+            'canReusePerson' => ! $permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(),
+        ]);
+    }
+
+    public function peopleForAccess(
+        Request $request,
+        AssignmentOptionsQuery $options,
+        EffectivePermissions $permissions,
+        PeopleDirectoryQuery $people,
+    ): JsonResponse {
+        $accountId = app(AccountContext::class)->requireId();
+        abort_if($permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(), 403);
+        abort_if($options->forOperator($request->user(), $accountId, creating: true) === [], 403);
+
+        $input = $request->query('q');
+        $search = is_string($input) ? mb_substr(trim($input), 0, 100) : '';
+        $candidates = $search !== '' ? $people->candidatesForAccess($accountId, $search) : [];
+
+        return response()->json(['people' => $candidates], headers: ['Cache-Control' => 'private, no-store']);
     }
 
     public function store(
@@ -172,10 +194,26 @@ final class UserController
         CreateUserAction $create,
         SendUserInvitationAction $invite,
         AssignmentNodeQuery $nodes,
+        EffectivePermissions $permissions,
+        PeopleDirectoryQuery $people,
     ): RedirectResponse {
         $tenant = $request->routeIs('account.users.*');
         $account = $tenant ? app(AccountContext::class)->requireAccount(404) : null;
-        $data = ProvisionUserData::fromInput($request->all(), $tenant, $account?->id);
+        $input = $request->all();
+        $person = null;
+        $personId = $tenant ? ProvisionUserData::personId(
+            $input['person_id'] ?? null,
+            $input['person_registration'] ?? null,
+        ) : null;
+
+        if ($personId !== null && $account !== null) {
+            abort_if($permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(), 403);
+            $person = $people->withoutAccess($account->id)->findOrFail($personId);
+            $input['name'] = $person->name;
+            $input['email'] ??= $person->email;
+        }
+
+        $data = ProvisionUserData::fromInput($input, $tenant, $account?->id);
         $node = $account === null ? null : $nodes->resolve(
             $account->id,
             $data->scope,
@@ -187,7 +225,7 @@ final class UserController
         $message = 'Usuário criado.';
 
         try {
-            $user = $create->execute($data->user, $data->role, $account, roleId: $data->roleId, node: $node);
+            $user = $create->execute($data->user, $data->role, $account, person: $person, roleId: $data->roleId, node: $node);
 
             if ($data->user->setup === PasswordSetup::Invite) {
                 $message = $invite->execute($user)

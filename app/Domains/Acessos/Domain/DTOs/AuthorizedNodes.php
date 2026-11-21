@@ -22,6 +22,16 @@ final readonly class AuthorizedNodes
         return ! $this->tenant && $this->companies === [] && $this->establishments === [];
     }
 
+    // União de descritores, por exemplo das empresas em que alguma ação comercial é permitida.
+    public function with(self $other): self
+    {
+        return new self(
+            tenant: $this->tenant || $other->tenant,
+            companies: array_values(array_unique([...$this->companies, ...$other->companies])),
+            establishments: array_values(array_unique([...$this->establishments, ...$other->establishments])),
+        );
+    }
+
     public function covers(AccessNode $node): bool
     {
         return $this->tenant

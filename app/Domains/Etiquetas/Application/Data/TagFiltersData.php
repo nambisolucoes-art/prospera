@@ -2,6 +2,7 @@
 
 namespace App\Domains\Etiquetas\Application\Data;
 
+use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Support\PageSize;
 
 final readonly class TagFiltersData
@@ -22,7 +23,7 @@ final readonly class TagFiltersData
 
         return new self(
             is_string($search) ? mb_substr(trim($search), 0, 100) : '',
-            in_array($module, ['people'], true) ? $module : '',
+            in_array($module, Tag::MODULES, true) ? $module : '',
             match ($status) {
                 'active' => true,
                 'inactive' => false,

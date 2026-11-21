@@ -1,7 +1,20 @@
-# Fornecedores no cadastro de Pessoas
+# Tour de Fornecedores
 
-O fluxo usa o tour de Pessoas. A listagem compartilha BusinessListTour e PageHeaderTour. people-suppliers explica o filtro de fornecedores ativos no grupo Filtros.
+Artigo: [Fornecedores](../ajuda/fornecedores.md). Tela: `/conta/estabelecimento/{codigo|todos}/fornecedores` (E07). Executor na barra superior, configurado em `resources/js/app/guidance.ts`. Nenhum executor ou atalho de tutorial no modal.
 
-O formulário mostra person-identity, person-address, person-contact, person-tags e person-access nessa ordem. Os três primeiros pertencem à pessoa, independentemente das etiquetas. Fornecedor identifica apenas seu papel; Usuário acrescenta a seção de acesso quando selecionado.
+| Ordem | Alvo | Título | Orientação |
+| --- | --- | --- | --- |
+| 1 | PageHeaderTour | Moldura | Passos compartilhados da moldura, sem duplicar textos. |
+| 2 | organization-switcher | Empresas da área de trabalho | A lista considera as empresas das unidades marcadas; duas unidades da mesma empresa mostram a relação uma vez. |
+| 3 | commercial-register | Cadastrar | Informe os dados da Pessoa ou busque um documento já cadastrado. O documento fica fixo e os campos autorizados podem ser atualizados. A etiqueta Fornecedor vem marcada. Selecione a empresa quando houver mais de uma opção e use Salvar. |
+| 4 em diante | BusinessListTour | Buscar, filtrar, colunas e paginação | Busca por nome, e-mail, CPF ou CNPJ; filtros Situação e Empresa; Use Editar para abrir a ficha da linha ou Ativar para reativar a relação. |
 
-Não há executor ou botão de tutorial no modal. O tour não altera etiquetas, não consulta CEP automaticamente e não grava dados. CPF/CNPJ, nome, endereço e contatos são informados uma única vez. Salvar e Cancelar seguem os componentes compartilhados.
+## Página de cadastro
+
+O botão **Cadastrar** abre uma página própria com tutorial na barra superior. O tour destaca a empresa quando houver escolha, os dados da pessoa, o endereço, os contatos, as etiquetas e as ações **Salvar** e **Cancelar**. A lupa localiza uma ficha já existente. Use **Descartar** para retirar essa seleção e pesquisar outro documento.
+
+Revisar alvos e ordem quando a posição de Cadastrar, dos filtros ou das ações mudar. Conferido em 1440, 1024, 768, 390 e 320 px no registro da E07.
+
+## Página de edição
+
+A ação **Editar** abre a ficha da empresa da linha. O tutorial destaca a empresa, os campos disponíveis, as etiquetas e as ações **Salvar** e **Cancelar**.

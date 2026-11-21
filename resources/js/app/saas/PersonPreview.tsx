@@ -3,8 +3,8 @@ import Modal from '@/components/Modal/Modal';
 import { formatMasked } from './ClientFormFields';
 import { formatTaxDocument } from '@/utils/formatTaxDocument';
 import PreviewSection from './PreviewSection';
-import StatusLabel from '@/components/StatusLabel/StatusLabel';
 import TagLabel from '@/components/TagLabel/TagLabel';
+import { PersonRelationsTable } from './CommercialRelations';
 import type { PersonRow } from './Directory.types';
 import './AccountPreview.css';
 import './Directory.css';
@@ -87,8 +87,12 @@ export default function PersonPreview({
             <dt>Site</dt><dd>{person.website || 'Não informado'}</dd>
             <dt>Endereço</dt><dd>{[person.address?.street, person.address?.number, person.address?.complement, person.address?.neighborhood, person.address?.city, person.address?.state, person.address?.postal_code ? formatMasked(person.address.postal_code, 'cep') : null].filter(Boolean).join(', ') || 'Não informado'}</dd>
           </PreviewSection>
-          {person.customer && <PreviewSection title="Cliente"><dt>Situação</dt><dd><StatusLabel active={person.customer.active} /></dd></PreviewSection>}
-          {person.supplier && <PreviewSection title="Fornecedor"><dt>Situação</dt><dd><StatusLabel active={person.supplier.active} /></dd></PreviewSection>}
+          {!!person.relations?.length && (
+            <section className="account-preview__section" data-tour="person-preview-relations">
+              <h3>Relações comerciais</h3>
+              <PersonRelationsTable relations={person.relations} />
+            </section>
+          )}
           {person.membership && (
             <section className="account-preview__section">
               <h3>Acesso de usuário</h3>

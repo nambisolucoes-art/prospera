@@ -13,6 +13,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -38,6 +39,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->dontFlash(['administrator.password', 'administrator.password_confirmation']);
 
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson()
+                || $request->routeIs('account.company.*.find-person'),
         );
+        $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {
+            if ($request->routeIs('account.company.*.find-person')) {
+                $response->headers->set('Cache-Control', 'private, no-store');
+            }
+
+            return $response;
+        });
     })->create();

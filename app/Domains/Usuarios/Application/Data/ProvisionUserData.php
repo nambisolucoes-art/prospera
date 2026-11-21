@@ -17,6 +17,18 @@ final readonly class ProvisionUserData
         public ?int $establishmentId = null,
     ) {}
 
+    public static function personId(mixed $input, mixed $mode): ?int
+    {
+        $values = Validator::validate(['person_id' => $input, 'person_registration' => $mode], [
+            'person_registration' => ['nullable', Rule::in(['new', 'existing'])],
+            'person_id' => ['nullable', 'required_if:person_registration,existing', 'integer', 'min:1'],
+        ], [
+            'person_id.required_if' => 'Selecione o cadastro existente.',
+        ]);
+
+        return isset($values['person_id']) ? (int) $values['person_id'] : null;
+    }
+
     /** @param array<string, mixed> $input */
     public static function fromInput(#[\SensitiveParameter] array $input, bool $tenant, ?int $accountId = null): self
     {

@@ -1,10 +1,40 @@
 import type { Address } from './ClientForm.types';
 
-export type SupplierProfile = { active: boolean };
+/** Situação de um papel comercial numa empresa, como o leitor pode vê-la. */
+export type RelationStatus = 'active' | 'inactive' | 'none' | 'restricted';
+
+export type PersonRelation = {
+    company_id: number;
+    company_name: string;
+    company_active: boolean;
+    customer: RelationStatus;
+    supplier: RelationStatus;
+};
+
+export type CommercialRoleOption = {
+    status: Exclude<RelationStatus, 'restricted'> | null;
+    can_create: boolean;
+    can_activate: boolean;
+    can_deactivate: boolean;
+};
+
+export type CommercialCompanyOption = {
+    id: number;
+    name: string;
+    active: boolean;
+    customer: CommercialRoleOption;
+    supplier: CommercialRoleOption;
+};
+
+export type CommercialOptions = {
+    single_company: boolean;
+    companies: CommercialCompanyOption[];
+};
 
 export type TagRow = {
     active: boolean;
     people_count?: number;
+    commercial_assigned?: boolean | number;
     id: number;
     name: string;
     module: string;
@@ -29,10 +59,7 @@ export type PersonRow = {
     website?: string | null;
     address?: Address | null;
     has_user?: boolean;
-    has_customer?: boolean;
-    customer?: { active: boolean } | null;
-    has_supplier?: boolean;
-    supplier?: SupplierProfile | null;
+    relations?: PersonRelation[];
     membership?: {
       id: number;
       email: string | null;

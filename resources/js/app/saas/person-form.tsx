@@ -16,16 +16,21 @@ import CardBox from '@/components/CardBox/CardBox';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
 import SaasLayout from './SaasLayout';
-import type { PersonRow, TagRow } from './Directory.types';
+import CommercialRelationFields from './CommercialRelationFields';
+import type { CommercialOptions, PersonRow, TagRow } from './Directory.types';
 export default function PersonForm({
   person,
   tags,
   roles,
-  canEditCentralData = true,
+  canEditIdentification = true,
+  canEditContacts = true,
+  commercial,
 }: {
   person: PersonRow | null;
   tags: TagRow[];
-  canEditCentralData?: boolean;
+  canEditIdentification?: boolean;
+  canEditContacts?: boolean;
+  commercial: CommercialOptions;
   roles: { id: number; name: string; system_key: string | null }[];
 }) {
   const [selected, setSelected] = useState(
@@ -34,15 +39,13 @@ export default function PersonForm({
   const access = tags.some(
     (tag) => tag.system_key === 'user' && selected.includes(tag.id),
   );
-  const customerSelected = tags.some((tag) => tag.system_key === 'customer' && selected.includes(tag.id));
-  const supplierSelected = tags.some((tag) => tag.system_key === 'supplier' && selected.includes(tag.id));
   const [mode, setMode] = useState('invite');
   const [editingAssignments, setEditingAssignments] = useState(false);
   const { auth } = useApiPage<SessionProps>().props;
   const readOnly = auth.inspection_mode === 'read-only';
-  const canSelectCustomer = person?.has_customer ? auth.permissions.includes('account.customers.activate') : auth.permissions.includes('account.customers.create');
-  const canSelectSupplier = person?.has_supplier ? auth.permissions.includes('account.suppliers.activate') : auth.permissions.includes('account.suppliers.create');
-  const maySave = !readOnly && canEditCentralData;
+  const maySave = !readOnly;
+  // Com várias empresas, a tela separa os dados centrais dos dados de cada empresa (Pessoas e contatos).
+  const multiCompany = !commercial.single_company;
   const mayAssign = auth.permissions.includes('account.users.assign-role');
   return (
     <SaasLayout
@@ -61,44 +64,44 @@ export default function PersonForm({
         >
           {({ errors, processing }) => (
             <>
-              <fieldset
-                disabled={!maySave}
-                style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
-              >
-                {!canEditCentralData && (
-                  <FormHelp>Dados centrais editáveis por quem atende todas as empresas relacionadas ou pela administração da conta.</FormHelp>
+              {multiCompany && (
+                <div className="business-form__section-note">
+                  <strong>Dados centrais.</strong> Estes dados pertencem ao cadastro compartilhado da conta e valem para todas as empresas.
+                </div>
+              )}
+              <fieldset disabled={readOnly || !canEditIdentification} className="person-form__group">
+                {!canEditIdentification && (
+                  <FormHelp>Alterável por quem atende todas as empresas desta pessoa ou pela administração da conta.</FormHelp>
                 )}
                 <PersonIdentityFields person={person} errors={errors} />
+              </fieldset>
+              <fieldset disabled={readOnly || !canEditContacts} className="person-form__group">
+                <FormHelp>
+                  {multiCompany && person?.relations && person.relations.length > 1
+                    ? 'Esta alteração vale para todas as empresas que atendem esta pessoa.'
+                    : 'Estes dados pertencem ao cadastro compartilhado da conta.'}
+                </FormHelp>
                 <AddressFields initial={person?.address ?? undefined} errors={errors} namePrefix="address" errorPrefix="address" tourTarget="person-address" />
                 <PersonContactFields person={person} errors={errors} access={access} />
+              </fieldset>
+              <fieldset disabled={readOnly} className="person-form__group">
                 <BusinessFormSection title="Etiquetas" tourTarget="person-tags">
                   <TagSelect
                     options={tags.map((tag) => ({
                       ...tag,
-                      locked: tag.system_key === 'customer'
-                        ? (selected.includes(tag.id) && person?.has_customer
-                          ? !auth.permissions.includes('account.customers.deactivate')
-                          : !canSelectCustomer)
-                        : tag.system_key === 'supplier'
-                        ? (selected.includes(tag.id) && person?.has_supplier
-                          ? !auth.permissions.includes('account.suppliers.deactivate')
-                          : !canSelectSupplier)
-                        : Boolean(
-                          (person?.has_user && selected.includes(tag.id)
-                            ? !auth.permissions.includes('account.users.revoke')
-                            : person?.has_user
-                              ? !auth.permissions.includes('account.users.reactivate')
-                              : !auth.permissions.includes('account.users.create') || !mayAssign) && tag.system_key === 'user',
-                        ),
+                      // Etiquetas convencionais seguem a regra dos contatos centrais; Usuário segue o acesso.
+                      locked: (tag.system_key === null && !canEditContacts) || Boolean(
+                        (person?.has_user && selected.includes(tag.id)
+                          ? !auth.permissions.includes('account.users.revoke')
+                          : person?.has_user
+                            ? !auth.permissions.includes('account.users.reactivate')
+                            : !auth.permissions.includes('account.users.create') || !mayAssign) && tag.system_key === 'user',
+                      ),
                     }))}
                     selected={selected}
                     onChange={setSelected}
                     disabled={readOnly}
-                    notice={(person?.tags.some((tag) => tag.system_key === 'customer') && !customerSelected) || (person?.has_user && !access) || (person?.has_supplier && !supplierSelected && person.supplier?.active) ? <>
-                      {person?.tags.some((tag) => tag.system_key === 'customer') && !customerSelected && <p>Ao salvar, esta pessoa deixará de ser cliente. Os dados e o histórico serão preservados.</p>}
-                      {person?.has_user && !access && <p>Ao salvar, o acesso desta pessoa à conta será suspenso. O cadastro e o histórico serão preservados.</p>}
-                      {person?.has_supplier && !supplierSelected && person.supplier?.active && <p>Ao salvar, esta pessoa deixará de ser fornecedor. Os dados e o histórico serão preservados.</p>}
-                    </> : undefined}
+                    notice={person?.has_user && !access ? <p>Ao salvar, o acesso desta pessoa à conta será suspenso. O cadastro e o histórico serão preservados.</p> : undefined}
                     error={
                       Object.entries(errors).find(
                         ([key]) =>
@@ -107,6 +110,9 @@ export default function PersonForm({
                     }
                   />
                 </BusinessFormSection>
+                {commercial.companies.length > 0 && (
+                  <CommercialRelationFields commercial={commercial} errors={errors} />
+                )}
                 {access && (
                   <BusinessFormSection
                     title="Acesso de usuário"

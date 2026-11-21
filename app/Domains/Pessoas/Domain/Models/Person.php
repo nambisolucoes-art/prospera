@@ -13,7 +13,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Validation\ValidationException;
 
@@ -38,6 +38,32 @@ use Illuminate\Validation\ValidationException;
 class Person extends Model implements Auditable
 {
     use AuditsChanges;
+
+    /**
+     * Identificação central: alterá-la exige cobrir todas as empresas relacionadas (seção 10.2.1).
+     */
+    public const IDENTIFICATION_FIELDS = [
+        'name',
+        'person_type',
+        'document',
+        'trade_name',
+        'state_registration',
+        'municipal_registration',
+    ];
+
+    /**
+     * Contatos e endereço centrais: alterá-los exige cobrir pelo menos uma empresa relacionada.
+     */
+    public const CONTACT_FIELDS = [
+        'email',
+        'phone',
+        'whatsapp',
+        'additional_phones',
+        'additional_emails',
+        'website',
+        'contact_name',
+        'address',
+    ];
 
     protected $attributes = [
         'person_type' => 'individual',
@@ -140,16 +166,40 @@ class Person extends Model implements Auditable
         $this->recordAuditFieldChange('tag_ids', $before, $tagIds, 'Etiquetas');
     }
 
-    /** @return HasOne<Customer, $this> */
-    public function customer(): HasOne
+    /**
+     * Etiquetas convencionais (sem chave de sistema) mudariam com a seleção informada?
+     *
+     * @param  array<int,int>  $tagIds
+     */
+    public function changesConventionalTags(array $tagIds): bool
     {
-        return $this->hasOne(Customer::class);
+        $current = $this->tags()
+            ->whereNull('tags.system_key')
+            ->pluck('tags.id')
+            ->all();
+
+        $requested = Tag::where('account_id', $this->account_id)
+            ->whereNull('system_key')
+            ->whereIn('id', $tagIds)
+            ->pluck('id')
+            ->all();
+
+        sort($current);
+        sort($requested);
+
+        return $current !== $requested;
     }
 
-    /** @return HasOne<Supplier, $this> */
-    public function supplier(): HasOne
+    /** @return HasMany<Customer, $this> */
+    public function customers(): HasMany
     {
-        return $this->hasOne(Supplier::class);
+        return $this->hasMany(Customer::class);
+    }
+
+    /** @return HasMany<Supplier, $this> */
+    public function suppliers(): HasMany
+    {
+        return $this->hasMany(Supplier::class);
     }
 
     /** @return HasOneThrough<User, AccountMembership, $this> */

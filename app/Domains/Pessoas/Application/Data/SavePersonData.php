@@ -7,6 +7,7 @@ use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Usuarios\Application\Data\ProvisionUserData;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 final readonly class SavePersonData
 {
@@ -15,9 +16,27 @@ final readonly class SavePersonData
         public array $values,
         public ?ProvisionUserData $access,
         public bool $userSelected = false,
-        public bool $supplierSelected = false,
-        public bool $customerSelected = false,
+        public CommercialRelationsData $relations = new CommercialRelationsData,
+        public bool $centralOnly = false,
     ) {}
+
+    /** @param array<string,mixed> $input */
+    public static function forCommercialReuse(array $input, Person $person): self
+    {
+        if (array_key_exists('document', $input) || array_key_exists('person_type', $input)) {
+            throw ValidationException::withMessages([
+                'document' => 'O CPF ou CNPJ usado para localizar a pessoa permanece fixo neste cadastro.',
+            ]);
+        }
+
+        if (is_array($input['address'] ?? null)) {
+            $input['address'] = array_replace($person->address ?? [], $input['address']);
+        }
+
+        $data = self::fromInput($input, $person->account_id, hasUser: false, existingPerson: $person);
+
+        return new self($data->values, access: null, centralOnly: true);
+    }
 
     /**
      * @param  array<string,mixed>  $input
@@ -29,7 +48,13 @@ final readonly class SavePersonData
         bool $hasUser,
         array $existingTagIds = [],
         ?Person $existingPerson = null,
+        bool $allowUserTag = true,
     ): self {
+        // Identificação somente leitura não é enviada pelo formulário e mantém o valor atual.
+        if (! array_key_exists('name', $input) && $existingPerson !== null) {
+            $input['name'] = $existingPerson->name;
+        }
+
         $input['name'] = is_string($input['name'] ?? null) ? trim($input['name']) : null;
 
         // Telefone ausente no envio mantém o valor atual da pessoa.
@@ -47,7 +72,8 @@ final readonly class SavePersonData
 
         $input['email'] = is_string($input['email'] ?? null) ? mb_strtolower(trim($input['email'])) : null;
 
-        // Etiquetas inativas só são aceitas quando a pessoa já as possui.
+        // Etiquetas inativas só são aceitas quando a pessoa já as possui. Cliente e Fornecedor são
+        // derivadas das relações comerciais (E07) e não são selecionadas.
         $selectableTag = Rule::exists('tags', 'id')
             ->where('account_id', $accountId)
             ->where('module', 'people')
@@ -56,7 +82,7 @@ final readonly class SavePersonData
                 ->orWhereIn('id', $existingTagIds))
             ->where(fn ($query) => $query
                 ->whereNull('system_key')
-                ->orWhereIn('system_key', ['user', 'supplier', 'customer']));
+                ->when($allowUserTag, fn ($tags) => $tags->orWhere('system_key', 'user')));
 
         $values = Validator::validate($input, [
             'name' => ['required', 'string', 'max:255'],
@@ -82,16 +108,14 @@ final readonly class SavePersonData
             ? ProvisionUserData::fromInput($input, true, $accountId)
             : null;
 
-        $supplierSelected = self::selectsSpecialTag($accountId, $tagIds, 'supplier');
         $details = SavePersonDetailsData::fromInput($input, $accountId, $existingPerson);
-        $customerSelected = self::selectsSpecialTag($accountId, $tagIds, 'customer');
+        $relations = CommercialRelationsData::fromInput($input['relations'] ?? null, $accountId);
 
         return new self(
             [...$values, ...$details->values],
             $access,
             $userSelected,
-            $supplierSelected,
-            $customerSelected,
+            $relations,
         );
     }
 

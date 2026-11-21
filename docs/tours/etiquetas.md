@@ -20,3 +20,5 @@ A paleta sobrepõe os campos sem aumentar o modal. Cancelar é branco e Salvar �
 A visualização da etiqueta usa o tamanho padrão do Modal (600 px no desktop), com adaptação automática ao celular. A revisão mantém os alvos e a ordem do tour: o ajuste reduz somente a largura da janela de leitura, sem alterar os controles do cadastro.
 
 Validação do ajuste de largura: Chromium em 1440, 390 e 320 px, visualização carregada com nome, badge e situação, fechamento por Esc e botão e retorno de foco à ação da tabela. Sem rolagem horizontal. Visualização de Cargos preservada em 900 px. Arquitetura e TypeScript aprovados; Docker reconstruído e saudável.
+
+O filtro e o seletor **Módulo** incluem Pessoas, Clientes e Fornecedores. Etiquetas comerciais convencionais são oferecidas no formulário do próprio papel.

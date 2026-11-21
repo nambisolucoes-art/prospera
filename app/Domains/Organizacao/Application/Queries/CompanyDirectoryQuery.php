@@ -59,6 +59,42 @@ final class CompanyDirectoryQuery
         return Company::where('account_id', $accountId)->findOrFail($id);
     }
 
+    /**
+     * Empresas cobertas por um descritor de alvo empresa (relações comerciais), em ordem de nome.
+     *
+     * @return Collection<int, Company>
+     */
+    public function covered(int $accountId, AuthorizedNodes $nodes): Collection
+    {
+        $query = Company::where('account_id', $accountId);
+
+        if (! $nodes->tenant) {
+            $query->whereIn('id', $nodes->companies);
+        }
+
+        return $query->orderByRaw('coalesce(trade_name, name)')
+            ->orderBy('id')
+            ->get(['id', 'code', 'name', 'trade_name', 'active']);
+    }
+
+    // Com uma empresa só, as telas omitem a escolha de empresa (contexto organizacional, Empresa pequena).
+    public function hasSingleCompany(int $accountId): bool
+    {
+        return Company::where('account_id', $accountId)->limit(2)->count() === 1;
+    }
+
+    /**
+     * @param  list<int>  $ids
+     * @return Collection<int, Company>
+     */
+    public function findMany(int $accountId, array $ids): Collection
+    {
+        return Company::where('account_id', $accountId)
+            ->whereKey($ids)
+            ->orderBy('id')
+            ->get();
+    }
+
     /** @return Collection<int, Company> */
     public function options(int $accountId, ?AuthorizedNodes $unitNodes = null): Collection
     {

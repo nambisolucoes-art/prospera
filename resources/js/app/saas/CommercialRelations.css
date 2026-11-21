@@ -1,0 +1,56 @@
+.commercial-relations__scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.commercial-relations__table {
+  margin-bottom: 0;
+}
+
+.commercial-relations__table th[scope='row'] {
+  font-weight: 600;
+}
+
+.commercial-relations__caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.commercial-relations__muted {
+  color: var(--bold-color-text-muted);
+}
+
+.commercial-relations__choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+
+.commercial-relations__choices .checkbox {
+  margin: 0;
+}
+
+.commercial-relations__directory {
+  container-type: inline-size;
+}
+
+.commercial-relations__compact-company {
+  display: none;
+}
+
+@container (max-width: 600px) {
+  .commercial-relations__directory .business-list__table td[data-column='name'] .business-list__cell {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .commercial-relations__compact-company {
+    display: block;
+    color: var(--bold-color-text-muted);
+  }
+}

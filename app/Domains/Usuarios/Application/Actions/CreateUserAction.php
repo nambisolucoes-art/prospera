@@ -77,7 +77,7 @@ final readonly class CreateUserAction
             $user->account()->associate($account);
 
             if ($person !== null && ($person->account_id !== $account?->id || $person->user()->exists())) {
-                throw new InvalidArgumentException('Pessoa indisponível para este acesso.');
+                throw ValidationException::withMessages(['person_id' => 'Pessoa indisponível para este acesso.']);
             }
 
             $user->forceFill([

@@ -259,6 +259,44 @@ final class ContextualAccessTest extends TestCase
         $this->patchJson('/conta/usuarios/'.$this->membership($owner)->id.'/suspender')->assertUnprocessable();
     }
 
+    public function test_account_user_can_reuse_an_existing_person_without_changing_the_central_record(): void
+    {
+        $account = Client::create(['name' => 'Conta de teste', 'active' => true]);
+        $other = Client::create(['name' => 'Outra conta', 'active' => true]);
+        $owner = User::factory()->asAccountAdministrator($account->id)->create();
+        $person = Person::create([
+            'account_id' => $account->id,
+            'name' => 'Pessoa candidata',
+            'email' => 'contato@example.test',
+            'phone' => '71988887777',
+        ]);
+        $foreign = Person::create(['account_id' => $other->id, 'name' => 'Pessoa candidata externa']);
+        $role = $this->role($account, 'Operador', ['account.establishments.list']);
+
+        $this->actingAs($owner)->getJson('/conta/usuarios/pessoas?q=candidata')
+            ->assertOk()->assertJsonCount(1, 'people')->assertJsonPath('people.0.id', $person->id);
+
+        $data = [
+            'person_registration' => 'existing',
+            'name' => 'Nome forjado',
+            'email' => 'acesso@example.test',
+            'mode' => 'invite',
+            'role_id' => $role->id,
+        ];
+        $this->postJson('/conta/usuarios', $data)->assertJsonValidationErrors('person_id');
+        $this->postJson('/conta/usuarios', [...$data, 'person_id' => $foreign->id])->assertNotFound();
+
+        $people = Person::count();
+        $this->postJson('/conta/usuarios', [...$data, 'person_id' => $person->id])->assertOk();
+        $identity = User::where('email', 'acesso@example.test')->sole();
+        $this->assertSame($person->id, $this->membership($identity)->person_id);
+        $this->assertSame('Pessoa candidata', $identity->name);
+        $this->assertSame('contato@example.test', $person->fresh()->email);
+        $this->assertSame('71988887777', $person->fresh()->phone);
+        $this->assertSame($people, Person::count());
+        $this->getJson('/conta/usuarios/pessoas?q=candidata')->assertJsonCount(0, 'people');
+    }
+
     public function test_tenant_user_creation_returns_the_same_response_for_an_existing_global_identity(): void
     {
         $account = Client::create(['name' => 'Conta de teste', 'active' => true]);

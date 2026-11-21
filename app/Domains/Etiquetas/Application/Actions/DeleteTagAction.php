@@ -24,7 +24,7 @@ final class DeleteTagAction
 
             abort_if($tag->system_key !== null, 403, 'Etiquetas especiais são gerenciadas pelo sistema.');
 
-            if ($tag->people()->exists()) {
+            if ($tag->isAssigned()) {
                 throw ValidationException::withMessages([
                     '_form' => 'Esta etiqueta possui registros vinculados. Inative a etiqueta em vez de excluir.',
                 ]);

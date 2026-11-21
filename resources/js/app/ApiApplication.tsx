@@ -28,6 +28,7 @@ const screens = import.meta.glob<{ default: ComponentType }>([
   './account/{auth,settings}/*.tsx',
   './saas/{clients,account-form,home,users,user-form,people,person-form,tags,roles,role-form,audit,help}.tsx',
   './saas/{organization,companies,company-form,establishments,establishment-form,establishment-home}.tsx',
+  './saas/{commercial-relations,commercial-registration}.tsx',
 ]);
 
 const routes: Array<[RegExp, string]> = [
@@ -40,6 +41,8 @@ const routes: Array<[RegExp, string]> = [
   [/^\/conta\/empresas\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/company-form'],
   [/^\/conta\/estabelecimentos$/, 'saas/establishments'],
   [/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}$/, 'saas/establishment-home'],
+  [/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}\/(?:clientes|fornecedores)$/, 'saas/commercial-relations'],
+  [/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}\/(?:clientes|fornecedores)\/(?:cadastrar|[a-z0-9][a-z0-9-]{1,39}\/\d+\/editar)$/, 'saas/commercial-registration'],
   [/^\/conta\/estabelecimentos\/(?:cadastrar|[0-9]+\/editar)$/, 'saas/establishment-form'],
   [
     /^\/(?:saas\/contas\/(?:cadastrar|\d+\/editar)|conta\/editar)$/,

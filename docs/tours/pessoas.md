@@ -7,15 +7,18 @@ Artigo: [Pessoas e acesso](../ajuda/pessoas.md). Integração do executor dispon
 | ID | Alvo | Orientação |
 | --- | --- | --- |
 | people-search | people-search | Digite nome ou e-mail. A busca é automática e pode ser executada pela lupa clicável à direita ou por Enter. |
+| people-suppliers | people-suppliers | Clientes ou Fornecedores: pessoas com relação ativa nas empresas em que o leitor pode listar e visualizar o papel. |
+| people-company | people-company | Com um papel escolhido e mais de uma empresa autorizada, restringe a uma empresa. Passo omitido quando o filtro não aparece. |
 | people-list | people-list | Consulte os cadastros e use os ícones Visualizar e Editar na coluna Ações. |
-| person-preview | person-preview | Confira os dados no modal; feche para retornar à lista e ao botão de origem. |
+| person-preview | person-preview | Confira os dados no modal; feche para retornar à lista e ao botão de origem. A seção Relações comerciais (`person-preview-relations`) mostra Empresa, Cliente e Fornecedor só com o que o leitor pode ver. |
 
 ## Cadastro e edição
 
 | ID | Alvo | Orientação |
 | --- | --- | --- |
 | person-identity | person-identity | Informe nome, e-mail e telefone. |
-| person-tags | person-tags | Abra o seletor, busque e escolha múltiplas etiquetas. Selecionar Usuário exibe a seção de acesso. Retirar Usuário e salvar revoga o acesso com a permissão específica. |
+| person-tags | person-tags | Abra o seletor, busque e escolha múltiplas etiquetas. Selecionar Usuário exibe a seção de acesso. Retirar Usuário e salvar revoga o acesso com a permissão específica. Cliente e Fornecedor não são selecionáveis (E07). |
+| person-relations | person-relations | Cliente e Fornecedor por empresa, com situação independente. Desmarcar e salvar inativa só a relação da linha. Passo omitido quando o operador não tem permissão comercial em nenhuma empresa. |
 | person-access | person-access | Escolha um cargo cadastrado na conta e a forma de acesso. Para um vínculo existente, use **Editar atribuições** para gerir os cargos por escopo. No modal, o acordeão **Permissões efetivas da atribuição** mostra as ações agrupadas por módulo. Este passo aparece quando **Usuário** está selecionado. |
 
 Finalize em Salvar. Preserve dados digitados ao demonstrar o seletor. Pule a seção de acesso quando ausente e as ações indisponíveis na inspeção somente leitura. Ao fechar o modal ou o tour, retorne o foco ao controle de origem.
@@ -28,20 +31,11 @@ Revisão dos marcadores: nenhuma estrela deve aparecer na lista, no seletor ou n
 
 Papel na conta exibe o indicador de campo obrigatório. O foco do seletor de etiquetas segue a borda dos demais campos. Alvos e ordem dos passos preservados.
 
-| people-suppliers | people-suppliers | Filtre Fornecedores para consultar somente os ativos, preservando a busca. Só aparece com a permissão de listar fornecedores. |
 | person-address | person-address | Informe o endereço principal da pessoa, reutilizado por todos os seus papéis. |
 | person-contact | person-contact | Telefone e WhatsApp seguem máscaras e ícones do cadastro da conta. Informe os contatos uma única vez. |
 
-Identificação, endereço e contatos aparecem sem depender da etiqueta Fornecedor. O tour não seleciona etiquetas nem grava dados. A estrela especial permanece exclusiva da listagem de Etiquetas.
+Inscrições estadual e municipal ficam disponíveis para PF e PJ. O passo person-contact inclui os botões de adicionar Telefone e E-mail e o X das linhas adicionais. O tour preserva os contatos digitados.
 
-Inscrição estadual e municipal ficam disponíveis para PF e PJ. Avisos de retirada de etiquetas especiais aparecem imediatamente abaixo do campo, alinhados com o controle. O texto explicativo repetido sobre Fornecedor foi removido; alvos e ordem do tour permanecem os mesmos.
-
-O passo person-contact inclui os botões de adicionar Telefone e E-mail e o X das linhas adicionais. O tour não adiciona nem remove linhas: preserva os contatos digitados e salvos. O e-mail principal continua sendo o acesso de usuário.
-
-## Etiqueta especial Cliente
-
-O passo person-tags explica que Cliente e Fornecedor podem coexistir e compartilham a identidade, endereço e contatos da pessoa. Selecionar Cliente não cria acesso de usuário. Retirar e salvar inativa somente esse papel, com aviso imediatamente abaixo do seletor.
-
-O alvo people-suppliers mantém o identificador existente e agora corresponde ao filtro Tipo de cadastro, com Clientes e Fornecedores conforme as permissões de listar cada papel. O passo se chama Consultar por papel. A sequência e os componentes BusinessListTour e PageHeaderTour são preservados. O tour explica os controles sem selecionar etiquetas, trocar filtros ou gravar dados.
+O passo **Consultar por papel** apresenta o filtro Tipo de cadastro. Os papéis aparecem conforme as permissões de listar e visualizar na mesma empresa. Para manter Cliente ou Fornecedor, use a seção **Relações comerciais**. A sequência e os componentes BusinessListTour e PageHeaderTour são preservados.
 
 A seção **Acesso de usuário** explica a primeira atribuição e identifica o e-mail de acesso de um vínculo existente.

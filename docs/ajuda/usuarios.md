@@ -15,6 +15,8 @@ Nos cadastros com senha inicial, use o ícone de olho para **Mostrar senha** e c
 
 Em **Usuários**, pesquise por nome ou e-mail de acesso. A coluna **Atribuições** lista cada cargo e o local em que ele vale, conforme o seu acesso. Use o ícone de informação para abrir **Visualizar usuário** e conferir os dados de acesso. Use o lápis **Editar pessoa** para abrir o cadastro em **Pessoas**, onde ficam os dados cadastrais e a gestão de atribuições.
 
+Em **Tipo de cadastro**, a opção inicial é **Pessoa ainda não cadastrada**. Para conceder acesso a alguém que já está em Pessoas, escolha **Pessoa já cadastrada**, procure pelo nome ou e-mail e selecione o cadastro encontrado. O nome vem da ficha e o e-mail de contato é sugerido como e-mail de acesso. Você pode informar outro e-mail de acesso. A forma de acesso e a primeira atribuição continuam obrigatórias. Essa opção exige autorização para visualizar Pessoas e só oferece cadastros sem acesso nesta conta.
+
 Ao cadastrar um usuário, escolha o local e o cargo da primeira atribuição. O sistema apresenta a mesma confirmação quando a solicitação usa um e-mail já existente. Até a seleção de múltiplas contas ser disponibilizada, um endereço existente em outra conta não recebe um vínculo novo.
 
 ## Orientação na tela

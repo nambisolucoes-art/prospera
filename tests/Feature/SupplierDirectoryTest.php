@@ -7,23 +7,35 @@ use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
+use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Domain\Models\Person;
-use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Tests\Feature\Concerns\BuildsCommercialScenario;
 use Tests\TestCase;
 
 class SupplierDirectoryTest extends TestCase
 {
+    use BuildsCommercialScenario;
     use RefreshDatabase;
+
+    /** @var array<int, Company> */
+    private array $companies = [];
 
     private function owner(): User
     {
-        $account = Client::create(['name' => 'Conta de fornecedores', 'active' => true]);
+        $account = $this->account('Conta de fornecedores');
+        $this->companies[$account->id] = $this->company($account, 'Empresa de fornecedores', '11222333');
 
-        return User::factory()->asAccountAdministrator($account->id)->create();
+        return $this->administrator($account);
+    }
+
+    /** @return array<int, array<string,string>> */
+    private function supplier(User $owner, bool $selected = true): array
+    {
+        return [$this->companies[$owner->account_id]->id => ['supplier' => $selected ? '1' : '0']];
     }
 
     /** @return array<string,mixed> */
@@ -33,7 +45,8 @@ class SupplierDirectoryTest extends TestCase
             'name' => 'Fornecedor de teste',
             'email' => 'fornecedor@example.test',
             'phone' => '71999999999',
-            'tag_ids' => [Tag::supplierTag($owner->account_id)->id],
+            'tag_ids' => [],
+            'relations' => $this->supplier($owner),
             'person_type' => 'individual',
             'document' => $document,
             'contact_name' => 'Contato comercial',
@@ -46,8 +59,9 @@ class SupplierDirectoryTest extends TestCase
         $owner = $this->owner();
         $this->actingAs($owner)->postJson('/conta/pessoas', $this->payload($owner))->assertOk();
         $person = Person::where('name', 'Fornecedor de teste')->sole();
-        $supplier = $person->supplier()->sole();
+        $supplier = $person->suppliers()->sole();
         $this->assertSame($owner->account_id, $supplier->account_id);
+        $this->assertSame($this->companies[$owner->account_id]->id, $supplier->company_id);
         $this->assertTrue($supplier->active);
         $this->assertFalse($person->user()->exists());
         $this->assertSame('40000000', $person->address['postal_code']);
@@ -60,7 +74,8 @@ class SupplierDirectoryTest extends TestCase
         $audit = AuditRecord::where('entity_type', 'supplier')->where('entity_id', $supplier->id)->sole();
         $this->assertSame($owner->id, $audit->actor_id);
         $this->assertSame($owner->account_id, $audit->account_id);
-        $this->assertSame($person->name, $audit->entity_name);
+        $this->assertSame($person->name.' (Empresa de fornecedores)', $audit->entity_name);
+        $this->assertSame($supplier->company_id, $audit->company_id);
         $this->assertStringNotContainsString('52998224725', json_encode($audit->changes));
         $personEvent = AuditRecord::where('entity_type', 'person')->where('entity_id', $person->id)->sole();
         $this->assertSame($personEvent->operation_id, $audit->operation_id);
@@ -78,6 +93,7 @@ class SupplierDirectoryTest extends TestCase
             'email' => $payload['email'],
             'phone' => $payload['phone'],
             'tag_ids' => [],
+            'relations' => $this->supplier($owner, false),
         ])->assertOk();
         $this->assertFalse($supplier->fresh()->active);
         $this->assertSame('52998224725', Person::findOrFail($supplier->person_id)->document);
@@ -104,15 +120,15 @@ class SupplierDirectoryTest extends TestCase
         $payload['person_type'] = 'company';
         $payload['trade_name'] = 'Fantasia';
         $this->postJson('/conta/pessoas', $payload)->assertOk();
-        $this->assertSame('12ABC34501DE35', Person::whereHas('supplier')->sole()->document);
+        $this->assertSame('12ABC34501DE35', Person::whereHas('suppliers')->sole()->document);
         $this->postJson('/conta/pessoas', $payload)->assertUnprocessable()->assertJsonValidationErrors('document');
         $this->assertDatabaseCount('suppliers', 1);
         $other = $this->owner();
-        $payload['tag_ids'] = [Tag::supplierTag($other->account_id)->id];
+        $payload['relations'] = $this->supplier($other);
         $this->actingAs($other)->postJson('/conta/pessoas', $payload)->assertOk();
         $this->assertDatabaseCount('suppliers', 2);
         $this
-            ->postJson('/conta/pessoas', [...$payload, 'tag_ids' => [Tag::supplierTag($owner->account_id)->id]])
+            ->postJson('/conta/pessoas', [...$payload, 'relations' => $this->supplier($owner)])
             ->assertUnprocessable();
         $personId = Supplier::where('account_id', $owner->account_id)->value('person_id');
         $this->getJson('/conta/pessoas/'.$personId.'/visualizar')->assertNotFound();
@@ -139,7 +155,7 @@ class SupplierDirectoryTest extends TestCase
         $this
             ->actingAs($editor)
             ->getJson('/conta/pessoas/'.$supplier->person_id.'/visualizar')
-            ->assertJsonPath('supplier', null);
+            ->assertJsonPath('relations', []);
         $this->getJson('/conta/pessoas?suppliers=1')->assertForbidden();
         $count = AuditRecord::count();
         $payload['name'] = 'Identidade compartilhada';
@@ -149,6 +165,14 @@ class SupplierDirectoryTest extends TestCase
         $this
             ->patchJson('/conta/pessoas/'.$supplier->person_id, ['name' => 'Identidade compartilhada', 'tag_ids' => []])
             ->assertOk();
+
+        // Sem envio da relação, a relação existente não muda; o envio forjado de inativação é recusado.
+        $this
+            ->patchJson('/conta/pessoas/'.$supplier->person_id, [
+                'name' => 'Identidade compartilhada',
+                'relations' => $this->supplier($owner, false),
+            ])
+            ->assertForbidden();
         $this->assertTrue($supplier->fresh()->active);
         $this->assertSame($count, AuditRecord::count());
     }
@@ -167,11 +191,12 @@ class SupplierDirectoryTest extends TestCase
             ])
             ->assertForbidden();
         $this->deleteJson('/conta/etiquetas/'.$tag->id)->assertForbidden();
-        $this->postJson('/conta/pessoas', ['name' => 'Fornecedor inicial', 'tag_ids' => [$tag->id]])->assertOk();
-        $this->assertNull(Person::whereHas('supplier')->sole()->document);
+        $this->postJson('/conta/pessoas', ['name' => 'Fornecedor inicial', 'relations' => $this->supplier($owner)])
+            ->assertOk();
+        $this->assertNull(Person::whereHas('suppliers')->sole()->document);
         $this->postJson('/conta/pessoas', [
             'name' => 'Fornecedor inválido',
-            'tag_ids' => [$tag->id],
+            'relations' => $this->supplier($owner),
             'person_type' => 'inválido',
         ])->assertUnprocessable()->assertJsonValidationErrors('person_type');
         $this->assertDatabaseMissing('people', ['name' => 'Fornecedor inválido']);
@@ -208,14 +233,14 @@ class SupplierDirectoryTest extends TestCase
 
     public function test_supplier_definition_does_not_convert_an_existing_custom_label(): void
     {
-        $account = Client::create(['name' => 'Conta com etiqueta comum', 'active' => true]);
+        $account = $this->account('Conta com etiqueta comum');
         $custom = Tag::create([
             'account_id' => $account->id,
             'module' => 'people',
             'name' => 'Fornecedor',
             'color' => '#123456',
         ]);
-        $owner = User::factory()->asAccountAdministrator($account->id)->create();
+        $owner = $this->administrator($account);
         $special = Tag::supplierTag($account->id);
         $this->assertNotSame($custom->id, $special->id);
         $this->assertNull($custom->fresh()->system_key);
@@ -249,18 +274,19 @@ class SupplierDirectoryTest extends TestCase
             ->getJson('/conta/pessoas/'.$person->id.'/editar')
             ->assertJsonPath('person.document', '52998224725')
             ->assertJsonPath('person.address.city', 'Salvador');
-        $client = Tag::customerTag($owner->account_id);
+        $companyId = $this->companies[$owner->account_id]->id;
         $this
             ->patchJson(
                 '/conta/pessoas/'.$person->id,
-                [...$input, 'tag_ids' => [$client->id, Tag::supplierTag($owner->account_id)->id]],
+                [...$input, 'relations' => [$companyId => ['customer' => '1', 'supplier' => '1']]],
             )
             ->assertOk();
         $this->assertDatabaseCount('people', 2);
         $this->assertDatabaseCount('suppliers', 1);
         $this->assertFalse(Schema::hasColumn('suppliers', 'document'));
         $this->assertFalse(Schema::hasColumn('suppliers', 'address'));
-        $this->patchJson('/conta/pessoas/'.$person->id, [...$input, 'tag_ids' => [$client->id]])->assertOk();
+        $this->patchJson('/conta/pessoas/'.$person->id, [...$input, 'relations' => $this->supplier($owner, false)])
+            ->assertOk();
         $this->assertSame('52998224725', $person->fresh()->document);
         $this->assertSame('Salvador', $person->fresh()->address['city']);
         $this
@@ -278,7 +304,10 @@ class SupplierDirectoryTest extends TestCase
     public function test_migration_preserves_existing_supplier_identity_on_its_person(): void
     {
         $owner = $this->owner();
+        $commercial = require database_path('migrations/2026_11_21_000001_add_company_to_commercial_relations.php');
         $migration = require database_path('migrations/2026_11_18_000008_move_shared_supplier_fields_to_people.php');
+        (require database_path('migrations/2026_11_21_000002_add_commercial_tags.php'))->down();
+        $commercial->down();
         $migration->down();
         $personId = DB::table('people')->insertGetId([
             'name' => 'Legado',
@@ -303,7 +332,11 @@ class SupplierDirectoryTest extends TestCase
         $this->assertSame('Nome fantasia legado', $person->trade_name);
         $this->assertSame('71988888888', $person->whatsapp);
         $this->assertSame('Salvador', $person->address['city']);
-        $this->assertTrue($person->supplier()->sole()->active);
+        $this->assertTrue((bool) DB::table('suppliers')->where('person_id', $personId)->value('active'));
+        $commercial->up();
+        $supplier = $person->suppliers()->sole();
+        $this->assertTrue($supplier->active);
+        $this->assertSame($this->companies[$owner->account_id]->id, $supplier->company_id);
         $this->assertSame($count, AuditRecord::count());
         $this->artisan('audit:check')->assertSuccessful();
     }

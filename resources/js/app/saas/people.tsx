@@ -13,22 +13,34 @@ import SaasLayout from './SaasLayout';
 import PersonPreview from './PersonPreview';
 import type { PersonRow } from './Directory.types';
 import './Directory.css';
+type CompanyFilter = { id: number; name: string; customers: boolean; suppliers: boolean };
+
 export default function People({
   people,
   search,
   suppliersOnly = false,
   customersOnly = false,
+  canFilterCustomers = false,
+  canFilterSuppliers = false,
+  companies = [],
+  company = null,
 }: {
   people: PageSummary & { data: PersonRow[] };
   search: string;
   suppliersOnly?: boolean;
   customersOnly?: boolean;
+  canFilterCustomers?: boolean;
+  canFilterSuppliers?: boolean;
+  companies?: CompanyFilter[];
+  company?: number | null;
 }) {
   const { props } = useApiPage<SessionProps>();
   const readOnly = props.auth.inspection_mode === 'read-only';
   const [preview, setPreview] = useState<PersonRow>();
   const trigger = useRef<HTMLElement | null>(null);
   const { query, setQuery, submit, apply } = useBusinessListFilters('/conta/pessoas', search);
+  // O filtro de empresa só aparece com um papel escolhido e mais de uma empresa autorizada para ele.
+  const roleCompanies = companies.filter((option) => (customersOnly && option.customers) || (suppliersOnly && option.suppliers));
   return (
     <SaasLayout
       tenant
@@ -60,13 +72,19 @@ export default function People({
           filters={<>
             <BusinessListSearch tour="people-search" label="Buscar pessoas" placeholder="Buscar por nome ou e-mail"
               value={query} onChange={setQuery} onSubmit={submit} />
-            {(props.auth.permissions.includes('account.suppliers.list') || props.auth.permissions.includes('account.customers.list')) && (
+            {(canFilterCustomers || canFilterSuppliers) && (
               <div data-tour="people-suppliers"><SelectControl id="people-suppliers" label="Tipo de cadastro" value={customersOnly ? 'customers' : suppliersOnly ? 'suppliers' : ''}
                 options={[{ value: '', label: 'Todas as pessoas' },
-                  ...(props.auth.permissions.includes('account.customers.list') ? [{ value: 'customers', label: 'Clientes' }] : []),
-                  ...(props.auth.permissions.includes('account.suppliers.list') ? [{ value: 'suppliers', label: 'Fornecedores' }] : []),
+                  ...(canFilterCustomers ? [{ value: 'customers', label: 'Clientes' }] : []),
+                  ...(canFilterSuppliers ? [{ value: 'suppliers', label: 'Fornecedores' }] : []),
                 ]}
-                onChange={(value) => apply({ customers: value === 'customers' ? '1' : '', suppliers: value === 'suppliers' ? '1' : '' })} /></div>
+                onChange={(value) => apply({ customers: value === 'customers' ? '1' : '', suppliers: value === 'suppliers' ? '1' : '', empresa: '' })} /></div>
+            )}
+            {roleCompanies.length > 1 && (
+              <div data-tour="people-company"><SelectControl id="people-company" label="Empresa" value={company ? String(company) : ''}
+                options={[{ value: '', label: 'Todas as empresas autorizadas' },
+                  ...roleCompanies.map((option) => ({ value: String(option.id), label: option.name }))]}
+                onChange={(value) => apply({ empresa: value })} /></div>
             )}
           </>}
 

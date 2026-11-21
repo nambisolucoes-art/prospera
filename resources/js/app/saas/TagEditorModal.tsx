@@ -1,3 +1,4 @@
+import { tagModules } from './tagModules';
 import { useEffect, useRef } from 'react';
 import BusinessForm, {
   BusinessFormActions,
@@ -63,10 +64,10 @@ export default function TagEditorModal({
                   />
                   <Select
                     label="Módulo"
-                    info="Define onde a etiqueta pode ser utilizada. Atualmente, as etiquetas estão disponíveis no módulo Pessoas."
+                    info="Define em qual cadastro a etiqueta pode ser utilizada."
                     name="module"
                     defaultValue={tag?.module ?? 'people'}
-                    options={[{ value: 'people', label: 'Pessoas' }]}
+                    options={tagModules}
                     error={errors.module}
                   />
                   <Select

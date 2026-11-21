@@ -2,38 +2,59 @@
 
 namespace App\Domains\Fornecedores\Application\Actions;
 
+use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
+use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Domain\Models\Person;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * Cria, ativa ou inativa a relação de fornecedor da pessoa com uma empresa (E07).
+ *
+ * O chamador trava a pessoa e confere que a empresa pertence à conta dela. Relações de outras empresas
+ * e a situação da pessoa nunca são alteradas aqui.
+ */
 final class SaveSupplierAction
 {
-    public function execute(Person $person, bool $selected): void
+    public function execute(Person $person, Company $company, bool $selected): void
     {
-        $supplier = Supplier::where('account_id', $person->account_id)
+        $node = AccessNode::company($person->account_id, $company->id);
+
+        $lockedSupplier = Supplier::where('account_id', $person->account_id)
+            ->where('company_id', $company->id)
             ->where('person_id', $person->id)
             ->lockForUpdate()
             ->first();
 
-        if (! $supplier && ! $selected) {
+        if ($lockedSupplier === null && ! $selected) {
             return;
         }
 
-        if (! $supplier) {
-            Gate::authorize('account.suppliers.create');
-            $supplier = new Supplier(['account_id' => $person->account_id, 'person_id' => $person->id]);
-        } elseif ($supplier->active !== $selected) {
+        if ($lockedSupplier === null) {
+            Gate::authorize('account.suppliers.create', $node);
+            $lockedSupplier = Supplier::register($person->account_id, $company->id, $person->id);
+        } elseif ($lockedSupplier->active !== $selected) {
             if ($selected) {
-                Gate::authorize('account.suppliers.activate');
+                Gate::authorize('account.suppliers.activate', $node);
+                $lockedSupplier->activate();
             } else {
-                Gate::authorize('account.suppliers.deactivate');
+                Gate::authorize('account.suppliers.deactivate', $node);
+                $lockedSupplier->deactivate();
             }
         }
 
-        $supplier->active = $selected;
-
-        if ($supplier->isDirty()) {
-            $supplier->saveOrFail();
+        if (! $lockedSupplier->isDirty()) {
+            return;
         }
+
+        if (! $company->active) {
+            throw ValidationException::withMessages([
+                '_form' => 'A empresa '.($company->trade_name ?: $company->name).' está inativa. '
+                    .'Reative a empresa antes de alterar suas relações comerciais.',
+            ]);
+        }
+
+        $lockedSupplier->saveOrFail();
     }
 }

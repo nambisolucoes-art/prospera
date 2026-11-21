@@ -8,6 +8,7 @@ use App\Domains\Etiquetas\Domain\DTOs\TagDTO;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Plataforma\Domain\Models\Client;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 final class SaveTagAction
 {
@@ -29,6 +30,10 @@ final class SaveTagAction
                 403,
                 'Etiquetas especiais são gerenciadas pelo sistema.',
             );
+
+            if ($lockedTag && $lockedTag->module !== $data->values['module'] && $lockedTag->isAssigned()) {
+                throw ValidationException::withMessages(['module' => 'Esta etiqueta está em uso no módulo atual.']);
+            }
 
             $tagDTO = new TagDTO(
                 name: $data->values['name'],

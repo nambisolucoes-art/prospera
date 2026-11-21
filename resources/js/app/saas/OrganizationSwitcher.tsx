@@ -9,6 +9,7 @@ import {
   pageWorkspace,
   readTabWorkspace,
   workspaceEntryUrl,
+  workspaceStorageKey,
   workspaceUrl,
   writeTabWorkspace,
 } from '@/utils/organizationContext';
@@ -27,7 +28,7 @@ export default function OrganizationSwitcher({ context }: { context: Organizatio
   const [error, setError] = useState('');
   const saving = useRef(false);
   const units = context.establishments;
-  const key = `prospera.workspace.${context.account_id}.${props.auth.user?.id}.${props.auth.inspection_mode ?? 'own'}`;
+  const key = workspaceStorageKey(context.account_id, props.auth.user?.id, props.auth.inspection_mode);
   const [local, setLocal] = useState<{ key: string; codes: string[] }>();
   const stored = local?.key === key ? local.codes : readTabWorkspace(key);
   const available = new Set(units.map((unit) => unit.code));

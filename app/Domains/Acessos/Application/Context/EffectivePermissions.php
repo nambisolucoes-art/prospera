@@ -100,6 +100,28 @@ final class EffectivePermissions
             }
         }
 
+        // Alvo company (E07): atribuição de estabelecimento não cobre a relação comercial.
+        foreach ([
+            'account.customers.list',
+            'account.customers.view',
+            'account.customers.create',
+            'account.customers.update',
+            'account.customers.activate',
+            'account.customers.deactivate',
+            'account.suppliers.list',
+            'account.suppliers.view',
+            'account.suppliers.create',
+            'account.suppliers.update',
+            'account.suppliers.activate',
+            'account.suppliers.deactivate',
+        ] as $ability) {
+            $nodes = $this->nodesFor($user, $ability);
+
+            if ($nodes->tenant || $nodes->companies !== []) {
+                $slugs[] = $ability;
+            }
+        }
+
         return array_values(array_unique($slugs));
     }
 

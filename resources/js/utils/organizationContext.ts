@@ -62,6 +62,22 @@ export function pageWorkspace(context: OrganizationContextProps, pageUrl: string
   return returning.includes(context.selected_codes[0]) ? returning : context.selected_codes;
 }
 
+/** Chave da seleção desta aba, por conta, usuário e modo de inspeção (E06). */
+export function workspaceStorageKey(accountId: number | null, userId: number | undefined, inspection: string | null): string {
+  return `prospera.workspace.${accountId}.${userId}.${inspection ?? 'own'}`;
+}
+
+/**
+ * Endereço de um módulo da área de trabalho a partir de qualquer tela: usa a seleção da URL ou a desta aba,
+ * e passa pela entrada, que revalida as unidades no servidor. Sem seleção, a entrada usa o padrão pessoal.
+ */
+export function workspaceModuleUrl(context: OrganizationContextProps | null | undefined, pageUrl: string, tabCodes: string[], module: string): string {
+  const available = new Set(context?.establishments.map((unit) => unit.code) ?? []);
+  const codes = (context ? pageWorkspace(context, pageUrl) : null) ?? tabCodes;
+  const valid = codes.filter((code) => available.has(code));
+  return valid.length > 0 ? workspaceEntryUrl(valid, module) : `/conta/estabelecimento?para=${module}`;
+}
+
 /** Selection local to this browser tab. The server still validates every operational URL. */
 export function readTabWorkspace(key: string): string[] {
   try {

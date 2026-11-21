@@ -1,3 +1,4 @@
+import { tagModules } from './tagModules';
 import { useEffect, useRef, useState } from 'react';
 import BusinessList, {
   type PageSummary,
@@ -93,7 +94,7 @@ export default function Tags({
               <div data-tour="tags-module">
                 <SelectControl id="tags-module-filter" label="Módulo" value={filters.module}
                   onChange={(value) => apply({ module: value })}
-                  options={[{ value: '', label: 'Todos os módulos' }, { value: 'people', label: 'Pessoas' }]} />
+                  options={[{ value: '', label: 'Todos os módulos' }, ...tagModules]} />
               </div>
               <div data-tour="tags-status">
                 <SelectControl id="tags-status-filter" label="Situação" value={filters.status}
@@ -142,9 +143,9 @@ export default function Tags({
                         iconOnly
                         tone="danger"
                         leftIconClass="fa fa-eraser"
-                        title={tag.people_count ? 'Etiqueta vinculada: use Editar cadastro para inativar' : 'Excluir etiqueta'}
+                        title={tag.people_count || tag.commercial_assigned ? 'Etiqueta vinculada: use Editar cadastro para inativar' : 'Excluir etiqueta'}
                         aria-label={`Excluir etiqueta ${tag.name}`}
-                        disabled={Boolean(tag.people_count)}
+                        disabled={Boolean(tag.people_count || tag.commercial_assigned)}
                         aria-haspopup="dialog"
                         onClick={(event) => {
                           trigger.current = event.currentTarget;
@@ -179,7 +180,7 @@ export default function Tags({
                 id: 'module',
                 label: 'Módulo',
                 width: 150,
-                render: () => 'Pessoas',
+                render: (tag) => tagModules.find((module) => module.value === tag.module)?.label ?? 'Não informado',
               },
             ]}
           />

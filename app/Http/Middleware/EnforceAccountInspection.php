@@ -50,6 +50,14 @@ final readonly class EnforceAccountInspection
             return $next($request);
         }
 
+        // As duas buscas usam POST para manter o documento fora da URL e somente consultam dados.
+        if ($request->routeIs(
+            'account.company.customers.find-person',
+            'account.company.suppliers.find-person',
+        )) {
+            return $next($request);
+        }
+
         if ($request->isMethodSafe()) {
             abort_if($request->routeIs(
                 'profile.email.confirm', 'verification.verify', 'two-factor.qr-code', 'two-factor.secret-key', 'two-factor.recovery-codes',

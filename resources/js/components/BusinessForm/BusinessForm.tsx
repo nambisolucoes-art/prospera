@@ -51,6 +51,7 @@ export function BusinessFormRow({ children }: { children: ReactNode }) {
 export function BusinessFormActions({
   submit = 'Salvar',
   processing,
+  submitDisabled = false,
   cancelHref,
   onCancel,
   tone = 'success',
@@ -59,6 +60,7 @@ export function BusinessFormActions({
 }: {
   submit?: string;
   processing: boolean;
+  submitDisabled?: boolean;
   cancelHref?: string;
   onCancel?: () => void;
   tone?: ButtonTone;
@@ -92,7 +94,7 @@ export function BusinessFormActions({
           Cancelar
         </Button>
       )}
-      <Button type="submit" tone={tone} disabled={processing}>
+      <Button type="submit" tone={tone} disabled={processing || submitDisabled}>
         {submit}
       </Button>
       {children}

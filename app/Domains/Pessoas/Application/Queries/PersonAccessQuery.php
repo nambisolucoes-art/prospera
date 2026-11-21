@@ -3,47 +3,58 @@
 namespace App\Domains\Pessoas\Application\Queries;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
+use App\Domains\Pessoas\Domain\DTOs\PersonEditAuthority;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Models\User;
 
 final readonly class PersonAccessQuery
 {
-    public function __construct(private EffectivePermissions $permissions) {}
+    public function __construct(
+        private EffectivePermissions $permissions,
+        private PersonCommercialRelationsQuery $relations,
+    ) {}
 
-    public function canUpdate(User $user, Person $person): bool
+    /**
+     * Alvo person: cobrir a empresa C é ter atribuição de conta, da empresa C ou de unidade de C (seção 8.2).
+     */
+    public function authority(User $user, Person $person): PersonEditAuthority
     {
         $scope = $this->permissions->nodesFor($user, 'account.people.update');
 
-        if ($scope->tenant) {
-            return true;
-        }
-
         if ($scope->isEmpty()) {
-            return false;
+            return PersonEditAuthority::denied();
         }
 
-        if (
-            ! $person->customer()->where('active', true)->exists()
-            && ! $person->supplier()->where('active', true)->exists()
-        ) {
-            return true;
+        if ($scope->tenant) {
+            return new PersonEditAuthority(true, true, true);
         }
 
-        // Antes da E07 a relação comercial não aponta para uma empresa.
-        $companies = Company::where('account_id', $person->account_id)->limit(2)->pluck('id');
+        $related = $this->relations->activeCompanyIds($person->account_id, $person->id);
 
-        if ($companies->count() !== 1) {
-            return false;
+        if ($related === []) {
+            return new PersonEditAuthority(true, true, true);
         }
 
-        $companyId = (int) $companies->first();
+        $covered = $scope->companies;
 
-        return in_array($companyId, $scope->companies, true)
-            || Establishment::where('account_id', $person->account_id)
-                ->where('company_id', $companyId)
+        if ($scope->establishments !== []) {
+            $unitCompanies = Establishment::where('account_id', $person->account_id)
                 ->whereKey($scope->establishments)
-                ->exists();
+                ->distinct()
+                ->pluck('company_id')
+                ->map(fn ($id): int => (int) $id)
+                ->all();
+
+            $covered = [...$covered, ...$unitCompanies];
+        }
+
+        $coveredRelated = array_intersect($related, $covered);
+
+        return new PersonEditAuthority(
+            allowed: true,
+            identification: count($coveredRelated) === count($related),
+            contacts: $coveredRelated !== [],
+        );
     }
 }

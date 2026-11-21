@@ -10,20 +10,24 @@ export type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   info?: string;
   error?: string;
   action?: ReactNode;
+  controlAside?: ReactNode;
   leadingIcon?: string;
   trailingIcon?: string;
   compact?: boolean;
 };
 
-export function Field({ label, info, error, action, leadingIcon, trailingIcon, compact, ...props }: FieldProps) {
+export function Field({ label, info, error, action, controlAside, leadingIcon, trailingIcon, compact, ...props }: FieldProps) {
   const id = useId();
   const grouped = Boolean(action || leadingIcon || trailingIcon);
   const input = <TextInput {...props} id={id} aria-labelledby={`${id}-label`} invalid={Boolean(error)} aria-describedby={error ? `${id}-error` : undefined}
     className={compact && !grouped ? 'business-form__short-control' : props.className} />;
+  const control = grouped
+    ? <InputGroup leadingIcon={leadingIcon} trailingIcon={trailingIcon} action={action} compact={compact}>{input}</InputGroup>
+    : input;
 
   return (
     <FormField id={id} label={label} info={info} error={error} layout="horizontal" requiredIndicator={props.required} passiveLabel>
-      {grouped ? <InputGroup leadingIcon={leadingIcon} trailingIcon={trailingIcon} action={action} compact={compact}>{input}</InputGroup> : input}
+      {controlAside ? <div className="business-form__control-row">{control}{controlAside}</div> : control}
     </FormField>
   );
 }

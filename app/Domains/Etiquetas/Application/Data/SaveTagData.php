@@ -2,6 +2,7 @@
 
 namespace App\Domains\Etiquetas\Application\Data;
 
+use App\Domains\Etiquetas\Domain\Models\Tag;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -19,13 +20,13 @@ final readonly class SaveTagData
 
         $uniqueName = Rule::unique('tags')
             ->where('account_id', $accountId)
-            ->where('module', 'people')
+            ->where('module', is_string($input['module'] ?? null) ? $input['module'] : '')
             ->ignore($id);
 
         $values = Validator::validate($input, [
             'active' => ['sometimes', 'boolean'],
             'name' => ['required', 'string', 'max:100', $uniqueName],
-            'module' => ['required', Rule::in(['people'])],
+            'module' => ['required', Rule::in(Tag::MODULES)],
             'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ], [
             'active.boolean' => 'Selecione uma situação válida.',

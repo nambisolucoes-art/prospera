@@ -5,8 +5,6 @@ namespace App\Domains\Pessoas\Application\Actions;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Clientes\Application\Actions\SaveCustomerAction;
-use App\Domains\Fornecedores\Application\Actions\SaveSupplierAction;
 use App\Domains\Pessoas\Application\Data\SavePersonData;
 use App\Domains\Pessoas\Application\Queries\PersonAccessQuery;
 use App\Domains\Pessoas\Application\Queries\PersonDocumentExistsQuery;
@@ -22,8 +20,7 @@ final readonly class SavePersonAction
     public function __construct(
         private SavePersonAccessAction $saveAccess,
         private CreateUserAction $createUser,
-        private SaveSupplierAction $saveSupplier,
-        private SaveCustomerAction $saveCustomer,
+        private SaveCommercialRelationsAction $saveRelations,
         private PersonDocumentExistsQuery $documentExists,
         private PersonAccessQuery $permissions,
         private EffectivePermissions $effective,
@@ -44,11 +41,14 @@ final readonly class SavePersonAction
                     ->findOrFail($person->id);
 
             $operator = auth()->user();
+            $authority = null;
 
             if ($lockedPerson === null) {
                 abort_if($this->effective->nodesFor($operator, 'account.people.create')->isEmpty(), 403);
             } else {
-                abort_unless($this->permissions->canUpdate($operator, $lockedPerson), 403);
+                // Avaliada antes das mudanças desta operação, com as relações ativas atuais.
+                $authority = $this->permissions->authority($operator, $lockedPerson);
+                abort_unless($authority->allowed, 403);
             }
 
             $personDTO = new PersonDTO(
@@ -74,7 +74,17 @@ final readonly class SavePersonAction
                 $lockedPerson->revise($personDTO);
             }
 
-            $user = $lockedPerson->user()->first();
+            // Um envio forjado não altera dados centrais fora da autoridade do operador (seção 10.2.1).
+            if ($authority !== null) {
+                $changesIdentification = $lockedPerson->isDirty(Person::IDENTIFICATION_FIELDS);
+                $changesContacts = $lockedPerson->isDirty(Person::CONTACT_FIELDS)
+                    || (! $data->centralOnly && $lockedPerson->changesConventionalTags($data->values['tag_ids'] ?? []));
+
+                abort_if($changesIdentification && ! $authority->identification, 403);
+                abort_if($changesContacts && ! $authority->contacts, 403);
+            }
+
+            $user = $data->centralOnly ? null : $lockedPerson->user()->first();
 
             if ($user !== null) {
                 $this->saveAccess->execute($account, $lockedPerson, $user, $data);
@@ -114,10 +124,10 @@ final readonly class SavePersonAction
                 );
             }
 
-            $this->saveSupplier->execute($lockedPerson, $data->supplierSelected);
-            $this->saveCustomer->execute($lockedPerson, $data->customerSelected);
-
-            $lockedPerson->assignTags($data->values['tag_ids'] ?? []);
+            if (! $data->centralOnly) {
+                $this->saveRelations->execute($lockedPerson, $data->relations);
+                $lockedPerson->assignTags($data->values['tag_ids'] ?? []);
+            }
 
             return $lockedPerson;
         });

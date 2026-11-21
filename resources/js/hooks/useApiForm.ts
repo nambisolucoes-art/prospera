@@ -5,6 +5,7 @@ import { contextualUrl } from '@/utils/organizationContext';
 
 type Values = Record<string, string | number | boolean | File | null>;
 export type SubmitOptions = NavigationOptions & {
+  successHref?: string;
   beforeNavigate?: () => Promise<void>;
   onSuccess?: () => void;
   onError?: (errors: ApiErrors) => void;
@@ -58,7 +59,7 @@ export function useApiForm<T extends Values>(initial: T) {
         if (method !== 'post') body.set('_method', method.toUpperCase());
         const result = await apiRequest<{ redirect?: string }>(endpoint, { method: 'POST', body });
         await options.beforeNavigate?.();
-        const destination = result.redirect ?? pageUrl;
+        const destination = result.redirect ?? options.successHref ?? pageUrl;
         const samePage = new URL(destination, location.origin).href === new URL(pageUrl, location.origin).href;
         if (!await navigate(destination, { replace: samePage, preserveScroll: samePage, ...options })) return;
       }

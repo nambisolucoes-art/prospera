@@ -106,6 +106,42 @@ export function tourFor(
         'O endereço mantém a seleção ao atualizar a página. Para salvar um registro operacional, abra o estabelecimento de destino.',
       ),
     ];
+  } else if (/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}\/(clientes|fornecedores)\/(cadastrar|[a-z0-9][a-z0-9-]{1,39}\/\d+\/editar)$/.test(path)) {
+    const customers = path.includes('/clientes/');
+    const editing = path.endsWith('/editar');
+    title = `${editing ? 'Editar' : 'Cadastrar'} ${customers ? 'cliente' : 'fornecedor'}`;
+    help = customers ? 'clientes' : 'fornecedores';
+    steps = form([
+      at('commercial-registration-company', 'Empresa responsável', editing
+        ? 'Confira a empresa deste cadastro.'
+        : 'Escolha a empresa quando houver mais de uma opção.'),
+      at('person-identity', 'Identificação', editing
+        ? 'Confira a ficha e altere os campos autorizados. O documento permanece fixo.'
+        : 'Selecione Pessoa física para buscar por CPF ou Pessoa jurídica para buscar por CNPJ. Ao preencher o documento completo, aguarde a busca automática ou use a lupa para buscar na hora.'),
+      at('person-address', 'Endereço', 'Complete o endereço do cadastro compartilhado conforme suas permissões.'),
+      at('person-contact', 'Contato', 'Informe os dados gerais de contato da pessoa.'),
+      at('person-tags', 'Etiquetas', 'A etiqueta do papel vem marcada. Selecione as etiquetas adicionais do módulo.'),
+    ]);
+  } else if (/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}\/(clientes|fornecedores)$/.test(path)) {
+    const customers = path.endsWith('/clientes');
+    title = customers ? 'Clientes' : 'Fornecedores';
+    help = customers ? 'clientes' : 'fornecedores';
+    steps = [
+      at(
+        'organization-switcher',
+        'Empresas da área de trabalho',
+        'A lista considera as empresas das unidades marcadas. Duas unidades da mesma empresa mostram a mesma relação uma única vez.',
+      ),
+      at(
+        'commercial-register',
+        'Cadastrar',
+        'Informe os dados da pessoa ou busque um CPF ou CNPJ já cadastrado. A etiqueta do papel vem marcada e Salvar registra o cadastro na empresa escolhida.',
+      ),
+      ...businessListTourSteps({
+        filters: 'Busque por nome, e-mail, CPF ou CNPJ e filtre pela situação e, com várias empresas, pela empresa.',
+        table: 'Cada linha é a relação de uma pessoa com uma empresa. Use Editar para alterar o cadastro ou Ativar para reativar a relação, conforme seu cargo.',
+      }),
+    ];
   } else if (path === '/conta/organizacao') {
     title = 'Organização';
     help = 'organizacao';
@@ -188,7 +224,10 @@ export function tourFor(
     title = 'Pessoas';
     help = 'pessoas';
     steps = list('pessoas', 'people-search', 'people-list');
-    steps.splice(1, 0, { ...at('people-suppliers', 'Consultar por papel', 'Escolha Clientes ou Fornecedores para listar as pessoas com esse papel ativo na conta. As opções dependem das suas permissões.'), group: 'Filtros' });
+    steps.splice(1, 0,
+      { ...at('people-suppliers', 'Consultar por papel', 'Escolha Clientes ou Fornecedores para listar as pessoas com relação ativa nas empresas em que você pode consultar esse papel. As etiquetas Cliente e Fornecedor seguem a mesma regra.'), group: 'Filtros' },
+      { ...at('people-company', 'Escolher a empresa', 'Com mais de uma empresa autorizada, restrinja o papel a uma delas. A lista nunca mostra relações de empresas fora do seu acesso.'), group: 'Filtros' },
+    );
   } else if (/^\/conta\/pessoas\/(cadastrar|\d+\/editar)$/.test(path)) {
     title = 'Cadastro de pessoa';
     help = 'pessoas';
@@ -203,7 +242,12 @@ export function tourFor(
       at(
         'person-tags',
         'Etiquetas',
-        'As etiquetas representam os papéis da mesma pessoa. Cliente e Fornecedor compartilham CPF/CNPJ, contatos e endereço. A mesma pessoa pode ter os dois papéis. Usuário revela a seção de acesso. Retirar uma etiqueta especial e salvar desativa sua função, conforme suas permissões.',
+        'Etiquetas organizam o cadastro compartilhado. Usuário revela a seção de acesso; retirá-la e salvar suspende o acesso. Cliente e Fornecedor não são escolhidos aqui: aparecem conforme as relações comerciais.',
+      ),
+      at(
+        'person-relations',
+        'Relações comerciais',
+        'Marque Cliente ou Fornecedor em cada empresa. Cada empresa tem a própria relação, com situação independente; marcar numa empresa não cria a relação nas outras. Desmarcar e salvar inativa só aquela relação. Você vê e altera apenas as empresas permitidas pelo seu cargo.',
       ),
       at(
         'person-access',
@@ -268,6 +312,7 @@ export function tourFor(
     title = 'Cadastrar usuário da conta';
     help = 'usuarios';
     steps = form([
+      at('user-registration', 'Tipo de cadastro', 'Escolha Pessoa já cadastrada para buscar e reaproveitar o cadastro. Confira o e-mail de acesso e escolha a forma de acesso.'),
       at('user-assignment', 'Primeira atribuição', 'Escolha Onde e Cargo para conceder acesso no local selecionado.'),
     ]);
   } else if (path === '/saas/usuarios') {

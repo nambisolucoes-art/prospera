@@ -10,4 +10,4 @@ Na conta, use o tour de [Pessoas](pessoas.md); a seleção da etiqueta Usuário 
 
 Executor disponível pelo botão **Tutorial desta tela** na barra superior. Configuração em `resources/js/app/guidance.ts`. Revisar alvos em desktop e mobile a cada alteração.
 
-O tour da conta explica a busca e as ações de informação e edição. O ícone de informação abre os dados de acesso e as atribuições no modal. O lápis abre o cadastro em Pessoas. No cadastro, **Onde** e **Cargo** definem a primeira atribuição.
+O tour da conta explica a busca e as ações de informação e edição. O ícone de informação abre os dados de acesso e as atribuições no modal. O lápis abre o cadastro em Pessoas. No cadastro, **Tipo de cadastro** oferece a busca de uma Pessoa já cadastrada. **Onde** e **Cargo** definem a primeira atribuição.

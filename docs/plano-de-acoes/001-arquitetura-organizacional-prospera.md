@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 concluída em 19/11/2026. E02 a E05 concluídas em 20/11/2026. E06 em validação. E07 a E10 pendentes |
+| Situação do documento | Aprovado. E01 a E07 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 a E10 pendentes |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
 | Revisão | 6 (20/11/2026): encerramento da E02. Revisão 5 (20/11/2026): execução da E02. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
@@ -1695,6 +1695,106 @@ A E08 do briefing (padronização dos componentes) foi distribuída: cada etapa 
 - A recuperação a partir daí é restaurar o backup tirado antes da implantação, com perda das alterações posteriores, ou corrigir para frente (preferido).
 - Para reduzir o risco, a escolha de várias empresas no formulário só é liberada depois de um período de validação com a migração já aplicada.
 
+**Registro de execução.** A retomada encontrou `34ed162` em `feat/filtros-calendario-titulos`, com a E07 na árvore de trabalho. O registro local de homologação da E06 citado no checkpoint não apareceu no diff. A homologação da E06 foi confirmada na autorização desta etapa. Os registros históricos anteriores foram preservados.
+
+| Responsabilidade | Diagnóstico na E06 | Implementação na E07 |
+| --- | --- | --- |
+| Pessoa | `people` era o cadastro da conta. CPF/CNPJ normalizado tinha unicidade por conta. Nome, natureza, inscrições, contato, endereço e meios adicionais eram centrais | Mantidos no cadastro compartilhado. `PersonDTO`, `SavePersonData`, `PersonDocumentExistsQuery` e `SavePersonAction` preservam o contrato. `PersonAccessQuery` distingue identificação e contatos pela cobertura das empresas com relações ativas |
+| Cliente e fornecedor | `customers` e `suppliers` tinham situação própria e unicidade global por pessoa. As Actions afetavam a relação única e sincronizavam a etiqueta especial | Cada tabela possui `id`, `account_id`, `company_id`, `person_id`, `active` e timestamps. FKs compostas validam Pessoa e empresa do mesmo tenant. A unicidade `(company_id, person_id)` por tabela admite os dois papéis na mesma empresa |
+| Etiquetas e filtros | Cliente e Fornecedor ficavam materializados em `person_tag`, sujeitos a aparecer em leituras do cadastro central | Catálogo especial preservado. O vínculo comercial materializado foi removido. Busca, contagem e filtros respeitam escopo SQL. As etiquetas comerciais são derivadas em lote das relações ativas em empresas visíveis |
+| Identidade e situação | Identidade de login e presença na conta já pertenciam a `users` e `account_memberships`. A Pessoa central não tinha situação comercial própria | Ativar ou inativar uma relação mantém a Pessoa, as demais relações e o vínculo de acesso. FKs restritivas preservam a referência. A empresa inativa mantém as relações existentes e impede alterações comerciais |
+| Escritas e leitura | A manutenção comercial fazia parte da ficha de Pessoas. O backend já usava classes Data; o domínio não dependia de Form Requests, factories comerciais ou seeders de relações | `SaveCommercialRelationsAction` aplica escolhas explícitas da ficha e `SetCommercialRelationAction` atende vínculo e situação. `CommercialRelationDirectoryQuery` e `PersonCommercialRelationsQuery` projetam registros autorizados. Os testes usam cenários sintéticos por empresa |
+| Auditoria | Os Models comerciais já usavam a trilha central | O evento comercial contém conta, empresa, Pessoa, tipo, ator e mudanças efetivas. A unidade fica nula. A inspeção preserva a autoria real. Alterações centrais são eventos do tenant |
+
+**Fluxo e navegação.** A ficha de Pessoas mostra os dois tipos de relação autorizados e mantém os componentes de dados centrais. Clientes e Fornecedores reutilizam `SaasLayout`, `BusinessList`, `BusinessListSearch`, `SelectControl`, `Modal` e `PersonPreview`. A leitura usa `/conta/estabelecimento/{estabelecimento}/{clientes|fornecedores}`, inclusive `todos?unidades=...`. A consulta elimina repetição por empresa antes de paginar. As escritas usam `/conta/empresa/{empresa}/{clientes|fornecedores}` e as rotas da relação para situação. A busca exata de documento, restrita a quem pode vincular naquela empresa, retorna nome, tipo e situação local do papel. Os slugs `list`, `view`, `create`, `activate` e `deactivate` já existiam, com alvo `company`. As políticas e a preferência da E06 são reutilizadas.
+
+**Exemplo.** João é uma Pessoa na conta. Duas linhas de cliente podem apontar para João, uma da Gartan Roupas e outra da Gartan Express. Uma linha de fornecedor da Gartan Roupas pode coexistir com ambas. Guanambi e Janaúba compartilham a linha da Gartan Roupas. Ana pode atuar apenas nas linhas cobertas pelas permissões dela. Contato e identificação centrais seguem a autoridade de `account.people.update`.
+
+**Migração.** `2026_11_21_000001_add_company_to_commercial_relations.php` usa a empresa única do tenant. Contas com relação legada e zero ou várias empresas, ou etiquetas comerciais incoerentes, interrompem a migração para revisão. Nenhum dado recebe empresa arbitrária. A reversão recompõe as etiquetas ativas e recusa a perda de relações repetidas por tipo. As consultas pela ficha usam o índice de `person_id`. A listagem usa a unicidade iniciada por `company_id`; o recorte amplo medido teve baixa seletividade por situação e não motivou um índice adicional.
+
+**Validação.** A suíte PHP em contêiner descartável com SQLite em memória e e-mail em array passou com 215 testes e 2.342 asserções. PostgreSQL 18 descartável validou instalação limpa, aplicação sobre uma relação ativa anterior e reversão para o formato anterior. O PostgreSQL também recusou a reversão incompatível e preservou 60.003 relações das duas empresas do cenário. A suíte SQLite verificou bloqueios por ambiguidade e perda de dados. Com dois workers FrankenPHP, 200 requisições alternaram três sessões de duas contas, incluindo respostas 404. O harness com um worker identificado repetiu a alternância e verificou inspeção somente leitura e de edição, autoria, bloqueio de preferências, revogação na próxima requisição e continuidade da sessão independente do representado. Dois lotes de cinco escritas concorrentes produziram uma criação e quatro respostas 422 para o CPF e para o vínculo. `permissions:sync` descobriu 81 permissões. `audit:check` validou 12 modelos. `organization:check` passou. A suíte de frontend, arquitetura, tipos, build, PHPStan e Pint foram executados.
+
+**Medições.** Listagem consolidada com duas empresas autorizadas, 50 registros por página, situação ativa e 30 amostras HTTP depois de uma requisição de aquecimento. O volume abaixo exclui os poucos cadastros dos fixtures. Os tempos são locais, em milissegundos.
+
+| Pessoas sintéticas | Relações de cliente sintéticas | HTTP mediana | HTTP p95 | Execução SQL da consulta de página |
+| ---: | ---: | ---: | ---: | ---: |
+| 100 | 200 | 13,04 | 18,37 | 0,301 |
+| 1.000 | 2.000 | 15,60 | 24,47 | 1,697 |
+| 10.000 | 20.000 | 31,08 | 34,19 | 12,547 |
+| 30.000 | 60.000 | 64,05 | 69,91 | 36,040 |
+
+Em 30 mil, `EXPLAIN (ANALYZE, BUFFERS)` registrou varredura de clientes com 54.002 linhas após o filtro, bitmap no cadastro de Pessoas, junções hash e ordenação top-N com 28 kB, 1.078 hits de buffers e 50 linhas devolvidas. O teste de regressão compara a contagem de consultas SQL entre páginas pequenas e maiores para detectar N+1. No ensaio instrumentado com um worker e 30 mil Pessoas, a página consolidada fez 9 consultas, sem duplicações. O tempo total de banco foi de 47,58 ms na mediana e 49,82 ms no p95. O pico adicional de memória PHP foi de aproximadamente 274 KiB por requisição na mediana e no p95.
+
+A segunda carga usou 30 mil Pessoas e 60 mil relações, distribuídas por cinco empresas e 50 unidades. As consultas consolidaram as unidades navegáveis de cada sessão. Foram 20 amostras por perfil após aquecimento, com um worker e 50 registros paginados, sem filtro de situação.
+
+| Perfil ou atribuições | Unidades selecionadas | Empresas comerciais | Relações visíveis | HTTP mediana (ms) | HTTP p95 (ms) | Banco mediana (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Administrador integral | 50 | 5 | 60.000 | 56,81 | 58,52 | 46,65 |
+| 1 atribuição | 10 | 1 | 12.000 | 30,15 | 32,21 | 21,25 |
+| 5 atribuições | 14 | 1 | 12.000 | 29,87 | 32,68 | 20,75 |
+| 30 atribuições | 29 | 1 | 12.000 | 30,73 | 32,39 | 20,61 |
+
+Os quatro perfis fizeram 9 consultas sem repetição de SQL e parâmetros. O pico PHP adicional das amostras registradas ficou entre 266 e 421 KiB.
+
+A comparação de Pessoas usou o mesmo banco isolado antes e depois da migração, 30.002 pessoas, 15.001 clientes ativos, uma empresa, um worker e página de 50 registros. A versão intermediária com `withExists` elevou a mediana sem filtro de 30,96 ms para 48,78 ms. A consulta final deriva as etiquetas em uma consulta em lote com os IDs da página e mantém o filtro de listagem e a contagem no SQL.
+
+| Consulta | Versão | HTTP mediana (ms) | HTTP p95 (ms) | Banco mediana (ms) | Queries | Pico adicional mediano PHP (KiB) |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Pessoas | HEAD E06 | 30,96 | 34,29 | 18,29 | 13 | 447 |
+| Pessoas | E07 | 29,81 | 34,51 | 17,72 | 14 | 363 |
+| Pessoas com filtro Clientes | HEAD E06 | 35,39 | 38,18 | 20,52 | 13 | 613 |
+| Pessoas com filtro Clientes | E07 | 31,63 | 38,07 | 19,66 | 14 | 362 |
+
+**Validação visual e pendências.** Pessoas, Clientes, Fornecedores e o modal de vínculo foram exercitados em Chromium a 1440, 1024, 768, 390 e 320 px, sem rolagem horizontal da página. As duas larguras menores preservaram a empresa na linha compacta. Os tours dos três fluxos foram percorridos a 1440 e 390 px. O teste a 390 px incluiu CPF inválido, descoberta, vínculo, inativação e reativação. Em três lotes adicionais de 200 requisições alternadas, o RSS do processo FrankenPHP foi de 330.364, 332.912 e 334.552 KiB após cada lote, com reciclagem do worker PHP durante o ensaio. A auditoria final abaixo registra a carga prolongada e a disponibilidade de tema escuro. A E07 aguarda homologação formal.
+
+**Arquivos.** A integração está nos domínios Pessoas, Clientes, Fornecedores, Acessos e Organização e em `routes/context.php`. No frontend, `commercial-relations.tsx`, `CommercialRelationFields.tsx`, `CommercialRelations.tsx` e os estilos comerciais foram adicionados. A ficha e o formulário de Pessoas, o catálogo de orientação e a navegação da área de trabalho foram atualizados. A cobertura adicional está em `CommercialRelationAccessTest`, `CommercialRelationIntegrityTest`, `CommercialRelationWorkspaceTest` e `BuildsCommercialScenario`, com regressões em `CustomerDirectoryTest`, `SupplierDirectoryTest` e `organizationContext.test.ts`. Ajuda e tours de Pessoas, Clientes e Fornecedores foram atualizados, assim como a convenção de Pessoas e contatos. O script `test:frontend` passou a indicar os arquivos de teste TypeScript para funcionar com Node 24.
+
+#### Auditoria final da E07
+
+A auditoria partiu de `34ed162` na branch `feat/filtros-calendario-titulos`, com a implementação da E07 na árvore local. O registro de homologação da E06 foi preservado. A regra de dados compartilhados da seção 10.2 e da DA-25 foi mantida.
+
+| Dado | Consulta | Criação | Alteração | Exclusão |
+| --- | --- | --- | --- | --- |
+| Nome ou razão social | Ficha com `account.people.view`; nome também na lista com `account.people.list` | `account.people.create` | `account.people.update` e todas as empresas com relação ativa, ou escopo conta | O cadastro de Pessoas não oferece exclusão |
+| CPF ou CNPJ | Ficha com `account.people.view`; projeção comercial com a permissão de listar na empresa | `account.people.create`; validação e unicidade por conta | Mesma regra de identificação | O documento opcional pode ser limpo com a mesma autorização de edição |
+| Nome fantasia | Ficha com `account.people.view` | `account.people.create` para Pessoa jurídica | Mesma regra de identificação | Campo opcional, mesma autorização de edição |
+| Inscrições fiscais | Ficha com `account.people.view` | `account.people.create` | Mesma regra de identificação | Campos opcionais, mesma autorização de edição |
+| Telefones | Ficha com `account.people.view` | `account.people.create` | `account.people.update` e cobertura de uma empresa com relação ativa, ou escopo conta | Remoção de contato opcional segue a mesma autorização |
+| E-mails de contato | Ficha com `account.people.view`; e-mail principal também na lista com `account.people.list` e na projeção comercial autorizada | `account.people.create` | Mesma regra de contatos | Remoção segue a regra de contatos e as validações aplicáveis |
+| Endereços | Ficha com `account.people.view` | `account.people.create` | Mesma regra de contatos | Remoção segue a regra de contatos |
+| Etiquetas convencionais | Lista e ficha de Pessoas com a permissão da operação | Associação inicial com `account.people.create`; catálogo com `account.tags.create` | Associação com a regra de contatos; edição do catálogo com `account.tags.update` | Desassociar segue a regra de contatos; excluir do catálogo exige `account.tags.delete` e as restrições do catálogo |
+| Situação da Pessoa | `people` não tem situação global | Situações são da relação comercial, do vínculo ou da identidade | Cliente e fornecedor exigem `activate` ou `deactivate` do papel na empresa; vínculo exige `account.users.revoke` ou `account.users.reactivate` no tenant | Cada relação fica retida após inativação |
+| Exclusão da Pessoa | Fora dos fluxos de Pessoas | A criação segue `account.people.create` | A edição segue as regras das categorias | Não há rota ou permissão de exclusão de Pessoas nesta versão |
+| Identidade de autenticação | Titular pelos fluxos `self.*`; dados limitados de vínculo com `account.users.view` no escopo | Provisionamento com `account.users.create` e autorização da primeira atribuição | Titular pelos fluxos `self.*` e plataforma nos fluxos auditados de suporte | Titular com `self.profile.delete`, senha e proteção do último administrador; Pessoas e relações comerciais são preservadas |
+
+Listagem e ficha central exigem atribuição ativa na conta. A abertura do formulário também depende da autorização de edição. Sem relação ativa, qualquer atribuição com `account.people.update` pode editar identificação e contatos. A cobertura para o alvo Pessoa admite a empresa ou um de seus estabelecimentos com a permissão aplicável. No teste de três empresas, a operadora de uma empresa alterou telefone, e-mail, endereço e etiqueta convencional. Os leitores das três empresas viram o mesmo cadastro atualizado. Nome, CPF, nome fantasia e inscrições foram protegidos enquanto havia relações ativas fora do escopo. As relações inativas perderam efeito sobre a cobertura, e nome e e-mail de autenticação permaneceram iguais.
+
+**Etiquetas e descoberta.** A auditoria encontrou uma divergência entre `list` usado originalmente nos filtros comerciais de Pessoas e `view` usado pelas etiquetas. Corrigida a seleção dos filtros, opções de empresa, contagens e paginação para exigir os dois na mesma empresa. Os testes usam atribuições disjuntas e confirmam 403 sem interseção e 404 ao tentar filtrar por empresa fora do recorte autorizado. As listagens próprias de Clientes e Fornecedores preservam a permissão de listar. O pivô armazena etiquetas convencionais e Usuário, e a validação recusa a associação manual das etiquetas comerciais. Uma relação ativa remanescente mantém a etiqueta visível no escopo permitido. O módulo não possui exportações de Pessoas, Clientes ou Fornecedores. A ajuda e o roteiro de Pessoas foram alinhados ao fluxo efetivo.
+
+A descoberta avalia `create` no contexto empresarial antes de validar o documento, normaliza e verifica CPF/CNPJ completo e busca somente no tenant. A resposta sem cache contém ID, nome, tipo de Pessoa e situação do papel somente na empresa escolhida. Documento de outra conta recebe a mesma resposta que um documento ausente. O teste inclui parâmetro malformado, negação e reutilização. Em duas corridas HTTP de cinco tentativas, o cadastro central retornou um 200 e quatro 422, e o vínculo retornou um 204 e quatro 422. A restrição de unicidade e as travas foram exercitadas em PostgreSQL descartável. Na auditoria final, o documento ainda estava na query string. O fechamento da E07 abaixo registra a correção e a nova evidência de privacidade.
+
+**Área de Trabalho e esquema.** A regressão cobre filiais da mesma empresa, empresas diferentes, permissões distintas por papel, filtros, paginação, escrita com empresa explícita e revogação. No Chromium, **Abrir área de trabalho** a partir de Pessoas fez o PUT da preferência com resposta 204, abriu Janaúba e preservou o contexto da outra aba. O GET da preferência confirmou o código salvo. O ensaio de inspeção confirmou os modos leitura e edição, autoria, bloqueio de gravação de preferências e encerramento na próxima requisição após revogação, com a sessão independente preservada. A migração foi reaplicada a PostgreSQL limpo e a uma relação legada identificável e revertida no caso representável. A migração aborta diante de conta com zero ou várias empresas e de etiqueta legada incoerente. A reversão aborta quando há mais de uma relação do mesmo tipo por pessoa. O ensaio PostgreSQL preservou as 60.003 linhas de clientes após essa recusa. Atribuição arbitrária, sincronização legada e esquema paralelo estão ausentes.
+
+**Visual.** Chromium foi executado com preferência escura de sistema em 1440, 1024, 768, 390 e 320 px. Foram conferidos Pessoas, Clientes, Fornecedores, ficha de visualização, etiquetas, badges e modal de vínculo, com a empresa visível no modo compacto e sem rolagem horizontal da página. Os tours foram percorridos em 1440 e 390 px. A ajuda dos três fluxos e os estados vazios por falta de relação e por filtro sem resultado foram verificados. Em 390 px foram conferidos descoberta, validação, vínculo, inativação com confirmação e reativação. A tela Aparência só oferece recolher o menu lateral. A aplicação manteve as mesmas cores de superfície e texto nas preferências clara e escura, em linha com o registro dos componentes compartilhados. Portanto, a evidência visual cobre o tema claro existente, inclusive com a preferência escura do sistema. Uma paleta escura da aplicação exigiria trabalho próprio, fora da E07.
+
+**Carga prolongada.** PostgreSQL 18 descartável com 30 mil Pessoas, 60 mil clientes e 12 mil fornecedores sintéticos. Um worker FrankenPHP instrumentado, reciclagem configurada para 20 mil requisições somente no ambiente de ensaio. Após 180 requisições de aquecimento, foram medidas 3.600 requisições sequenciais, alternando três usuários em duas contas, Pessoas, Clientes, Fornecedores, filtros, paginação, contextos consolidados e acessos negados. Houve 2.800 respostas 200 e 800 respostas 404 esperadas, zero erros inesperados e zero reinícios durante a medição. HTTP mediana de 22,91 ms e p95 de 58,24 ms. Contagem por requisição de 14 a 16 queries em Pessoas, 9 a 10 em Clientes, 10 a 11 em Fornecedores e 5 a 8 em rejeições contextuais.
+
+| Requisições após aquecimento | RSS do processo FrankenPHP (KiB) | Uso de PHP no início, mediana recente (bytes) |
+| ---: | ---: | ---: |
+| 0 | 324.140 | 9.291.864 (amostra) |
+| 450 | 327.228 | 9.292.360 |
+| 900 | 330.264 | 9.292.360 |
+| 1.350 | 296.068 | 9.292.360 |
+| 1.800 | 296.400 | 9.292.360 |
+| 2.250 | 296.748 | 9.292.360 |
+| 2.700 | 296.836 | 9.292.360 |
+| 3.150 | 296.948 | 9.292.360 |
+| 3.600 | 297.140 | 9.292.360 |
+
+O pico adicional do PHP foi 282.224 bytes por requisição. O uso inicial permaneceu estável e o RSS do processo oscilou, caiu abaixo do ponto de aquecimento e variou 1.072 KiB nos 2.250 últimos atendimentos. O comportamento é compatível com alocação e retenção transitórias, sem indício de retenção PHP persistente nesta carga. O ensaio sequencial em um worker não representa todos os perfis de concorrência da implantação.
+
+**Regressão.** PHP completo com SQLite em memória e e-mail em array passou com 217 testes e 2.387 asserções. O recorte comercial passou com 39 testes e 566 asserções. Passaram teste de frontend, arquitetura, tipos, build, PHPStan, Pint, `permissions:sync` (81 permissões), `audit:check` (12 modelos) e `organization:check`. A E07 está pronta para homologação formal do escopo disponível e permanece **Em validação**. A auditoria não exigiu redesenho ou mudança no seletor e não iniciou a E08.
+
 **Entregáveis.** Código, migrations, testes, ajuda, tours, relatório.
 
 ---
@@ -2011,8 +2111,8 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E03 | Concluída | 20/11/2026 | 20/11/2026 | Registro E03 e relatório de medições | Concorrência e custos de migrations em bases maiores ficam para trabalho futuro |
 | E04 | Concluída | 20/11/2026 | 20/11/2026 | Registro de execução e homologação final da E04 na seção 26 | Implantação pendente de conferência da base oficial, backup e confirmação fiscal legada |
 | E05 | Concluída | 20/11/2026 | 20/11/2026 | Registro, auditoria, revisão, verificação da inspeção e homologação final da E05 na seção 26 | Implantação pendente de provedor de e-mail, backup, migrations e reinício controlado dos workers; `users.account_id` preservada até a E09 |
-| E06 | Em validação | 20/11/2026 | | Registro de execução da E06 na seção 26 | Aguarda revisão; pendências de implantação e de módulos operacionais registradas |
-| E07 | Pendente | | | | |
+| E06 | Concluída (homologada) | 20/11/2026 | | Registro de execução na seção 26 e homologação confirmada na autorização da E07 | Pendências de implantação e de módulos operacionais preservadas |
+| E07 | Concluída | 21/11/2026 | 21/11/2026 | Auditoria final na subseção E07 e homologação nesta seção | Privacidade da descoberta corrigida e verificada; tema disponível aprovado |
 | E08 | Pendente | | | | |
 | E09 | Pendente | | | | |
 | E10 | Pendente | | | | |
@@ -2496,6 +2596,91 @@ Chrome headless contra o ambiente descartável (`STACK_PREFIX=prospera-e06-visua
 - Durante a execução, o container `app` do Compose local foi recriado em modo de produção por outra sessão. A E06 não alterou esse ambiente e executou testes e medições em containers descartáveis.
 - A implantação continua sujeita às pendências da E05 (e-mail externo, backup, migrations e reinício controlado dos workers); a E06 não tem migration, mas o reinício dos workers é necessário para carregar o código novo.
 
+#### E07, homologação final (21/11/2026)
+
+- **Decisão.** Homologados o cadastro central de Pessoas, as relações de Cliente e Fornecedor por empresa, o compartilhamento entre filiais, a matriz de autorização dos dados compartilhados, as etiquetas derivadas, a correção do recorte dos filtros, a Área de Trabalho e a auditoria empresarial. A integridade referencial, a concorrência e a remoção das sincronizações legadas foram aprovadas.
+- **Privacidade.** A descoberta comercial usa `POST /conta/empresa/{empresa}/{clientes|fornecedores}/pessoa` e lê `documento` exclusivamente do corpo. O cliente usa o mecanismo de sessão e CSRF da API existente. A autorização `create` do papel na empresa precede a validação e a consulta. A busca é restrita à conta, retorna apenas identificação mínima e situação da relação local e não grava cadastro, vínculo ou evento de auditoria. As rotas consultivas mantêm o acesso em inspeção somente leitura dentro das permissões do representado.
+- **Respostas e logs.** As respostas da descoberta usam `Cache-Control: private, no-store`. Erros de validação retornam JSON e evitam guardar o documento como entrada anterior na sessão. Uma falha de consulta retorna 503 com mensagem genérica. O log de erro registra conta, empresa e papel, sem a exceção SQL que pode expor os parâmetros. Em Chromium e FrankenPHP descartáveis, a busca dos dois papéis enviou JSON sem query string, e a tentativa sem token foi recusada com 419. O documento sintético ficou ausente dos logs do aplicativo e do PostgreSQL no ensaio. A revisão de parâmetros de logging e captura de corpo em infraestrutura externa permanece fora da validação local.
+- **Regressão aplicável.** A auditoria final anterior registrou 217 testes e 2.387 asserções, com 39 testes comerciais e 566 asserções. Após a correção da descoberta, a suíte completa passou com 218 testes e 2.409 asserções, e o recorte comercial com 40 testes e 588 asserções. Passaram o teste de frontend, a checagem de arquitetura e tipos, build, PHPStan, Pint, `permissions:sync`, `audit:check` e `organization:check`.
+- **Performance.** Mantidas as medições homologadas de 3.600 requisições após 180 de aquecimento, com 2.800 respostas 200, 800 respostas 404 esperadas, zero erros inesperados e zero reinícios do worker. Mediana HTTP de 22,91 ms e p95 de 58,24 ms. O uso inicial de memória PHP ficou estável. O ensaio foi sequencial com um worker e não representa todos os perfis de concorrência da implantação.
+- **Visual.** Homologada a validação do tema disponível, incluindo as cinco larguras registradas na auditoria final. A ausência de tema escuro nativo foi aceita. O fluxo atualizado de descoberta foi confirmado a 390 px em Clientes e Fornecedores.
+- **Git e implantação.** HEAD `34ed162`, branch `feat/filtros-calendario-titulos`. O registro de encerramento da E06 foi preservado. A validação usou contêineres e dados descartáveis, sem alterações em bases oficiais, commits ou push. A implantação continua sujeita à conferência dos dados legados, backup e reinício controlado dos workers. E08 a E10 seguem pendentes.
+
+#### E07, ajustes posteriores à homologação
+
+- Clientes e Fornecedores passaram a ter edição direta na listagem. O formulário reutiliza a ficha comercial, fixa a empresa e o documento e mantém a situação da relação. A inativação segue disponível na ficha de Pessoas, conforme autorização.
+- As permissões `account.customers.update` e `account.suppliers.update` avaliam o escopo da empresa. Alterar dados centrais continua exigindo a autoridade de Pessoas. Etiquetas atualizadas são auditadas na empresa da relação, sem gravar alterações efetivamente iguais.
+
+<details>
+<summary>Inventário da árvore de trabalho da E07 na homologação</summary>
+
+**Arquivos rastreados modificados (40).** Inclui o ajuste local preexistente em `.dockerignore`, preservado.
+
+- `.dockerignore`
+- `app/Domains/Acessos/Application/Context/EffectivePermissions.php`
+- `app/Domains/Acessos/Domain/DTOs/AuthorizedNodes.php`
+- `app/Domains/Clientes/Application/Actions/SaveCustomerAction.php`
+- `app/Domains/Clientes/Domain/Models/Customer.php`
+- `app/Domains/Fornecedores/Application/Actions/SaveSupplierAction.php`
+- `app/Domains/Fornecedores/Domain/Models/Supplier.php`
+- `app/Domains/Organizacao/Application/Queries/CompanyDirectoryQuery.php`
+- `app/Domains/Pessoas/Application/Actions/SavePersonAction.php`
+- `app/Domains/Pessoas/Application/Data/SavePersonData.php`
+- `app/Domains/Pessoas/Application/Queries/PeopleDirectoryQuery.php`
+- `app/Domains/Pessoas/Application/Queries/PersonAccessQuery.php`
+- `app/Domains/Pessoas/Domain/Models/Person.php`
+- `app/Domains/Pessoas/UI/Controllers/DirectoryController.php`
+- `app/Http/Middleware/EnforceAccountInspection.php`
+- `bootstrap/app.php`
+- `docs/ajuda/clientes.md`
+- `docs/ajuda/fornecedores.md`
+- `docs/ajuda/pessoas.md`
+- `docs/convencoes/pessoas-e-contatos.md`
+- `docs/plano-de-acoes/001-arquitetura-organizacional-prospera.md`
+- `docs/tours/clientes.md`
+- `docs/tours/fornecedores.md`
+- `docs/tours/pessoas.md`
+- `package.json`
+- `resources/js/app/ApiApplication.tsx`
+- `resources/js/app/guidance.ts`
+- `resources/js/app/saas/Directory.css`
+- `resources/js/app/saas/Directory.types.ts`
+- `resources/js/app/saas/OrganizationSwitcher.tsx`
+- `resources/js/app/saas/PersonPreview.tsx`
+- `resources/js/app/saas/SaasLayout.tsx`
+- `resources/js/app/saas/accountNavigation.ts`
+- `resources/js/app/saas/people.tsx`
+- `resources/js/app/saas/person-form.tsx`
+- `resources/js/utils/organizationContext.ts`
+- `routes/context.php`
+- `tests/Feature/CustomerDirectoryTest.php`
+- `tests/Feature/SupplierDirectoryTest.php`
+- `tests/Frontend/organizationContext.test.ts`
+
+**Arquivos novos ainda não rastreados (19).**
+
+- `app/Domains/Pessoas/Application/Actions/SaveCommercialRelationsAction.php`
+- `app/Domains/Pessoas/Application/Actions/SetCommercialRelationAction.php`
+- `app/Domains/Pessoas/Application/Data/CommercialRelationFiltersData.php`
+- `app/Domains/Pessoas/Application/Data/CommercialRelationLinkData.php`
+- `app/Domains/Pessoas/Application/Data/CommercialRelationsData.php`
+- `app/Domains/Pessoas/Application/Queries/CommercialRelationDirectoryQuery.php`
+- `app/Domains/Pessoas/Application/Queries/PersonCommercialRelationsQuery.php`
+- `app/Domains/Pessoas/Domain/DTOs/PersonEditAuthority.php`
+- `app/Domains/Pessoas/Domain/Enums/CommercialRole.php`
+- `app/Domains/Pessoas/UI/Controllers/CommercialRelationController.php`
+- `database/migrations/2026_11_21_000001_add_company_to_commercial_relations.php`
+- `resources/js/app/saas/CommercialRelationFields.tsx`
+- `resources/js/app/saas/CommercialRelations.css`
+- `resources/js/app/saas/CommercialRelations.tsx`
+- `resources/js/app/saas/commercial-relations.tsx`
+- `tests/Feature/CommercialRelationAccessTest.php`
+- `tests/Feature/CommercialRelationIntegrityTest.php`
+- `tests/Feature/CommercialRelationWorkspaceTest.php`
+- `tests/Feature/Concerns/BuildsCommercialScenario.php`
+
+</details>
+
 ## 27. Contrato para módulos futuros
 
 ### 27.1 Checklist oficial
@@ -2547,5 +2732,8 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | E05 | Remoção de `users.role_id`, `users.is_account_admin` e `users.person_id`; `users.account_id` mantida até a E09 | Aprovada | 20/11/2026 | Homologação final da E05 |
 | E05 | Fechamento da etapa | Concluída | 20/11/2026 | Homologação final da E05 |
 | E06 | Início do estabelecimento como destino do seletor; 403 orientado para contexto inativo; consolidado somente leitura; seletor em todas as telas da conta | Proposta, em validação | 20/11/2026 | Registro de execução da E06 |
+
+| E07 | Descoberta comercial por POST consultivo, com documento no corpo e resposta privada sem cache | Aprovada | 21/11/2026 | Preserva CSRF, escopo empresarial, autorização e inspeção somente leitura |
+| E07 | Fechamento da etapa e aceite do tema disponível | Concluída | 21/11/2026 | Homologação final na seção 26 |
 
 Decisões novas surgidas durante a execução devem ser registradas aqui antes de alterar o contrato, com a justificativa e o impacto nas etapas.

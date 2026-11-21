@@ -13,6 +13,7 @@ type Option = {
   color: string;
   system_key?: string | null;
   locked?: boolean;
+  displayOnly?: boolean;
 };
 export default function TagSelect({
   options,
@@ -158,7 +159,7 @@ export default function TagSelect({
             }}
           />
         </div>
-        {selected.map((value) => (
+        {selected.filter((value) => !options.some((option) => option.id === value && option.displayOnly)).map((value) => (
           <input key={value} type="hidden" name="tag_ids[]" value={value} />
         ))}
 

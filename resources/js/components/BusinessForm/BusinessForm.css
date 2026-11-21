@@ -27,6 +27,13 @@
 .business-form .textInput { height: var(--business-control-height); padding: 5px 10px; font-size: 13px; max-width: 640px; }
 .business-form .textInputPassword { max-width: 640px; }
 .business-form .business-form__short-control { max-width: 240px; }
+.business-form__control-row {
+  container-type: inline-size;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 6px;
+}
 .business-form__control-start { margin-inline: 10px; }
 .business-form__actions-inline {
   display: flex;

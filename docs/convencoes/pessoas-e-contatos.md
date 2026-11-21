@@ -6,7 +6,7 @@ Esta política classifica os campos existentes e reserva o lugar dos campos futu
 
 ## Princípios
 
-- **Duas camadas:** dados centrais (tabela `people`, nó tenant ou alvo `person`) e dados da relação comercial (`customers` e `suppliers`, nó `company`, a partir da E07).
+- **Duas camadas:** dados centrais (tabela `people`, nó tenant ou alvo `person`) e dados da relação comercial (`customers` e `suppliers`, nó `company`).
 - **Sem sincronização:** nenhuma rotina copia, sincroniza ou propaga dados entre os dados centrais e as relações, nem entre relações de empresas diferentes.
 - **Alteração explícita:** quem altera um dado central vê que ele vale para todas as empresas. Quem altera um dado da relação altera só a própria empresa.
 - **Contato de uma empresa só:** um contato que interessa a uma única empresa (por exemplo, o e-mail de cobrança da Empresa A) é gravado na relação daquela empresa, nunca no cadastro central.
@@ -45,11 +45,11 @@ Esta política classifica os campos existentes e reserva o lugar dos campos futu
 
 ### Dados comerciais por empresa
 
-- **Campos atuais:** `customers.active` e `suppliers.active` (situação da relação). Até a E07 existe uma relação por pessoa, da única empresa da conta.
+- **Campos atuais:** `customers.active` e `suppliers.active` (situação da relação). Cada tabela admite uma relação por combinação de empresa e pessoa. A situação de cada tipo é independente.
 - **Campos futuros:** condições de pagamento, limite de crédito, tabela de preço, observações comerciais e afins.
 - **Proprietário:** a empresa da relação.
 - **Visualização:** `account.customers.view` ou `account.suppliers.view` sobre **aquela** empresa.
-- **Edição:** a permissão da ação (`create`, `update`, `activate`, `deactivate`) sobre aquela empresa.
+- **Edição:** a permissão da ação disponível (`create`, `activate`, `deactivate`) sobre aquela empresa. Campos comerciais futuros terão sua própria permissão de edição.
 - **Efeitos:** só a relação daquela empresa. Outras empresas não veem nem herdam o dado.
 - **Auditoria:** evento com `company_id` da relação.
 - **Várias empresas:** cada empresa tem a própria linha, com histórico separado.
@@ -77,8 +77,17 @@ A etiqueta Usuário, o vínculo e as atribuições seguem [Identidade e vínculo
 ## Etiquetas comerciais
 
 - A partir da E07, Cliente e Fornecedor são derivadas das relações e calculadas para quem está vendo. Cliente aparece somente se houver relação ativa numa empresa onde o leitor tem `account.customers.view`. Fornecedor segue a mesma regra.
-- Os filtros Clientes e Fornecedores da listagem de Pessoas consideram só as empresas autorizadas.
-- Até a E07, as etiquetas continuam gravadas em `person_tag`, sem mudança de comportamento.
+- Os filtros Clientes e Fornecedores da listagem de Pessoas consideram relações ativas nas empresas em que o leitor possui as permissões de listar e visualizar o papel.
+- `person_tag` guarda etiquetas convencionais e Usuário. Cliente e Fornecedor continuam no catálogo como etiquetas especiais, com vínculo calculado a partir das relações ativas e visíveis.
+
+Etiquetas convencionais de Clientes e Fornecedores pertencem à relação da empresa. O catálogo pertence à conta, e o módulo da etiqueta determina em qual tipo de relação ela pode ser selecionada. As etiquetas especiais Cliente e Fornecedor continuam derivadas e aparecem fixas no formulário comercial. A seleção específica de uma relação permanece nela, sem passar para a Pessoa ou para a relação de outro papel.
+
+## Consultas e vínculo
+
+- A Área de Trabalho limita as listagens comerciais às empresas distintas das unidades selecionadas com permissão para a ação. As consultas de Pessoas continuam administrativas.
+- Uma escrita comercial identifica uma empresa. Em Clientes ou Fornecedores, a URL da escrita contém o código da empresa. No formulário de Pessoas, as escolhas são indexadas pela empresa.
+- Quem pode cadastrar uma relação pode buscar um documento completo na empresa escolhida. O tipo de pessoa é obrigatório no corpo da requisição e determina a validação e a busca por CPF ou CNPJ. A resposta identifica a Pessoa central e informa a situação da relação daquele tipo somente na empresa escolhida.
+- Para vincular uma Pessoa já presente em outra empresa, reutilize o identificador retornado pela busca. A situação de cada relação é independente. Empresas inativas preservam as relações e bloqueiam alterações comerciais.
 
 ## Formulário
 

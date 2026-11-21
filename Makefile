@@ -6,6 +6,7 @@
 # permissions:sync e audit:check.
 
 COMPOSE     := docker compose
+UP_BUILD    ?= --build
 DEV_COMPOSE := APP_UID=$$(id -u) APP_GID=$$(id -g) $(COMPOSE) -f compose.yaml -f compose.dev.yaml
 APP         := $(COMPOSE) exec app
 ARTISAN     := $(APP) php artisan
@@ -22,7 +23,7 @@ help: ## Lista os comandos disponíveis
 # Aplicação
 
 up: ## Sobe tudo, recompila a imagem e os assets se o código mudou e roda as migrations
-	$(COMPOSE) up --build --wait --remove-orphans
+	$(COMPOSE) up $(UP_BUILD) --wait --remove-orphans
 	@echo "Aplicação: http://localhost:$${APP_PORT:-8000}  Mailpit: http://localhost:$${MAILPIT_PORT:-8025}"
 
 dev: ## Sobe em desenvolvimento: Vite com HMR e Octane --watch, sem rebuild a cada alteração

@@ -32,7 +32,7 @@ function entry(permissions: string[], module: string, item: SidebarItem, create?
   return [];
 }
 
-export function accountNavigation(tenant: boolean, permissions: string[] = []) {
+export function accountNavigation(tenant: boolean, permissions: string[] = [], workspaceHref: (module: string) => string = (module) => `/conta/estabelecimento?para=${module}`) {
   const shared: SidebarEntry[] = [
     ...(permissions.includes((tenant ? 'account' : 'platform') + '.audit.list')
       ? [
@@ -59,6 +59,9 @@ export function accountNavigation(tenant: boolean, permissions: string[] = []) {
   const records: SidebarEntry[] = [
     ...entry(permissions, 'people', { key: 'people', label: 'Pessoas', href: '/conta/pessoas', iconClass: 'ti-id-badge' }, '/conta/pessoas/cadastrar'),
     ...entry(permissions, 'tags', { key: 'tags', label: 'Etiquetas', href: '/conta/etiquetas', iconClass: 'ti-tag' }, '/conta/etiquetas/cadastrar'),
+    // Relações comerciais (E07): abrem na área de trabalho, com as empresas das unidades selecionadas.
+    ...entry(permissions, 'customers', { key: 'customers', label: 'Clientes', href: workspaceHref('clientes'), iconClass: 'ti-face-smile' }),
+    ...entry(permissions, 'suppliers', { key: 'suppliers', label: 'Fornecedores', href: workspaceHref('fornecedores'), iconClass: 'ti-truck' }),
     // Cargos passa ao grupo Controle de acesso na E05, junto com Usuários.
     ...entry(permissions, 'roles', { key: 'roles', label: 'Cargos', href: '/conta/cargos', iconClass: 'ti-id-badge' }, '/conta/cargos/cadastrar'),
   ];

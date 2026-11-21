@@ -9,11 +9,21 @@ use App\Domains\Pessoas\Domain\Models\Person;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\DB;
 
 #[Fillable(['account_id', 'module', 'name', 'color', 'system_key', 'active'])]
 class Tag extends Model implements Auditable
 {
     use AuditsChanges;
+
+    public const MODULES = ['people', 'customers', 'suppliers'];
+
+    public function isAssigned(): bool
+    {
+        return $this->people()->exists()
+            || DB::table('customers_tags')->where('tag_id', $this->id)->exists()
+            || DB::table('suppliers_tags')->where('tag_id', $this->id)->exists();
+    }
 
     protected $attributes = ['active' => true];
 
