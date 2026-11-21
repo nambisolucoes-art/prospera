@@ -14,12 +14,10 @@ export default function SelectChecklist({
   label,
   options,
   onChange,
-  onReset,
 }: {
   label: string;
   options: ChecklistOption[];
   onChange: (id: string, checked: boolean) => void;
-  onReset: () => void;
 }) {
   const id = useId();
   const container = useRef<HTMLDivElement>(null);
@@ -103,13 +101,6 @@ export default function SelectChecklist({
             />
           ))}
         </div>
-        <button
-          className="selectControl__reset"
-          type="button"
-          onClick={onReset}
-        >
-          Restaurar padrão
-        </button>
       </SelectMenu>
     </div>
   );

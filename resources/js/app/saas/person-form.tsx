@@ -126,7 +126,7 @@ export default function PersonForm({
                     {person?.membership && (
                       <>
                         <Field label="E-mail de acesso" readOnly value={person.membership.email ?? 'Não informado'} />
-                        <ul className="business-form__control-start">
+                        <ul className="business-form__control-start person-assignment-summary">
                           {person.membership.assignments.map((assignment) => (
                             <li key={assignment.id}>{assignment.role} ({assignment.location})</li>
                           ))}

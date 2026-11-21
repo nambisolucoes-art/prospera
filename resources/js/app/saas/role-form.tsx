@@ -84,6 +84,7 @@ export default function RoleForm({
                         <ChoiceControl
                           key={permission.id}
                           type="checkbox"
+                          tone="primary"
                           id={`role-permission-${permission.id}`}
                           name="permission_ids[]"
                           value={String(permission.id)}

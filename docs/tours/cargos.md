@@ -11,7 +11,7 @@ Artigo: [Cargos e permissões](../ajuda/cargos-permissoes.md). Executor disponí
 
 Finalize em Salvar. Pule ações não autorizadas, cargos protegidos e gravações em inspeção somente leitura. Preserve seleções ao demonstrar o formulário. Fechar o modal devolve o foco ao botão de origem.
 
-No modal, confira primeiro Dados do cargo e depois Permissões por módulo, com rótulos e valores no padrão de Contas. Revise o alinhamento no desktop e no mobile.
+No modal, confira primeiro Dados do cargo e depois Permissões por módulo, com uma etiqueta por ação e o nome do módulo na linha do grupo. Revise o alinhamento no desktop e no mobile.
 
 Executor disponível pelo botão **Tutorial desta tela** na barra superior. Configuração em `resources/js/app/guidance.ts`. Revisar alvos em desktop e mobile a cada alteração.
 

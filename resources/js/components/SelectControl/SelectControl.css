@@ -124,16 +124,6 @@
   outline-offset: 2px;
 }
 
-.selectControl__reset {
-  width: calc(100% - 12px);
-  margin: 4px 6px;
-  padding: 5px;
-  border: 1px solid var(--bold-color-border);
-  background: var(--bold-color-surface-alt);
-  color: var(--bold-color-text);
-  cursor: pointer;
-}
-
 @media (max-width: 767px) {
   .selectControl__menu {
     --select-menu-max-width: calc(100vw - 16px);

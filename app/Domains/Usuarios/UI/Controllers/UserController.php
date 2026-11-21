@@ -55,7 +55,6 @@ final class UserController
         $nodes = $permissions->nodesFor($user, 'account.users.list');
         abort_if($nodes->isEmpty(), 403);
 
-        $manage = $permissions->nodesFor($user, 'account.users.assign-role');
         $view = $permissions->nodesFor($user, 'account.users.view');
         $search = mb_substr(trim($request->string('search')->toString()), 0, 100);
         $pageSize = PageSize::fromInput($request->query('per_page'));
@@ -64,24 +63,26 @@ final class UserController
         return ApiPage::respond([
             'tenant' => true,
             'search' => $search,
-            'users' => $memberships->through(fn (AccountMembership $membership) => [
-                'id' => $membership->id,
-                'person_id' => $membership->person_id,
-                'name' => $membership->person->name,
-                'email' => $membership->identity->email,
-                'status' => $membership->status,
-                'password_setup_pending' => $membership->identity->password_setup_pending,
-                'photo_url' => $membership->identity->profile_photo
-                    && ($view->tenant || $membership->assignments->contains(fn ($assignment) => $view->covers($assignment->node())))
-                    ? route(
-                        'account.users.photo',
-                        ['userId' => $membership->user_id, 'version' => $membership->identity->profile_photo],
-                        absolute: false,
-                    ) : null,
-                'assignments' => $membership->assignments->map($directory->assignment(...)),
-                'can_manage' => $manage->tenant || $membership->assignments
-                    ->contains(fn ($assignment) => $manage->covers($assignment->node())),
-            ]),
+            'users' => $memberships->through(function (AccountMembership $membership) use ($view, $directory): array {
+                $canView = $view->tenant || $membership->assignments
+                    ->contains(fn ($assignment) => $view->covers($assignment->node()));
+
+                return [
+                    'id' => $membership->id,
+                    'person_id' => $membership->person_id,
+                    'name' => $membership->person->name,
+                    'email' => $membership->identity->email,
+                    'status' => $membership->status,
+                    'photo_url' => $canView && $membership->identity->profile_photo
+                        ? route(
+                            'account.users.photo',
+                            ['userId' => $membership->user_id, 'version' => $membership->identity->profile_photo],
+                            absolute: false,
+                        ) : null,
+                    'assignments' => $membership->assignments->map($directory->assignment(...)),
+                    'can_view' => $canView,
+                ];
+            }),
         ]);
     }
 

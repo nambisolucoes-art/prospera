@@ -1,16 +1,16 @@
 import { useRef, useState } from 'react';
 import { useApiPage as usePage } from '@/hooks/useApiPage';
 import BusinessList, { type BusinessColumn, type PageSummary } from '@/components/BusinessList/BusinessList';
-import Link from '@/components/ApiLink/ApiLink';
 import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
-import BusinessForm, { BusinessFormActions } from '@/components/BusinessForm/BusinessForm';
 import { useBusinessListFilters } from '@/components/BusinessList/useBusinessListFilters';
 import Modal from '@/components/Modal/Modal';
-import MembershipAssignmentsModal, { type AssignmentSummary } from './MembershipAssignmentsModal';
+import type { AssignmentSummary } from './MembershipAssignmentsModal';
 import Button from '@/components/Button/Button';
 import ProfileAvatar from '@/components/ProfileAvatar/ProfileAvatar';
 import type { SessionProps } from '@/types/Session.types';
+import PreviewSection from './PreviewSection';
 import SaasLayout from './SaasLayout';
+import './AccountPreview.css';
 import './UserDirectory.css';
 
 type UserRow = {
@@ -21,16 +21,7 @@ type UserRow = {
   photo_url: string | null;
   status?: string;
   assignments?: AssignmentSummary[];
-  can_manage?: boolean;
-  password_setup_pending?: boolean;
-};
-type MembershipAction = 'suspender' | 'reativar' | 'recuperacao' | 'convite';
-
-const labels: Record<MembershipAction, string> = {
-  suspender: 'Suspender acesso',
-  reativar: 'Reativar acesso',
-  recuperacao: 'Enviar link de redefinição de senha',
-  convite: 'Reenviar convite',
+  can_view?: boolean;
 };
 
 export default function Users({ users, tenant, search = '' }: {
@@ -42,48 +33,35 @@ export default function Users({ users, tenant, search = '' }: {
   const readOnly = auth.inspection_mode === 'read-only';
   const can = (permission: string) => auth.permissions.includes(permission);
   const base = tenant ? '/conta/usuarios' : '/saas/usuarios';
-  const [editing, setEditing] = useState<UserRow>();
-  const [confirmation, setConfirmation] = useState<{ user: UserRow; action: MembershipAction }>();
+  const [preview, setPreview] = useState<UserRow>();
   const trigger = useRef<HTMLElement | null>(null);
   const { query, setQuery, submit } = useBusinessListFilters(base, search);
 
   function close() {
-    setEditing(undefined);
-    setConfirmation(undefined);
+    setPreview(undefined);
     requestAnimationFrame(() => trigger.current?.focus());
-  }
-
-  function actions(user: UserRow): MembershipAction[] {
-    const available: MembershipAction[] = [];
-    if (user.status === 'active' && can('account.users.revoke')) available.push('suspender');
-    if (user.status === 'suspended' && can('account.users.reactivate')) available.push('reativar');
-    if (can('account.users.send-password-reset')) available.push('recuperacao');
-    if (user.password_setup_pending && can('account.users.invite')) available.push('convite');
-    return available;
   }
 
   const columns: BusinessColumn<UserRow>[] = [
     ...(tenant ? [{
-      id: 'actions', label: 'Ações', width: 170, locked: true, render: (user: UserRow) => (
+      id: 'actions', label: 'Ações', width: 92, compactWidth: 78, locked: true, render: (user: UserRow) => (
         <div className="business-list__actions" data-tour="user-access-actions">
-          {!readOnly && user.can_manage && (
-            <Button iconOnly tone="primary" leftIconClass="fa fa-sitemap" aria-label={'Editar atribuições de ' + user.name}
-              title="Editar atribuições" aria-haspopup="dialog"
-              onClick={(event) => { trigger.current = event.currentTarget; setEditing(user); }} />
+          {user.can_view && (
+            <Button iconOnly tone="primary" leftIconClass="fa fa-info" title="Visualizar usuário"
+              aria-label={`Visualizar usuário ${user.name}`} aria-haspopup="dialog"
+              onClick={(event) => { trigger.current = event.currentTarget; setPreview(user); }} />
           )}
-          {!readOnly && actions(user).map((action) => (
-            <Button key={action} iconOnly tone="primary" leftIconClass={action === 'suspender' ? 'fa fa-ban'
-              : action === 'reativar' ? 'fa fa-check' : action === 'convite' ? 'fa fa-envelope-o' : 'fa fa-key'}
-              title={labels[action]} aria-label={labels[action] + ' de ' + user.name} aria-haspopup="dialog"
-              onClick={(event) => { trigger.current = event.currentTarget; setConfirmation({ user, action }); }} />
-          ))}
+          {!readOnly && user.person_id && can('account.people.update') && (
+            <Button href={`/conta/pessoas/${user.person_id}/editar`} iconOnly tone="primary" leftIconClass="fa fa-pencil"
+              title="Editar pessoa" aria-label={`Editar pessoa ${user.name}`} />
+          )}
         </div>
       ),
     }] : []),
     { id: 'name', label: 'Nome', width: 220, compact: true, render: (user) => (
       <span className="user-directory__identity">
         <ProfileAvatar name={user.name} photoUrl={user.photo_url} small lazy />
-        <span className="user-directory__name" title={user.name}>{tenant && can('account.people.update') ? <Link href={`/conta/pessoas/${user.person_id}/editar`}>{user.name}</Link> : user.name}</span>
+        <span className="user-directory__name" title={user.name}>{user.name}</span>
       </span>
     ) },
     { id: 'email', label: 'E-mail de acesso', width: 255, compact: true, render: (user) => user.email },
@@ -102,19 +80,25 @@ export default function Users({ users, tenant, search = '' }: {
         filters={tenant ? <BusinessListSearch label="Pesquisar usuários" placeholder="Nome ou e-mail de acesso"
           value={query} onChange={setQuery} onSubmit={submit} /> : undefined}
         columns={columns} rowKey={(user) => user.id} empty="Nenhum usuário cadastrado." />
-      {editing && <MembershipAssignmentsModal membership={editing.id} name={editing.name} onClose={close} />}
-      {confirmation && (
-        <Modal open title={labels[confirmation.action]} onClose={close} bootstrap manageFocus>
-          <BusinessForm action={base + '/' + confirmation.user.id + '/' + confirmation.action}
-            method={confirmation.action === 'suspender' || confirmation.action === 'reativar' ? 'patch' : 'post'}
-            onSuccess={close}>
-            {({ processing }) => (
-              <>
-                <p>Confirme a operação para {confirmation.user.name}.</p>
-                <BusinessFormActions processing={processing} onCancel={close} />
-              </>
-            )}
-          </BusinessForm>
+      {preview && (
+        <Modal open title={preview.name} onClose={close} size="default" contentClassName="account-preview"
+          bootstrap manageFocus>
+          <PreviewSection title="Dados do usuário">
+            <dt>Nome</dt>
+            <dd>{preview.name}</dd>
+            <dt>E-mail de acesso</dt>
+            <dd>{preview.email}</dd>
+            <dt>Acesso à conta</dt>
+            <dd>{preview.status === 'active' ? 'Ativo' : 'Suspenso'}</dd>
+            <dt>Atribuições</dt>
+            <dd>
+              {preview.assignments?.length
+                ? preview.assignments.map((assignment) => (
+                  <div key={assignment.id}>{assignment.role} ({assignment.location})</div>
+                ))
+                : 'Sem atribuição'}
+            </dd>
+          </PreviewSection>
         </Modal>
       )}
     </SaasLayout>

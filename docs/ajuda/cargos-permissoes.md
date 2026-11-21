@@ -7,7 +7,7 @@ palavras-chave: cargos, papéis, permissões, catálogo, acesso, equipe, usuári
 
 ## Consultar cargos
 
-O item **Cargos** aparece no menu conforme as permissões do usuário. Quando o usuário pode apenas cadastrar, o item abre o formulário; após salvar, permanece numa tela autorizada. Listar, visualizar, cadastrar e editar são autorizações separadas. No topo da lista, busque pelo nome do cargo e filtre pela origem: **Cargo inicial** ou **Personalizado**. A lista se atualiza automaticamente ao digitar; a lupa à direita e Enter também executam a busca. Use a ação de informação para abrir o modal do cargo, com nome, origem, quantidade de permissões e ações atribuídas agrupadas por módulo.
+O item **Cargos** aparece no menu conforme as permissões do usuário. Quando o usuário pode apenas cadastrar, o item abre o formulário; após salvar, permanece numa tela autorizada. Listar, visualizar, cadastrar e editar são autorizações separadas. No topo da lista, busque pelo nome do cargo e filtre pela origem: **Cargo inicial** ou **Personalizado**. A lista se atualiza automaticamente ao digitar; a lupa à direita e Enter também executam a busca. Use a ação de informação para abrir o modal do cargo, com nome, origem, quantidade de permissões e ações atribuídas agrupadas por módulo. Cada etiqueta mostra apenas a ação, como **Listar** na linha **Auditoria**.
 
 As permissões são disponibilizadas automaticamente pelos módulos do sistema. Não existe uma tela ou cadastro de permissões. A seleção das ações autorizadas acontece no formulário de cadastro e edição do cargo.
 

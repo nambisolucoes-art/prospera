@@ -110,6 +110,7 @@ final class ContextualAccessTest extends TestCase
         $this->getJson('/conta/usuarios')
             ->assertOk()
             ->assertJsonFragment(['location' => 'Empresa A'])
+            ->assertJsonFragment(['id' => $target->id, 'can_view' => false])
             ->assertJsonMissing(['location' => 'Empresa B']);
 
         $inside = $target->assignments()->where('company_id', $a->id)->sole();

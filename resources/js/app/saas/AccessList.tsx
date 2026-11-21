@@ -13,6 +13,7 @@ import type { SessionProps } from '@/types/Session.types';
 import SaasLayout from './SaasLayout';
 import type { PermissionRow, RoleRow } from './Access.types';
 import type { TagRow } from './Directory.types';
+import PermissionChips from './PermissionChips';
 import PreviewSection from './PreviewSection';
 import './AccountPreview.css';
 import './Access.css';
@@ -265,15 +266,14 @@ function PermissionGroup({
   label: string;
   permissions: PermissionRow[];
 }) {
+  const moduleSuffix = `: ${label}`;
+
   return (
     <>
       <dt>{label}</dt>
       <dd>
-        {permissions.map((permission) => (
-          <div className="access-preview__permission" key={permission.id}>
-            {permission.name}
-          </div>
-        ))}
+        <PermissionChips permissions={permissions.map(({ name }) => name.endsWith(moduleSuffix)
+          ? name.slice(0, -moduleSuffix.length) : name)} />
       </dd>
     </>
   );

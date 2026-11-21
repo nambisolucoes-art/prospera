@@ -260,8 +260,8 @@ export function tourFor(
       ...businessListTourSteps({ filters: 'Busque pelo nome da pessoa ou pelo e-mail de acesso.' }),
       at(
         'user-access-actions',
-        'Atribuições e acesso',
-        'Consulte os cargos e seus locais. As ações disponíveis dependem do seu escopo e das suas permissões.',
+        'Visualizar usuário e editar pessoa',
+        'Use o ícone de informação para consultar os dados de acesso e os cargos. Use o lápis para abrir o cadastro em Pessoas, conforme suas permissões.',
       ),
     ];
   } else if (path === '/conta/usuarios/cadastrar') {

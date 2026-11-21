@@ -53,7 +53,7 @@ Selecione a etiqueta especial Cliente para identificar um cliente da conta. Os d
 
 ## Editar atribuições
 
-No cadastro de uma pessoa com vínculo, use **Editar atribuições** para gerir os cargos nos locais que você administra. **E-mail de acesso** é somente leitura. Alterações no nome, no e-mail de contato e nos outros dados de Pessoas ficam no cadastro da conta. Consulte [Cargos e permissões](cargos-permissoes.md).
+No cadastro de uma pessoa com vínculo, use **Editar atribuições** para gerir os cargos nos locais que você administra. Abra **Permissões efetivas da atribuição** para conferir as ações agrupadas por módulo. **E-mail de acesso** é somente leitura. Alterações no nome, no e-mail de contato e nos outros dados de Pessoas ficam no cadastro da conta. Consulte [Cargos e permissões](cargos-permissoes.md).
 
 ## Orientações nos campos
 

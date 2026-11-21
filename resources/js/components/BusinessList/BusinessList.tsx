@@ -213,10 +213,7 @@ export default function BusinessList<Row>({ label, preferenceKey, filters, page,
             checked: column.locked || !hidden.includes(column.id),
             disabled: column.locked || (visible.length === 1 && visible[0].id === column.id),
           }))}
-            onChange={setColumnVisibility}
-            onReset={() => setPreferences((current) => compact
-              ? { ...current, compactHidden: undefined }
-              : { ...defaultPreferences, compactHidden: current.compactHidden })} />
+            onChange={setColumnVisibility} />
         </div>
       </div>
       <div ref={tableViewport} className="business-list__table" data-tour="business-table" role="region" aria-label={label}>

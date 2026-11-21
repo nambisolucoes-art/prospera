@@ -2,4 +2,65 @@
   .access-header .pageHeader__actions { grid-area: 2 / 1 / auto / -1; }
 }
 
-.access-preview__permission + .access-preview__permission { margin-top: 4px; }
+.access-preview__permissions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.access-preview__permissions li {
+  max-width: 100%;
+}
+
+.label.access-preview__permission {
+  padding: 3px 10px;
+  border-radius: var(--bold-radius);
+  background: var(--bold-color-surface-alt);
+  color: var(--bold-color-navigation);
+  font: 400 12px/1.5 var(--bold-font-body);
+  letter-spacing: normal;
+  text-align: start;
+  white-space: normal;
+}
+
+@media (max-width: 480px) {
+  .account-preview__section dl:has(.access-preview__permissions) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .account-preview__section dl:has(.access-preview__permissions) > dt {
+    text-align: start;
+  }
+}
+
+.membership-assignment-dialog .checkbox {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.membership-assignment-dialog .tabs__accordion {
+  margin-bottom: 12px;
+}
+
+.membership-assignment-dialog .tabs__accordionHeading button {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.membership-assignment-dialog .tabs__accordionBody {
+  padding-inline: 12px;
+}
+
+.membership-assignment-dialog .tabs__accordionBody--open {
+  padding-block: 10px;
+}
+
+.membership-assignment-dialog__permissions h5 {
+  margin: 0 0 4px;
+  color: var(--bold-color-text);
+  font-size: 13px;
+  font-weight: 600;
+}

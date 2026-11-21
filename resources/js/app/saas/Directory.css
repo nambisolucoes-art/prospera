@@ -11,3 +11,15 @@
   overflow-wrap: anywhere;
   text-align: start;
 }
+
+.person-assignment-summary {
+  margin-block: 0 8px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  list-style: none;
+}
+
+.person-assignment-summary li + li {
+  margin-top: 3px;
+}

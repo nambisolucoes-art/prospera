@@ -61,9 +61,6 @@ export default function RoleAvailabilityFields({ role, organization, errors }: {
 
   return (
     <BusinessFormSection title="Abrangência" tourTarget="role-availability">
-      <FormHelp className="business-form__control-start">
-        A abrangência define onde o cargo pode ser atribuído. Para conceder acesso, atribua o cargo a um vínculo.
-      </FormHelp>
       {role?.system_key ? <FormHelp className="business-form__control-start">Cargos de sistema abrangem toda a conta.</FormHelp> : (
         <fieldset disabled={reviewing} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
           <Select label="Disponibilidade" info="Define onde o cargo pode ser atribuído. Selecionar toda a conta inclui empresas e estabelecimentos futuros. Para conceder acesso, atribua o cargo a um vínculo." name="availability" value={mode} error={errors.availability}
@@ -77,14 +74,14 @@ export default function RoleAvailabilityFields({ role, organization, errors }: {
               {organization.companies.map((company) => (
                 <fieldset key={company.id}>
                   <legend>{company.name}</legend>
-                  <ChoiceControl type="checkbox" id={`availability-company-${company.id}`} name="available_companies[]"
+                  <ChoiceControl type="checkbox" tone="primary" id={`availability-company-${company.id}`} name="available_companies[]"
                     value={String(company.id)} label="Toda a empresa" checked={companies.includes(company.id)}
                     onChange={(checked) => {
                       setCompanies((current) => checked ? [...current, company.id] : current.filter((id) => id !== company.id));
                       clearReview();
                     }} />
                   {organization.establishments.filter((unit) => unit.company_id === company.id).map((unit) => (
-                    <ChoiceControl key={unit.id} type="checkbox" id={`availability-unit-${unit.id}`}
+                    <ChoiceControl key={unit.id} type="checkbox" tone="primary" id={`availability-unit-${unit.id}`}
                       name="available_establishments[]" value={String(unit.id)} label={unit.name}
                       checked={companies.includes(company.id) || units.includes(unit.id)} disabled={companies.includes(company.id)}
                       onChange={(checked) => {
@@ -103,7 +100,7 @@ export default function RoleAvailabilityFields({ role, organization, errors }: {
                 <>
                   <p>Ao salvar, estas atribuições serão removidas:</p>
                   <ul>{impact.map((item) => <li key={item.id}>{item.name} ({location(item)})</li>)}</ul>
-                  <ChoiceControl type="checkbox" id="confirm-role-impact" label="Confirmo a remoção dessas atribuições"
+                  <ChoiceControl type="checkbox" tone="primary" id="confirm-role-impact" label="Confirmo a remoção dessas atribuições"
                     checked={confirmed} onChange={setConfirmed} />
                   {confirmed && impact.map((item) => (
                     <input key={item.id} type="hidden" name="confirmed_revocations[]" value={item.id} />
