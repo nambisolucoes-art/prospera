@@ -97,7 +97,7 @@ export default function Users({ users, tenant, search = '' }: {
 
   return (
     <SaasLayout title={tenant ? 'Usuários da conta' : 'Usuários da plataforma'} tenant={tenant} userPage
-      actions={!readOnly && can(tenant ? 'account.users.create' : 'platform.users.create') && <Button href={`${base}/cadastrar`} tone="primary" leftIconClass="fa fa-plus">Cadastrar usuário</Button>}>
+      actions={!readOnly && can(tenant ? 'account.users.create' : 'platform.users.create') && <Button href={`${base}/cadastrar`} tone="primary" labelIconClass="fa fa-plus" aria-label="Cadastrar usuário">Cadastrar</Button>}>
       <BusinessList key={base} preferenceKey={base} label="Listagem de usuários" page={users} rows={users.data}
         filters={tenant ? <BusinessListSearch label="Pesquisar usuários" placeholder="Nome ou e-mail de acesso"
           value={query} onChange={setQuery} onSubmit={submit} /> : undefined}

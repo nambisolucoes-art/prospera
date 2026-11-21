@@ -43,9 +43,10 @@ export default function AccessList({
           <Button
             href={base + '/cadastrar'}
             tone="primary"
-            leftIconClass="fa fa-plus"
+            labelIconClass="fa fa-plus"
+            aria-label="Cadastrar cargo"
           >
-            Cadastrar cargo
+            Cadastrar
           </Button>
         )
       }

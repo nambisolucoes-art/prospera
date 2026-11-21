@@ -2,6 +2,7 @@
 
 namespace App\Domains\Plataforma\Application\Data;
 
+use App\Domains\Organizacao\Application\Data\SaveCompanyData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Data\CreateUserData;
 use App\Support\TaxDocument;
@@ -9,10 +10,14 @@ use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 final readonly class SaveAccountData
 {
-    /** @param array<string,mixed>|null $details */
+    /**
+     * @param  array<string,mixed>|null  $details
+     * @param  array<string,mixed>|null  $firstCompany
+     */
     private function __construct(
         public string $name,
         public ?string $email,
@@ -22,7 +27,8 @@ final readonly class SaveAccountData
         public bool $active,
         public ?array $details,
         public ?CreateUserData $administrator,
-        public bool $contractorIsCompany = false,
+        public bool $contractorIsCompany,
+        public ?array $firstCompany,
     ) {}
 
     /** @param array<string, mixed> $input */
@@ -61,11 +67,31 @@ final readonly class SaveAccountData
             active: array_key_exists('active', $validated) ? (bool) $validated['active'] : ($client->active ?? true),
             details: $validated['details'] ?? null,
             administrator: $administrator,
-            contractorIsCompany: $client === null && filter_var(
-                $input['contractor_is_company'] ?? false,
-                FILTER_VALIDATE_BOOLEAN,
+            contractorIsCompany: $client === null && (
+                ($validated['organization_setup'] ?? null) === 'automatic'
+                || filter_var($input['contractor_is_company'] ?? false, FILTER_VALIDATE_BOOLEAN)
             ),
+            firstCompany: ($validated['organization_setup'] ?? null) === 'manual' ? $input['first_company'] : null,
         );
+    }
+
+    public function companyFor(Client $account): SaveCompanyData
+    {
+        if ($this->firstCompany === null) {
+            return SaveCompanyData::forProvisioning($account, $this->contractorIsCompany);
+        }
+
+        try {
+            return SaveCompanyData::fromInput($this->firstCompany, $account->id, null);
+        } catch (ValidationException $exception) {
+            $errors = [];
+
+            foreach ($exception->errors() as $field => $messages) {
+                $errors['first_company.'.$field] = $messages;
+            }
+
+            throw ValidationException::withMessages($errors);
+        }
     }
 
     /** @param array<string, mixed> $input */
@@ -86,7 +112,7 @@ final readonly class SaveAccountData
         }
 
         if ($client !== null) {
-            unset($input['administrator']);
+            unset($input['administrator'], $input['organization_setup'], $input['first_company']);
         } elseif (is_array($input['administrator'] ?? null)) {
             $input['administrator'] = CreateUserData::normalize($input['administrator']);
         }
@@ -148,7 +174,13 @@ final readonly class SaveAccountData
             $uniqueDocument->ignore($client);
         }
 
+        $manual = $client === null && ($input['organization_setup'] ?? null) === 'manual';
+
         return [
+            'organization_setup' => ['sometimes', 'required', Rule::in(['automatic', 'manual'])],
+            'first_company' => [Rule::excludeIf(! $manual), 'required', 'array:name,trade_name,person_type,document,primary'],
+            'first_company.primary' => [Rule::excludeIf(! $manual), 'required', 'array'],
+            'first_company.primary.name' => [Rule::excludeIf(! $manual), 'required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'plan' => ['nullable', 'string', 'max:100'],
@@ -217,6 +249,9 @@ final readonly class SaveAccountData
             'details.additional_phones.*.regex' => 'Informe um telefone com DDD e 10 ou 11 dígitos.',
             'details.additional_emails.max' => 'Adicione até 20 e-mails adicionais.',
             'details.additional_emails.*.email' => 'Informe um e-mail válido.',
+            'first_company.required' => 'Preencha os dados da primeira empresa.',
+            'first_company.primary.required' => 'Preencha os dados do estabelecimento principal.',
+            'first_company.primary.name.required' => 'Informe o nome do estabelecimento principal.',
             'administrator.required' => 'Preencha os dados do administrador da conta.',
         ];
     }

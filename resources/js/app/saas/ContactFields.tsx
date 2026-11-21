@@ -64,7 +64,7 @@ type ContactValues = {
  * Contatos no padrão do cadastro da conta. Sem `values`, usa os campos do contratante (`details[...]`);
  * com `values`, recebe os nomes do cadastro que o utiliza, como os estabelecimentos.
  */
-export default function ContactFields({ client, values, errors, required, namePrefix, errorPrefix, tourTarget }: {
+export default function ContactFields({ client, values, errors, required, namePrefix, errorPrefix, tourTarget, embedded = false }: {
   client?: ClientData;
   values?: ContactValues;
   errors: Errors;
@@ -72,6 +72,7 @@ export default function ContactFields({ client, values, errors, required, namePr
   namePrefix?: string;
   errorPrefix?: string;
   tourTarget?: string;
+  embedded?: boolean;
 }) {
   const own = values !== undefined;
   const prefix = namePrefix ?? (own ? '' : 'details');
@@ -82,8 +83,8 @@ export default function ContactFields({ client, values, errors, required, namePr
   const whatsapp = own ? values.whatsapp ?? '' : contactNumber(client?.details, 'whatsapp');
   const emailName = own ? name('email') : 'email';
   const emailError = own ? error('email') : errors.email;
-  return (
-    <BusinessFormSection title="Informações de contato" tourTarget={tourTarget}>
+  const fields = (
+    <>
       <BusinessFormRow>
         <MaskedField mask="phone" label="Telefone" name={name('phone')} type="tel" leadingIcon="fa fa-phone"
           defaultValue={phone} autoComplete="tel" error={error('phone')} required={required} />
@@ -96,6 +97,10 @@ export default function ContactFields({ client, values, errors, required, namePr
         defaultValue={(own ? values.email : client?.email) ?? ''} error={emailError} />
       <AdditionalContacts kind="email" initial={(own ? values.additional_emails : client?.details?.additional_emails) ?? []}
         errors={errors} namePrefix={prefix} errorPrefix={errorRoot} />
-    </BusinessFormSection>
+    </>
+  );
+
+  return embedded ? fields : (
+    <BusinessFormSection title="Informações de contato" tourTarget={tourTarget}>{fields}</BusinessFormSection>
   );
 }

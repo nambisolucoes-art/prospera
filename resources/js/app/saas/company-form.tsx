@@ -8,8 +8,8 @@ import CardBox from '@/components/CardBox/CardBox';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
-import { formatTaxDocument } from '@/utils/formatTaxDocument';
-import { AddressFields, LookupButton } from './ClientFormFields';
+import { AddressFields } from './ClientFormFields';
+import CompanyDocumentField from './CompanyDocumentField';
 import ContactFields from './ContactFields';
 import SaasLayout from './SaasLayout';
 import { organizationFormNavigation } from './organizationNavigation';
@@ -66,19 +66,8 @@ export default function CompanyForm({
                       setDocument(value === company?.person_type ? company.document ?? '' : '');
                       cnpjLookup.reset();
                     }} />
-                  <Field label={legalEntity ? 'CNPJ' : 'CPF'} name="document" info={legalEntity ? "Informe a raiz de 8 posições ou o CNPJ completo de 14 posições. A consulta cadastral exige o CNPJ numérico completo e preenche os nomes que ainda estiverem vazios." : "Informe um CPF válido para identificar a empresa."} compact required maxLength={18}
-                    inputMode={legalEntity ? 'text' : 'numeric'}
-                    placeholder={legalEntity ? 'CNPJ completo ou raiz' : '000.000.000-00'}
-                    value={document ? formatTaxDocument(document, type) : ''}
-                    onChange={(event) => {
-                      setDocument(event.target.value);
-                      cnpjLookup.reset();
-                    }}
-                    action={legalEntity && (
-                      <LookupButton label="Buscar CNPJ" loading={cnpjLookup.loading}
-                        onClick={() => void cnpjLookup.lookup(document)} />
-                    )}
-                    error={cnpjLookup.error || errors.document} />
+                  <CompanyDocumentField name="document" type={type} document={document}
+                    onChange={setDocument} lookup={cnpjLookup} error={errors.document} />
                   <Field label={legalEntity ? 'Razão social' : 'Nome'} name="name" value={name}
                     onChange={(event) => setName(event.target.value)} error={errors.name} required />
                   <Field label="Nome fantasia" name="trade_name" value={tradeName}

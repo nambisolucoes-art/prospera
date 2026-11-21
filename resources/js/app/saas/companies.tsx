@@ -33,8 +33,8 @@ export default function Companies({
       actions={
         writable &&
         can('create') && (
-          <Button href="/conta/empresas/cadastrar" tone="primary" leftIconClass="fa fa-plus">
-            Cadastrar empresa
+          <Button href="/conta/empresas/cadastrar" tone="primary" labelIconClass="fa fa-plus" aria-label="Cadastrar empresa">
+            Cadastrar
           </Button>
         )
       }

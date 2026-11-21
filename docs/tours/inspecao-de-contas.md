@@ -4,7 +4,7 @@ Artigo de referência em [Inspecionar uma conta](../ajuda/inspecao-de-contas.md)
 
 | Passo | Alvo | Orientação |
 | --- | --- | --- |
-| Inspecionar conta | Ações da listagem de Contas | Abra o modal em uma conta ativa. |
+| Inspecionar conta | Ações da listagem de Contas | Use o ícone de entrada para abrir o modal em uma conta ativa. |
 | Escolher usuário | Campo Usuário no modal | Busque pelo nome ou e-mail. Confira o cargo abaixo do nome e escolha o perfil. |
 | Escolher modo | Campo Modo de inspeção | Escolha entre consultar e editar conforme as permissões do perfil. A demonstração termina antes de trocar a sessão. |
 | Voltar ao SaaS | Faixa acima da barra superior (`data-tour="account-inspection-banner"`) | Confira o texto Acessando como, o usuário e o modo na faixa amarela, que ocupa toda a largura da janela e permanece visível durante a rolagem. No celular, o modo fica abaixo do usuário, com o botão ao lado. Use o ícone vermelho de saída identificado como “Voltar ao SaaS”. Encerre a inspeção e retorne à plataforma. |

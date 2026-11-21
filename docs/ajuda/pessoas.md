@@ -11,7 +11,7 @@ Usuários de contas ativas com permissão de listar ou cadastrar pessoas encontr
 
 ## Cadastrar uma pessoa
 
-Abra **Cadastrar pessoa**. Informe nome, e-mail opcional e telefone opcional. As etiquetas aparecem em marcadores quadrados com suas próprias cores. A estrela de etiqueta especial aparece somente na listagem de Etiquetas, não em Pessoas ou no seletor. No seletor **Etiquetas**, selecione uma ou várias etiquetas disponíveis no módulo Pessoas da conta. Elas aparecem dentro do campo com sua própria cor cadastrada, também exibida nas opções do menu; busque pelo nome e use o × para retirar uma seleção. Salve em **Salvar**. Pessoas sem a etiqueta Usuário não recebem acesso.
+Na listagem de Pessoas, clique em **Cadastrar**. Informe nome, e-mail opcional e telefone opcional. As etiquetas aparecem em marcadores quadrados com suas próprias cores. A estrela de etiqueta especial aparece somente na listagem de Etiquetas, não em Pessoas ou no seletor. No seletor **Etiquetas**, selecione uma ou várias etiquetas disponíveis no módulo Pessoas da conta. Elas aparecem dentro do campo com sua própria cor cadastrada, também exibida nas opções do menu; busque pelo nome e use o × para retirar uma seleção. Salve em **Salvar**. Pessoas sem a etiqueta Usuário não recebem acesso.
 
 ## Conceder acesso pela etiqueta Usuário
 

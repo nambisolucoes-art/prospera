@@ -39,9 +39,10 @@ export default function People({
           <Button
             href="/conta/pessoas/cadastrar"
             tone="primary"
-            leftIconClass="fa fa-plus"
+            labelIconClass="fa fa-plus"
+            aria-label="Cadastrar pessoa"
           >
-            Cadastrar pessoa
+            Cadastrar
           </Button>
         )
       }

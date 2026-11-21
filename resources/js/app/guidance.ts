@@ -56,8 +56,15 @@ export function tourFor(
       at(
         'business-form',
         'Dados da conta',
-        'Preencha os dados do contratante, endereço, contatos e o acesso inicial do administrador. Na seção Primeira empresa, confirme a identidade com o contratante somente quando estiver comprovada.',
+        'Preencha a identificação, o endereço e os contatos do contratante.',
       ),
+      ...(path.endsWith('/cadastrar') ? [
+        at(
+          'account-first-company',
+          'Primeira empresa',
+          'Use Sim para criar a empresa do contratante e seu estabelecimento principal. Use Não para editar os dados sugeridos antes de salvar.',
+        ),
+      ] : []),
     ]);
   } else if (path === '/conta') {
     title = 'Início';

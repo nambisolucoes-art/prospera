@@ -1,0 +1,30 @@
+.account-organization-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.account-organization-mode > .formField__labelRow {
+  align-items: center;
+}
+
+.account-organization-mode .formField__label {
+  margin-bottom: 0;
+}
+
+@media (min-width: 768px) {
+  .business-form .account-organization-mode.formField--horizontal {
+    align-items: center;
+  }
+
+  .business-form .account-organization-mode.formField--horizontal > .formField__labelRow {
+    padding-block: 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .account-organization-mode .formField__label {
+    white-space: nowrap;
+  }
+}

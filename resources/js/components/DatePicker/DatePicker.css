@@ -13,6 +13,7 @@
 }
 
 .datepicker.datePicker__popup {
+  z-index: 20;
   position: absolute;
   min-width: 160px;
   margin: 2px 0 0;
@@ -27,7 +28,7 @@
   list-style: none;
 }
 
-.datepicker.datePicker__popup table { border-collapse: collapse; border-spacing: 0; }
+.datepicker.datePicker__popup table { border-collapse: separate; border-spacing: 0; }
 .datepicker.datePicker__popup th { color: #666; font-weight: 600; }
 .datepicker.datePicker__popup .table-condensed > :is(thead, tbody, tfoot) > tr > :is(th, td) { padding: 5px; }
 .datepicker.datePicker__popup thead tr:first-child th:hover,
@@ -42,19 +43,10 @@
   text-shadow: none;
 }
 
-.datepicker.datePicker__popup table tr td.today,
-.datepicker.datePicker__popup table tr td.today:hover {
-  background-color: var(--bold-color-surface-alt) !important;
-  color: var(--bold-color-text);
-}
-
 .datepicker.datePicker__popup table tr td.active,
 .datepicker.datePicker__popup table tr td.active:hover,
 .datepicker.datePicker__popup table tr td span.active,
 .datepicker.datePicker__popup table tr td span.active:hover {
-  background-color: var(--bold-color-navigation) !important;
+  background-color: #5fbeaa !important;
   color: var(--bold-color-surface);
 }
-
-.datepicker.datePicker__popup table tr td:is(.day, span),
-.datepicker.datePicker__popup :is(thead, tfoot) th { border-radius: var(--bold-radius); }

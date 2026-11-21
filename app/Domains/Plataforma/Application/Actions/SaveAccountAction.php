@@ -4,7 +4,6 @@ namespace App\Domains\Plataforma\Application\Actions;
 
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
 use App\Domains\Plataforma\Application\Data\SaveAccountData;
 use App\Domains\Plataforma\Domain\DTOs\AccountDTO;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -55,7 +54,7 @@ final readonly class SaveAccountAction
             }
 
             // Toda conta nasce com a primeira empresa e a unidade principal (seção 6.5).
-            $companyData = SaveCompanyData::forProvisioning($client, $data->contractorIsCompany);
+            $companyData = $data->companyFor($client);
             $this->createCompany->execute($client->id, $companyData);
 
             try {

@@ -672,7 +672,7 @@ final class OrganizationTest extends TestCase
 
         $this->post('/saas/contas', [
             ...$account,
-            'contractor_is_company' => '1',
+            'organization_setup' => 'automatic',
             'administrator' => $this->administrator('owner@gartan.test'),
         ])->assertSessionHasNoErrors();
 
@@ -702,6 +702,61 @@ final class OrganizationTest extends TestCase
         $this->artisan('organization:check')
             ->expectsOutputToContain('Pendência: Empresa #'.$undeclared->id)
             ->assertSuccessful();
+    }
+
+    public function test_manual_account_provisioning_validates_and_audits_the_company_and_primary_unit(): void
+    {
+        $platform = User::factory()->create(['is_saas_admin' => true]);
+        $payload = [
+            'name' => 'Contratante',
+            'person_type' => 'company',
+            'document' => '99.888.777/0001-00',
+            'details' => ['phone' => '(77) 3451-0000'],
+            'organization_setup' => 'manual',
+            'administrator' => $this->administrator('owner@manual.test'),
+            'first_company' => [
+                'name' => 'Empresa informada',
+                'person_type' => 'company',
+                'document' => 'inválido',
+                'primary' => [
+                    'name' => 'Loja Guanambi',
+                    'classification' => 'branch',
+                    'phone' => '(77) 3451-0001',
+                    'address' => ['city' => 'Guanambi', 'state' => 'BA'],
+                ],
+            ],
+        ];
+
+        $this->actingAs($platform)->postJson('/saas/contas', $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('first_company.document');
+
+        $this->assertDatabaseCount('clients', 0);
+        $this->assertDatabaseCount('companies', 0);
+        $this->assertDatabaseCount('establishments', 0);
+
+        $payload['first_company']['document'] = '11.222.333/0001-81';
+        $this->postJson('/saas/contas', $payload)->assertOk();
+
+        $account = Client::query()->sole();
+        $company = Company::query()->sole();
+        $unit = $company->primaryEstablishment()->sole();
+        $this->assertSame('99888777000100', $account->document);
+        $this->assertSame($account->id, $company->account_id);
+        $this->assertSame('Empresa informada', $company->name);
+        $this->assertSame('11222333', $company->tax_root);
+        $this->assertSame('11222333000181', $unit->tax_document);
+        $this->assertSame('Loja Guanambi', $unit->name);
+        $this->assertSame('7734510001', $unit->phone);
+        $this->assertSame('Guanambi', $unit->address['city']);
+        $this->assertFalse($unit->is_headquarters);
+
+        $event = AuditRecord::where('entity_type', 'establishment')->sole();
+        $this->assertSame($platform->id, $event->actor_id);
+        $this->assertSame($account->id, $event->account_id);
+        $this->assertSame($company->id, $event->company_id);
+        $this->assertSame($unit->id, $event->establishment_id);
+        $this->assertSame(AuditRecord::where('entity_type', 'company')->sole()->operation_id, $event->operation_id);
     }
 
     public function test_inspection_preserves_the_saas_author_on_organizational_events(): void

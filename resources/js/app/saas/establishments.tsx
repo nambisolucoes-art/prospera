@@ -44,9 +44,10 @@ export default function Establishments({
           <Button
             href={filters.company ? `/conta/estabelecimentos/cadastrar?empresa=${filters.company}` : '/conta/estabelecimentos/cadastrar'}
             tone="primary"
-            leftIconClass="fa fa-plus"
+            labelIconClass="fa fa-plus"
+            aria-label="Cadastrar estabelecimento"
           >
-            Cadastrar estabelecimento
+            Cadastrar
           </Button>
         )
       }

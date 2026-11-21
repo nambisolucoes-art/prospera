@@ -7,13 +7,14 @@ import './Tooltip.css';
 
 type TriggerProps = HTMLAttributes<HTMLElement> & { ref?: Ref<HTMLElement> };
 
-export default function Tooltip({ text, children, side = 'top', disabled = false, asChild = false, touch = false }: {
+export default function Tooltip({ text, children, side = 'top', disabled = false, asChild = false, touch = false, appearance }: {
   text: string;
   children: ReactElement;
   side?: 'top' | 'right';
   disabled?: boolean;
   asChild?: boolean;
   touch?: boolean;
+  appearance?: 'ubold';
 }): JSX.Element {
   const id = useId();
   const trigger = useRef<HTMLElement>(null);
@@ -30,9 +31,9 @@ export default function Tooltip({ text, children, side = 'top', disabled = false
 
   useLayoutEffect(() => {
     if (open) { setVisible(true); return; }
-    const timer = window.setTimeout(() => setVisible(false), 120);
+    const timer = window.setTimeout(() => setVisible(false), appearance === 'ubold' ? 150 : 120);
     return () => window.clearTimeout(timer);
-  }, [open]);
+  }, [appearance, open]);
 
   useLayoutEffect(() => {
     if (!visible || disabled) return;
@@ -41,7 +42,7 @@ export default function Tooltip({ text, children, side = 'top', disabled = false
       const rect = trigger.current.getBoundingClientRect();
       const width = overlay.current.offsetWidth;
       const height = overlay.current.offsetHeight;
-      const gap = 9;
+      const gap = appearance === 'ubold' ? 8 : 9;
       const margin = 8;
       let nextSide: string = side;
       if (side === 'top' && rect.top < height + gap + margin) nextSide = 'bottom';
@@ -84,7 +85,7 @@ export default function Tooltip({ text, children, side = 'top', disabled = false
       document.removeEventListener('keydown', dismiss, true);
       document.removeEventListener('pointerdown', dismiss);
     };
-  }, [visible, disabled, side, text]);
+  }, [appearance, visible, disabled, side, text]);
 
   useLayoutEffect(() => {
     setHovered(false);
@@ -130,7 +131,7 @@ export default function Tooltip({ text, children, side = 'top', disabled = false
   return <>
     {control}
     {visible && !disabled && createPortal(
-      <span ref={overlay} id={id} role="tooltip" className="legacyTooltip" data-side={placement} data-open={open} aria-hidden={!open} style={position}>
+      <span ref={overlay} id={id} role="tooltip" className="legacyTooltip" data-appearance={appearance} data-side={placement} data-open={open} aria-hidden={!open} style={position}>
         <span className="legacyTooltip__inner">{text}</span>
         <span className="legacyTooltip__arrow" />
       </span>, document.body,

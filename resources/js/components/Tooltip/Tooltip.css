@@ -30,3 +30,71 @@
 
 .legacyTooltip[data-open="false"] { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .legacyTooltip { transition: none; } }
+
+.legacyTooltip[data-appearance="ubold"] {
+  max-width: min(200px, calc(100vw - 16px));
+  line-height: 1.42857143;
+  animation: none;
+  transition: opacity 150ms linear;
+}
+
+.legacyTooltip[data-appearance="ubold"][data-open="true"] {
+  opacity: 0.9;
+  animation: uboldTooltipFade 150ms linear;
+}
+
+.legacyTooltip[data-appearance="ubold"] .legacyTooltip__inner {
+  padding: 6px 10px;
+  border-radius: 1px;
+  background: #000;
+  box-shadow: none;
+  text-align: center;
+}
+
+.legacyTooltip[data-appearance="ubold"] .legacyTooltip__arrow {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+  background: transparent;
+}
+
+.legacyTooltip[data-appearance="ubold"][data-side="top"] .legacyTooltip__arrow {
+  bottom: -5px;
+  border-top-color: #000;
+  border-bottom-width: 0;
+  transform: translateX(-50%);
+}
+
+.legacyTooltip[data-appearance="ubold"][data-side="bottom"] .legacyTooltip__arrow {
+  top: -5px;
+  border-top-width: 0;
+  border-bottom-color: #000;
+  transform: translateX(-50%);
+}
+
+.legacyTooltip[data-appearance="ubold"][data-side="right"] .legacyTooltip__arrow {
+  left: -5px;
+  border-right-color: #000;
+  border-left-width: 0;
+  transform: translateY(-50%);
+}
+
+.legacyTooltip[data-appearance="ubold"][data-side="left"] .legacyTooltip__arrow {
+  right: -5px;
+  border-right-width: 0;
+  border-left-color: #000;
+  transform: translateY(-50%);
+}
+
+@keyframes uboldTooltipFade {
+  from { opacity: 0; }
+  to { opacity: 0.9; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .legacyTooltip[data-appearance="ubold"],
+  .legacyTooltip[data-appearance="ubold"][data-open="true"] {
+    animation: none;
+    transition: none;
+  }
+}

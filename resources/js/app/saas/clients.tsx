@@ -27,7 +27,7 @@ export default function Accounts({ accounts, search }: { accounts: PageSummary &
           onClick={(event) => { trigger.current = event.currentTarget; setPreview({ id: account.id, name: account.name }); }} />
         <Button href={`/saas/contas/${account.id}/editar`} iconOnly tone="primary" leftIconClass="fa fa-pencil"
           title="Editar cadastro" aria-label={`Editar conta ${account.name}`} />
-        <Button iconOnly tone="inverse" leftIconClass="fa fa-user-secret" title="Inspecionar conta"
+        <Button iconOnly tone="inverse" leftIconClass="fa fa-sign-in" title="Inspecionar conta"
           aria-label={`Inspecionar conta ${account.name}`} aria-haspopup="dialog"
           disabled={!account.active || account.users_count === 0}
           onClick={(event) => { trigger.current = event.currentTarget; setInspection({ id: account.id, name: account.name }); }} />
@@ -45,7 +45,7 @@ export default function Accounts({ accounts, search }: { accounts: PageSummary &
   ];
 
   return (
-    <SaasLayout title="Contas" actions={<Button href="/saas/contas/cadastrar" tone="primary" leftIconClass="fa fa-plus">Cadastrar conta</Button>}>
+    <SaasLayout title="Contas" actions={<Button href="/saas/contas/cadastrar" tone="primary" labelIconClass="fa fa-plus" aria-label="Cadastrar conta">Cadastrar</Button>}>
       <BusinessList label="Listagem de contas" preferenceKey="accounts" page={accounts} rows={accounts.data}
         columns={columns} rowKey={(account) => account.id} empty={search ? 'Nenhuma conta encontrada.' : 'Nenhuma conta cadastrada.'}
         filters={<BusinessListSearch label="Buscar conta" placeholder="Buscar por nome, CPF ou CNPJ" maxLength={100}

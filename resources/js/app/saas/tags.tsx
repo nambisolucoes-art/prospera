@@ -70,9 +70,10 @@ export default function Tags({
             }}
             aria-haspopup="dialog"
             tone="primary"
-            leftIconClass="fa fa-plus"
+            labelIconClass="fa fa-plus"
+            aria-label="Cadastrar etiqueta"
           >
-            Cadastrar etiqueta
+            Cadastrar
           </Button>
         )
       }
@@ -185,7 +186,7 @@ export default function Tags({
         </div>
       ) : (
         <CardBox>
-          <p>Use Cadastrar etiqueta para incluir uma etiqueta nesta conta.</p>
+          <p>Use Cadastrar para incluir uma etiqueta nesta conta.</p>
         </CardBox>
       )}
       {deleting && (

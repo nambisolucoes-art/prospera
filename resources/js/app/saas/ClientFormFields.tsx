@@ -44,7 +44,7 @@ const stateOptions = [
 
 type Municipality = [code: string, name: string, state: string];
 
-export function AddressFields({ initial, errors, namePrefix = 'details[address]', errorPrefix = 'details.address', title = 'Informações de endereço', tourTarget }: { initial?: Address; errors: Errors; namePrefix?: string; errorPrefix?: string; title?: string; tourTarget?: string }) {
+export function AddressFields({ initial, errors, namePrefix = 'details[address]', errorPrefix = 'details.address', title = 'Informações de endereço', tourTarget, embedded = false }: { initial?: Address; errors: Errors; namePrefix?: string; errorPrefix?: string; title?: string; tourTarget?: string; embedded?: boolean }) {
   const [address, setAddress] = useState<Address>(initial ?? {});
   const [loading, setLoading] = useState(false);
   const [lookupError, setLookupError] = useState('');
@@ -106,8 +106,8 @@ export function AddressFields({ initial, errors, namePrefix = 'details[address]'
       onChange={(event) => update(key, event.target.value)} />
   );
 
-  return (
-    <BusinessFormSection title={title} tourTarget={tourTarget}>
+  const fields = (
+    <>
       {field('postal_code', 'CEP', 'numeric',
         <LookupButton label="Buscar CEP" loading={loading} onClick={() => void lookup()} />
       )}
@@ -135,7 +135,9 @@ export function AddressFields({ initial, errors, namePrefix = 'details[address]'
         {field('street', 'Logradouro')}
         <BusinessFormRow>{field('number', 'Número')}{field('complement', 'Complemento')}</BusinessFormRow>
       </div>
-    </BusinessFormSection>
+    </>
   );
+
+  return embedded ? fields : <BusinessFormSection title={title} tourTarget={tourTarget}>{fields}</BusinessFormSection>;
 }
 
