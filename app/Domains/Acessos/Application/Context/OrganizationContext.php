@@ -105,6 +105,24 @@ final class OrganizationContext
         return array_values(array_intersect($available, $preferred)) ?: [$available[0]];
     }
 
+    /**
+     * Seleção enviada pela aba, revalidada contra as unidades navegáveis; sem seleção, o padrão revalidado.
+     *
+     * @param  list<string>|null  $codes
+     * @return list<string>
+     */
+    public function workspaceCodes(User $user, ?array $codes): array
+    {
+        if ($codes === null) {
+            return $this->defaultCodes($user);
+        }
+
+        $available = array_column($this->navigable($user), 'code');
+        abort_if($codes === [] || array_diff($codes, $available) !== [], 404);
+
+        return $codes;
+    }
+
     /** @return list<string> */
     public function selectedCodes(): array
     {

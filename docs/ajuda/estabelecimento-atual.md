@@ -17,6 +17,8 @@ Na barra superior, abra **Área de trabalho** e marque as unidades em que quer t
 
 Clique fora da lista para aplicar a seleção nesta aba e salvá-la como seu padrão nesta conta. A seleção acompanha a aba ao abrir Pessoas e outras telas ou ao atualizar a página. As outras abas seguem com as próprias seleções. Se todas as caixas estiverem desmarcadas ao fechar, a seleção anterior é mantida.
 
+Nas telas de cadastro da conta, use **Abrir área de trabalho**, no fim da lista, para ir às unidades marcadas. A seleção é aplicada e salva antes da abertura. Para abrir a área de trabalho em outra aba sem mudar esta, clique no link com a tecla Ctrl (ou Command, no Mac).
+
 Com acesso a uma única unidade, o Prospera a abre diretamente e oculta o seletor.
 
 ## Por que algumas unidades não aparecem
@@ -29,7 +31,7 @@ Se um endereço tiver uma unidade indisponível, use **Abrir área de trabalho**
 
 ## Consultar e operar em várias unidades
 
-Ao aplicar duas ou mais unidades, o Início mostra os estabelecimentos escolhidos. Abra uma unidade para consultar seu cadastro ou acessar as ações disponíveis. Use **Área de trabalho** na trilha da página para retornar ao conjunto.
+Com duas ou mais unidades, a área de trabalho mostra os estabelecimentos escolhidos. Se a tela pedida funciona com um estabelecimento por vez, a área de trabalho mostra **Escolha o estabelecimento**: o Prospera não escolhe a unidade por você. Com uma unidade marcada, a tela abre direto nela. Abra uma unidade para consultar seu cadastro ou acessar as ações disponíveis. Use **Área de trabalho** na trilha da página para retornar ao conjunto.
 
 Uma consulta consolidada usa somente as unidades selecionadas em que seu cargo permite a ação. Para salvar um registro operacional, abra o estabelecimento de destino. Aplicar uma seleção não muda as outras abas. Os cadastros administrativos da conta mantêm o próprio escopo.
 

@@ -272,7 +272,9 @@ final class OrganizationContextTest extends TestCase
 
         $this->get('/conta/estabelecimento')->assertRedirect('/conta/estabelecimento/'.$unit->code);
         $this->get('/conta/estabelecimento?para=estoque')->assertRedirect('/conta/estabelecimento/'.$unit->code.'/estoque');
-        $this->get('/conta/estabelecimento?para=../../saas')->assertRedirect('/conta/estabelecimento/'.$unit->code);
+        $this->get('/conta/estabelecimento?para=historico')->assertRedirect('/conta/estabelecimento/'.$unit->code.'/historico');
+        $this->get('/conta/estabelecimento?para=../../saas')->assertNotFound();
+        $this->get('/conta/estabelecimento?para=inexistente')->assertNotFound();
 
         // Operações administrativas da conta continuam sem empresa nem estabelecimento.
         $this->getJson('/conta/editar')
@@ -456,6 +458,51 @@ final class OrganizationContextTest extends TestCase
         $this->get($base)->assertRedirect($base.'/'.$guanambi->code);
     }
 
+    public function test_workspace_entry_uses_the_tab_selection_and_only_compatible_destinations(): void
+    {
+        $gartan = $this->gartan();
+        $ana = $this->ana($gartan);
+        $units = $gartan['units'];
+        $guanambi = $units['roupas-guanambi']->code;
+        $janauba = $units['express-janauba']->code;
+        $tab = $guanambi.','.$janauba;
+        $base = '/conta/estabelecimento';
+
+        // O padrão salvo é outro: a entrada respeita a seleção enviada pela aba e não grava nada.
+        $this->actingAs($ana)->putJson('/conta/area-de-trabalho/padrao', ['unidades' => [$guanambi]])->assertNoContent();
+        $this->get($base.'?unidades='.$tab)->assertRedirect($base.'/todos?unidades='.$tab);
+        $this->getJson($base.'?unidades='.$tab)->assertOk()->assertJsonPath('redirect', url($base.'/todos?unidades='.$tab));
+        $this->get($base)->assertRedirect($base.'/'.$guanambi);
+        $this->assertSame(json_encode([$guanambi]), $this->membership($ana)->getAttribute('workspace_establishments'));
+
+        // Destino com consolidado preserva a seleção; com uma unidade, abre direto.
+        $this->get($base.'?unidades='.$tab.'&para=estoque')->assertRedirect($base.'/todos/estoque?unidades='.$tab);
+        $this->get($base.'?unidades='.$janauba.'&para=historico')->assertRedirect($base.'/'.$janauba.'/historico');
+
+        // Destino de uma unidade com várias selecionadas: pede a escolha, sem escolher pelo usuário.
+        $chooser = $base.'/todos?unidades='.$tab.'&para=historico';
+        $this->get($base.'?unidades='.$tab.'&para=historico')->assertRedirect($chooser);
+        $this->get($base.'?unidades='.$tab.'&para=estoque/1')
+            ->assertRedirect($base.'/todos?unidades='.$tab.'&para=estoque/1');
+        $this->getJson($chooser)->assertOk()
+            ->assertJsonPath('destination', 'historico')
+            ->assertJsonCount(2, 'workspace');
+
+        // URLs diretas incompatíveis, destinos arbitrários e seleções indisponíveis continuam recusados.
+        $this->getJson($base.'/todos/historico?unidades='.$tab)->assertNotFound();
+        $this->getJson($base.'/todos?unidades='.$tab.'&para=inexistente')->assertNotFound();
+        foreach (['https://externo.test', '//externo.test', '../../saas/contas', 'estoque?x=1', 'inexistente'] as $path) {
+            $this->get($base.'?unidades='.$tab.'&para='.urlencode($path))->assertNotFound();
+        }
+        $this->get($base.'?unidades='.$guanambi.','.$units['gartan3']->code)->assertNotFound();
+        $this->get($base.'?unidades=')->assertNotFound();
+
+        // A revogação vale na requisição seguinte, mesmo para a seleção guardada na aba.
+        $this->membership($ana)->assignments()->where('establishment_id', $units['express-janauba']->id)->delete();
+        $this->get($base.'?unidades='.$tab)->assertNotFound();
+        $this->get($base.'?unidades='.$guanambi.'&para=estoque')->assertRedirect($base.'/'.$guanambi.'/estoque');
+    }
+
     public function test_inspection_follows_the_represented_user_and_ends_on_revocation(): void
     {
         $gartan = $this->gartan();
@@ -479,6 +526,10 @@ final class OrganizationContextTest extends TestCase
         ])->assertForbidden();
         $this->assertDatabaseHas('fixture_stock', ['id' => $stock, 'quantity' => 10]);
         $this->putJson('/conta/area-de-trabalho/padrao', ['unidades' => [$janauba->code]])->assertForbidden();
+        $selection = $janauba->code.','.$gartan['units']['roupas-guanambi']->code;
+        $this->get('/conta/estabelecimento?unidades='.$selection)
+            ->assertRedirect('/conta/estabelecimento/todos?unidades='.$selection);
+        $this->get('/conta/estabelecimento?unidades='.$gartan['units']['gartan3']->code)->assertNotFound();
         $this->assertNull($this->membership($ana)->getAttribute('workspace_establishments'));
 
         $platform->forceFill(['is_saas_admin' => false])->saveOrFail();

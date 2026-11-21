@@ -1,3 +1,5 @@
+import type { OrganizationContextProps } from '@/types/Session.types';
+
 // URLs com contexto organizacional (E06). O contexto vem sempre da URL da página, nunca de estado global.
 const contextPattern = /^\/conta\/(empresa|estabelecimento)\/([a-z0-9][a-z0-9-]{1,39})(?=\/|$)/;
 
@@ -36,6 +38,28 @@ export function workspaceUrl(codes: string[], pageUrl = '', supportsConsolidated
   const base = '/conta/estabelecimento';
   if (codes.length === 1) return `${base}/${codes[0]}${module}`;
   return `${base}/todos${module}?unidades=${codes.join(',')}`;
+}
+
+/**
+ * Entrada da área de trabalho com a seleção desta aba. O servidor revalida as unidades e decide
+ * o destino: uma unidade, o consolidado ou a escolha do estabelecimento quando o módulo exige um só.
+ */
+export function workspaceEntryUrl(codes: string[], destination: string | null = null): string {
+  const query = [`unidades=${codes.join(',')}`];
+  if (destination) query.push(`para=${encodeURIComponent(destination)}`);
+  return `/conta/estabelecimento?${query.join('&')}`;
+}
+
+/**
+ * Seleção definida pela URL da página: o consolidado usa os códigos validados pelo servidor, e uma
+ * unidade aberta a partir do conjunto mantém o conjunto de retorno. Nas telas da conta, retorna null.
+ */
+export function pageWorkspace(context: OrganizationContextProps, pageUrl: string): string[] | null {
+  if (context.mode === 'consolidated') return context.selected_codes;
+  if (context.mode !== 'establishment') return null;
+
+  const returning = new URL(pageUrl, window.location.origin).searchParams.get('voltar-unidades')?.split(',') ?? [];
+  return returning.includes(context.selected_codes[0]) ? returning : context.selected_codes;
 }
 
 /** Selection local to this browser tab. The server still validates every operational URL. */

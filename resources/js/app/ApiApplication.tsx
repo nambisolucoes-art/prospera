@@ -17,7 +17,7 @@ import {
   markAppPageTransitionReady,
   startAppPageTransition,
 } from '@/utils/appPageTransition';
-import { contextBase } from '@/utils/organizationContext';
+import { contextBase, contextualUrl } from '@/utils/organizationContext';
 import {
   clearPageAssetRetry,
   isPageAssetError,
@@ -88,7 +88,16 @@ export default function ApiApplication(): JSX.Element {
   const currentPageUrl = useRef<string | undefined>(undefined);
 
   const navigate = useCallback(
-    async (url: string, options: NavigationOptions = {}) => {
+    async (address: string, options: NavigationOptions = {}) => {
+      // Ponto oficial de resolução de ~/: o contexto da página atual desta aba.
+      let url: string;
+      try {
+        url = contextualUrl(address, currentPageUrl.current ?? location.href);
+      } catch (failure) {
+        setError(failure instanceof Error ? failure.message : 'Não foi possível abrir a página.');
+        return false;
+      }
+
       request.current?.abort();
       const pending = new AbortController();
       request.current = pending;

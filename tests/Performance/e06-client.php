@@ -139,6 +139,12 @@ for ($round = 0; $round < 60; $round++) {
     sort($codes);
     verify($metrics['worker'] === $worker && $codes === $expected);
 
+    // Entrada com a seleção da aba, intercalada com outros usuários: o destino usa só esta requisição.
+    $tab = $code.','.$gartan['ana_units'][($round + 2) % count($gartan['ana_units'])];
+    [$page, $metrics] = request('/conta/estabelecimento?unidades='.$tab, $cookies['ana']);
+    verify($metrics['worker'] === $worker && str_ends_with($page['redirect'], '/conta/estabelecimento/todos?unidades='.$tab));
+    request('/conta/estabelecimento?unidades='.$tab.'&para=inexistente', $cookies['ana'], 404);
+
     [$page, $metrics] = request('/conta/estabelecimento', $cookies['local']);
     verify($metrics['worker'] === $worker && str_ends_with($page['redirect'], '/conta/estabelecimento/'.$localCode));
 
@@ -149,7 +155,7 @@ for ($round = 0; $round < 60; $round++) {
     // Código de outra empresa sem atribuição e código de outro tenant.
     request('/conta/estabelecimento/'.$gartan['hidden'], $cookies['ana'], 404);
     request('/conta/estabelecimento/'.$code, $cookies['single'], 404);
-    $checked += 5;
+    $checked += 7;
 }
 
 echo json_encode(['e06_isolation' => $checked, 'worker' => $worker, 'single_redirect' => $single['redirect']], JSON_THROW_ON_ERROR).PHP_EOL;

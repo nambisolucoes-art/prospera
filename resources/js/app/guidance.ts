@@ -83,7 +83,7 @@ export function tourFor(
       at(
         'organization-switcher',
         'Configurar a área de trabalho',
-        'Marque uma ou várias unidades. A caixa no fim da linha marca toda a empresa. Clique fora da lista para aplicar a seleção nesta aba e salvá-la como padrão.',
+        'Marque uma ou várias unidades. A caixa no fim da linha marca toda a empresa. Clique fora da lista para aplicar a seleção nesta aba e salvá-la como padrão. Abrir área de trabalho, no fim da lista, leva às unidades marcadas.',
       ),
     ];
   } else if (/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}$/.test(path)) {
@@ -98,7 +98,7 @@ export function tourFor(
       at(
         'establishment-home-summary',
         'Estabelecimentos da área de trabalho',
-        'Confira as unidades desta aba. Ao abrir uma unidade, Ver cadastro e Editar aparecem conforme as permissões do seu cargo.',
+        'Confira as unidades desta aba. Quando a tela pedida funciona com uma unidade por vez, escolha aqui o estabelecimento. Ao abrir uma unidade, Ver cadastro e Editar aparecem conforme as permissões do seu cargo.',
       ),
       at(
         'establishment-home-tabs',

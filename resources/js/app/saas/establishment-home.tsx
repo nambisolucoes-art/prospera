@@ -13,20 +13,28 @@ import './Organization.css';
 type Establishment = ContextEstablishment & { id: number; can_view: boolean; can_update: boolean };
 
 // Início do estabelecimento (E06): destino do seletor e base das futuras rotas operacionais da unidade.
-export default function EstablishmentHome({ establishment, workspace }: {
+export default function EstablishmentHome({ establishment, workspace, destination = null }: {
   establishment?: Establishment;
   workspace?: ContextEstablishment[];
+  destination?: string | null;
 }) {
   if (workspace) {
     const codes = workspace.map((unit) => unit.code).join(',');
+    // Destino que opera numa unidade por vez: o usuário escolhe; o sistema nunca escolhe por ele.
+    const suffix = destination ? `/${destination}` : '';
     return (
       <SaasLayout tenant title="Área de trabalho" breadcrumb={[{ label: 'Área de trabalho' }]}>
         <div className="card-box" data-tour="establishment-home-summary">
-          <h2>Estabelecimentos selecionados</h2>
+          <h2>{destination ? 'Escolha o estabelecimento' : 'Estabelecimentos selecionados'}</h2>
+          {destination && (
+            <p data-tour="establishment-home-destination">
+              Esta tela funciona com um estabelecimento por vez. Escolha em qual unidade deseja continuar.
+            </p>
+          )}
           <ul>
             {workspace.map((unit) => (
               <li key={unit.code}>
-                <ApiLink href={`/conta/estabelecimento/${unit.code}?voltar-unidades=${codes}`}>
+                <ApiLink href={`/conta/estabelecimento/${unit.code}${suffix}?voltar-unidades=${codes}`}>
                   {unit.name}
                 </ApiLink>
                 {' ('}{unit.company_name}{')'}

@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   height: var(--bold-topbar-height);
-  width: 180px;
+  width: 200px;
   margin-inline-end: 6px;
 }
 
@@ -10,8 +10,22 @@
   height: 34px;
 }
 
-.organization-switcher__label {
+/* O contador fica sempre visível; só o rótulo recebe reticências. */
+.organization-switcher > .selectControl__trigger > span {
+  display: flex;
+  align-items: center;
+}
+
+.organization-switcher > .selectControl__trigger > span > * {
+  flex: none;
+}
+
+.organization-switcher > .selectControl__trigger > span > .organization-switcher__label {
+  flex: 0 1 auto;
+  min-width: 0;
   margin-inline: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .organization-switcher__menu {
@@ -44,6 +58,21 @@
 
 .organization-switcher__company-heading .checkbox label {
   width: 6px;
+}
+
+.organization-switcher__open {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 8px 10px 4px;
+  border-top: 1px solid var(--bold-color-border);
+  color: var(--bold-color-primary);
+}
+
+.organization-switcher__open[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: .6;
 }
 
 .organization-switcher__error {

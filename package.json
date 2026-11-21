@@ -6,6 +6,7 @@
         "dev": "vite",
         "check:architecture": "node scripts/check-architecture.mjs",
         "types:check": "tsc --noEmit",
+        "test:frontend": "node --test tests/Frontend/",
         "check": "npm run check:architecture && npm run types:check",
         "build": "npm run check && vite build"
     },
