@@ -1,31 +1,29 @@
-import { Field } from '@/components/BusinessForm/BusinessFormFields';
-import { formatTaxDocument } from '@/utils/formatTaxDocument';
+import type { Errors } from '@/components/BusinessForm/BusinessFormFields';
+import TaxDocumentField from '@/components/BusinessForm/TaxDocumentField';
 import { LookupButton } from './ClientFormFields';
 import type { useCnpjLookup } from './useCnpjLookup';
 
-export default function CompanyDocumentField({ name, type, document, onChange, lookup, error }: {
+export default function CompanyDocumentField({ name, type, document, onChange, lookup, errors, errorKey }: {
   name: string;
   type: string;
   document: string;
   onChange: (document: string) => void;
   lookup: ReturnType<typeof useCnpjLookup>;
-  error?: string;
+  errors: Errors;
+  errorKey?: string;
 }) {
   const legalEntity = type === 'company';
 
   return (
-    <Field
-      label={legalEntity ? 'CNPJ' : 'CPF'}
+    <TaxDocumentField
+      personType={legalEntity ? 'company' : 'individual'}
       name={name}
       info={legalEntity
         ? 'Informe a raiz de 8 posições ou o CNPJ completo de 14 posições. A consulta cadastral exige o CNPJ numérico completo e preenche os nomes que ainda estiverem vazios.'
         : 'Informe um CPF válido para identificar a empresa.'}
-      compact
       required
-      maxLength={18}
-      inputMode={legalEntity ? 'text' : 'numeric'}
-      placeholder={legalEntity ? 'CNPJ completo ou raiz' : '000.000.000-00'}
-      value={document ? formatTaxDocument(document, type) : ''}
+      placeholder={legalEntity ? 'CNPJ completo ou raiz' : undefined}
+      value={document}
       onChange={(event) => {
         onChange(event.target.value);
         lookup.reset();
@@ -33,7 +31,9 @@ export default function CompanyDocumentField({ name, type, document, onChange, l
       action={legalEntity && (
         <LookupButton label="Buscar CNPJ" loading={lookup.loading} onClick={() => void lookup.lookup(document)} />
       )}
-      error={lookup.error || error}
+      error={lookup.error}
+      errors={errors}
+      errorKey={errorKey}
     />
   );
 }

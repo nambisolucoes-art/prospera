@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select, type Errors } from '@/components/BusinessForm/BusinessFormFields';
-import { formatTaxDocument } from '@/utils/formatTaxDocument';
+import TaxDocumentField from '@/components/BusinessForm/TaxDocumentField';
 import type { PersonRow } from './Directory.types';
 
 export default function PersonIdentityFields({ person, errors }: { person: PersonRow | null; errors: Errors }) {
@@ -15,9 +15,10 @@ export default function PersonIdentityFields({ person, errors }: { person: Perso
       options={[{ value: 'individual', label: 'Pessoa física' }, { value: 'company', label: 'Pessoa jurídica' }]}
       onChange={(value) => { setType(value === 'company' ? 'company' : 'individual'); setDocumentError(undefined); setDocument(value === person?.person_type ? person.document ?? '' : ''); }} />
     <Field label={company ? 'Razão social' : 'Nome'} name="name" defaultValue={person?.name} error={errors.name} required />
-    <Field label={company ? 'CNPJ' : 'CPF'} name="document" info="Documento opcional. Quando informado, deve ser válido e único nesta conta. CNPJ numérico ou alfanumérico é aceito." compact inputMode={company ? 'text' : 'numeric'} maxLength={18}
-      value={document ? formatTaxDocument(document, type) : ''} onChange={(event) => { setDocument(event.target.value); setDocumentError(undefined); }} error={documentError}
-      placeholder={company ? 'Numérico ou alfanumérico' : '000.000.000-00'} />
+    <TaxDocumentField personType={type} name="document"
+      info="Documento opcional. Quando informado, deve ser válido e único nesta conta. CNPJ numérico ou alfanumérico é aceito."
+      value={document} onChange={(event) => { setDocument(event.target.value); setDocumentError(undefined); }}
+      error={documentError} />
     {company && <>
       <Field label="Nome fantasia" name="trade_name" defaultValue={person?.trade_name ?? ''} error={errors.trade_name} />
     </>}

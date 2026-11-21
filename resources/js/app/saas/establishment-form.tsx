@@ -4,18 +4,20 @@ import BusinessForm, {
   BusinessFormSection,
 } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
+import TaxDocumentField from '@/components/BusinessForm/TaxDocumentField';
 import Button from '@/components/Button/Button';
 import CardBox from '@/components/CardBox/CardBox';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
-import { formatTaxDocument } from '@/utils/formatTaxDocument';
-import { AddressFields } from './ClientFormFields';
+import { AddressFields, LookupButton } from './ClientFormFields';
 import ContactFields from './ContactFields';
 import SaasLayout from './SaasLayout';
 import { organizationFormNavigation } from './organizationNavigation';
 import PromoteEstablishmentModal from './PromoteEstablishmentModal';
 import { companyName, type CompanyLabel, type EstablishmentDetails } from './Organization.types';
+import { useCnpjLookup } from './useCnpjLookup';
+
 export default function EstablishmentForm({
   establishment,
   companies,
@@ -41,6 +43,9 @@ export default function EstablishmentForm({
   const legalEntity = company?.person_type === 'company' && company.document_label !== null;
   const [classification, setClassification] = useState<string>(establishment?.classification ?? 'unregistered');
   const [document, setDocument] = useState(establishment?.tax_document ?? '');
+  const [name, setName] = useState(establishment?.name ?? '');
+  const [tradeName, setTradeName] = useState(establishment?.trade_name ?? '');
+  const cnpjLookup = useCnpjLookup(setName, setTradeName);
   const [promoting, setPromoting] = useState(false);
   const trigger = useRef<HTMLElement | null>(null);
   const listHref = navigation.back ?? (can('list') ? '/conta/estabelecimentos' : undefined);
@@ -83,7 +88,12 @@ export default function EstablishmentForm({
                       title="A empresa proprietária não muda depois do cadastro." />
                   ) : selectable.length > 1 ? (
                     <Select label="Empresa" name="company_id" required searchable value={companyId} error={errors.company_id}
-                      onChange={(value) => { setCompanyId(value); setClassification('unregistered'); setDocument(''); }}
+                      onChange={(value) => {
+                        setCompanyId(value);
+                        setClassification('unregistered');
+                        setDocument('');
+                        cnpjLookup.reset();
+                      }}
                       options={[{ value: '', label: 'Selecione a empresa' },
                         ...selectable.map((option) => ({ value: String(option.id), label: companyName(option) }))]} />
                   ) : null}
@@ -93,8 +103,10 @@ export default function EstablishmentForm({
                   {!establishment && (fixedCompany || selectable.length <= 1) && errors.company_id && (
                     <p className="formField__error business-form__control-start" role="alert">{errors.company_id}</p>
                   )}
-                  <Field label="Nome" name="name" defaultValue={establishment?.name} error={errors.name} required />
-                  <Field label="Nome fantasia" name="trade_name" defaultValue={establishment?.trade_name ?? ''} error={errors.trade_name} />
+                  <Field label="Nome" name="name" value={name}
+                    onChange={(event) => setName(event.target.value)} error={errors.name} required />
+                  <Field label="Nome fantasia" name="trade_name" value={tradeName}
+                    onChange={(event) => setTradeName(event.target.value)} error={errors.trade_name} />
                   {establishment ? (
                     <Field label="Código" value={establishment.code} readOnly compact
                       info="O código identifica o estabelecimento nos endereços e não muda depois do cadastro." />
@@ -115,7 +127,10 @@ export default function EstablishmentForm({
                 <BusinessFormSection title="Identificação fiscal" tourTarget="establishment-fiscal">
                   {legalEntity ? (
                     <Select label="Classificação" name="classification" required value={classification}
-                      error={errors.classification} onChange={setClassification}
+                      error={errors.classification} onChange={(value) => {
+                        setClassification(value);
+                        cnpjLookup.reset();
+                      }}
                       options={[
                         { value: 'headquarters', label: 'Matriz' },
                         { value: 'branch', label: 'Filial' },
@@ -136,10 +151,16 @@ export default function EstablishmentForm({
                     </>
                   )}
                   {legalEntity && classification !== 'unregistered' && (
-                    <Field label="CNPJ" info="Informe um CNPJ completo e válido, com a mesma raiz da empresa proprietária." name="tax_document" compact required maxLength={18}
+                    <TaxDocumentField personType="company" name="tax_document" required errors={errors}
+                      info="Informe um CNPJ completo e válido, com a mesma raiz da empresa proprietária. A lupa consulta CNPJs numéricos completos e preenche os nomes que ainda estiverem vazios."
                       placeholder={company?.document_label ? `${company.document_label}/0000-00` : undefined}
-                      value={document ? formatTaxDocument(document, 'company') : ''}
-                      onChange={(event) => setDocument(event.target.value)} error={errors.tax_document} />
+                      value={document} onChange={(event) => {
+                        setDocument(event.target.value);
+                        cnpjLookup.reset();
+                      }}
+                      action={<LookupButton label="Buscar CNPJ" loading={cnpjLookup.loading} disabled={processing}
+                        onClick={() => void cnpjLookup.lookup(document)} />}
+                      error={cnpjLookup.error} />
                   )}
                   <Field label="Inscrição estadual" name="state_registration" maxLength={30}
                     defaultValue={establishment?.state_registration ?? ''} error={errors.state_registration} />

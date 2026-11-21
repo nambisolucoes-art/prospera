@@ -67,7 +67,7 @@ export default function CompanyForm({
                       cnpjLookup.reset();
                     }} />
                   <CompanyDocumentField name="document" type={type} document={document}
-                    onChange={setDocument} lookup={cnpjLookup} error={errors.document} />
+                    onChange={setDocument} lookup={cnpjLookup} errors={errors} />
                   <Field label={legalEntity ? 'Razão social' : 'Nome'} name="name" value={name}
                     onChange={(event) => setName(event.target.value)} error={errors.name} required />
                   <Field label="Nome fantasia" name="trade_name" value={tradeName}

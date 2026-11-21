@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import BusinessForm, { BusinessFormActions, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
+import TaxDocumentField from '@/components/BusinessForm/TaxDocumentField';
 import AccountOrganizationFields from './AccountOrganizationFields';
 import { formatTaxDocument } from '@/utils/formatTaxDocument';
 import { AddressFields, LookupButton } from './ClientFormFields';
@@ -46,10 +47,11 @@ export default function ClientForm({
               updateDocument(nextType === client?.person_type ? client.document ?? '' : '');
             }} error={errors.person_type} />}
             <Field label={company ? 'Razão social' : 'Nome'} name="name" value={name} onChange={(event) => setName(event.target.value)} error={errors.name} required />
-            {!tenant && <Field label={company ? 'CNPJ' : 'CPF'} name="document" info={company ? "Informe um CNPJ válido. Buscar CNPJ exige um CNPJ numérico completo e preenche os nomes que ainda estiverem vazios." : "Informe um CPF válido para identificar o contratante."} compact inputMode={company ? 'text' : 'numeric'} maxLength={18}
-              value={document ? formatTaxDocument(document, company ? 'company' : 'individual') : ''} onChange={(event) => updateDocument(event.target.value)}
+            {!tenant && <TaxDocumentField personType={company ? 'company' : 'individual'} name="document"
+              info={company ? "Informe um CNPJ válido. Buscar CNPJ exige um CNPJ numérico completo e preenche os nomes que ainda estiverem vazios." : "Informe um CPF válido para identificar o contratante."}
+              value={document} onChange={(event) => updateDocument(event.target.value)}
               action={company && <LookupButton label="Buscar CNPJ" loading={cnpjLookup.loading} onClick={() => void cnpjLookup.lookup(document)} />}
-              error={cnpjLookup.error || errors.document} required={required} />}
+              error={cnpjLookup.error} errors={errors} required={required} />}
             {company && <Field label="Nome fantasia" name="details[trade_name]" value={tradeName}
               onChange={(event) => setTradeName(event.target.value)} error={errors['details.trade_name']} />}
             {!tenant && <Field label="Plano" name="plan" defaultValue={client?.plan ?? ''} error={errors.plan} />}

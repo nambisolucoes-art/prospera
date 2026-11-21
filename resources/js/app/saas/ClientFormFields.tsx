@@ -3,11 +3,11 @@ import { BusinessFormRow, BusinessFormSection } from '@/components/BusinessForm/
 import { Field, Select, type Errors, type FieldProps } from '@/components/BusinessForm/BusinessFormFields';
 import type { Address } from './ClientForm.types';
 
-export type Mask = 'cpf' | 'cnpj' | 'cep' | 'phone';
+export type Mask = 'cep' | 'phone';
 
 export function formatMasked(value: string, mask: Mask): string {
   const digits = value.replace(/\D/g, '');
-  const pattern = { cpf: '000.000.000-00', cnpj: '00.000.000/0000-00', cep: '00000-000', phone: digits.length > 10 ? '(00) 00000-0000' : '(00) 0000-0000' }[mask];
+  const pattern = { cep: '00000-000', phone: digits.length > 10 ? '(00) 00000-0000' : '(00) 0000-0000' }[mask];
   let index = 0;
   let result = '';
   for (const character of pattern) {
@@ -22,9 +22,14 @@ export function MaskedField({ mask, defaultValue = '', ...props }: FieldProps & 
   return <Field {...props} compact value={formatMasked(value, mask)} inputMode="numeric" onChange={(event) => setValue(event.target.value)} />;
 }
 
-export function LookupButton({ label, loading, onClick }: { label: string; loading: boolean; onClick: () => void }) {
+export function LookupButton({ label, loading, disabled = false, onClick }: {
+  label: string;
+  loading: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
   return (
-    <button type="button" className="inputGroup__button waves-effect" title={label} aria-label={label} aria-busy={loading} disabled={loading} onClick={onClick}>
+    <button type="button" className="inputGroup__button waves-effect" title={label} aria-label={label} aria-busy={loading} disabled={loading || disabled} onClick={onClick}>
       <i className={loading ? 'fa fa-spinner fa-spin' : 'fa fa-search'} aria-hidden="true" />
     </button>
   );

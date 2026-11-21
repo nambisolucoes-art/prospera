@@ -91,7 +91,7 @@ function ManualOrganizationFields({ defaults, errors, disabled }: {
             cnpjLookup.reset();
           }} error={errors['first_company.person_type']} required />
         <CompanyDocumentField name={`${company}[document]`} type={type} document={document}
-          onChange={setDocument} lookup={cnpjLookup} error={errors['first_company.document']} />
+          onChange={setDocument} lookup={cnpjLookup} errors={errors} errorKey="first_company.document" />
         <Field label={legalEntity ? 'Razão social' : 'Nome'} name={`${company}[name]`}
           value={name} onChange={(event) => setName(event.target.value)} error={errors['first_company.name']} required />
         <Field label="Nome fantasia" name={`${company}[trade_name]`}

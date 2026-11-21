@@ -179,7 +179,7 @@ export function tourFor(
       at(
         'establishment-fiscal',
         'Identificação fiscal',
-        'Matriz e Filial exigem que a empresa tenha CNPJ e que o da unidade tenha a mesma raiz. Uma empresa com CPF ou identificação fiscal pendente só tem unidades sem CNPJ próprio.',
+        'Matriz e Filial são unidades da empresa selecionada. Informe o CNPJ completo da unidade, com a mesma raiz da empresa. Para um CNPJ numérico, a lupa pode preencher os nomes vazios.',
       ),
       at('establishment-address', 'Endereço', 'Endereço da unidade, com consulta opcional de CEP.'),
       at('establishment-contact', 'Contatos', 'Telefone, WhatsApp e e-mails da unidade, no mesmo padrão do cadastro da conta.'),

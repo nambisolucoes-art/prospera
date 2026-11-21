@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Modal from '@/components/Modal/Modal';
 import { formatMasked } from './ClientFormFields';
+import { formatTaxDocument } from '@/utils/formatTaxDocument';
 import { contactNumber, type ClientData } from './ClientForm.types';
 import PreviewSection from './PreviewSection';
 import './AccountPreview.css';
@@ -32,7 +33,7 @@ export default function AccountPreview({ id, name, onClose }: { id: number; name
             <dt>{account.person_type === 'company' ? 'Razão social' : 'Nome'}</dt><dd>{account.name}</dd>
             {account.details?.trade_name && <><dt>Nome fantasia</dt><dd>{account.details.trade_name}</dd></>}
             <dt>{account.person_type === 'company' ? 'CNPJ' : account.person_type === 'individual' ? 'CPF' : 'Documento'}</dt>
-            <dd>{formatMasked(account.document ?? '', account.person_type === 'company' ? 'cnpj' : 'cpf') || 'Não informado'}</dd>
+            <dd>{formatTaxDocument(account.document, account.person_type ?? '')}</dd>
             <dt>Plano</dt><dd>{account.plan || 'Não informado'}</dd>
             <dt>Status</dt><dd>{account.active ? 'Ativa' : 'Inativa'}</dd>
           </PreviewSection>

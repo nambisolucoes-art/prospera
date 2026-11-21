@@ -6,7 +6,7 @@ import { useBusinessListFilters } from '@/components/BusinessList/useBusinessLis
 import StatusLabel from '@/components/StatusLabel/StatusLabel';
 import AccountPreview from './AccountPreview';
 import AccountInspection from './AccountInspection';
-import { formatMasked } from './ClientFormFields';
+import { formatTaxDocument } from '@/utils/formatTaxDocument';
 import SaasLayout from './SaasLayout';
 
 type AccountRow = {
@@ -37,7 +37,7 @@ export default function Accounts({ accounts, search }: { accounts: PageSummary &
     { id: 'email', label: 'E-mail', width: 220,
       render: (account) => account.email ? <span title={account.email}>{account.email}</span> : 'Não informado' },
     { id: 'document', label: 'CPF/CNPJ', width: 160,
-      render: (account) => formatMasked(account.document ?? '', account.person_type === 'company' ? 'cnpj' : 'cpf') || 'Não informado' },
+      render: (account) => formatTaxDocument(account.document, account.person_type ?? '') },
     { id: 'plan', label: 'Plano', width: 130, render: (account) => account.plan || 'Não informado' },
     { id: 'status', label: 'Status', width: 110, compact: true,
       render: (account) => <StatusLabel active={account.active} /> },
