@@ -117,15 +117,23 @@ class AuditAndGuidanceTest extends TestCase
         $this->getJson('/conta/auditoria')->assertForbidden();
         $this->getJson('/conta/auditoria/'.$local->id.'/visualizar')->assertForbidden();
         $platform = User::factory()->create(['is_saas_admin' => true]);
+
+        // PD-02 (E08): fora da inspeção, a plataforma não vê os eventos de negócio das contas.
         $this
             ->actingAs($platform)
             ->getJson('/saas/auditoria?account='.$other->account_id.'&entity=person')
             ->assertOk()
-            ->assertJsonFragment(['name' => 'Pessoa de outra conta']);
+            ->assertJsonPath('records.total', 0)
+            ->assertJsonMissing(['name' => 'Pessoa de outra conta']);
+        $this->getJson('/saas/auditoria/'.$foreign->id.'/visualizar')->assertNotFound();
+
+        $accountEvent = AuditRecord::where('entity_type', 'account')
+            ->where('entity_id', $other->account_id)
+            ->sole();
         $this
-            ->getJson('/saas/auditoria/'.$foreign->id.'/visualizar')
+            ->getJson('/saas/auditoria/'.$accountEvent->id.'/visualizar')
             ->assertOk()
-            ->assertJsonPath('technical.entity_id', $foreign->entity_id);
+            ->assertJsonPath('technical.entity_id', $other->account_id);
     }
 
     public function test_secrets_and_photo_contents_never_enter_either_audit_view(): void

@@ -6,6 +6,7 @@ use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Clientes\Domain\Models\Customer;
+use App\Domains\Etiquetas\Domain\Concerns\NamesAuditedTags;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
 use App\Domains\Pessoas\Domain\DTOs\PersonDTO;
@@ -38,6 +39,9 @@ use Illuminate\Validation\ValidationException;
 class Person extends Model implements Auditable
 {
     use AuditsChanges;
+    use NamesAuditedTags {
+        NamesAuditedTags::auditRelationNames insteadof AuditsChanges;
+    }
 
     /**
      * Identificação central: alterá-la exige cobrir todas as empresas relacionadas (seção 10.2.1).

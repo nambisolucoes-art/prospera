@@ -6,6 +6,12 @@ import PreviewSection from './PreviewSection';
 import type { AuditDetail } from './audit';
 import '@/components/Button/Button.css';
 import './AuditRecordDetails.css';
+const levels: Record<AuditDetail['level'], string> = {
+  platform: 'Plataforma SaaS',
+  tenant: 'Conta',
+  company: 'Empresa',
+  establishment: 'Estabelecimento',
+};
 function value(v: unknown): string {
   if (v === null || v === undefined || v === '') return 'Não informado';
   if (typeof v === 'boolean') return v ? 'Sim' : 'Não';
@@ -145,34 +151,46 @@ export default function AuditRecordDetails({
           </pre>
         ) : (
           <>
-            <PreviewSection title="Dados do registro">
-              <dt>Registro</dt>
-              <dd>{detail.name}</dd>
-              <dt>Quem fez</dt>
-              <dd>{detail.actor}</dd>
-              <dt>Contexto</dt>
-              <dd>
-                {detail.context === 'platform-account'
-                  ? 'Plataforma em inspeção da conta'
-                  : detail.context === 'platform'
-                    ? 'Plataforma SaaS'
-                    : detail.context === 'account'
-                      ? 'Conta'
-                      : 'Sistema'}
-              </dd>
-              {detail.account_id !== null && (
-                <>
-                  <dt>Conta</dt>
-                  <dd>#{detail.account_id}</dd>
-                </>
-              )}
-              {detail.represented_user_id !== null && (
-                <>
-                  <dt>Usuário representado</dt>
-                  <dd>#{detail.represented_user_id}</dd>
-                </>
-              )}
-            </PreviewSection>
+            <div className="audit-record__sections" data-tour="audit-modal-context">
+              <PreviewSection title="Operação">
+                <dt>Registro</dt>
+                <dd>{detail.name}</dd>
+                <dt>Tipo</dt>
+                <dd>{detail.type}</dd>
+                <dt>Ação</dt>
+                <dd>{detail.event}</dd>
+                <dt>Data e hora</dt>
+                <dd>{new Date(detail.created_at).toLocaleString('pt-BR')}</dd>
+              </PreviewSection>
+              <PreviewSection title="Autoria">
+                <dt>Quem fez</dt>
+                <dd>{detail.actor}</dd>
+                <dt>Origem</dt>
+                <dd>{detail.origin}</dd>
+                {detail.represented_user_id !== null && (
+                  <>
+                    <dt>Usuário representado</dt>
+                    <dd>{detail.represented ?? 'Não registrado neste evento'}</dd>
+                    <dt>Modo da inspeção</dt>
+                    <dd>{detail.inspection_mode ?? 'Não registrado neste evento'}</dd>
+                  </>
+                )}
+              </PreviewSection>
+              <PreviewSection title="Contexto organizacional">
+                <dt>Nível</dt>
+                <dd>{levels[detail.level]}</dd>
+                {detail.account && (
+                  <>
+                    <dt>Conta</dt>
+                    <dd>{detail.account}</dd>
+                  </>
+                )}
+                <dt>Empresa</dt>
+                <dd>{detail.company ?? 'Não se aplica'}</dd>
+                <dt>Estabelecimento</dt>
+                <dd>{detail.establishment ?? 'Não se aplica'}</dd>
+              </PreviewSection>
+            </div>
             {detail.changes.length ? (
               <div className="audit-record__table-wrap">
                 <Table hover headerTone="primary" className="audit-record__table">

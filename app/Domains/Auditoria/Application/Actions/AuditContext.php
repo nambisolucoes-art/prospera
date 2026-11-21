@@ -3,6 +3,7 @@
 namespace App\Domains\Auditoria\Application\Actions;
 
 use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Domains\Plataforma\Domain\DTOs\AccountInspectionDTO;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -18,6 +19,11 @@ final class AuditContext
 
     public ?int $representedUserId = null;
 
+    // Nome do representado no momento da operação, para o histórico continuar legível depois de mudanças.
+    public ?string $representedUserName = null;
+
+    public ?string $inspectionId = null;
+
     public string $context = 'system';
 
     /** @var array<string,int|null> */
@@ -25,7 +31,15 @@ final class AuditContext
 
     public function membershipIdFor(?User $identity, ?int $accountId): ?int
     {
-        if ($identity === null || $identity->is_saas_admin || $accountId === null) {
+        if ($accountId === null) {
+            return null;
+        }
+
+        if ($this->representedUserId !== null) {
+            return $this->memberships[$this->representedUserId.':'.$accountId] ?? null;
+        }
+
+        if ($identity === null || $identity->is_saas_admin) {
             return null;
         }
 
@@ -49,16 +63,27 @@ final class AuditContext
         if ($inspection) {
             $administratorName = User::whereKey($inspection->administratorId)->value('name');
 
-            $this->actorId = $inspection->administratorId;
-            $this->actorName = $administratorName ?? 'Administrador da plataforma';
-            $this->representedUserId = $inspection->userId;
-            $this->memberships[$inspection->userId.':'.$inspection->accountId] = $inspection->membershipId;
-            $this->context = 'platform-account';
+            $representedName = $user?->id === $inspection->userId ? $user->name : null;
+            $this->identifyInspection($inspection, $administratorName, $representedName);
         } elseif ($user) {
             $this->actorId = $user->id;
             $this->actorName = $user->name;
             $this->context = $user->is_saas_admin ? 'platform' : 'account';
         }
+    }
+
+    public function identifyInspection(
+        AccountInspectionDTO $inspection,
+        ?string $administratorName,
+        ?string $representedName,
+    ): void {
+        $this->actorId = $inspection->administratorId;
+        $this->actorName = $administratorName ?? 'Administrador da plataforma';
+        $this->representedUserId = $inspection->userId;
+        $this->representedUserName = $representedName;
+        $this->inspectionId = $inspection->id;
+        $this->memberships[$inspection->userId.':'.$inspection->accountId] = $inspection->membershipId;
+        $this->context = 'platform-account';
     }
 
     public function clear(): void
@@ -67,6 +92,8 @@ final class AuditContext
         $this->actorId = null;
         $this->actorName = 'Sistema';
         $this->representedUserId = null;
+        $this->representedUserName = null;
+        $this->inspectionId = null;
         $this->memberships = [];
         $this->context = 'system';
     }

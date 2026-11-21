@@ -4,6 +4,7 @@ namespace App\Domains\Clientes\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
+use App\Domains\Etiquetas\Domain\Concerns\NamesAuditedTags;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Domain\Models\Person;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -23,6 +24,9 @@ use Illuminate\Support\Facades\DB;
 class Customer extends Model implements Auditable
 {
     use AuditsChanges;
+    use NamesAuditedTags {
+        NamesAuditedTags::auditRelationNames insteadof AuditsChanges;
+    }
 
     protected $attributes = ['active' => true];
 

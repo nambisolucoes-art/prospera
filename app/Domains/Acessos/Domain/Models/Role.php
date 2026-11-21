@@ -36,6 +36,23 @@ class Role extends Model implements Auditable
             ->all();
     }
 
+    /**
+     * Permissões do catálogo (globais) nomeadas no histórico de `permission_ids`.
+     *
+     * @param  list<int>  $ids
+     * @return list<string>|null
+     */
+    public function auditRelationNames(string $field, array $ids): ?array
+    {
+        if ($field !== 'permission_ids') {
+            return null;
+        }
+
+        $names = Permission::whereIn('id', $ids)->pluck('name', 'id');
+
+        return array_map(fn (int $id): string => $names[$id] ?? 'Permissão #'.$id, $ids);
+    }
+
     /** @return BelongsToMany<Permission, $this> */
     public function permissions(): BelongsToMany
     {

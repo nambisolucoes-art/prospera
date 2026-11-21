@@ -3,8 +3,11 @@
 namespace App\Http\Middleware;
 
 use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Domains\Auditoria\Application\Actions\AuditContext;
+use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
+use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use Closure;
 use Illuminate\Http\Request;
@@ -29,6 +32,8 @@ final readonly class EnforceAccountInspection
             $this->users->administrator($inspection->administratorId) === null
             || $user === null
             || $user->id !== $inspection->userId
+            || ! $user->access_enabled
+            || EnsureIdentitySessionCurrent::isStale($user, $request->session())
             || ! AccountMembership::where('user_id', $user->id)
                 ->where('account_id', $inspection->accountId)
                 ->whereKey($inspection->membershipId)
@@ -37,6 +42,26 @@ final readonly class EnforceAccountInspection
             || $user->is_saas_admin
             || ! $user->hasVerifiedEmail()
         ) {
+            // O encerramento forçado também entra no histórico, com o administrador como autor real.
+            $audit = app(AuditContext::class);
+            try {
+                $audit->begin($request);
+                AuditLog::record(
+                    'account',
+                    $inspection->accountId,
+                    $inspection->accountId,
+                    'inspection-ended',
+                    Client::whereKey($inspection->accountId)->value('name') ?? 'Conta #'.$inspection->accountId,
+                    ['ending' => [
+                        'label' => 'Encerramento',
+                        'before' => null,
+                        'after' => 'Automático: a autorização da inspeção deixou de valer',
+                    ]],
+                );
+            } finally {
+                $audit->clear();
+            }
+
             Auth::guard('web')->logoutCurrentDevice();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

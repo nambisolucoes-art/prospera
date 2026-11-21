@@ -2,6 +2,7 @@
 
 namespace App\Domains\Acessos\Domain\Models;
 
+use App\Domains\Acessos\Domain\Concerns\NamesAuditedRole;
 use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
@@ -23,6 +24,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 final class RoleAssignment extends Model implements Auditable
 {
     use AuditsChanges;
+    use NamesAuditedRole {
+        NamesAuditedRole::auditRelationNames insteadof AuditsChanges;
+    }
 
     public static function auditType(): string
     {

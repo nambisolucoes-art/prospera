@@ -25,10 +25,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['organization' => ResolveOrganizationContext::class]);
 
         $middleware->web(append: [
-            EnsureUserAccessEnabled::class,
             JsonNavigation::class,
-            EnsureIdentitySessionCurrent::class,
             EnforceAccountInspection::class,
+            EnsureUserAccessEnabled::class,
+            EnsureIdentitySessionCurrent::class,
             EnforceAudit::class,
             SelfServicePermissions::class,
             ThrottleAccessRecovery::class,

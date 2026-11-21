@@ -49,10 +49,12 @@ Responder antes de implementar:
 ### Auditoria
 
 - [ ] Models implementam `Auditable`, usam `AuditsChanges` e declaram `auditedFields()`; exclusões justificadas.
-- [ ] Eventos gravam `company_id` e `establishment_id` conforme o nó.
-- [ ] Relacionamentos e escritas em lote registrados explicitamente na mesma transação.
-- [ ] Segredos, tokens, senhas e imagens fora do histórico.
-- [ ] `php artisan audit:check` verde.
+- [ ] Eventos gravam `company_id` e `establishment_id` conforme o nó do recurso afetado, nunca pela unidade selecionada na Área de Trabalho; unidade sempre com a empresa.
+- [ ] Eventos sem Model usam `AuditLog::record` com rótulos em `config/audit.php`; nenhuma resolução própria de autor, conta ou inspeção.
+- [ ] Relacionamentos e escritas em lote registrados explicitamente na mesma transação. Uma operação que afeta vários nós usa o mesmo `operation_id` e registra cada nó, sem duplicar por atribuição.
+- [ ] Segredos, tokens, senhas e imagens fora do histórico; documentos pessoais mascarados.
+- [ ] Testes do evento produzido: nó, autor, representado em inspeção, sem evento em atualização sem mudança, erro e reversão, e sem acesso por auditor de outra empresa ou unidade ([Auditoria](auditoria.md)).
+- [ ] `php artisan audit:check` verde. A leitura reutiliza a consulta central e o módulo não modifica eventos confirmados.
 
 ### Consultas contextualizadas
 

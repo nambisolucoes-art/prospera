@@ -5,9 +5,10 @@ Rotas: `/conta/auditoria` e `/saas/auditoria`. Ajuda: `/ajuda/auditoria`.
 1. `PageHeaderTour`: título e trilha. Sem passo de cadastro, pois a auditoria é somente leitura.
 2. `BusinessListTour`: filtros (busca, seletores e as datas com o `DatePicker` compartilhado), Colunas, menu aberto, tabela, largura, demonstração temporária, ações, quantidade, opções e paginação.
 3. `audit-modal-summary`: abre a primeira operação autorizada e explica ação, tipo e data.
-4. `audit-modal-content`: campos em Formatado, comparações Antes e Depois ou valores de cadastro e exclusão.
-5. `audit-modal-views`: demonstra Log técnico e restaura Formatado ao sair. Exige permissão técnica.
-6. `audit-modal-footer`: explica Fechar e encerra a janela aberta pelo tutorial.
+4. `audit-modal-context` (E08): seções Operação, Autoria e Contexto organizacional; autor real e usuário representado na inspeção; Não se aplica nos eventos da conta.
+5. `audit-modal-content`: campos em Formatado, comparações Antes e Depois ou valores de cadastro e exclusão.
+6. `audit-modal-views`: demonstra Log técnico e restaura Formatado ao sair. Exige permissão técnica.
+7. `audit-modal-footer`: explica Fechar e encerra a janela aberta pelo tutorial.
 
 Os passos do modal compartilham uma sessão de demonstração. Alvos assíncronos usam `availableWith` sobre o botão de visualização. Ausência de registros ou permissão pula a parte indisponível. Esc e Concluir limpam menus, largura temporária e modal. Preferências de colunas, filtros e dados não são gravados pelo tour.
 
@@ -22,3 +23,7 @@ O detalhe usa o mesmo cabeçalho de tabela das listagens e badges com as dimens�
 Ação usa a mesma badge na listagem e no detalhe: cadastro verde, alteração amarela e exclusão vermelha. Eventos de acesso e inspeção também possuem cores próprias. O nome acompanha a cor.
 
 Os campos do detalhe mostram os rótulos das opções em português, inclusive para registros antigos. Modo de inspeção apresenta Somente leitura ou Leitura e edição. Alvos e ordem preservados.
+
+E08: o passo de filtros cita Origem e os filtros de Empresa, Estabelecimento e Nível, que só aparecem com mais de uma opção no acesso do usuário. O passo da tabela explica as colunas Onde e Quem fez, com a marca Inspeção e o usuário representado. O novo passo `audit-modal-context` usa a mesma sessão de demonstração do modal e não grava dados. A ordem dos passos existentes foi preservada.
+
+Na revisão de encerramento, o tour foi percorrido a 1440, 1024, 768, 390 e 320 px. Os passos de largura da tabela foram pulados nas duas larguras menores. A demonstração fechou a ficha em todas as larguras.

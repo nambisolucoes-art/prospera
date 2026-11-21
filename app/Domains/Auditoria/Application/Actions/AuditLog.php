@@ -2,11 +2,11 @@
 
 namespace App\Domains\Auditoria\Application\Actions;
 
-use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
+use App\Domains\Auditoria\Domain\Exceptions\AuditWriteFailed;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
-use App\Domains\Etiquetas\Domain\Models\Tag;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -44,13 +44,19 @@ final class AuditLog
         ?int $companyId = null,
         ?int $establishmentId = null,
     ): void {
-        if (! Schema::hasTable('audit_records')) {
-            // Migrations antigas da instalação são anteriores à tabela central de histórico.
-            if (app()->runningInConsole()) {
-                return;
-            }
+        // Migrations antigas da instalação são anteriores à tabela central de histórico. Fora do console, a
+        // ausência da tabela falha na gravação e desfaz a operação, sem uma consulta de esquema por evento.
+        if (app()->runningInConsole() && ! Schema::hasTable('audit_records')) {
+            return;
+        }
 
-            throw new \LogicException('A tabela de auditoria não está disponível. Execute as migrações.');
+        // O nó do evento segue a árvore: unidade exige empresa, e empresa exige conta (FKs e CHECKs da E08).
+        if ($establishmentId !== null && $companyId === null) {
+            throw new \LogicException('Evento de estabelecimento sem a empresa responsável.');
+        }
+
+        if ($companyId !== null && $accountId === null) {
+            throw new \LogicException('Evento de empresa sem a conta responsável.');
         }
 
         $context = app(AuditContext::class);
@@ -59,34 +65,6 @@ final class AuditLog
 
         // Criação e edição do mesmo registro na mesma operação viram um único evento.
         $events = in_array($event, ['created', 'updated'], true) ? ['created', 'updated'] : [$event];
-
-        $existing = AuditRecord::where('operation_id', $operationId)
-            ->where('entity_type', $type)
-            ->where('entity_id', $id)
-            ->whereIn('event', $events)
-            ->first();
-
-        $merged = $existing ? $existing->changes : [];
-
-        foreach ($changes as $field => $change) {
-            if (isset($merged[$field])) {
-                $change['before'] = $merged[$field]['before'];
-            }
-
-            $merged[$field] = $change;
-        }
-
-        $recordedEvent = $existing ? $existing->event : $event;
-
-        if ($recordedEvent === 'updated') {
-            $merged = array_filter($merged, fn ($change) => $change['before'] !== $change['after']);
-        }
-
-        if ($event === 'updated' && ! $merged) {
-            $existing?->delete();
-
-            return;
-        }
 
         $actorName = $context->actorId !== null
             ? $context->actorName
@@ -106,9 +84,6 @@ final class AuditLog
             'entity_type' => $type,
             'entity_id' => $id,
             'entity_name' => $label,
-            'event' => $recordedEvent,
-            'changes' => $merged,
-            'created_at' => $existing ? $existing->created_at : now(),
         ];
 
         // Eventos sem empresa omitem as colunas, gravadas desde a E04, para não depender delas em migrações antigas.
@@ -120,16 +95,70 @@ final class AuditLog
             $values['establishment_id'] = $establishmentId;
         }
 
+        // Colunas da E08, omitidas quando vazias para as migrações anteriores a elas.
+        if ($context->representedUserName !== null) {
+            $values['represented_user_name'] = $context->representedUserName;
+        }
+
+        if ($context->inspectionId !== null) {
+            $values['inspection_id'] = $context->inspectionId;
+        }
+
         $membershipId = $context->membershipIdFor($actor, $accountId);
 
         if ($membershipId !== null) {
             $values['membership_id'] = $membershipId;
         }
 
-        if ($existing) {
-            $existing->fill($values)->saveOrFail();
-        } else {
-            AuditRecord::create($values);
+        try {
+            $existing = AuditRecord::where('operation_id', $operationId)
+                ->where('entity_type', $type)
+                ->where('entity_id', $id)
+                ->where('account_id', $accountId)
+                ->whereIn('event', $events)
+                ->get()
+                ->first(fn (AuditRecord $record) => $record->getRawOriginal('company_id') === $companyId
+                    && $record->getRawOriginal('establishment_id') === $establishmentId);
+
+            $merged = $existing ? $existing->changes : [];
+
+            foreach ($changes as $field => $change) {
+                if (isset($merged[$field])) {
+                    $change['before'] = $merged[$field]['before'];
+                }
+
+                $merged[$field] = $change;
+            }
+
+            $recordedEvent = $existing ? $existing->event : $event;
+
+            if ($recordedEvent === 'updated') {
+                $merged = array_filter($merged, fn ($change) => $change['before'] !== $change['after']);
+            }
+
+            if ($event === 'updated' && ! $merged) {
+                $existing?->delete();
+
+                return;
+            }
+
+            $values['event'] = $recordedEvent;
+            $values['changes'] = $merged;
+            $values['created_at'] = $existing ? $existing->created_at : now();
+
+            if ($existing) {
+                $existing->fill($values)->saveOrFail();
+            } else {
+                AuditRecord::create($values);
+            }
+        } catch (QueryException $exception) {
+            // A operação é desfeita pela exceção; o log recebe só o tipo, a operação e o código do banco.
+            throw new AuditWriteFailed(sprintf(
+                'Falha ao gravar o histórico de auditoria (%s, operação %s, SQLSTATE %s).',
+                $type,
+                $operationId,
+                $exception->errorInfo[0] ?? 'desconhecido',
+            ));
         }
     }
 
@@ -144,8 +173,8 @@ final class AuditLog
         array $after,
         string $label,
     ): void {
-        $before = array_map('intval', $before);
-        $after = array_map('intval', $after);
+        $before = array_values(array_map('intval', $before));
+        $after = array_values(array_map('intval', $after));
         sort($before);
         sort($after);
 
@@ -153,15 +182,9 @@ final class AuditLog
             return;
         }
 
-        $names = function (array $ids) use ($field, $model): array {
-            $query = $field === 'permission_ids'
-                ? Permission::query()
-                : Tag::where('account_id', $model->auditAccountId());
-
-            $labels = $query->whereIn('id', $ids)->pluck('name', 'id');
-
-            return array_map(fn ($id) => $labels[$id] ?? 'Registro #'.$id, $ids);
-        };
+        // O próprio model nomeia os itens; sem nome conhecido, o histórico mostra o identificador.
+        $names = fn (array $ids): array => $model->auditRelationNames($field, array_values($ids))
+            ?? array_map(fn (int $id): string => 'Registro #'.$id, $ids);
 
         self::record(
             $model::auditType(),

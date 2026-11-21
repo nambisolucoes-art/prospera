@@ -28,6 +28,7 @@ final readonly class EndAccountInspectionAction
             $inspection->accountId,
             'inspection-ended',
             $accountName ?? 'Conta #'.$inspection->accountId,
+            ['ending' => ['label' => 'Encerramento', 'before' => null, 'after' => 'Solicitado pelo administrador']],
         );
 
         $administrator = $this->users->administrator($inspection->administratorId);

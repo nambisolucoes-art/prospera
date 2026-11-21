@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,10 +23,9 @@ final class EnsureIdentitySessionCurrent
         }
 
         $session = $request->session();
-        $stored = $session->get(self::KEY);
         $revision = $identity->emailChangeRevision();
 
-        if (($stored['id'] ?? null) === $identity->id && ($stored['value'] ?? null) !== $revision) {
+        if (self::isStale($identity, $session, $revision)) {
             Auth::guard('web')->logoutCurrentDevice();
             $session->invalidate();
             $session->regenerateToken();
@@ -35,5 +36,13 @@ final class EnsureIdentitySessionCurrent
         $session->put(self::KEY, ['id' => $identity->id, 'value' => $revision]);
 
         return $next($request);
+    }
+
+    public static function isStale(User $identity, Session $session, ?string $revision = null): bool
+    {
+        $stored = $session->get(self::KEY);
+
+        return ($stored['id'] ?? null) === $identity->id
+            && ($stored['value'] ?? null) !== ($revision ?? $identity->emailChangeRevision());
     }
 }

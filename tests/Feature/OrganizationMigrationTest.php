@@ -61,6 +61,8 @@ final class OrganizationMigrationTest extends TestCase
             ->expectsOutputToContain('Pendência: Empresa #'.$company->id.' da conta #'.$account->id)
             ->assertSuccessful();
 
+        // Mesma ordem do migrate:rollback: a integridade da E08 referencia as unidades do histórico.
+        $this->migration('2026_11_21_000003_consolidate_contextual_audit')->down();
         $migration->down();
 
         $this->assertDatabaseCount('companies', 0);
@@ -112,6 +114,7 @@ final class OrganizationMigrationTest extends TestCase
 
         // A reversão depende da tabela antiga de estabelecimentos, que a estrutura organizacional substitui.
         $organization = $this->migration('2026_11_20_000003_create_organization_structure');
+        $this->migration('2026_11_21_000003_consolidate_contextual_audit')->down();
         $organization->down();
         $migration->down();
 

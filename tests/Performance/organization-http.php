@@ -19,7 +19,8 @@ function request(
 
     $options['follow_location'] = 0;
     $start = hrtime(true);
-    $body = file_get_contents('http://127.0.0.1:8000'.$path, false, stream_context_create(['http' => $options]));
+    $base = getenv('HARNESS_URL') ?: 'http://127.0.0.1:8000';
+    $body = file_get_contents($base.$path, false, stream_context_create(['http' => $options]));
     $elapsed = (hrtime(true) - $start) / 1e6;
     $headers = http_get_last_response_headers();
 

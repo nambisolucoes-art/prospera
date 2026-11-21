@@ -2,7 +2,6 @@
 
 namespace App\Domains\Auditoria\Infrastructure\Observers;
 
-use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Model;
@@ -37,7 +36,7 @@ final class AuditObserver
         return $value instanceof \DateTimeInterface ? $value->format(DATE_ATOM) : $value;
     }
 
-    private function safe(Model $entity, string $field, mixed $value, bool $before, string $event): mixed
+    private function safe(Model&Auditable $entity, string $field, mixed $value, bool $before, string $event): mixed
     {
         if ($value === null || $value === '') {
             return null;
@@ -55,12 +54,13 @@ final class AuditObserver
             return $before ? 'Documento anterior' : 'Documento informado';
         }
 
-        if ($field === 'role_id') {
-            $roleName = Role::where('account_id', $entity->getAttribute('account_id'))
-                ->whereKey((int) $value)
-                ->value('name');
+        // Chaves de relacionamento nomeadas pelo próprio model, como o cargo de uma atribuição.
+        if (is_int($value) || (is_string($value) && ctype_digit($value))) {
+            $names = $entity->auditRelationNames($field, [(int) $value]);
 
-            return $roleName ?? 'Cargo #'.$value;
+            if ($names !== null) {
+                return $names[0];
+            }
         }
 
         if (str_ends_with($field, '_confirmed_at') || $field === 'email_verified_at') {

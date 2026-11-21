@@ -2,6 +2,7 @@
 
 namespace App\Domains\Acessos\Domain\Models;
 
+use App\Domains\Acessos\Domain\Concerns\NamesAuditedRole;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,9 @@ use Illuminate\Database\Eloquent\Model;
 final class RoleAvailability extends Model implements Auditable
 {
     use AuditsChanges;
+    use NamesAuditedRole {
+        NamesAuditedRole::auditRelationNames insteadof AuditsChanges;
+    }
 
     protected $table = 'role_availability';
 

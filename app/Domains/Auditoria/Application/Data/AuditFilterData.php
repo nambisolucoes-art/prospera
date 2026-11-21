@@ -25,12 +25,20 @@ final readonly class AuditFilterData
             'actor' => 'nullable|integer|min:1',
             'from' => 'nullable|date_format:Y-m-d',
             'until' => $untilRule,
+            'origin' => 'nullable|in:'.implode(',', array_keys(config('audit.origins'))),
         ];
 
+        // A plataforma filtra por conta; a conta filtra pelos nós da própria árvore (E08).
         if ($platform) {
             $rules['account'] = 'nullable|integer|min:1';
+            $rules['company'] = 'prohibited';
+            $rules['establishment'] = 'prohibited';
+            $rules['level'] = 'prohibited';
         } else {
             $rules['account'] = 'prohibited';
+            $rules['company'] = 'nullable|integer|min:1';
+            $rules['establishment'] = 'nullable|integer|min:1';
+            $rules['level'] = 'nullable|in:tenant,company,establishment';
         }
 
         return new self(Validator::make($input, $rules)->validate());

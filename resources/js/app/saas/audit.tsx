@@ -16,6 +16,8 @@ import { apiRequest } from '@/utils/apiRequest';
 import SaasLayout from './SaasLayout';
 import AuditEventLabel from '@/components/AuditEventLabel/AuditEventLabel';
 import AuditRecordDetails from './AuditRecordDetails';
+import Label from '@/components/Label/Label';
+import { auditPlace, type AuditLevel } from '@/utils/auditPlace';
 import './AccountPreview.css';
 import './Guidance.css';
 export type AuditRow = {
@@ -27,14 +29,22 @@ export type AuditRow = {
   actor: string;
   created_at: string;
   account_id: number | null;
+  account: string | null;
   context: string;
+  origin: string;
+  level: AuditLevel;
+  company: string | null;
+  establishment: string | null;
   represented_user_id: number | null;
+  represented: string | null;
   can_view?: boolean;
 };
 export type AuditDetail = AuditRow & {
+  inspection_mode: string | null;
   changes: { label: string; before: unknown; after: unknown }[];
   technical: Record<string, unknown> | null;
 };
+type AuditOption = SelectOption & { company?: string };
 type Filters = Record<string, string>;
 const date = (value: string) => new Date(value).toLocaleString('pt-BR');
 export default function Audit({
@@ -45,7 +55,7 @@ export default function Audit({
 }: {
   records: PageSummary & { data: AuditRow[] };
   filters: Filters;
-  options: Record<string, SelectOption[]>;
+  options: Record<string, AuditOption[]>;
   platform: boolean;
 }) {
   const { props } = useApiPage<SessionProps>();
@@ -90,21 +100,40 @@ export default function Audit({
                 ['entity', 'Tipo', 'entities'],
                 ['event', 'Ação', 'events'],
                 ['actor', 'Autor', 'actors'],
-                ...(platform ? [['account', 'Conta', 'accounts']] : []),
-              ].map(([key, label, source]) => (
-                <SelectControl
-                  key={key}
-                  id={'audit-' + key}
-                  label={label}
-                  value={filters[key] ?? ''}
-                  searchable
-                  options={[
-                    { value: '', label: 'Todos: ' + label },
-                    ...options[source],
-                  ]}
-                  onChange={(v) => apply({ [key]: v })}
-                />
-              ))}
+                ['origin', 'Origem', 'origins'],
+                ...(platform
+                  ? [['account', 'Conta', 'accounts']]
+                  : [
+                      ['level', 'Nível', 'levels'],
+                      ['company', 'Empresa', 'companies'],
+                      ['establishment', 'Estabelecimento', 'establishments'],
+                    ]),
+              ].map(([key, label, source]) => {
+                // Com uma empresa escolhida, só as unidades dela; sem alternativa, o filtro fica oculto.
+                const choices = (options[source] ?? []).filter(
+                  (option) =>
+                    key !== 'establishment' ||
+                    !filters.company ||
+                    option.company === filters.company,
+                );
+                const organizational = ['level', 'company', 'establishment'].includes(key);
+                if (organizational && choices.length < 2 && !filters[key]) return null;
+                return (
+                  <SelectControl
+                    key={key}
+                    id={'audit-' + key}
+                    label={label}
+                    value={filters[key] ?? ''}
+                    searchable
+                    options={[{ value: '', label: 'Todos: ' + label }, ...choices]}
+                    onChange={(v) =>
+                      apply(
+                        key === 'company' ? { company: v, establishment: '' } : { [key]: v },
+                      )
+                    }
+                  />
+                );
+              })}
               <DatePicker id="audit-from" label="Data inicial" placeholder="Data inicial" max={filters.until}
                 value={filters.from ?? ''}
                 onChange={(v) => apply({ from: v, ...(v && filters.until && filters.until < v ? { until: '' } : {}) })} />
@@ -158,10 +187,35 @@ export default function Audit({
               render: (r) => r.type,
             },
             {
+              id: 'place',
+              label: 'Onde',
+              width: 200,
+              render: (r) => {
+                const place = auditPlace(r);
+                return (
+                  <span className="audit-list__stack" title={[place.main, place.detail].filter(Boolean).join(', ')}>
+                    <span>{place.main}</span>
+                    {place.detail && <small>{place.detail}</small>}
+                  </span>
+                );
+              },
+            },
+            {
               id: 'actor',
               label: 'Quem fez',
-              width: 210,
-              render: (r) => r.actor,
+              width: 220,
+              render: (r) =>
+                r.context === 'platform-account' ? (
+                  <span className="audit-list__stack" title={r.actor}>
+                    <span>{r.actor}</span>
+                    <small>
+                      <Label variant="purple">Inspeção</Label>
+                      {r.represented ? 'Representando ' + r.represented : 'Representado não registrado'}
+                    </small>
+                  </span>
+                ) : (
+                  r.actor
+                ),
             },
             {
               id: 'date',

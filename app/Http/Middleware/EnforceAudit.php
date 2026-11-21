@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +23,23 @@ final class EnforceAudit
             }
 
             return AuditLog::transaction(function () use ($request, $next) {
+                $inspection = $request->routeIs('logout') && $request->hasSession()
+                    ? AccountInspectionSession::current($request->session())
+                    : null;
+
+                if ($inspection !== null) {
+                    $accountName = Client::whereKey($inspection->accountId)->value('name');
+
+                    AuditLog::record(
+                        'account',
+                        $inspection->accountId,
+                        $inspection->accountId,
+                        'inspection-ended',
+                        $accountName ?? 'Conta #'.$inspection->accountId,
+                        ['ending' => ['label' => 'Encerramento', 'before' => null, 'after' => 'Saída da sessão']],
+                    );
+                }
+
                 $response = $next($request);
 
                 // Respostas de erro desfazem a transação e o histórico gravado nela.

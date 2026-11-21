@@ -54,6 +54,10 @@ export function auditDetailTourSteps(technical: boolean): TourStep[] {
       'Resumo da operação',
       'O título resume o registro. Os marcadores identificam a ação e o tipo; ao lado aparece a data da operação.',
     ),
+    make('audit-modal-context', 'Autoria e organização', [
+      'Operação resume o registro. Autoria mostra quem fez e a origem: conta, plataforma, inspeção ou sistema.',
+      'Em uma inspeção, Quem fez é o administrador da plataforma e Usuário representado é a pessoa cujo acesso foi usado. Contexto organizacional indica a conta, a empresa e o estabelecimento afetados; Não se aplica aparece quando o evento é da conta.',
+    ]),
     make('audit-modal-content', 'Campos registrados', [
       'Nas alterações, compare Antes e Depois. Em cadastros, confira Valor registrado; em exclusões, Valor ao excluir.',
       'Nas listas, o sinal de mais indica os itens adicionados e o de menos, os removidos.',

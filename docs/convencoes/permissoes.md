@@ -110,13 +110,13 @@ Na primeira checagem para um usuário da conta, o resolvedor carrega as atribui�
 
 ## Auditoria
 
-Cargos e atribuições são auditados apenas em `audit_records`: o cargo pelo próprio Model, as permissões do cargo por `recordAuditFieldChange('permission_ids', ...)` e os cargos do vínculo pela criação ou remoção de `role_assignments`. Alterações sem mudanças não geram evento. `access_catalog_events` registra sincronizações globais e a retirada das antigas permissões de manutenção do catálogo, com autoria de sistema, escopo plataforma e contas afetadas. Ela é consolidada em `audit_records` na E08. Atribuições gravam a empresa e o estabelecimento do escopo ([Auditoria](auditoria.md)).
+Cargos, restrições de disponibilidade, atribuições e sincronizações do catálogo usam `audit_records`. O Model registra o próprio cargo, e `recordAuditFieldChange('permission_ids', ...)` registra as permissões. A inclusão ou remoção de uma restrição de disponibilidade grava o nó da empresa ou do estabelecimento, conforme E08-D4. Cada concessão ou retirada de uma atribuição grava o nó correspondente. Uma operação sobre vários nós conserva o mesmo `operation_id`, com um evento por recurso e nó afetado. Alterações sem mudanças não geram evento. Veja [Auditoria](auditoria.md).
 
 ## Verificação
 
 Cubra descoberta e idempotência, seleção por ação no cargo, inexistência de endpoints de manutenção de permissões, isolamento de conta, rejeição de permissões SaaS, escalada de privilégios, troca de cargo, último administrador, auditoria e inspeção somente leitura. A partir da E05, cubra também alvos admitidos, herança, atribuições em vários escopos, administração local legítima e negada, revogação e atribuição de cargo indisponível. Confira cadastro, edição e visualização de Cargos no desktop e mobile.
 
-O modal compartilha `PreviewSection` com Contas. A regra de não usar travessão nos textos da aplicação está no AGENTS.md. Ajuda e tour de Cargos estão versionados; a integração da Central de Ajuda, do executor dos tours e da consulta central de auditoria permanece pendente.
+O modal compartilha `PreviewSection` com Contas. A regra de não usar travessão nos textos da aplicação está no AGENTS.md. Ajuda e tour de Cargos estão versionados. A consulta central de auditoria aplica o escopo do nó afetado.
 
 ## Validação da retirada da tela de permissões
 

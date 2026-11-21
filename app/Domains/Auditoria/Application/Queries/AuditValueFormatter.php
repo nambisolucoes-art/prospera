@@ -3,8 +3,6 @@
 namespace App\Domains\Auditoria\Application\Queries;
 
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
-use App\Domains\Organizacao\Domain\Models\Company;
-use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 
 final class AuditValueFormatter
 {
@@ -46,21 +44,9 @@ final class AuditValueFormatter
             return is_array($value) ? array_map($format, $value) : $format($value);
         }
 
-        if ($entity === 'account' && $field === 'mode' && is_string($value)) {
-            return AccountInspectionMode::tryFrom($value)?->label() ?? $value;
-        }
+        // Rótulos das opções declarados por tipo e campo em config/audit.php, sem consultar os domínios.
+        $labels = config('audit.values.'.$entity.'.'.$field, []);
 
-        $labels = match ($entity.'.'.$field) {
-            'tag.module' => ['people' => 'Pessoas'],
-            'account.person_type', 'person.person_type', 'supplier.person_type', 'company.person_type' => [
-                'company' => 'Pessoa jurídica',
-                'individual' => 'Pessoa física',
-            ],
-            'tag.system_key' => ['user' => 'Usuário', 'supplier' => 'Fornecedor', 'customer' => 'Cliente'],
-            'role.system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário'],
-            'company.tax_regime' => Company::TAX_REGIMES,
-            default => [],
-        };
         if (is_string($value) && isset($labels[$value])) {
             return $labels[$value];
         }

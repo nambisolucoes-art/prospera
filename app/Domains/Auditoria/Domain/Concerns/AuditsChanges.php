@@ -44,6 +44,17 @@ trait AuditsChanges
     }
 
     /**
+     * O model que audita relacionamentos (etiquetas, permissões, cargo) sobrescreve e nomeia os próprios itens.
+     *
+     * @param  list<int>  $ids
+     * @return list<string>|null
+     */
+    public function auditRelationNames(string $field, array $ids): ?array
+    {
+        return null;
+    }
+
+    /**
      * Registra a mudança de um relacionamento, que não dispara os eventos do Eloquent.
      *
      * @param  array<int,mixed>  $before

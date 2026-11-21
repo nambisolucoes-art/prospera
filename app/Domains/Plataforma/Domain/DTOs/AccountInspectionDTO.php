@@ -12,5 +12,6 @@ final readonly class AccountInspectionDTO
         public int $userId,
         public AccountInspectionMode $mode,
         public ?int $membershipId = null,
+        public ?string $id = null,
     ) {}
 }

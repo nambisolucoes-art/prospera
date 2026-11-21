@@ -136,3 +136,13 @@
     overflow-wrap: anywhere;
   }
 }
+
+/* Rótulos longos da ficha (Estabelecimento, Usuário representado) quebram entre palavras no mobile. */
+@media (max-width: 480px) {
+  .audit-record .account-preview__section dl {
+    grid-template-columns: minmax(min-content, 40%) minmax(0, 1fr);
+  }
+  .audit-record .account-preview__section dt {
+    overflow-wrap: normal;
+  }
+}

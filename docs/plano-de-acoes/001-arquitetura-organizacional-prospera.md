@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 a E07 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 a E10 pendentes |
+| Situação do documento | Aprovado. E01 a E07 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 em validação formal. E09 e E10 pendentes |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
 | Revisão | 6 (20/11/2026): encerramento da E02. Revisão 5 (20/11/2026): execução da E02. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
@@ -724,7 +724,8 @@ A política separa as operações abaixo:
 | Estabelecimento criado, alterado, promovido ou inativado | a empresa | a unidade | E04 |
 | Provisionamento da unidade principal | a empresa (os dois eventos) | nulo no evento da empresa; a unidade no evento da unidade | E04 |
 | Atribuição criada ou removida | empresa do escopo, quando houver | unidade do escopo, quando houver | E05 |
-| Cargo e disponibilidade | nulo (tenant) | nulo | E05 |
+| Cargo e abrangência geral | nulo (tenant) | nulo | E05 |
+| Inclusão ou remoção de disponibilidade restrita | empresa do nó | unidade do nó, quando houver | E05, consolidada na E08-D4 |
 | Vínculo, identidade e acesso | nulo (tenant) | nulo | E05 |
 | Relação comercial (cliente ou fornecedor) | a empresa | nulo | E07 |
 | Cadastro base de pessoa e etiquetas | nulo (tenant) | nulo | atual |
@@ -770,7 +771,7 @@ or (company_id is null and T)
 
 Isso é a regra de alvo da 8.2 aplicada em SQL: o nó do evento precisa estar coberto por uma atribuição com a permissão.
 - Ter acesso a unidades não concede auditoria: `account.audit.list` é sempre exigida.
-- Eventos de cadastros compartilhados (pessoas, etiquetas) e administrativos (cargos, usuários, conta) são de nó tenant e só aparecem com T.
+- Eventos de cadastros compartilhados (pessoas, etiquetas) e administrativos da conta são de nó tenant e só aparecem com T. Restrições de disponibilidade e atribuições seguem o nó descrito na 11.1.
 - O detalhe (`account.audit.view`) e os dados técnicos (`account.audit.technical`) seguem a mesma regra sobre o nó do evento, avaliada para cada uma dessas permissões.
 
 ### 11.3 O que usa a mesma condição
@@ -784,15 +785,17 @@ Isso é a regra de alvo da 8.2 aplicada em SQL: o nó do evento precisa estar co
 
 ### 11.4 Consolidação da trilha legada
 
-1. ~~Substituir as 5 chamadas de `DirectoryAudit::record`~~: concluído em 20/11/2026 (commit `a661b8d`). A classe foi removida e o histórico central é a única trilha; os mesmos fatos são registrados por `AuditsChanges` e `recordAuditFieldChange()`.
-2. Migrar as linhas de `directory_audit_events` posteriores à migration `2026_11_18_000004` para `audit_records`, com `legacy_key`, o mesmo mecanismo já usado.
-3. Remover, numa migration posterior e reversível, a tabela `directory_audit_events`, com exportação prévia e aprovação (apaga o histórico guardado nela).
+As chamadas de `DirectoryAudit::record` foram substituídas em `a661b8d`. A E08 centralizou também a sincronização do catálogo. O código de execução passou a usar exclusivamente `audit_records`.
 
-Além disso, `access_catalog_events` continua recebendo a sincronização do catálogo em paralelo com `audit_records`. Ela será tratada da mesma forma.
+A migration `2026_11_21_000003` importa registros sem chave legada e sem correspondência temporal no histórico central, preservando somente campos permitidos. A correspondência usa conta, tipo e registro, ou sincronização do catálogo, em uma janela de cinco segundos. É uma conciliação heurística. A ausência de duplicatas foi demonstrada para as amostras do harness, e não prova equivalência de todos os dados de origem. Valores descartados por privacidade, nomes históricos indisponíveis e metadados sem mapeamento não são reconstruídos.
+
+A migration `2026_11_21_000006` remove as duas tabelas antigas do esquema ativo, conforme autorização para o ambiente em desenvolvimento. A implantação em banco com dados a preservar exige cópia verificada e exportação das tabelas antes da remoção. O rollback recria o esquema vazio e a restauração dos dados depende dessa exportação.
 
 ### 11.5 Auditoria da plataforma (A12)
 
 Recomendação: `/saas/auditoria` mostra os eventos de contexto `platform` e os eventos administrativos das contas (provisionamento, situação, inspeções). Os eventos de negócio do tenant passam a ser visíveis apenas durante uma inspeção, que já é registrada (PD-02).
+
+**Lista fechada na E08.** A plataforma vê eventos com `account_id` nulo (catálogo, identidade dos administradores SaaS), eventos do tipo Conta (cadastro, situação, plano, dados da conta, inspeção iniciada e encerrada) e eventos de origem `platform` (provisionamento feito pela plataforma). As escritas feitas durante uma inspeção são eventos de negócio da conta e não aparecem em `/saas/auditoria`.
 
 ### 11.6 Índices
 
@@ -2113,7 +2116,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E05 | Concluída | 20/11/2026 | 20/11/2026 | Registro, auditoria, revisão, verificação da inspeção e homologação final da E05 na seção 26 | Implantação pendente de provedor de e-mail, backup, migrations e reinício controlado dos workers; `users.account_id` preservada até a E09 |
 | E06 | Concluída (homologada) | 20/11/2026 | | Registro de execução na seção 26 e homologação confirmada na autorização da E07 | Pendências de implantação e de módulos operacionais preservadas |
 | E07 | Concluída | 21/11/2026 | 21/11/2026 | Auditoria final na subseção E07 e homologação nesta seção | Privacidade da descoberta corrigida e verificada; tema disponível aprovado |
-| E08 | Pendente | | | | |
+| E08 | Em validação | 21/11/2026 | | Revisão técnica de encerramento na seção 26 | Remoção autorizada e ensaiada. Aguarda homologação formal |
 | E09 | Pendente | | | | |
 | E10 | Pendente | | | | |
 
@@ -2681,6 +2684,275 @@ Chrome headless contra o ambiente descartável (`STACK_PREFIX=prospera-e06-visua
 
 </details>
 
+### Registro de execução da E08 em 21/11/2026
+
+**Checkpoint.** Branch `feat/filtros-calendario-titulos`, HEAD `e0d3cce` (E07 publicada e permite editar clientes e fornecedores), árvore limpa no início. A E07 estava integralmente versionada em `41628d1` e `e0d3cce`, posteriores ao `34ed162` do último relatório. Esse HEAD é o checkpoint anterior à E08. Linha de base da suíte nesse ponto: 225 testes e 2.526 asserções. Sem commits, push nem alteração de bases oficiais.
+
+#### E08.1 Diagnóstico
+
+- **Infraestrutura existente, preservada.** `audit_records` com autor, conta, origem (`context`), representado, tipo, id e nome do registro, evento, alterações em JSON, `operation_id`, `membership_id`, `company_id` e `establishment_id` (E04 e E05). `Auditable`, `AuditsChanges` e `AuditObserver` gravam criação, alteração e exclusão de 12 models, com antes e depois só dos campos alterados, máscara de segredos e descarte de alterações vazias. `AuditLog::transaction()` agrupa a operação; `AuditLog::record()` grava eventos sem model; `recordAuditFieldChange()` registra relacionamentos. `AuditContext` (`scoped`) é aberto por `EnforceAudit`, que roda cada escrita numa transação e desfaz o histórico em respostas 4xx e 5xx. Consulta por `AuditQuery`, `AuditController`, `AuditFilterData` e `AuditValueFormatter`, com a condição da 11.2 aplicada no SQL desde a E05. Interface `audit.tsx` e `AuditRecordDetails.tsx`, tour e ajuda. `audit:check` cobre models, colunas e ids organizacionais.
+- **Caminhos que produzem eventos.** Observer dos models; `recordAuditFieldChange()` (etiquetas de Pessoas e das relações, permissões dos cargos); `AuditLog::record()` direto em inspeção (início e fim), envio de link de acesso, chaves de acesso (`EnforceAudit`), entrada e saída (`AppServiceProvider`) e sincronização do catálogo.
+- **Lacunas encontradas.**
+  1. PD-02 não aplicada: `/saas/auditoria` lia o histórico de negócio de todas as contas (A12).
+  2. `access_catalog_events` ainda recebia gravações em paralelo, e as linhas legadas posteriores à importação original não estavam conciliadas.
+  3. Sem integridade organizacional no banco: empresa e unidade sem FK, e evento de unidade sem empresa possível.
+  4. Inspeção sem identificação histórica: só o id do representado, sem nome da época, sem referência da inspeção e sem modo por evento.
+  5. Encerramento automático da inspeção (autoridade revogada) sem evento.
+  6. Filtro de período com `whereDate`, que converte cada linha e impede o uso do índice.
+  7. Opções de filtro com três varreduras completas do escopo por requisição; índices `(actor_id, created_at)` e `(entity_type, event)` sem a conta; nenhum índice para auditores de empresa e de unidade.
+  8. `Schema::hasTable()` consultado a cada evento gravado fora do console.
+  9. Histórico alterável pelo próprio Model fora da operação que o gravou.
+  10. Falha de gravação da auditoria levava ao log o SQL com os valores alterados.
+  11. Interface sem empresa, unidade, nome do representado e origem legível; conta exibida como `#id`; sem filtros organizacionais.
+- **Sem duplicidade encontrada** nos eventos de uma mesma operação: o agrupamento por `operation_id` e o descarte de alterações vazias já funcionavam.
+
+#### E08.2 Contrato e integridade
+
+- **Migration `2026_11_21_000003_consolidate_contextual_audit` (RP).**
+  - Recusa aplicar se houver evento com unidade sem empresa, empresa sem conta, conta inexistente, empresa de outra conta ou unidade de outra empresa. Não corrige o histórico por suposição.
+  - Acrescenta `represented_user_name` e `inspection_id`, nulos no histórico anterior.
+  - FKs `restrict`, sem cascata: `account_id` para `clients`; `(company_id, account_id)` para `companies`; `(establishment_id, company_id, account_id)` para `establishments`, com o índice único `(id, company_id, account_id)` em `establishments`. No PostgreSQL, CHECKs fecham os casos que a FK composta não verifica quando uma coluna é nula: unidade exige empresa e empresa exige conta.
+  - Importa as linhas legadas sem evento central equivalente.
+  - A reversão remove as colunas novas, as constraints e as linhas importadas por ela, preservando o restante.
+- **`AuditLog::record`.** Valida o nó do evento (unidade exige empresa, empresa exige conta), grava o nome do representado e a inspeção a partir do `AuditContext` e só consulta o esquema no console. Uma falha de gravação vira `AuditWriteFailed`, com tipo, operação e SQLSTATE, sem SQL nem valores, e desfaz a operação de negócio.
+- **Inspeção.** `AccountInspectionDTO` e a sessão ganham `id` (UUID gerado no início). Início, escritas e encerramento gravam o mesmo `inspection_id`. O encerramento registra o motivo: Solicitado pelo administrador ou Automático, quando `EnforceAccountInspection` encerra a sessão por perda de autoridade. O autor real continua sendo o administrador SaaS. O mecanismo de inspeção não foi redesenhado.
+- **Imutabilidade.** `AuditRecord` recusa alteração e exclusão fora da operação que gravou o evento. Não existe rota, Action, permissão ou comando de edição ou exclusão de eventos (verificado em teste sobre o roteamento).
+- **Legado.** `SyncPermissionsAction` deixou de gravar em `access_catalog_events`. `directory_audit_events` e `access_catalog_events` permanecem no banco até aprovação da remoção (11.4).
+
+#### E08.3 Cobertura dos domínios
+
+| Operação | Evento | Nó gravado | Autor | Dados registrados | Consulta | Cobertura automatizada |
+| --- | --- | --- | --- | --- | --- | --- |
+| Cadastro, situação e plano da conta (plataforma) | `account` criado ou alterado | conta | administrador SaaS (`platform`) | nome, e-mail, tipo, documento mascarado, plano, situação, contatos e endereço | conta (T) e plataforma | `SaasPlatformTest`, `ContextualAuditTest` |
+| Dados da conta (tenant) | `account` alterado | conta | operador | mesmos campos | conta (T) e plataforma | `OrganizationTest` |
+| Empresa: cadastro, edição, ativação, inativação | `company` | empresa | operador ou sistema | identificação fiscal, regime, situação | T ou empresa | `ContextualAuditTest`, `OrganizationTest` |
+| Estabelecimento: cadastro, edição, situação, promoção | `establishment` | empresa e unidade | operador ou sistema | dados da unidade, CNPJ, situação, principal | T, empresa ou unidade | `ContextualAuditTest`, `OrganizationTest` |
+| Pessoa: cadastro, identificação, contatos, endereço, etiquetas | `person` | conta | operador | campos alterados; documento mascarado; etiquetas por nome | T | `ContextualAuditTest`, `PeopleDirectoryTest`, `PersonAdditionalContactsTest` |
+| Etiqueta: cadastro, edição, situação, exclusão | `tag` | conta | operador | nome, cor, módulo, situação | T | `PeopleDirectoryTest`, `ContextualAuditTest` |
+| Cliente e fornecedor: vínculo, Pessoa existente, edição, etiquetas, inativação, reativação | `customer`, `supplier` | empresa | operador | situação e etiquetas da relação | T ou empresa | `ContextualAuditTest`, `CustomerDirectoryTest`, `SupplierDirectoryTest`, `CommercialRelation*Test` |
+| Cargo e permissões | `role` (`permission_ids`) | conta | operador ou sistema | nome, permissões por nome | T | `AccessControlTest`, `ContextualAuditTest` |
+| Disponibilidade restrita do cargo | `role-availability` | empresa e, quando houver, unidade da restrição | operador | cargo, empresa, unidade | T ou o nó restrito | `ContextualAuditTest`, `ContextualAccessTest` |
+| Atribuição concedida ou retirada | `role-assignment` | nó do escopo | operador | cargo, escopo | T ou o nó | `ContextualAuditTest`, `ContextualAccessTest` |
+| Vínculo: criação, suspensão, reativação | `account-membership` | conta | operador | situação, pessoa | T | `ContextualAccessTest` |
+| Envio de link de redefinição e de convite | `password-reset-requested`, `invitation-requested` | conta | operador | nenhum valor (sem token) | T | `ContextualAuditTest`, `ContextualAccessTest` |
+| Identidade: nome, e-mail, senha, segundo fator, foto, acesso, chaves | `user` | conta do vínculo ou nulo | a própria pessoa ou a plataforma | segredos como Configurado ou Atualizado | T ou plataforma | `AuditAndGuidanceTest` |
+| Entrada e saída | `login`, `logout` | conta do vínculo ou nulo | a própria pessoa | nenhum valor | T ou plataforma | `AuditAndGuidanceTest` |
+| Inspeção iniciada e encerrada (manual ou automática) | `inspection-started`, `inspection-ended` | conta | administrador SaaS, com representado | modo, representado, motivo do encerramento | T e plataforma | `ContextualAuditTest`, `AuditAndGuidanceTest` |
+| Escrita durante inspeção | evento do recurso | nó do recurso | administrador SaaS, com representado e `inspection_id` | campos do recurso | conforme o nó; não aparece na plataforma | `ContextualAuditTest`, harness FrankenPHP |
+| Sincronização do catálogo | `catalog-synchronized` e cargos padrão | nulo e conta | sistema | permissões alteradas | plataforma; cargos em T | `AccessControlTest`, `ContextualAuditTest` |
+
+- **Fora da auditoria de alteração:** leituras, buscas, descoberta de Pessoa por documento, navegação, abertura de modal, preferências de colunas e tentativas negadas. Não há política aprovada de eventos de segurança para negações.
+- **Disponibilidade restrita.** A tabela da 11.1 classificava a disponibilidade como evento da conta. Desde a E05, a linha de `role_availability` carrega a empresa e a unidade da restrição, e o `audit:check` exige que o evento as informe. A E08 mantém esse nó e registra a decisão abaixo para homologação.
+
+#### E08.4 Autorização
+
+- A condição da 11.2 continua no SQL (`AuditQuery::scoped`) e alimenta listagem, contagem, paginação, busca, opções e detalhe. O detalhe aplica também `account.audit.view` e responde 404 fora do escopo; os dados técnicos exigem `account.audit.technical` sobre o nó.
+- Novos filtros (`company`, `establishment`, `level`, `origin`) só restringem o conjunto autorizado. As opções de empresa e unidade vêm dos nós autorizados, numa consulta. O nível Conta só é oferecido a quem tem escopo tenant. A unidade da Área de Trabalho não altera a auditoria.
+- PD-02 aplicada em `/saas/auditoria`, com filtros organizacionais proibidos na plataforma.
+- Sem bypass: o administrador SaaS lê eventos de negócio de uma conta apenas pela auditoria da conta, durante uma inspeção autorizada e com a autoridade do representado.
+
+#### E08.5 Privacidade
+
+- Segredos, tokens e imagens continuam mascarados no observer. A descoberta por documento segue por POST sem evento. O envio de link grava só o fato, sem token nem e-mail. Os dados técnicos têm apenas identificadores.
+- E-mail, telefone e endereço de Pessoas aparecem como valores para quem audita o nó da conta. Quem audita uma empresa vê a relação comercial, não o cadastro central (limitação aceita na 11.1).
+- O log da inspeção leva só identificadores (agora com a referência da inspeção). A falha de gravação não leva SQL nem valores ao log nem à resposta (teste com `Log::spy`).
+
+#### E08.6 Interface
+
+- `audit.tsx`: filtros Origem, Nível, Empresa e Estabelecimento com o `SelectControl` existente, ocultos quando não há mais de uma opção. Escolher uma empresa limita as unidades oferecidas. A nova coluna Onde (`resources/js/utils/auditPlace.ts`) mostra a unidade com a empresa, a empresa ou a conta. Quem fez mostra a marca roxa Inspeção (`Label`) e o representado.
+- `AuditRecordDetails.tsx`: seções Operação, Autoria e Contexto organizacional com o `PreviewSection` existente. Autor real e Usuário representado aparecem separados, com Modo da inspeção. Não se aplica indica evento da conta, e Não registrado neste evento indica histórico anterior sem o dado. Tabela de campos e Log técnico preservados.
+- Tour: novo passo `audit-modal-context` na sessão de demonstração do modal; textos de filtros e tabela revisados. Ajuda `docs/ajuda/auditoria.md` e roteiro `docs/tours/auditoria.md` atualizados.
+- Ajustes visuais: a marca Inspeção fica na segunda linha, para não ser cortada pela reticência. No mobile, os rótulos longos da ficha quebram entre palavras, com coluna limitada a 40%, só no escopo da auditoria.
+
+#### E08.7 Performance
+
+PostgreSQL 18.7 e FrankenPHP 1.14.0 descartáveis, um worker. Eventos sintéticos: 40% de conta, 30% de empresa e 30% de unidade, 2% em inspeção, 200 autores, dois anos de histórico. A conta Cenário 50 (5 empresas, 50 unidades) concentra 68% dos eventos. O mesmo harness (`tests/Performance/e08-check.sh`) mediu o HEAD `e0d3cce` (antes) e a árvore da E08 (depois). Cada caso tem 10 amostras após aquecimento; tempos em milissegundos. As contagens de cada perfil foram conferidas contra a condição normativa calculada fora da aplicação.
+
+| Volume | Perfil | Caso | Eventos visíveis | HTTP mediana antes | HTTP mediana depois | p95 depois | Banco depois | Consultas antes / depois |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 10000 | integral | lista | 6890 | 20,7 | 18,7 | 20,5 | 8,1 | 13 / 15 |
+| 10000 | integral | detalhe | 6890 | 5,3 | 5,2 | 7,8 | 2,1 | 7 / 8/9 |
+| 10000 | empresa | lista | 839 | 19,8 | 16,0 | 17,4 | 6,0 | 13/14 / 15 |
+| 10000 | empresa | detalhe | 839 | 5,8 | 5,3 | 7,6 | 2,2 | 7 / 9 |
+| 10000 | estabelecimento | lista | 56 | 17,2 | 11,5 | 14,9 | 3,7 | 12 / 14 |
+| 10000 | estabelecimento | detalhe | 56 | 5,2 | 5,9 | 8,2 | 2,4 | 7 / 10 |
+| 10000 | atribuicoes-1 | lista | 31 | 15,8 | 11,5 | 14,8 | 3,7 | 12 / 14 |
+| 10000 | atribuicoes-5 | lista | 206 | 19,7 | 14,3 | 17,2 | 5,0 | 13 / 15 |
+| 10000 | atribuicoes-30 | lista | 1282 | 19,4 | 15,9 | 19,6 | 5,7 | 13/14 / 15/16 |
+| 100000 | integral | lista | 67707 | 80,2 | 25,5 | 31,1 | 16,2 | 13 / 15 |
+| 100000 | integral | busca | 67707 | 156,8 | 93,8 | 98,1 | 82,9 | 13 / 15 |
+| 100000 | integral | periodo | 67707 | 89,9 | 18,5 | 20,5 | 8,5 | 13/14 / 15 |
+| 100000 | integral | autor | 67707 | 72,1 | 17,4 | 19,8 | 7,2 | 13 / 15 |
+| 100000 | integral | pagina-profunda | 67707 | 84,4 | 29,6 | 32,9 | 18,6 | 13 / 15 |
+| 100000 | integral | empresa | 67707 | novo | 18,9 | 20,7 | 8,7 | novo / 15 |
+| 100000 | integral | estabelecimento | 67707 | novo | 16,8 | 19,1 | 7,2 | novo / 15 |
+| 100000 | integral | detalhe | 67707 | 5,7 | 5,4 | 7,2 | 2,2 | 7/8 / 8/9 |
+| 100000 | empresa | lista | 8134 | 89,0 | 20,3 | 22,8 | 9,8 | 13 / 15 |
+| 100000 | empresa | busca | 8134 | 114,1 | 34,5 | 36,0 | 22,9 | 13/14 / 15 |
+| 100000 | empresa | periodo | 8134 | 105,7 | 19,4 | 23,3 | 8,5 | 13 / 15 |
+| 100000 | empresa | autor | 8134 | 75,8 | 21,4 | 23,0 | 10,0 | 13/14 / 15 |
+| 100000 | empresa | pagina-profunda | 8134 | 105,1 | 22,5 | 24,9 | 14,8 | 13 / 13 |
+| 100000 | empresa | empresa | 8134 | novo | 16,0 | 17,0 | 8,3 | novo / 12 |
+| 100000 | empresa | estabelecimento | 8134 | novo | 16,2 | 17,8 | 8,4 | novo / 12 |
+| 100000 | empresa | detalhe | 8134 | 5,7 | 6,0 | 8,1 | 2,4 | 7 / 9/10 |
+| 100000 | estabelecimento | lista | 542 | 80,8 | 13,2 | 16,9 | 4,9 | 12 / 14 |
+| 100000 | estabelecimento | busca | 542 | 93,8 | 13,1 | 15,4 | 6,5 | 12 / 14 |
+| 100000 | estabelecimento | periodo | 542 | 94,0 | 14,1 | 18,3 | 5,1 | 12 / 14 |
+| 100000 | estabelecimento | autor | 542 | 62,9 | 11,9 | 13,3 | 4,8 | 12 / 14 |
+| 100000 | estabelecimento | pagina-profunda | 542 | 90,5 | 9,3 | 10,9 | 4,1 | 12 / 12 |
+| 100000 | estabelecimento | empresa | 542 | novo | 14,5 | 15,8 | 5,7 | novo / 14 |
+| 100000 | estabelecimento | estabelecimento | 542 | novo | 14,2 | 15,1 | 5,0 | novo / 14 |
+| 100000 | estabelecimento | detalhe | 542 | 5,5 | 5,5 | 6,4 | 2,3 | 7 / 10 |
+| 100000 | atribuicoes-1 | lista | 274 | 68,8 | 11,8 | 14,0 | 4,1 | 12/13 / 14/15 |
+| 100000 | atribuicoes-1 | busca | 274 | 76,0 | 10,1 | 11,9 | 5,0 | 12/13 / 14 |
+| 100000 | atribuicoes-1 | periodo | 274 | 78,4 | 11,2 | 12,3 | 4,2 | 12 / 14 |
+| 100000 | atribuicoes-1 | autor | 274 | 51,4 | 8,8 | 11,1 | 3,7 | 11 / 11 |
+| 100000 | atribuicoes-1 | pagina-profunda | 274 | 76,6 | 8,8 | 10,2 | 3,8 | 12 / 12 |
+| 100000 | atribuicoes-1 | empresa | 274 | novo | 8,5 | 9,1 | 3,8 | novo / 11 |
+| 100000 | atribuicoes-1 | estabelecimento | 274 | novo | 8,3 | 9,3 | 3,5 | novo / 11 |
+| 100000 | atribuicoes-5 | lista | 1908 | 73,8 | 16,9 | 20,2 | 7,7 | 13 / 15 |
+| 100000 | atribuicoes-5 | busca | 1908 | 202,6 | 19,2 | 23,7 | 10,2 | 13 / 15 |
+| 100000 | atribuicoes-5 | periodo | 1908 | 90,6 | 17,0 | 20,6 | 6,8 | 13 / 15/16 |
+| 100000 | atribuicoes-5 | autor | 1908 | 60,5 | 17,2 | 18,9 | 7,6 | 13 / 15 |
+| 100000 | atribuicoes-5 | pagina-profunda | 1908 | 83,5 | 12,8 | 15,0 | 6,8 | 13 / 13/14 |
+| 100000 | atribuicoes-5 | empresa | 1908 | novo | 12,9 | 15,2 | 6,9 | novo / 12 |
+| 100000 | atribuicoes-5 | estabelecimento | 1908 | novo | 11,9 | 12,9 | 6,3 | novo / 12 |
+| 100000 | atribuicoes-30 | lista | 12228 | 74,6 | 24,6 | 29,2 | 13,8 | 13 / 15 |
+| 100000 | atribuicoes-30 | busca | 12228 | 106,6 | 54,1 | 59,8 | 42,1 | 13 / 15/16 |
+| 100000 | atribuicoes-30 | periodo | 12228 | 87,8 | 25,7 | 28,4 | 13,2 | 13 / 15/16 |
+| 100000 | atribuicoes-30 | autor | 12228 | 63,1 | 24,2 | 26,0 | 12,8 | 13/14 / 15/16 |
+| 100000 | atribuicoes-30 | pagina-profunda | 12228 | 91,3 | 29,0 | 34,0 | 20,5 | 13 / 13/14 |
+| 100000 | atribuicoes-30 | empresa | 12228 | novo | 20,4 | 23,6 | 12,2 | novo / 12 |
+| 100000 | atribuicoes-30 | estabelecimento | 12228 | novo | 18,2 | 19,8 | 10,8 | novo / 12 |
+| 500000 | integral | lista | 337983 | 215,0 | 47,6 | 48,8 | 36,1 | 13 / 15/16 |
+| 500000 | integral | detalhe | 337983 | 5,9 | 5,7 | 8,9 | 2,2 | 7/8 / 8 |
+| 500000 | empresa | lista | 40567 | 200,2 | 51,4 | 55,7 | 39,1 | 13/14 / 15 |
+| 500000 | empresa | detalhe | 40567 | 6,5 | 5,6 | 7,2 | 2,1 | 7/8 / 9 |
+| 500000 | estabelecimento | lista | 2704 | 180,0 | 18,0 | 20,0 | 8,2 | 12 / 14 |
+| 500000 | estabelecimento | detalhe | 2704 | 5,8 | 6,0 | 8,2 | 2,4 | 7 / 10 |
+| 500000 | atribuicoes-1 | lista | 1355 | 194,8 | 14,8 | 16,8 | 5,8 | 12/13 / 14/15 |
+| 500000 | atribuicoes-5 | lista | 9475 | 177,9 | 31,5 | 35,2 | 20,7 | 13 / 15 |
+| 500000 | atribuicoes-30 | lista | 60876 | 206,2 | 74,3 | 77,9 | 62,6 | 13 / 15 |
+| 1000000 | integral | lista | 675827 | 383,8 | 59,4 | 65,8 | 49,6 | 13/14 / 15/16 |
+| 1000000 | integral | busca | 675827 | 598,4 | 249,8 | 386,2 | 238,8 | 13 / 15 |
+| 1000000 | integral | periodo | 675827 | 413,2 | 28,9 | 33,1 | 18,7 | 13 / 15 |
+| 1000000 | integral | autor | 675827 | 332,2 | 19,3 | 21,9 | 8,7 | 13 / 15 |
+| 1000000 | integral | pagina-profunda | 675827 | 366,1 | 69,2 | 71,5 | 58,4 | 13 / 15 |
+| 1000000 | integral | empresa | 675827 | novo | 34,1 | 36,8 | 22,9 | novo / 15 |
+| 1000000 | integral | estabelecimento | 675827 | novo | 19,0 | 21,4 | 8,9 | novo / 15/16 |
+| 1000000 | integral | detalhe | 675827 | 5,3 | 5,2 | 6,1 | 2,1 | 7 / 8 |
+| 1000000 | empresa | lista | 81107 | 338,4 | 77,8 | 87,3 | 66,9 | 13 / 15 |
+| 1000000 | empresa | busca | 81107 | 379,6 | 149,2 | 156,7 | 137,6 | 13 / 15 |
+| 1000000 | empresa | periodo | 81107 | 307,4 | 62,2 | 67,0 | 51,0 | 13 / 15 |
+| 1000000 | empresa | autor | 81107 | 248,6 | 62,8 | 65,8 | 51,9 | 13 / 15 |
+| 1000000 | empresa | pagina-profunda | 81107 | 335,1 | 73,5 | 78,8 | 63,6 | 13/14 / 15 |
+| 1000000 | empresa | empresa | 81107 | novo | 58,5 | 61,2 | 50,8 | novo / 12/13 |
+| 1000000 | empresa | estabelecimento | 81107 | novo | 58,6 | 62,9 | 51,5 | novo / 12 |
+| 1000000 | empresa | detalhe | 81107 | 5,1 | 5,2 | 6,3 | 2,1 | 7/8 / 9 |
+| 1000000 | estabelecimento | lista | 5407 | 242,0 | 17,6 | 19,5 | 9,9 | 12 / 14 |
+| 1000000 | estabelecimento | busca | 5407 | 294,8 | 25,9 | 28,6 | 17,2 | 12 / 14 |
+| 1000000 | estabelecimento | periodo | 5407 | 294,1 | 20,0 | 21,9 | 10,6 | 12 / 14 |
+| 1000000 | estabelecimento | autor | 5407 | 196,0 | 19,8 | 23,3 | 11,0 | 12 / 14 |
+| 1000000 | estabelecimento | pagina-profunda | 5407 | 288,0 | 20,4 | 22,5 | 14,9 | 12 / 12 |
+| 1000000 | estabelecimento | empresa | 5407 | novo | 22,7 | 25,2 | 13,4 | novo / 14 |
+| 1000000 | estabelecimento | estabelecimento | 5407 | novo | 25,6 | 48,5 | 13,4 | novo / 14 |
+| 1000000 | estabelecimento | detalhe | 5407 | 5,6 | 6,1 | 7,4 | 2,5 | 7/8 / 10 |
+| 1000000 | atribuicoes-1 | lista | 2707 | 237,7 | 15,0 | 16,6 | 7,2 | 12 / 14/15 |
+| 1000000 | atribuicoes-1 | busca | 2707 | 293,1 | 20,5 | 23,1 | 12,1 | 12 / 14 |
+| 1000000 | atribuicoes-1 | periodo | 2707 | 288,9 | 15,6 | 17,0 | 6,9 | 12 / 14 |
+| 1000000 | atribuicoes-1 | autor | 2707 | 192,8 | 12,0 | 14,1 | 6,7 | 11 / 11 |
+| 1000000 | atribuicoes-1 | pagina-profunda | 2707 | 299,6 | 12,6 | 14,0 | 7,1 | 12 / 12 |
+| 1000000 | atribuicoes-1 | empresa | 2707 | novo | 14,0 | 15,1 | 8,5 | novo / 11/12 |
+| 1000000 | atribuicoes-1 | estabelecimento | 2707 | novo | 9,6 | 11,7 | 5,4 | novo / 11/12 |
+| 1000000 | atribuicoes-5 | lista | 18936 | 264,6 | 41,2 | 47,9 | 32,2 | 13 / 15 |
+| 1000000 | atribuicoes-5 | busca | 18936 | 545,2 | 161,9 | 185,9 | 151,6 | 13 / 15 |
+| 1000000 | atribuicoes-5 | periodo | 18936 | 385,6 | 39,3 | 47,1 | 29,4 | 13 / 15/16 |
+| 1000000 | atribuicoes-5 | autor | 18936 | 244,0 | 43,5 | 49,1 | 32,5 | 13 / 15 |
+| 1000000 | atribuicoes-5 | pagina-profunda | 18936 | 393,8 | 50,5 | 62,8 | 41,1 | 13 / 15 |
+| 1000000 | atribuicoes-5 | empresa | 18936 | novo | 39,2 | 42,4 | 32,2 | novo / 12 |
+| 1000000 | atribuicoes-5 | estabelecimento | 18936 | novo | 31,8 | 39,8 | 26,5 | novo / 12 |
+| 1000000 | atribuicoes-30 | lista | 121688 | 307,6 | 108,3 | 115,0 | 96,8 | 13/14 / 15 |
+| 1000000 | atribuicoes-30 | busca | 121688 | 364,1 | 159,0 | 163,6 | 145,6 | 13 / 15 |
+| 1000000 | atribuicoes-30 | periodo | 121688 | 321,5 | 87,4 | 93,1 | 75,7 | 13 / 15 |
+| 1000000 | atribuicoes-30 | autor | 121688 | 245,0 | 91,2 | 98,3 | 79,9 | 13/14 / 15/16 |
+| 1000000 | atribuicoes-30 | pagina-profunda | 121688 | 348,7 | 138,0 | 146,1 | 125,8 | 13 / 15 |
+| 1000000 | atribuicoes-30 | empresa | 121688 | novo | 88,0 | 101,7 | 78,5 | novo / 12 |
+| 1000000 | atribuicoes-30 | estabelecimento | 121688 | novo | 78,6 | 92,2 | 70,6 | novo / 12 |
+
+- **Planos em 1 milhão (`EXPLAIN (ANALYZE, BUFFERS)`, `tests/Performance/e08-plans.sql`).** Página inicial da conta: 0,07 ms pelo índice `(account_id, created_at, id)`. Contagem da conta: 24,9 ms por index only scan paralelo (antes 42,7 ms). Empresa: página em 0,03 ms e contagem em 17,5 ms por `(company_id, created_at, id)` (antes 72,5 ms por varredura sequencial). 30 unidades: contagem em 26,5 ms por bitmap em `(establishment_id, created_at, id)` (antes 72,6 ms). Período: 3,3 ms com intervalo semiaberto, contra 42,3 ms com o cast anterior. Autor: 0,37 ms (antes 4,0 ms). Opções de autores por varredura solta: 3,3 ms (antes 191 ms). Tipos e ações: 0,35 ms (antes cerca de 82 ms cada). A busca textual continua em varredura sequencial (218,9 ms na conta inteira). Plataforma: 41 a 43 ms por varredura sequencial, por ter poucas linhas qualificadas.
+- **Índices.** Removidos `(actor_id, created_at)` e `(entity_type, event)`, que não começavam pela conta. Criados `(account_id, actor_id, created_at)`, `(account_id, entity_type, event)`, `(company_id, created_at, id)` e `(establishment_id, created_at, id)`, todos usados nos planos acima. Em 1 milhão, os índices de `audit_records` passaram de cerca de 148 MB para 260 MB. Sem índice para a busca textual: `pg_trgm` fica como evolução, a ser decidida com volume real.
+- **Escrita.** Cadastro de Pessoa com auditoria, sobre 1 milhão de eventos: de 17 ou 18 para 16 ou 17 consultas; mediana HTTP de 13,03 para 9,80 ms; banco de 4,75 para 3,80 ms. Em inserção em lote sobre 800 mil eventos, 200 mil linhas levaram 4.292 ms com os índices da E08 e 3.589 ms com os anteriores, cerca de 21,5 e 17,9 µs por linha (`e08-migrations.sh`, etapa 7).
+- **Paginação.** A paginação por deslocamento foi mantida: página 500 (deslocamento 9.980) custa 14 ms no banco em 1 milhão. Paginação por cursor fica como evolução se o uso real exigir páginas mais profundas.
+
+#### FrankenPHP, isolamento e carga
+
+- **Isolamento.** Com um worker identificado, 300 escritas alternaram quatro contas e uma sessão de inspeção com edição. Entre elas houve consultas a IDs inexistentes com 404. Cada evento foi conferido no banco: autor, nome do autor, conta, origem e ausência de empresa e unidade. Nas escritas da inspeção, também representado, nome do representado e `inspection_id`. A revogação do administrador durante a inspeção encerrou a sessão na requisição seguinte, com 401. Nenhum evento foi gravado em nome do representado, e o encerramento automático foi registrado. A escrita seguinte do titular não herdou representado nem inspeção. Memória PHP no início da requisição: 9.279.752 bytes na primeira e 9.346.184 na última.
+- **Carga prolongada.** Sobre 1 milhão de eventos, 8 lotes de 450 requisições sequenciais (3.600) alternaram o titular da Cenário 50, o auditor de empresa e o titular de outra conta. Os casos foram lista, página 50, período, busca, detalhe, autor, ação, ID inexistente e evento de outra conta. Todas as respostas tiveram o status esperado: 2.800 respostas 200 e 800 respostas 404, sempre no mesmo worker, sem reinício. A mediana HTTP ficou entre 13,2 e 13,5 ms, e o p95 entre 222 e 227 ms; antes da E08, eram 37,3 a 41,8 ms e 488 a 559 ms. O p95 vem da busca textual da conta inteira. A memória PHP no início da requisição ficou constante (9.344.912 bytes), com pico adicional de 363 KiB por requisição. A memória do contêiner variou de 201,0 a 203,6 MiB entre os lotes (antes, de 196,5 a 199,0 MiB), sem crescimento contínuo.
+- **Concorrência.** Uma segunda instância FrankenPHP com dois workers, só no contêiner descartável, recebeu dez alterações simultâneas da mesma Pessoa. As dez responderam 200 e geraram dez eventos com `operation_id` distintos. O antes de cada evento é o depois do anterior, e o último corresponde ao nome gravado. A trava de `SavePersonAction` e a transação de `EnforceAudit` mantêm o histórico coerente sob concorrência. A repetição com o código final também refez as 300 escritas de isolamento.
+
+#### Migrations em PostgreSQL
+
+`tests/Performance/e08-migrations.sh` partiu do HEAD `e0d3cce` com 155 eventos (94 com empresa) e duas linhas em `directory_audit_events`: uma com evento central equivalente e outra só no legado.
+
+- **Recusa.** Com uma linha de unidade sem empresa, a migration abortou com a mensagem de contexto incoerente e o esquema ficou intacto. Removida a linha de teste, a evolução foi aplicada.
+- **Evolução.** Contagem preservada mais uma linha importada (`e08:`), nenhuma duplicata e os 94 eventos com empresa mantidos. Criadas as FKs `account_id`, `(company_id, account_id)` e `(establishment_id, company_id, account_id)`, os CHECKs e os índices da E08.7. `audit:check` e `organization:check` aprovados.
+- **Proteções no banco.** Recusados: unidade sem empresa (`audit_records_establishment_requires_company`), empresa de outra conta (`audit_records_company_id_account_id_foreign`), empresa sem conta (`audit_records_company_requires_account`) e exclusão física de unidade com histórico (`audit_records_establishment_id_company_id_account_id_foreign`).
+- **Reversão e reaplicação.** `migrate:rollback --step=2` removeu a importação, as colunas, as constraints e os índices novos, preservou os demais eventos e restaurou os índices anteriores. A reaplicação repetiu as contagens.
+- **Instalação limpa** em PostgreSQL 18 aprovada, com `permissions:sync` e `audit:check`. Em SQLite, `migrate`, `migrate:rollback --step=2` e nova `migrate` passaram.
+- **Classificação.** `2026_11_21_000003` é RP: a reversão perde o nome do representado e a referência da inspeção gravados depois dela. `2026_11_21_000004` é R.
+
+#### E08.8 Documentação e testes
+
+- `docs/convencoes/auditoria.md` reescrita com o contrato para módulos: registro, recurso afetado, contexto, autoria, inspeção, alterações, dados protegidos, transação, imutabilidade, consulta, filtros, plataforma e testes. `docs/convencoes/checklist-modulos.md` ganhou os itens de auditoria da E08.
+- `tests/Feature/ContextualAuditTest.php` (14 testes): nós por tipo de evento; provisionamento pela plataforma, entrada, saída e disponibilidade restrita; Pessoa compartilhada sem duplicação; identificação histórica após renomear, suspender, inativar e remover; contexto incoerente; atualização sem mudança, reversão e falha obrigatória com log sanitizado; imutabilidade; inspeção somente leitura e com edição, encerramentos e requisição seguinte; matriz de visibilidade com integral, empresa, unidade, várias atribuições, sem permissão, suspensão e revogação, em lista, contagem, paginação, busca, opções e detalhe; filtros e Área de Trabalho; PD-02; privacidade; eventos antigos incompletos; consolidação legada.
+- Ajustados: `AuditAndGuidanceTest` (PD-02, previsto na decisão) e `OrganizationMigrationTest` (reversão na ordem do `migrate:rollback`). `tests/Frontend/auditPlace.test.ts` fixa a coluna Onde.
+- Cobertura já existente e preservada: sessão independente do representado e revogação (`AccountInspectionTest`, harness E05), bloqueio da preferência da Área de Trabalho em inspeção (`OrganizationContextTest`), duas abas (`CommercialRelationWorkspaceTest`). Na auditoria, os filtros ficam só na URL, por isso cada aba tem o próprio estado.
+
+#### Verificações
+
+- PHP completo em contêiner descartável, com SQLite em memória e e-mail em array: 239 testes e 2.832 asserções (linha de base: 225 e 2.526). `ContextualAuditTest`: 14 testes e 304 asserções.
+- `npm run test:frontend` com 16 testes, `npm run check` (arquitetura de 824 arquivos e tipos), `npm run build`, PHPStan sem erros e Pint em 280 arquivos.
+- `permissions:sync` descobriu 83 permissões, nenhuma nova (a E08 não cria ações). `audit:check` validou 12 modelos e `organization:check` passou, em SQLite e PostgreSQL.
+- Validação visual em Chromium headless no ambiente descartável `e04-stack.sh` com os dados da E06. Listagem e ficha de um evento de inspeção em 1440, 1024, 768, 390 e 320 px, sem rolagem horizontal. Também filtro por empresa com unidades restritas, tour completo de 17 passos com o novo passo e a ficha fechada ao final, auditor de empresa (1440 e 390 px, sem eventos da conta e com uma empresa no filtro), estado vazio e plataforma (1440 e 390 px, sem a escrita feita na inspeção). A validação levou a dois ajustes: a marca Inspeção passou para a segunda linha, e os rótulos da ficha quebram entre palavras no mobile.
+- `make test` no contêiner oficial não foi usado, para não herdar `MAIL_MAILER=smtp` nem tocar no ambiente oficial. As bases oficiais não foram migradas.
+
+#### Decisões para homologação
+
+- **E08-D1.** Lista fechada da PD-02 (11.5): eventos com conta nula, tipo Conta e origem `platform`.
+- **E08-D2.** Integridade organizacional por FKs compostas `restrict` e CHECKs, com recusa da migration diante de histórico incoerente.
+- **E08-D3.** Nome do representado e referência da inspeção gravados no evento; empresa e unidade exibidas com o nome atual.
+- **E08-D4.** Disponibilidade restrita de cargo como evento do nó restrito, mantendo o comportamento da E05 em vez da classificação da tabela 11.1.
+- **E08-D5.** Índices da E08.7 e varredura solta das opções no escopo da conta.
+- **E08-D6.** Importação legada só das linhas sem equivalente central; tabelas legadas mantidas até aprovação.
+
+#### Riscos, limitações e pendências
+
+- Medições sequenciais com um worker em dados sintéticos. A concorrência cobriu dez escritas simultâneas na mesma Pessoa. Carga simultânea sustentada e volumes de produção não foram medidos.
+- A busca textual da conta inteira passa de 200 ms a partir de 1 milhão de eventos. As contagens dos auditores com dezenas de unidades crescem com o volume visível (cerca de 100 ms com 121 mil eventos). Evoluções possíveis com volume real: `pg_trgm`, paginação por cursor e contagem estimada.
+- Na primeira execução, a remoção de `directory_audit_events` e `access_catalog_events` ainda aguardava aprovação. O tratamento final está na revisão de encerramento.
+- Eventos de segurança para tentativas negadas, retenção, assinatura e arquivamento do histórico não foram implementados (fora do escopo e sem política aprovada).
+- A implantação exige backup, conferência do histórico (a migration recusa incoerências) e reinício controlado dos workers. Nenhuma base oficial foi migrada.
+- E09 e E10 não foram iniciadas.
+
+
+### Revisão técnica de encerramento da E08 em 21/11/2026
+
+**Checkpoint.** A revisão começou na branch `feat/filtros-calendario-titulos`, com HEAD `e0d3cce` e índice Git vazio. A implementação E08 já estava na árvore de trabalho. A revisão manteve o núcleo transversal, a consulta contextual, os índices e a interface.
+
+**Correções verificadas.** O agrupamento considera também o nó, e a leitura e a exclusão empregadas na consolidação ficam dentro do tratamento de exceções de persistência. O observer preserva listas de contatos sem convertê-las em texto. O início da inspeção grava a auditoria antes de trocar a sessão. Saída explícita e revogação da identidade representada registram o encerramento. A expiração passiva do armazenamento de sessões encerra o acesso, sem execução de evento de saída. No Chromium com sessão real em PostgreSQL, a primeira consulta após a expiração retornou 401. A falha de um registro obrigatório desfaz as escritas de negócio da mesma transação.
+
+**Decisões.** D1 mantém a política da seção 11.5. D2 mantém FKs compostas e CHECKs. D3 preserva nome histórico do representado e referência da inspeção. D4 foi aprovada e validada com restrições simultâneas de empresa e unidade e posterior remoção de uma delas. Cada auditor vê o evento do seu nó e recebe 404 no detalhe do outro. D5 conserva os índices usados pelos planos. D6 foi aplicada com retirada das tabelas do esquema ativo, autorizada para o ambiente em desenvolvimento. A conciliação de origem não prova equivalência integral. A recuperação dos registros de origem requer backup verificado e exportação, conforme a 11.4.
+
+**PostgreSQL.** A evolução a partir da E07 manteve 155 registros centrais, dos quais 94 com empresa, e importou um evento da amostra. Instalação limpa, exportação e restauração da origem, reversão e reaplicação passaram. Os ensaios recusaram contexto incoerente, referência a empresa de outra conta, unidade de outra empresa e exclusão física de unidade referenciada. A migration `000005` protege UPDATE, DELETE e TRUNCATE mesmo via SQL e operações em lote; a consolidação na transação original passou com savepoint. A proteção depende da configuração de privilégios do banco. A `000005` é reversível sem perda de eventos. A `000006` recupera dados de origem somente por backup.
+
+**Performance.** PostgreSQL 18.7 e FrankenPHP 1.14.0, com volumes de 200 mil e um milhão e repetição dos caminhos afetados no código final em um milhão. Medianas HTTP finais em ms, na ordem dos cenários da E08.7, de 62,94 (lista integral), 263,06 (busca integral), 79,31 (empresa), 21,45 (unidade) e 109,20 (30 atribuições). Os planos usaram os índices novos de empresa, unidade, autor e entidade/ação. A varredura solta de autores levou 3,08 ms no banco. Cadastro com auditoria ficou em 9,90 ms, com 16 consultas. Dez alterações concorrentes produziram dez eventos com cadeia coerente. Um worker alternou contas e inspeção em 300 escritas com conferência da autoria no banco.
+
+O ensaio prolongado da revisão, anterior ao último ajuste de encerramento da inspeção, registrou 2.800 respostas 200 e 800 respostas 404 em um worker. A memória PHP inicial teve mediana constante de 9.346.984 bytes por lote e o p95 HTTP ficou entre 226 e 243 ms. No ensaio de lote, 200 mil inserções com os mesmos índices levaram 5,01 s com a proteção e 5,10 s sem ela. Essa comparação de uma amostra por configuração não isola pequenas diferenças. A busca textual e a contagem de dezenas de nós continuam candidatas a revisão quando houver volume real.
+
+**Cobertura final.** 243 testes PHP, 2.869 asserções, 18 testes específicos de auditoria contextual e 16 casos de frontend. Arquitetura, tipos, build, PHPStan, Pint, `permissions:sync`, `audit:check` e `organization:check` passaram. Em Chromium, lista, ficha e tour passaram em 1440, 1024, 768, 390 e 320 px, sem transbordamento horizontal da página. O tour concluiu 17 passos nas três larguras maiores e 15 nas duas menores, pulando a demonstração de largura de colunas. Filtros hierárquicos, estado vazio, perfil local, plataforma e identificação da inspeção foram verificados. Carregamento, paginação e comparação com texto extenso foram conferidos a 320 px.
+
+**Estado.** A revisão técnica e visual automatizada foi concluída. O quadro mantém a E08 em validação para a homologação formal indicada no plano. Nenhum banco oficial foi migrado. Segurança de tentativas negadas, retenção, arquivamento e descarte controlado são decisões próprias. A E09 segue pendente.
+
 ## 27. Contrato para módulos futuros
 
 ### 27.1 Checklist oficial
@@ -2732,8 +3004,8 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | E05 | Remoção de `users.role_id`, `users.is_account_admin` e `users.person_id`; `users.account_id` mantida até a E09 | Aprovada | 20/11/2026 | Homologação final da E05 |
 | E05 | Fechamento da etapa | Concluída | 20/11/2026 | Homologação final da E05 |
 | E06 | Início do estabelecimento como destino do seletor; 403 orientado para contexto inativo; consolidado somente leitura; seletor em todas as telas da conta | Proposta, em validação | 20/11/2026 | Registro de execução da E06 |
-
 | E07 | Descoberta comercial por POST consultivo, com documento no corpo e resposta privada sem cache | Aprovada | 21/11/2026 | Preserva CSRF, escopo empresarial, autorização e inspeção somente leitura |
 | E07 | Fechamento da etapa e aceite do tema disponível | Concluída | 21/11/2026 | Homologação final na seção 26 |
+| E08 | E08-D1 a E08-D6: lista da PD-02, integridade por FKs compostas e CHECKs, identificação histórica da inspeção, nó da disponibilidade restrita, índices de leitura e importação legada | D4 aprovada. D1 a D3, D5 e D6 validadas tecnicamente | 21/11/2026 | Revisão técnica da seção 26 |
 
 Decisões novas surgidas durante a execução devem ser registradas aqui antes de alterar o contrato, com a justificativa e o impacto nas etapas.

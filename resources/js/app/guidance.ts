@@ -376,9 +376,9 @@ export function tourFor(
     steps = [
       ...businessListTourSteps({
         filters:
-          'Filtre por autor, tipo, ação e período. Na plataforma também é possível filtrar por conta.',
+          'Filtre por tipo, ação, autor, origem e período. Empresa, Estabelecimento e Nível aparecem quando há mais de uma opção no seu acesso e só restringem o que você já pode ver. Na plataforma, filtre por conta.',
         table:
-          'Cada linha é uma operação. O histórico é somente leitura. Use a ação Visualizar registro para consultar o que mudou.',
+          'Cada linha é uma operação. Onde mostra a conta, a empresa ou o estabelecimento afetado; Quem fez destaca as inspeções e o usuário representado. O histórico é somente leitura.',
       }),
       ...auditDetailTourSteps(
         permissions.includes(

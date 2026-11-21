@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 final readonly class StartAccountInspectionAction
@@ -48,13 +49,10 @@ final readonly class StartAccountInspectionAction
             userId: $target->id,
             mode: $data->mode,
             membershipId: $membership->id,
+            id: (string) Str::uuid(),
         );
 
-        $session->invalidate();
-        Auth::guard('web')->login($target);
-        AccountInspectionSession::start($session, $inspectionDTO);
-
-        app(AuditContext::class)->begin(request());
+        app(AuditContext::class)->identifyInspection($inspectionDTO, $administrator->name, $target->name);
         AuditLog::record(
             'account',
             $account->id,
@@ -66,6 +64,10 @@ final readonly class StartAccountInspectionAction
                 'represented' => ['label' => 'Usuário representado', 'before' => null, 'after' => $target->name],
             ],
         );
+
+        $session->invalidate();
+        Auth::guard('web')->login($target);
+        AccountInspectionSession::start($session, $inspectionDTO);
 
         Log::notice('Inspeção de conta iniciada.', AccountInspectionSession::context($inspectionDTO));
     }

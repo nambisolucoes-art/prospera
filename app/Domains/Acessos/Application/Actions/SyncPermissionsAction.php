@@ -6,8 +6,6 @@ use App\Domains\Acessos\Application\Queries\PermissionRegistry;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Domain\Models\Client;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 final readonly class SyncPermissionsAction
 {
@@ -80,23 +78,6 @@ final readonly class SyncPermissionsAction
                     'Catálogo de permissões',
                     $changes,
                 );
-
-                $summary = [
-                    'created' => $created,
-                    'updated' => $updated,
-                    'deleted' => $deleted,
-                    'account_ids' => $accountIds,
-                    'slugs' => array_column($definitions, 'slug'),
-                ];
-
-                DB::table('access_catalog_events')->insert([
-                    'operation_id' => (string) Str::uuid(),
-                    'actor_id' => auth()->id(),
-                    'scope' => 'platform',
-                    'event' => 'permission-catalog.synchronized',
-                    'changes' => json_encode($summary, JSON_THROW_ON_ERROR),
-                    'created_at' => now(),
-                ]);
             }
         });
 

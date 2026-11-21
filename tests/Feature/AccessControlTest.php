@@ -280,6 +280,9 @@ class AccessControlTest extends TestCase
             'account_id' => $owner->account_id,
         ]);
         $this->membership($owner)->assignments()->sole()->role()->sole()->permissions()->attach($obsolete->id);
+        $legacyAudit = require database_path('migrations/2026_11_21_000006_remove_legacy_audit_tables.php');
+        $legacyAudit->down();
+
         $migration = require database_path('migrations/2026_11_18_000003_retire_permission_management.php');
         $migration->up();
         $this->assertDatabaseMissing('permissions', ['id' => $obsolete->id]);
@@ -292,6 +295,8 @@ class AccessControlTest extends TestCase
             'scope' => 'platform',
             'actor_id' => null,
         ]);
+
+        $legacyAudit->up();
     }
 
     public function test_role_list_filters_by_search_and_origin_within_the_account(): void
