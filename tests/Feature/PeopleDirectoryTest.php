@@ -396,7 +396,7 @@ class PeopleDirectoryTest extends TestCase
         $owner = $this->owner();
         $other = $this->owner();
         $this->actingAs($owner);
-        $payload = ['name' => 'Permissões de etiqueta', 'module' => 'people', 'color' => '#123456'];
+        $payload = ['name' => 'Permissões de etiqueta', 'module' => 'customers', 'color' => '#123456'];
         $this->postJson('/conta/etiquetas', $payload)->assertOk();
         $tag = Tag::where('name', $payload['name'])->sole();
         $special = Tag::userTag($owner->account_id);
@@ -418,6 +418,39 @@ class PeopleDirectoryTest extends TestCase
         $this->assertFalse($tag->fresh()->active);
     }
 
+    public function test_people_tags_cannot_be_created_but_existing_links_are_preserved(): void
+    {
+        $owner = $this->owner();
+        $this->actingAs($owner);
+        $payload = ['name' => 'Cadastro anterior', 'module' => 'people', 'color' => '#123456'];
+
+        $this->postJson('/conta/etiquetas', $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('module');
+        $this->assertDatabaseMissing('tags', ['name' => $payload['name']]);
+
+        $tag = Tag::create(['account_id' => $owner->account_id, ...$payload]);
+        $person = $this->membership($owner)->person()->sole();
+        $person->tags()->attach($tag->id);
+
+        $this->patchJson('/conta/etiquetas/'.$tag->id, [...$payload, 'active' => false])->assertOk();
+        $this->assertDatabaseHas('person_tag', ['person_id' => $person->id, 'tag_id' => $tag->id]);
+        $this->assertFalse($tag->fresh()->active);
+        $this->assertDatabaseHas('audit_records', [
+            'entity_type' => 'tag',
+            'entity_id' => $tag->id,
+            'event' => 'updated',
+            'actor_id' => $owner->id,
+            'account_id' => $owner->account_id,
+        ]);
+
+        $this->postJson('/conta/etiquetas', [...$payload, 'module' => 'customers'])->assertOk();
+        $commercial = Tag::where('module', 'customers')->where('name', $payload['name'])->sole();
+        $this->patchJson('/conta/etiquetas/'.$commercial->id, $payload)
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('module');
+    }
+
     public function test_tag_form_does_not_list_records_without_list_permission(): void
     {
         $owner = $this->owner();
@@ -437,7 +470,7 @@ class PeopleDirectoryTest extends TestCase
         $foreign = Tag::userTag($other->account_id);
         $this->getJson('/conta/etiquetas/'.$foreign->id.'/editar')->assertNotFound();
         $this
-            ->postJson('/conta/etiquetas', ['name' => 'Cadastro permitido', 'module' => 'people', 'color' => '#123456'])
+            ->postJson('/conta/etiquetas', ['name' => 'Cadastro permitido', 'module' => 'customers', 'color' => '#123456'])
             ->assertOk()
             ->assertJsonPath('redirect', fn ($url) => str_ends_with($url, '/conta/etiquetas/cadastrar'));
         $tag = Tag::where('name', 'Cadastro permitido')->sole();

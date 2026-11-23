@@ -180,7 +180,9 @@ export default function Tags({
                 id: 'module',
                 label: 'Módulo',
                 width: 150,
-                render: (tag) => tagModules.find((module) => module.value === tag.module)?.label ?? 'Não informado',
+                render: (tag) => tag.system_key
+                  ? 'Sistema'
+                  : tagModules.find((module) => module.value === tag.module)?.label ?? 'Cadastro anterior',
               },
             ]}
           />

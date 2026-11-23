@@ -7,3 +7,11 @@ Use uma cópia de código com as dependências da imagem `prospera-app:e08-base`
 - A suíte PHP usa SQLite em memória. Os testes dos gatilhos e da concorrência pertencem a esses harnesses. Para validação visual, use uma cópia isolada do ambiente `e04-stack.sh` com `E06_CONTEXT=1`, uma sub-rede explícita e usuários sintéticos com as permissões de auditoria pertinentes. Confira 1440, 1024, 768, 390 e 320 px.
 
 Na versão sem a tela Pessoas, as escritas de prova usam o cadastro de Cliente e a edição dos dados compartilhados. A medição de escrita dessa versão inclui o vínculo comercial.
+
+## Estabilização complementar de 23/11/2026
+
+`bash tests/Performance/run-octane.sh "$PWD" 1` e a mesma chamada com `2` usam PostgreSQL em tmpfs e FrankenPHP descartáveis, rede interna e e-mail em log. Não apontar para bases existentes. A execução remove seus containers e rede ao sair.
+
+O cliente deixou de acessar `/conta/pessoas` e `/conta/pontos`: lista e formulário são de Clientes na unidade da URL; escritas usam Clientes na empresa da URL. Confere payload, HTTP 403/404/422/204, total após escrita, revogação e autoria real/representada. A fixture exige também o escopo empresarial na auditoria. Listagem e escrita comerciais constituem nova linha de base, sem comparação direta com Pessoas ou Pontos. As demais telas preservam a responsabilidade original, mas só são comparáveis com ambiente, carga e versão controlados.
+
+`vendor/bin/phpunit tests/Performance/AccountRequestsTest.php` continua usando SQLite em memória imposto pelo bootstrap. Verifica orçamento estrutural, ausência de SQL repetido e payload de 25 Clientes sintéticos; os tempos desse teste não são métricas de PostgreSQL. Medições HTTP e limites estão no registro complementar do plano 001. Nenhum harness E08 precisa ser executado para essa estabilização.

@@ -98,7 +98,7 @@ final class ContextualAuditTest extends TestCase
         $this->patchJson('/conta/estabelecimentos/'.$this->janauba->id, ['name' => 'Janaúba Centro'])->assertOk();
         $this->postJson('/conta/empresa/'.$this->express->code.'/fornecedores', ['person_id' => $ana->id])
             ->assertSuccessful();
-        $this->postJson('/conta/etiquetas', ['name' => 'VIP', 'color' => '#2b7de9', 'module' => 'people'])->assertOk();
+        $this->postJson('/conta/etiquetas', ['name' => 'VIP', 'color' => '#2b7de9', 'module' => 'customers'])->assertOk();
 
         return $ana;
     }
@@ -263,7 +263,7 @@ final class ContextualAuditTest extends TestCase
         $removable = $this->operator($this->gartan, [[$this->role($this->gartan, 'Etiquetas', [
             'account.tags.create',
         ]), AccessNode::tenant($this->gartan->id)]]);
-        $this->actingAs($removable)->postJson('/conta/etiquetas', ['name' => 'Temporária', 'color' => '#2b7de9', 'module' => 'people'])
+        $this->actingAs($removable)->postJson('/conta/etiquetas', ['name' => 'Temporária', 'color' => '#2b7de9', 'module' => 'customers'])
             ->assertOk();
         $name = $removable->name;
         AccountMembership::where('user_id', $removable->id)->update(['status' => 'suspended']);

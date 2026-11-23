@@ -3,6 +3,10 @@
 namespace Tests\Performance;
 
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Clientes\Domain\Models\Customer;
+use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
@@ -22,6 +26,25 @@ final class AccountRequestsTest extends TestCase
         $owner = User::factory()->asAccountAdministrator($account->id)->create();
         $role = Role::where('account_id', $account->id)->where('system_key', 'member')->sole();
         User::factory()->count(39)->forAccount($account->id, $role)->create();
+
+        // Desde a E04 toda conta tem empresa e unidade principal; desde 2ba26f7 Pessoas entra por Clientes.
+        $company = app(CreateCompanyAction::class)->execute($account->id, SaveCompanyData::fromInput([
+            'name' => 'Empresa sintética',
+            'person_type' => 'company',
+            'document' => '11222333',
+        ], $account->id, null));
+        $unit = $company->primaryEstablishment()->sole()->code;
+
+        foreach (range(1, 25) as $index) {
+            $person = Person::create(['account_id' => $account->id, 'name' => sprintf('Cliente %02d', $index)]);
+            Customer::create([
+                'account_id' => $account->id,
+                'company_id' => $company->id,
+                'person_id' => $person->id,
+                'active' => true,
+            ]);
+        }
+
         $queries = [];
         DB::listen(function (QueryExecuted $query) use (&$queries): void {
             $queries[] = $query;
@@ -29,8 +52,8 @@ final class AccountRequestsTest extends TestCase
 
         foreach ([
             '/conta',
-            '/conta/pessoas',
-            '/conta/pessoas/cadastrar',
+            '/conta/estabelecimento/'.$unit.'/clientes',
+            '/conta/estabelecimento/'.$unit.'/clientes/cadastrar',
             '/conta/etiquetas',
             '/conta/cargos',
             '/conta/cargos/cadastrar',
@@ -45,6 +68,15 @@ final class AccountRequestsTest extends TestCase
             $response = $this->actingAs($owner)->getJson($path);
             $elapsed = (hrtime(true) - $start) / 1e6;
             $response->assertOk();
+
+            if ($path === '/conta/estabelecimento/'.$unit.'/clientes') {
+                $response->assertJsonPath('role', 'customer')->assertJsonPath('relations.total', 25);
+            }
+
+            if ($path === '/conta/estabelecimento/'.$unit.'/clientes/cadastrar') {
+                $response->assertJsonPath('companies.0.code', $company->code);
+            }
+
             $signatures = array_map(fn (QueryExecuted $query) => serialize([$query->sql, $query->bindings]), $queries);
             $permissionQueries = count(array_filter(
                 $queries,
@@ -57,7 +89,9 @@ final class AccountRequestsTest extends TestCase
                 self::assertCount(count(array_unique($signatures)), $queries, $path);
                 // As telas da conta somam 1 consulta do seletor de estabelecimento (E06, meta 15.3.1).
                 self::assertLessThanOrEqual($path === '/ajuda' ? 2 : 10, count($queries), $path);
-                self::assertLessThanOrEqual(1, count(array_filter(
+                // Rotas com contexto na URL somam 1 consulta de resolução do código (convenção de performance).
+                $contextual = str_starts_with($path, '/conta/estabelecimento/');
+                self::assertLessThanOrEqual($contextual ? 2 : 1, count(array_filter(
                     $queries,
                     fn (QueryExecuted $query) => str_contains($query->sql, 'from "establishments" as "e"'),
                 )), $path);

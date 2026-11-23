@@ -43,6 +43,10 @@ function verify(bool $condition): void
     }
 }
 
+// Empresa e unidade principal da Conta A, criadas pelas fixtures (E04).
+const COMPANY = '/conta/empresa/empresa-a';
+const UNIT = '/conta/estabelecimento/empresa-a';
+
 $owner = [];
 $member = [];
 $medium = [];
@@ -53,11 +57,22 @@ request('/_e03/session/42', $medium);
 request('/_e03/session/43', $platform);
 $workers = [];
 foreach ([
-    '/conta', '/conta/pessoas', '/conta/pessoas/cadastrar', '/conta/etiquetas', '/conta/cargos',
+    // Pessoas não tem tela própria desde 2ba26f7: a listagem e o cadastro de Clientes são as entradas vigentes.
+    '/conta', UNIT.'/clientes', UNIT.'/clientes/cadastrar', '/conta/etiquetas', '/conta/cargos',
     '/conta/cargos/cadastrar', '/conta/auditoria', '/conta/usuarios', '/ajuda',
 ] as $path) {
     for ($sample = 0; $sample < 10; $sample++) {
-        [, $metrics] = request($path, $owner);
+        [$payload, $metrics] = request($path, $owner);
+
+        // Confere que a medição exercita a tela prevista, e não uma página de erro ou de orientação.
+        if ($path === UNIT.'/clientes') {
+            verify(isset($payload['relations']['data']) && $payload['role'] === 'customer');
+        }
+
+        if ($path === UNIT.'/clientes/cadastrar') {
+            verify(($payload['companies'][0]['code'] ?? null) === 'empresa-a');
+        }
+
         $workers[$metrics['worker']] = true;
         echo json_encode(['path' => $path, 'profile' => 'owner', ...$metrics], JSON_THROW_ON_ERROR).PHP_EOL;
     }
@@ -84,7 +99,7 @@ request('/saas/contas/1/inspecao', $platform, 200, [
 verify(count($workers) === 1 && isset($workers[$during['worker']], $workers[$after['worker']]));
 verify($inspected['auth']['inspection_mode'] === 'read-only' && $inspected['account']['name'] === 'Conta A');
 verify($other['auth']['inspection_mode'] === null && $other['account']['name'] === 'Conta B');
-verify(! in_array('account.points.create', $other['auth']['permissions'], true));
+verify(! in_array('account.customers.create', $other['auth']['permissions'], true));
 [$session] = request('/_e03/session', $platform);
 $inspectionToken = $session['token'];
 [$session] = request('/_e03/session', $owner);
@@ -94,17 +109,17 @@ $workerMemory = [];
 $rounds = 60;
 
 for ($round = 0; $round < $rounds; $round++) {
-    request('/conta/pontos', $platform, 403, ['_token' => $inspectionToken, 'name' => 'Bloqueado']);
-    request('/conta/pessoas/999999/visualizar', $owner, 404);
-    request('/conta/pontos', $owner, 422, ['_token' => $ownerToken, 'name' => '', 'active' => true]);
+    request(COMPANY.'/clientes', $platform, 403, ['_token' => $inspectionToken, 'name' => 'Bloqueado']);
+    request(COMPANY.'/clientes/999999/visualizar', $owner, 404);
+    request(COMPANY.'/clientes', $owner, 422, ['_token' => $ownerToken, 'name' => '']);
     [$other, $memberMetrics] = request('/conta', $member);
     [$inspected, $inspectionMetrics] = request('/conta', $platform);
 
     verify($memberMetrics['worker'] === $after['worker'] && $inspectionMetrics['worker'] === $after['worker']);
     verify($other['account']['name'] === 'Conta B' && $other['auth']['inspection_mode'] === null);
-    verify(! in_array('account.points.create', $other['auth']['permissions'], true));
+    verify(! in_array('account.customers.create', $other['auth']['permissions'], true));
     verify($inspected['account']['name'] === 'Conta A' && $inspected['auth']['inspection_mode'] === 'read-only');
-    verify(in_array('account.points.create', $inspected['auth']['permissions'], true));
+    verify(in_array('account.customers.create', $inspected['auth']['permissions'], true));
     $workerMemory[] = $memberMetrics['start_bytes'];
 }
 
@@ -119,12 +134,14 @@ request('/saas/contas/1/inspecao', $platform, 200, [
     '_token' => $session['token'], 'user_id' => 1, 'mode' => 'edit',
 ]);
 [$session] = request('/_e03/session', $platform);
-request('/conta/pontos', $platform, 200, [
-    '_token' => $session['token'], 'name' => 'Ponto sintético', 'active' => true,
+request(COMPANY.'/clientes', $platform, 204, [
+    '_token' => $session['token'], 'name' => 'Cliente sintético',
 ]);
-request('/conta/pontos', $owner, 200, [
-    '_token' => $ownerToken, 'name' => 'Ponto do administrador', 'active' => true,
+request(COMPANY.'/clientes', $owner, 204, [
+    '_token' => $ownerToken, 'name' => 'Cliente do administrador',
 ]);
+[$listing] = request(UNIT.'/clientes', $owner);
+verify($listing['relations']['total'] === 2);
 request('/ajuda', $member);
 exec('php /performance/octane-fixtures.php revoke', result_code: $status);
 verify($status === 0);

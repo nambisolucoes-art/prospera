@@ -18,6 +18,8 @@ class Tag extends Model implements Auditable
 
     public const MODULES = ['people', 'customers', 'suppliers'];
 
+    public const COMMERCIAL_MODULES = ['customers', 'suppliers'];
+
     public function isAssigned(): bool
     {
         return $this->people()->exists()

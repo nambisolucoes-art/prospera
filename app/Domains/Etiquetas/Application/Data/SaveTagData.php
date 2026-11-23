@@ -12,7 +12,7 @@ final readonly class SaveTagData
     public function __construct(public array $values) {}
 
     /** @param array<string,mixed> $input */
-    public static function fromInput(array $input, int $accountId, ?int $id): self
+    public static function fromInput(array $input, int $accountId, ?int $id, ?string $existingModule = null): self
     {
         if (is_string($input['name'] ?? null)) {
             $input['name'] = trim($input['name']);
@@ -26,7 +26,7 @@ final readonly class SaveTagData
         $values = Validator::validate($input, [
             'active' => ['sometimes', 'boolean'],
             'name' => ['required', 'string', 'max:100', $uniqueName],
-            'module' => ['required', Rule::in(Tag::MODULES)],
+            'module' => ['required', Rule::in($existingModule === 'people' ? ['people'] : Tag::COMMERCIAL_MODULES)],
             'color' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ], [
             'active.boolean' => 'Selecione uma situação válida.',

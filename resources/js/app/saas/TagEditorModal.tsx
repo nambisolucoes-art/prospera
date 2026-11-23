@@ -66,8 +66,10 @@ export default function TagEditorModal({
                     label="Módulo"
                     info="Define em qual cadastro a etiqueta pode ser utilizada."
                     name="module"
-                    defaultValue={tag?.module ?? 'people'}
-                    options={tagModules}
+                    defaultValue={tag?.module ?? 'customers'}
+                    options={tag?.module === 'people'
+                      ? [{ value: 'people', label: 'Cadastro anterior' }]
+                      : tagModules}
                     error={errors.module}
                   />
                   <Select

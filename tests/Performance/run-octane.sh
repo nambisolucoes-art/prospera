@@ -26,7 +26,7 @@ docker run -d --rm --name "$prefix-app" --network "$prefix" --entrypoint sh \
     -e APP_ENV=local -e APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= -e APP_URL=http://127.0.0.1:8000 \
     -e DB_CONNECTION=pgsql -e DB_HOST=pg -e DB_DATABASE=e03 -e DB_USERNAME=postgres -e DB_PASSWORD=e03-synthetic \
     -e E03_CHECK_MIGRATION="${E03_CHECK_MIGRATION:-0}" -e E03_INDEX_PLANS="${E03_INDEX_PLANS:-0}" -e SESSION_DRIVER=database -e CACHE_STORE=file \
-    -e BCRYPT_ROUNDS=4 -e LOG_CHANNEL=stderr \
+    -e BCRYPT_ROUNDS=4 -e LOG_CHANNEL=stderr -e MAIL_MAILER=log \
     prospera-app:latest -c '
         set -eu
         for path in app bootstrap config database docs resources routes; do

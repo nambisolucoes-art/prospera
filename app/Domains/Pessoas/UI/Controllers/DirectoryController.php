@@ -77,7 +77,9 @@ final class DirectoryController
 
         abort_if($tag?->system_key !== null, 403);
 
-        $save->execute($accountId, $tag, SaveTagData::fromInput($request->all(), $accountId, $tagId));
+        $data = SaveTagData::fromInput($request->all(), $accountId, $tagId, $tag?->module);
+
+        $save->execute($accountId, $tag, $data);
         ApiPage::toast('Etiqueta salva.');
 
         if ($request->user()->can('account.tags.list')) {

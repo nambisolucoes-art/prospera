@@ -1,7 +1,7 @@
 .formField { margin-bottom: 15px; }
 .formField::before, .formField::after { display: table; content: ' '; }
 .formField::after { clear: both; }
-.formField__label { display: inline-block; max-width: 100%; margin-bottom: 5px; font-weight: 700; }
+.formField__label { display: inline-block; min-width: 0; max-width: 100%; margin-bottom: 5px; font-weight: 700; overflow-wrap: anywhere; }
 .formField__hint { color: #98a6ad; font-size: 13px; }
 .formField__required {
   margin-inline-end: 5px;
@@ -24,3 +24,4 @@
 
 .formField__labelRow { display: flex; align-items: baseline; gap: 3px; }
 .formField__labelRow .formField__label { margin-bottom: 5px; }
+.formField__labelRow > .infoTooltip { flex-shrink: 0; }

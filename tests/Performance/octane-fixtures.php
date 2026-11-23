@@ -3,6 +3,8 @@
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
+use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\SaveCompanyData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -20,15 +22,20 @@ if (($argv[1] ?? '') === 'revoke') {
 }
 
 if (($argv[1] ?? '') === 'check-audit') {
-    $records = AuditRecord::where('entity_type', 'point')->where('event', 'created')->orderBy('id')->get();
+    // Escritas de prova: cadastro de Cliente na empresa da URL (Pontos saiu na E04 e Pessoas em 2ba26f7).
+    $records = AuditRecord::where('entity_type', 'customer')->where('event', 'created')->orderBy('id')->get();
     if (
         $records->count() !== 2
         || $records[0]->actor_id !== 43
         || $records[0]->represented_user_id !== 1
         || $records[0]->account_id !== 1
+        || $records[0]->company_id !== 1
+        || $records[0]->establishment_id !== null
         || $records[1]->actor_id !== 1
         || $records[1]->represented_user_id !== null
         || $records[1]->account_id !== 1
+        || $records[1]->company_id !== 1
+        || $records[1]->establishment_id !== null
     ) {
         throw new RuntimeException('Autoria de inspeção incorreta.');
     }
@@ -38,6 +45,16 @@ if (($argv[1] ?? '') === 'check-audit') {
 
 $first = Client::create(['name' => 'Conta A', 'active' => true]);
 $second = Client::create(['name' => 'Conta B', 'active' => true]);
+
+// Desde a E04 toda conta tem empresa e unidade principal; os códigos são usados pelo cliente HTTP.
+foreach ([[$first, 'Empresa A', '11222333'], [$second, 'Empresa B', '44555666']] as [$account, $name, $root]) {
+    app(CreateCompanyAction::class)->execute($account->id, SaveCompanyData::fromInput([
+        'name' => $name,
+        'person_type' => 'company',
+        'document' => $root,
+    ], $account->id, null));
+}
+
 $owner = User::factory()->asAccountAdministrator($first->id)->create();
 $member = Role::where('account_id', $first->id)->where('system_key', 'member')->sole();
 User::factory()->count(39)->forAccount($first->id, $member)->create();
