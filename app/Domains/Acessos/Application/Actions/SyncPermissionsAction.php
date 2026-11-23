@@ -38,11 +38,30 @@ final readonly class SyncPermissionsAction
                     continue;
                 }
 
-                $changes[$definition['slug']] = [
-                    'label' => $definition['name'],
-                    'before' => $isNew ? null : $permission->getOriginal('name'),
-                    'after' => $definition['name'],
-                ];
+                if ($isNew || $permission->isDirty('name')) {
+                    $changes[$definition['slug']] = [
+                        'label' => $definition['name'],
+                        'before' => $isNew ? null : $permission->getOriginal('name'),
+                        'after' => $definition['name'],
+                    ];
+                }
+
+                foreach ([
+                    'scope' => 'Escopo',
+                    'module' => 'Módulo',
+                    'is_system' => 'Definida pelo código',
+                    'account_id' => 'Conta',
+                ] as $field => $label) {
+                    if (! $permission->isDirty($field)) {
+                        continue;
+                    }
+
+                    $changes[$definition['slug'].'.'.$field] = [
+                        'label' => $definition['name'].': '.$label,
+                        'before' => $isNew ? null : $permission->getOriginal($field),
+                        'after' => $permission->getAttribute($field),
+                    ];
+                }
 
                 $permission->saveOrFail();
                 $isNew ? $created++ : $updated++;

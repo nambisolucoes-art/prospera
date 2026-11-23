@@ -236,10 +236,27 @@ class AuditAndGuidanceTest extends TestCase
         ]);
         $record = AuditRecord::latest('id')->firstOrFail();
         $this->getJson('/conta/auditoria/'.$record->id.'/visualizar')->assertOk()
-            ->assertJsonPath('changes.0.after', 'Pessoas')
+            ->assertJsonPath('changes.0.after', 'Cadastro anterior')
             ->assertJsonPath('changes.1.before', 'Ativa')
             ->assertJsonPath('changes.1.after', 'Inativa');
         $this->assertTrue($record->fresh()->changes['active']['before']);
+
+        foreach (['customers' => 'Clientes', 'suppliers' => 'Fornecedores'] as $module => $label) {
+            AuditLog::record('tag', 999, $owner->account_id, 'updated', 'Etiqueta', [
+                'module' => ['label' => 'Módulo', 'before' => 'people', 'after' => $module],
+                'name' => ['label' => 'Nome', 'before' => 'people', 'after' => $module],
+            ]);
+            $record = AuditRecord::latest('id')->firstOrFail();
+
+            $this->getJson('/conta/auditoria/'.$record->id.'/visualizar')
+                ->assertOk()
+                ->assertJsonPath('changes.0.before', 'Cadastro anterior')
+                ->assertJsonPath('changes.0.after', $label)
+                ->assertJsonPath('changes.1.before', 'people')
+                ->assertJsonPath('changes.1.after', $module);
+            $this->assertSame($module, $record->fresh()->changes['module']['after']);
+        }
+
     }
 
     public function test_help_search_and_direct_articles_enforce_context_and_permissions(): void
@@ -308,5 +325,30 @@ class AuditAndGuidanceTest extends TestCase
         $before = AuditRecord::count();
         $this->artisan('permissions:sync')->assertSuccessful();
         $this->assertSame($before, AuditRecord::count());
+    }
+
+    public function test_catalog_metadata_changes_record_the_actual_fields_without_a_false_name_change(): void
+    {
+        $platform = User::factory()->create(['is_saas_admin' => true]);
+        $this->actingAs($platform);
+        $permission = Permission::where('slug', 'account.tags.list')->sole();
+        $permission->update(['scope' => 'platform', 'module' => 'anterior', 'is_system' => false]);
+
+        $this->artisan('permissions:sync')->assertSuccessful();
+        $record = AuditRecord::where('event', 'catalog-synchronized')->latest('id')->firstOrFail();
+
+        $this->assertArrayNotHasKey('account.tags.list', $record->changes);
+        $this->assertSame('platform', $record->changes['account.tags.list.scope']['before']);
+        $this->assertSame('account', $record->changes['account.tags.list.scope']['after']);
+        $this->assertSame('anterior', $record->changes['account.tags.list.module']['before']);
+        $this->assertSame('tags', $record->changes['account.tags.list.module']['after']);
+        $this->assertFalse($record->changes['account.tags.list.is_system']['before']);
+        $this->assertTrue($record->changes['account.tags.list.is_system']['after']);
+        $this->assertSame($platform->id, $record->actor_id);
+        $this->assertNull($record->account_id);
+
+        $count = AuditRecord::count();
+        $this->artisan('permissions:sync')->assertSuccessful();
+        $this->assertSame($count, AuditRecord::count());
     }
 }

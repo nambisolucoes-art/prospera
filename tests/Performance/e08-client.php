@@ -1,7 +1,8 @@
 <?php
 
 // E08: medição da consulta de auditoria e prova de autoria e isolamento em worker FrankenPHP real.
-// Uso: php e08-client.php measure <volume> | write | isolation | endurance <lote> | race-setup | race <n> | race-check. E08_PHASE=baseline omite os recursos da E08.
+// Uso: measure <volume>, write, isolation, endurance <lote>, race-setup, race <n> ou race-check.
+// E08_PHASE=baseline omite os recursos da E08.
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -135,6 +136,19 @@ if ($mode === 'measure') {
                     ));
                 }
 
+                if ($label === 'estabelecimento') {
+                    verify($body['records']['total'] === expectedTotal(
+                        $data['account'],
+                        $scenario['user'],
+                        ['establishment_id' => $data['establishment']],
+                    ));
+                }
+
+                if ($label === 'detalhe') {
+                    verify($body['id'] === $first['records']['data'][0]['id']);
+                    verify($body['account_id'] === $data['account']);
+                }
+
                 if ($sample !== 0) {
                     $samples[] = $metrics;
                 }
@@ -161,11 +175,24 @@ if ($mode === 'write') {
 
     for ($sample = 0; $sample < 31; $sample++) {
         $before = AuditRecord::count();
+        $name = 'Pessoa de escrita '.$sample.' '.bin2hex(random_bytes(3));
         [, $metrics] = request($path, $cookies, [200, 204], [
             '_token' => $session['token'],
-            'name' => 'Pessoa de escrita '.$sample.' '.bin2hex(random_bytes(3)),
+            'name' => $name,
         ]);
         verify(AuditRecord::count() > $before);
+
+        $personEvent = AuditRecord::where('entity_type', 'person')->where('entity_name', $name)->sole();
+        verify($personEvent->actor_id === $owner && $personEvent->account_id === $data['account']);
+        verify($personEvent->company_id === null && $personEvent->establishment_id === null);
+
+        if (! Route::has('account.directory.people.store')) {
+            $relationEvent = AuditRecord::where('operation_id', $personEvent->operation_id)
+                ->where('entity_type', 'customer')->sole();
+            verify($relationEvent->account_id === $personEvent->account_id);
+            verify($relationEvent->company_id !== null && $relationEvent->establishment_id === null);
+            verify($relationEvent->actor_id === $owner);
+        }
 
         if ($sample !== 0) {
             $samples[] = $metrics;
@@ -174,7 +201,9 @@ if ($mode === 'write') {
 
     echo json_encode([
         'e08' => 'escrita',
-        'caso' => 'cadastro de pessoa',
+        'caso' => Route::has('account.directory.people.store')
+            ? 'cadastro central histórico'
+            : 'cadastro de cliente e pessoa',
         'audit_records' => AuditRecord::count(),
         ...summary($samples),
     ], JSON_THROW_ON_ERROR).PHP_EOL;
@@ -186,6 +215,8 @@ if ($mode === 'isolation') {
     $authors = [$data['scenarios']['integral']['user'], ...$data['other_owners']];
     $sessions = [];
     $worker = null;
+    $workers = [];
+    $expectedWorkers = (int) (getenv('E08_ISOLATION_WORKERS') ?: 1);
     $memory = [];
     $checked = 0;
 
@@ -221,7 +252,9 @@ if ($mode === 'isolation') {
         $name = 'Isolamento E08 '.$round.' '.bin2hex(random_bytes(3));
 
         if ($inspecting) {
-            [, $metrics] = request($inspectionPath, $inspector, [200, 204], ['_token' => $inspectionToken, 'name' => $name]);
+            [, $metrics] = request($inspectionPath, $inspector, [200, 204], [
+                '_token' => $inspectionToken, 'name' => $name,
+            ]);
         } else {
             [, $metrics] = request($sessions[$author][2], $sessions[$author][0], [200, 204], [
                 '_token' => $sessions[$author][1],
@@ -230,7 +263,11 @@ if ($mode === 'isolation') {
         }
 
         $worker ??= $metrics['worker'];
-        verify($metrics['worker'] === $worker);
+        $workers[$metrics['worker']] = true;
+
+        if ($expectedWorkers === 1) {
+            verify($metrics['worker'] === $worker);
+        }
         $memory[] = $metrics['start_bytes'];
 
         $event = AuditRecord::where('entity_type', 'person')->where('entity_name', $name)->sole();
@@ -276,14 +313,22 @@ if ($mode === 'isolation') {
 
     $platform->forceFill(['is_saas_admin' => true])->saveOrFail();
     $owner = $authors[0];
-    request($sessions[$owner][2], $sessions[$owner][0], [200, 204], ['_token' => $sessions[$owner][1], 'name' => 'Depois E08']);
-    $last = AuditRecord::where('entity_name', 'Depois E08')->sole();
-    verify((int) $last->actor_id === (int) $owner && $last->represented_user_id === null && $last->context === 'account');
+    $finalName = 'Depois E08 '.bin2hex(random_bytes(6));
+    request($sessions[$owner][2], $sessions[$owner][0], [200, 204], [
+        '_token' => $sessions[$owner][1], 'name' => $finalName,
+    ]);
+    $last = AuditRecord::where('entity_type', 'person')->where('entity_name', $finalName)->sole();
+    verify((int) $last->actor_id === (int) $owner
+        && $last->represented_user_id === null && $last->context === 'account');
+
+    verify(count($workers) >= 1 && count($workers) <= $expectedWorkers);
 
     echo json_encode([
         'e08' => 'isolamento',
         'escritas_verificadas' => $checked,
         'worker' => $worker,
+        'workers' => array_keys($workers),
+        'workers_configurados' => $expectedWorkers,
         'memoria_inicio_primeira' => $memory[0],
         'memoria_inicio_ultima' => end($memory),
         'memoria_inicio_maxima' => max($memory),
@@ -374,11 +419,13 @@ if ($mode === 'race') {
     // Cada processo altera a mesma Pessoa com um nome próprio, ao mesmo tempo que os demais.
     $race = json_decode(file_get_contents('/tmp/prospera-e08-race.json'), true, flags: JSON_THROW_ON_ERROR);
     $cookies = $race['cookies'];
-    [, , $status] = request($race['url'], $cookies, [200, 204, 409, 422], [
+    [, $metrics, $status] = request($race['url'], $cookies, [200, 204, 409, 422], [
         '_token' => $race['token'],
         'name' => 'Concorrência E08 '.$argv[2],
     ], 'PATCH');
-    echo json_encode(['e08' => 'corrida', 'processo' => (int) $argv[2], 'status' => $status], JSON_THROW_ON_ERROR).PHP_EOL;
+    echo json_encode([
+        'e08' => 'corrida', 'processo' => (int) $argv[2], 'status' => $status, 'worker' => $metrics['worker'],
+    ], JSON_THROW_ON_ERROR).PHP_EOL;
 }
 
 if ($mode === 'race-check') {
@@ -398,7 +445,12 @@ if ($mode === 'race-check') {
 
     $final = DB::table('people')->where('id', $race['person'])->value('name');
     verify($previous === $final);
+    verify($events->count() === 10);
     verify($events->pluck('operation_id')->unique()->count() === $events->count());
+    verify($events->every(fn ($event) => $event->actor_id === $data['scenarios']['integral']['user']
+        && $event->account_id === $data['account']
+        && $event->company_id === null && $event->establishment_id === null
+        && $event->represented_user_id === null));
 
     echo json_encode([
         'e08' => 'corrida-verificada',
@@ -407,3 +459,9 @@ if ($mode === 'race-check') {
         'cadeia_coerente' => true,
     ], JSON_THROW_ON_ERROR).PHP_EOL;
 }
+
+// O bootstrap do console pode renderizar uma exceção sem código de saída não zero.
+// O runner exige este marcador para distinguir conclusão de saída parcial.
+echo json_encode([
+    'e08' => 'verificado', 'modo' => $mode,
+], JSON_THROW_ON_ERROR).PHP_EOL;

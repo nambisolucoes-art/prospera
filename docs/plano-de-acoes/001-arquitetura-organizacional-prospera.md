@@ -3,9 +3,10 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 a E07 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 em validação formal. E09 e E10 pendentes. Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026, encerrada no mesmo dia com a suíte estabilizada (seção 26), sem reabrir etapas homologadas |
+| Situação do documento | Aprovado. E01 a E08 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 homologada formalmente em 23/11/2026, com referência em `7cd9b9d` e complementação validada sobre `845218a` (seção 26). E09 e E10 pendentes. Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026, encerrada no mesmo dia com a suíte estabilizada (seção 26), sem reabrir etapas homologadas |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
+| Homologação técnica da E08 | 23/11/2026: Concluída; evidências, limitações aceitas e condições de implantação na seção 26 |
 | Revisão | 6 (20/11/2026): encerramento da E02. Revisão 5 (20/11/2026): execução da E02. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
 | Revisões 5 e 6 | Revisão 6: ajustes da validação (identidade, contatos, segurança de e-mail na E05, URLs) e aprovação de DA-26 a DA-30. Revisão 5: execução da E02 (contrato organizacional). Convenções publicadas em `docs/convencoes/`, `AGENTS.md` emendado e nomenclaturas fechadas (DA-26 a DA-30). Seções 6.2, 6.3, 7.2, 8.2.1, 10.2.1, 12.1, 12.2, E04, R07, 26, 27 e 28 ajustadas. Detalhes no registro da seção 26 |
 | Antecessor | Relatório de auditoria arquitetural apresentado na sessão anterior (não versionado) |
@@ -2116,7 +2117,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E05 | Concluída | 20/11/2026 | 20/11/2026 | Registro, auditoria, revisão, verificação da inspeção e homologação final da E05 na seção 26 | Implantação pendente de provedor de e-mail, backup, migrations e reinício controlado dos workers; `users.account_id` preservada até a E09 |
 | E06 | Concluída (homologada) | 20/11/2026 | | Registro de execução na seção 26 e homologação confirmada na autorização da E07 | Pendências de implantação e de módulos operacionais preservadas |
 | E07 | Concluída | 21/11/2026 | 21/11/2026 | Auditoria final na subseção E07 e homologação nesta seção | Privacidade da descoberta corrigida e verificada; tema disponível aprovado |
-| E08 | Em validação | 21/11/2026 | | Revisão técnica de encerramento na seção 26 | Remoção autorizada e ensaiada. Aguarda homologação formal |
+| E08 | Concluída | 21/11/2026 | 23/11/2026 | `7cd9b9d`, retomada, matriz de cobertura, medições e homologação formal na seção 26 | Homologação técnica aprovada; limitações sintéticas aceitas e condições futuras de implantação preservadas |
 | E09 | Pendente | | | | |
 | E10 | Pendente | | | | |
 
@@ -3125,6 +3126,168 @@ Chromium em ambiente PostgreSQL/FrankenPHP descartável: filtro aberto e cadastr
 
 Git: mesmo HEAD e branch, sem commit ou push. Alterações anteriores preservadas; esta correção acrescenta mudanças em Data e Model de Etiquetas, DirectoryController, `tagModules.ts`, `TagEditorModal.tsx`, `tags.tsx`, testes `PeopleDirectoryTest` e `ContextualAuditTest`, ajuda, tour, convenção de Pessoas e este plano. Nenhuma etiqueta excluída, nenhuma base oficial alterada e nenhuma etapa iniciada.
 
+### Retomada e consolidação da E08 em 23/11/2026
+
+**Estado no checkpoint anterior à homologação abaixo: Em validação, aguardando homologação formal.** E09 e E10 não foram iniciadas. Esta retomada aproveita a implementação existente; não cria outra trilha, serviço por domínio, RBAC ou infraestrutura externa.
+
+#### Diagnóstico anterior à programação
+
+Git inicial: branch `feat/filtros-calendario-titulos`, HEAD `845218a4544cd2c7465acb127d8435eb6ea03fb8`, árvore e staging limpos, nenhum não rastreado ou stash. O commit `7cd9b9da93e4def29d7b7d941cf774bccefda759`, de 21/11/2026, pertence exatamente à E08 deste plano: 60 arquivos, 3.725 inserções e 288 remoções, incluindo serviço central, contexto, consultas, interface, quatro migrations, documentação e ensaios. É ancestral do HEAD, não trabalho pendente fora da branch. A revisão fiscal e a retirada da interface avulsa de Pessoas vieram depois dele.
+
+| Classificação inicial | Constatação |
+| --- | --- |
+| Desenvolvido e aproveitado | `Auditable`, `AuditsChanges`, `AuditObserver`, `AuditLog`, `AuditContext`, transação HTTP, `AuditQuery`, filtros, detalhe, autoria real e representada, inspeção, FKs compostas, CHECKs, índices, proteção de histórico confirmado e migração legada |
+| Desenvolvido e revalidado | Matriz de escopos, PD-02, rollback, no-op, privacidade, inspeção revogada, consulta por ID, opções e paginação, interface e responsividade |
+| Incorreto na apresentação | Formatação de módulo de etiqueta ainda mostrava Pessoas e deixava Clientes/Fornecedores como códigos |
+| Incompleto no registro | Sincronização do catálogo detectava mudanças em metadados, mas registrava somente o nome, inclusive quando o nome não mudava |
+| Incompleto nos ensaios | Rollbacks por quantidade presumiam que E08 era a última migration; escritas comerciais exigiam conferir dois eventos de nós diferentes; repetição do isolamento reutilizava nome fixo; conclusão do PHP precisava de marcador explícito |
+| Fora desta entrega | E09, E10, módulos comerciais novos, política de retenção e arquivamento, eventos de segurança para tentativas negadas e implantação operacional |
+
+A linha de base foi conferida novamente: 255 testes PHP e 3.291 asserções, zero falhas. O quadro anterior já mantinha a E08 em validação. Não foi encontrada razão para reimplementar o núcleo.
+
+#### Correções desta retomada
+
+- `SyncPermissionsAction` passa a registrar escopo, módulo, classificação de sistema e conta quando esses campos efetivamente mudam. O nome só entra se mudar ou no cadastro. O registro continua como `permission-catalog`, sem conta, na mesma transação; não há alteração na decisão de autorização. Teste novo cobre antes/depois, autoria e silêncio na sincronização seguinte.
+- `config/audit.php` traduz os módulos de etiquetas como Clientes, Fornecedores e Cadastro anterior. A tradução ocorre na leitura; o histórico armazenado e textos livres permanecem intactos. Não há menu, cadastro, listagem ou novas etiquetas próprias de Pessoas. `people` continua como estrutura interna para Clientes, Fornecedores e Usuários.
+- O cliente de performance verifica separadamente o evento central da Pessoa (conta) e o da relação de Cliente (empresa), ligados pelo `operation_id`. O cenário de escrita atual é identificado como cadastro de Cliente e Pessoa, sem compará-lo ao cadastro avulso antigo. A corrida exige dez eventos, operações distintas, cadeia antes/depois, autor e nó corretos; registra o worker de cada resposta.
+- O runner exige marcador final de conclusão além de status HTTP e payload. A exceção renderizada pelo bootstrap do console pode produzir saída parcial sem exit code não zero; essa saída agora falha no runner. A alternância é repetida com dois workers configurados, com IDs observados explícitos. A carga sequencial pode utilizar só um; nos ensaios finais, a alternância e as dez requisições concorrentes comprovaram atendimento pelos dois.
+- Os dois processos FrankenPHP descartáveis usam limite de 20 mil requisições para não confundir reciclagem programada com vazamento durante o ensaio. Nenhuma configuração oficial de workers foi alterada. Identificadores sintéticos são únicos entre repetições.
+- O harness de migrations seleciona as quatro migrations da E08 por nome, tanto na evolução como na reversão. A instalação limpa continua executando o esquema atual inteiro, inclusive as migrations posteriores.
+- Ajuda, tour, convenção de auditoria e README de performance atualizados. Alvos e ordem do tour foram revisados e preservados. Não houve novo componente, mudança de layout, índice ou migration nesta retomada.
+
+#### Matriz de cobertura verificada
+
+As linhas abaixo representam operações existentes. Eventos Eloquent usam `created`, `updated` e, quando há exclusão permitida, `deleted`; mudanças de relacionamento consolidam no evento da mesma entidade e operação. Somente campos efetivamente alterados são registrados.
+
+| Recurso ou operação | Evento e campos | Nó e autoria | Evidência |
+| --- | --- | --- | --- |
+| Conta: cadastro, edição, plano, situação e provisionamento | `account`, identificação permitida, plano, situação e contatos; documento por marcador | Conta afetada, sem empresa fictícia; administrador SaaS no provisionamento | `SaasPlatformTest`, `ContextualAuditTest`, `AuditAndGuidanceTest` |
+| Empresa: cadastro, edição e situação | `company`, nome, raiz empresarial, tipo, regime, situação e inscrições | Conta e própria empresa | `OrganizationTest`, `ContextualAuditTest` |
+| Estabelecimento: cadastro, edição fiscal, Matriz/Filial, situação e principal | `establishment`, CNPJ empresarial, `is_headquarters`, `is_primary`, situação e campos autorizados; promoção registra as unidades afetadas | Conta, empresa e próprio estabelecimento; mesmo autor da operação | `OrganizationTest`, `ContextualAuditTest` |
+| Cliente e Fornecedor: criação, vinculação, reativação e inativação | `customer` ou `supplier`, pessoa, empresa e situação | Empresa da relação, independentemente da unidade da Área de Trabalho | Testes de diretórios, relações e `CommercialRelationWorkspaceTest`; harness E08 |
+| Dados centrais compartilhados | `person`, identificação, contatos e endereço permitidos; CPF/CNPJ por marcador; evento único, sem cópia por empresa | Conta; edição autorizada por classe de dado | `ContextualAuditTest`, `PersonAdditionalContactsTest`, testes de relações |
+| Etiquetas convencionais comerciais | Evento da relação com `tag_ids`, nomes anteriores e posteriores | Empresa da relação; criação e manutenção do catálogo em nó conta | `PeopleDirectoryTest`, `RoleBasedRegistrationTest`, `SaveCommercialTagsAction` |
+| Etiquetas anteriores | Manutenção do catálogo auditada; vínculos anteriores preservados; não há criação nova do módulo Pessoas | Conta | Testes da estabilização e formatação histórica |
+| Cargos e permissões do cargo | `role`, nome, abrangência e `permission_ids` com nomes legíveis | Conta | `AccessControlTest`, `ContextualAuditTest`, `AuditAndGuidanceTest` |
+| Disponibilidade restrita e atribuições | `role-availability` e `role-assignment`, cargo, escopo e nó concedido ou retirado | Empresa/unidade do nó; disponibilidade geral é da conta | `ContextualAuditTest`, testes de acesso contextual |
+| Suspensão e reativação de vínculo | `account-membership`, situação e mudança explícita da etiqueta automática Usuário | Conta; não altera a identidade global | Testes de acesso e inspeção; `ContextualAuditTest` |
+| Sincronização de permissões | `permission-catalog`, `catalog-synchronized`, nomes e metadados alterados; no-op silencioso | Plataforma/sistema, sem conta ou unidade | `AuditAndGuidanceTest` e teste novo de metadados |
+| Identidade, segundo fator, foto, chaves e acesso | `user`, mudanças permitidas, marcadores de segredos/foto e fato de criação/remoção de chave | Conta da sessão quando houver; autor real | Testes de autenticação, perfil e `AuditAndGuidanceTest` |
+| Entrada, saída, redefinição e convite | `login`, `logout`, `password-reset-requested`, `invitation-requested`; sem token ou corpo da mensagem | Identidade/conta conforme sessão; disparo de link do vínculo em nó conta | Testes de identidade, acesso e auditoria |
+| Inspeção: início, encerramento, saída e revogação | `account`, `inspection-started`/`inspection-ended`, modo e motivo; operações internas seguem o recurso real | Conta inspecionada; administrador SaaS como autor, representado separado | `AccountInspectionTest`, `ContextualAuditTest`, harness E08 |
+
+`audit:check` confirma 12 modelos persistentes cobertos. Ele verifica a declaração de campos e nós, mas não substitui os testes de ações, pivôs, autoria, rollback e escrita em lote.
+
+#### Contrato definitivo preservado
+
+O nó vem da entidade afetada. A Área de Trabalho não fornece empresa ou unidade para a auditoria. Pessoas e catálogo de Etiquetas são internos à conta; relações comerciais são de empresa; operações de unidade identificam empresa e estabelecimento. Os serviços `AccountContext`, `OrganizationContext`, `EffectivePermissions` e `AuditContext` mantêm binding `scoped`, sem guardar Request, User ou Session em singleton e sem cache persistente de permissões.
+
+A autoria guarda `actor_id`/nome real, representado id/nome histórico, vínculo e `inspection_id`. O modo é obtido pelo início da mesma inspeção e conta. A inspeção somente leitura bloqueia escritas; revogação encerra a sessão do inspetor na próxima requisição sem encerrar a sessão legítima independente do representado. Fim de sessão passivo pode deixar somente início e operações no histórico, conforme contrato anterior.
+
+Persistência central na mesma transação da alteração: erro HTTP ou falha obrigatória de gravação desfaz a operação; atualização sem mudança é silenciosa; mudanças do mesmo registro e nó se consolidam; nós distintos não se fundem. FKs compostas e CHECKs preservam pertinência; inativação preserva o histórico; eventos anteriores incompletos não recebem contexto inventado. A proteção PostgreSQL preexistente contra UPDATE/DELETE/TRUNCATE de histórico confirmado foi testada, sem criar mecanismo adicional. Proprietário do esquema continua podendo alterar DDL; isso não é prova contra administrador de banco.
+
+A consulta aplica `AuditQuery::scoped` e `AuthorizedNodes` no SQL antes de contar, paginar, buscar, montar opções ou consultar detalhe. O detalhe exige interseção de listar e visualizar, e o técnico exige permissão no nó. Atribuições se unem, sem dar eventos administrativos da conta a um auditor de unidade ou empresa. Parâmetros só restringem o conjunto autorizado; ID de outro escopo responde 404. A plataforma segue a PD-02, sem acesso automático aos eventos comerciais das contas. Leitura de modo de inspeção recupera somente o modo do início da mesma referência, sem expor o restante do evento de conta.
+
+#### Privacidade e logs
+
+Campos permitidos são declarados pelos Models. Senhas/hashes, tokens, segredos de segundo fator, credenciais e conteúdo de imagem ficam fora dos valores gravados; marcadores informam apenas o fato da alteração. Token de sessão é excluído com justificativa. Eventos explícitos continuam obrigados a enviar apenas valores permitidos. As escritas explícitas existentes foram revisadas: links, chaves e inspeção não copiam segredo, corpo de requisição ou cookies.
+
+CPF/CNPJ central de Pessoa e contratante, e CPF da empresa individual, usam marcadores. Raiz do CNPJ empresarial e CNPJ do estabelecimento permanecem conforme contrato fiscal. E-mail, telefone e endereço centrais só aparecem no histórico da conta para quem tem auditoria nesse nó; permissão local de empresa ou unidade não basta. A permissão técnica não amplia o nó nem revela segredos. Esta é a política atual de minimização, não uma autorização universal a dados pessoais.
+
+Descoberta comercial continua POST consultivo, documento no corpo, resposta privada sem cache e sem evento de mudança. Os logs de inspeção registram IDs, rota e status, sem payload. Falha de gravação central é convertida em `AuditWriteFailed` com tipo, operação e SQLSTATE, sem SQL com bindings. Nenhuma captura de todos os dados da entidade foi adicionada. Tentativas negadas não são eventos de alteração; retenção e segurança operacional continuam decisões separadas.
+
+#### Validação e resultados da retomada
+
+Suíte final: 256 testes PHP, 3.315 asserções, zero falhas; E08 específica: 18 testes e 378 asserções. Frontend: 19 testes; arquitetura, tipos e build aprovados. PHPStan sem erros e Pint aprovado. `permissions:sync`: 81 descobertas, nenhuma alteração; `audit:check`: 12 modelos; `organization:check`: nenhuma violação, em PostgreSQL descartável. A suíte permanece em SQLite em memória e e-mail em array, mesmo dentro do Docker.
+
+Migrations em PostgreSQL 18 descartável: recusa de contexto incoerente antes de alterar o esquema; evolução pré-E08; importação de uma linha sem equivalente; contagens preservadas e sem duplicatas; FKs/CHECKs; UPDATE/DELETE/TRUNCATE negados a papel DML; consolidação na transação com savepoint; exportação e restauração das origens para rollback; reversão por nome, reaplicação e instalação atual limpa. Nenhuma migration ou base oficial foi alterada. Medição exploratória de 200 mil inserções sobre 800 mil: 8.585,96 ms com índices e proteção, 10.946,28 ms com os mesmos índices sem proteção e 6.918,21 ms com índices anteriores. Uma amostra por cenário em host compartilhado não permite atribuir a diferença isoladamente à proteção ou afirmar que ela acelera a escrita.
+
+Chromium: lista, ficha com texto longo, autoria/representado/modo, Formatado/Log técnico, tradução histórica e estado vazio em 1440, 1024, 768, 390 e 320 px; perfis de empresa sem permissão técnica e plataforma em 1440 e 390 px. Sem erro JavaScript ou rolagem horizontal da página. Fechamento pelo botão testado; tour revisado sem mudança de alvos ou ordem. Capturas em `/tmp/pw/shots/e08-*.png`. Não houve escrita de negócio pelo navegador; persistência e recusas foram verificadas por testes HTTP e harnesses.
+
+Os ensaios finais usam cópia imutável em `/tmp/prospera-e08-delivery-snapshot`, imagem `prospera-app:latest`, PostgreSQL em tmpfs, rede interna e e-mail em log. Os registros completos ficam em `/tmp/prospera-e08-delivery-volume.log`, `prospera-e08-delivery-endurance.log`, `prospera-e08-migrations-final.log`, `prospera-e08-delivery-tests.log` e `prospera-e08-visual.log`, todos no mesmo diretório temporário. Resultados quantitativos finais e limites estão na subseção seguinte.
+
+#### Medições finais em PostgreSQL e FrankenPHP
+
+PostgreSQL 18.7, FrankenPHP 1.14.0, PHP 8.5.13. Cada cenário tem dez amostras após uma descartada para aquecimento. Os volumes são de eventos sintéticos, além dos eventos gerados pelas fixtures. As linhas visíveis abaixo são os totais autorizados do perfil, não o total global nem linhas materializadas em PHP. Cada página contém no máximo 20 eventos. A matriz completa inclui lista, busca, período, autor, página profunda, empresa, estabelecimento e detalhe quando autorizado: 45 combinações por volume, 180 medições.
+
+| Volume sintético | Perfil e caso | Eventos autorizados | HTTP mediana / p95 (ms) | Banco mediana (ms) | Queries | Pico adicional mediano (KiB) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 10000 | integral: lista | 6890 | 33.55 / 36.04 | 15.9 | 15 | 622.2 |
+| 10000 | integral: busca | 6890 | 52.56 / 56.19 | 33.92 | 15 / 16 | 618.8 |
+| 10000 | empresa: lista | 839 | 35.93 / 37.48 | 15.55 | 15 / 16 | 403.1 |
+| 10000 | estabelecimento: lista | 56 | 28.27 / 30.6 | 10.28 | 14 | 256.6 |
+| 10000 | atribuicoes-30: lista | 1282 | 37.84 / 39.55 | 16.28 | 15 | 375.3 |
+| 10000 | integral: detalhe | 6890 | 12.61 / 15.42 | 5.29 | 8 / 9 | 115.5 |
+| 100000 | integral: lista | 67707 | 46.89 / 51.48 | 29.93 | 15 | 625.2 |
+| 100000 | integral: busca | 67707 | 151.51 / 165.87 | 136.32 | 15 | 629.9 |
+| 100000 | empresa: lista | 8134 | 38.01 / 40.43 | 19.98 | 15 / 16 | 403.1 |
+| 100000 | estabelecimento: lista | 542 | 28.74 / 30.95 | 11.53 | 14 | 257.3 |
+| 100000 | atribuicoes-30: lista | 12228 | 51.52 / 60.78 | 30.46 | 15 | 375.3 |
+| 100000 | integral: detalhe | 67707 | 10.85 / 12.16 | 4.53 | 8 / 9 | 115.5 |
+| 500000 | integral: lista | 337983 | 69.22 / 76.42 | 54.48 | 15 | 624.5 |
+| 500000 | integral: busca | 337983 | 259.82 / 291.31 | 243.61 | 15 | 631.1 |
+| 500000 | empresa: lista | 40567 | 80.26 / 122.6 | 61.05 | 15 | 403.1 |
+| 500000 | estabelecimento: lista | 2704 | 32.38 / 36.41 | 15.39 | 14 | 257.3 |
+| 500000 | atribuicoes-30: lista | 60876 | 114.37 / 134.62 | 97.54 | 15 | 375.3 |
+| 500000 | integral: detalhe | 337983 | 24.67 / 26.5 | 10.95 | 8 | 115.5 |
+| 1000000 | integral: lista | 675827 | 114.12 / 140.42 | 97.35 | 15 | 624.7 |
+| 1000000 | integral: busca | 675827 | 533.45 / 561.15 | 516.5 | 15 | 631.1 |
+| 1000000 | empresa: lista | 81107 | 142.42 / 151.04 | 120.73 | 15 | 403.1 |
+| 1000000 | estabelecimento: lista | 5407 | 39.42 / 41.76 | 22.51 | 14 / 15 | 257.3 |
+| 1000000 | atribuicoes-30: lista | 121688 | 186.16 / 200.85 | 166.77 | 15 / 16 | 375.3 |
+| 1000000 | integral: detalhe | 675827 | 10.77 / 12.91 | 4.26 | 8 | 115.6 |
+
+Nenhuma consulta medida teve assinatura SQL repetida. Variações de uma query decorrem da infraestrutura de sessão. `EXPLAIN (ANALYZE, BUFFERS)` confirmou uso dos índices preexistentes de conta/data, empresa/data, unidade/data, autor e tipo/ação. Os índices ocupavam cerca de 263 MB em um milhão de eventos (relação total de aproximadamente 505 MB). Não foi adicionado ou removido índice nesta retomada. A busca ampla continua usando varredura quando esse é o plano escolhido. Sem consulta ou índice de leitura alterado, os valores atuais são revalidação da implementação existente, não uma alegação de ganho frente à E07.
+
+No ensaio final de 10 mil, cadastro de Cliente e Pessoa: 30 amostras, mediana HTTP 20,97 ms, p95 25,50 ms, banco mediano 9,35 ms, 22 queries, pico adicional mediano 142 KiB. Há uma assinatura repetida na escrita: trava da conta na Action comercial e na Action de Pessoa, ambas preexistentes. Isso não é N+1 de listagem nem duplicação de evento; sua otimização comercial não foi antecipada nesta etapa. Os dois eventos produzidos são conferidos em seus respectivos nós e na mesma operação.
+
+Isolamento final: 300 escritas alternadas e leituras negadas com um worker, e mais 300 com dois workers, com conferência individual de autor, representado, conta e ausência de nó fictício no evento central. Os dois IDs de worker foram observados na instância dupla, tanto na alternância como na corrida. Dez PATCH concorrentes retornaram 204 e produziram exatamente dez eventos, operações únicas e cadeia antes/depois coerente. Revogação de inspeção foi testada em ambas as instâncias. Os dois runners finais terminaram com todos os marcadores de conclusão exigidos.
+
+Carga prolongada final no conjunto de 10 mil: oito lotes de 450 consultas, total 3.600 respostas (2.800 HTTP 200 e 800 HTTP 404 esperados), mesmo worker e zero SQL repetido. Medianas HTTP por lote de 20,81 a 25,22 ms; p95 de 44,51 a 51,58 ms. A mediana da memória PHP inicial ficou em 9.219.512 bytes nos oito lotes; pico adicional mediano de 282 KiB. O uso do contêiner variou de 392,8 a 396,2 MiB, com pequenas quedas entre lotes. A variação total de 3,4 MiB merece acompanhamento em carga mais longa; a memória PHP estável e as asserções aprovadas não são prova de RSS invariável ou de capacidade de produção. A carga prolongada não foi repetida integralmente em um milhão; esse volume foi coberto nas consultas, planos, escritas e isolamento.
+
+Os ensaios são sequenciais em host compartilhado; o runner de volume e o de carga pequena se sobrepuseram em parte. Não há comparação causal de latência entre revisões nem dimensionamento de capacidade. Não foram adicionados Redis, filas, particionamento, outro banco ou motor de busca.
+
+#### Limites e estado do Git
+
+Host compartilhado e dados sintéticos; amostras sequenciais não medem capacidade simultânea sustentada. Ensaios exploratórios concorrentes com migrations sofreram pressão de memória e foram substituídos pelas execuções finais em cópia imutável. Duas fragilidades do próprio harness foram corrigidas antes do aceite: nome fixo repetido e reciclagem do worker durante a alternância longa. Código HTTP sozinho ou saída parcial não são aceitos como sucesso. Não houve regressão funcional comprovada no núcleo contextual.
+
+Persistem os limites já documentados: busca textual ampla, contagens em grandes conjuntos, ausência de política de retenção e necessidade de backup/reconciliação antes de evoluir bases operacionais. Nenhum índice novo foi adicionado para antecipar demanda. E08 permanece Em validação, sem homologação automática. Não há autorização para E09, E10 ou implantação nesta entrega.
+
+Git final: branch `feat/filtros-calendario-titulos`, HEAD `845218a`, 11 arquivos modificados, nenhum em staging, não rastreado ou stash. Sem commit ou push nesta retomada. Mudanças limitadas à sincronização auditada do catálogo, rótulos de auditoria, teste de contrato, harnesses e documentação. Todos os containers e redes dos ensaios desta retomada foram removidos ao final. Nenhum arquivo de outra sessão foi descartado. A autorização de commit/push anterior foi consumada na frente de estabilização; esta tarefa observa a restrição atual.
+
+### Homologação formal e encerramento da E08 em 23/11/2026
+
+**Estado definitivo: Concluída.** O usuário aprovou expressamente a homologação técnica da E08, com base na última validação. E01 a E08 estão concluídas; E09 e E10 permanecem pendentes, sem autorização de início. Os registros anteriores de Em validação representam checkpoints históricos, superados por esta homologação. Não há ampliação de escopo nem necessidade de reimplementar a etapa.
+
+**Referência e complementação aprovadas.** O núcleo do commit `7cd9b9da93e4def29d7b7d941cf774bccefda759` foi reaproveitado. A complementação validada sobre o HEAD `845218a` abrange os rótulos históricos de etiquetas na leitura, sem reescrever eventos, o registro dos metadados efetivamente alterados na sincronização de permissões, os testes correspondentes e as correções dos harnesses (conclusão explícita, conferência dos eventos central e comercial, nomes sintéticos únicos, workers e rollback por nome). Essa complementação permanece na árvore de trabalho, ainda sem commit próprio.
+
+Foram aprovados o serviço central existente, o contexto do recurso afetado, a autoria real separada do representado, as proteções da inspeção SaaS, a consulta SQL protegida pelo RBAC contextual, a preservação do histórico, a integridade transacional, a minimização de dados sensíveis, os harnesses e a validação visual. Pessoas permanece entidade técnica interna: sem cadastro avulso, menu, listagem própria ou novas etiquetas de Pessoas; vínculos anteriores e classificações comerciais são preservados.
+
+**Evidências homologadas, sem nova execução nesta formalização documental.**
+
+- Suíte PHP: 256 testes, 3.315 asserções, zero falhas.
+- E08 específica: 18 testes, 378 asserções; frontend: 19 testes aprovados.
+- Arquitetura, tipos, build, PHPStan e Pint aprovados; `permissions:sync` com 81 permissões descobertas e nenhuma alteração; `audit:check` com 12 modelos cobertos; `organization:check` sem violações.
+- PostgreSQL 18.7 e FrankenPHP 1.14.0 descartáveis, com instalação, evolução, reversão, reaplicação, integridade e proteção do histórico verificadas. A suíte continua exclusivamente em SQLite em memória.
+- Dez escritas concorrentes com dez eventos e cadeia coerente; alternância de 300 escritas com um worker e mais 300 com dois workers, conferindo autoria, inspeção, conta e nós. Carga prolongada de 3.600 consultas com respostas esperadas.
+- 180 medições de consulta nos volumes de 10 mil, 100 mil, 500 mil e um milhão de eventos sintéticos. A matriz de cobertura, os planos SQL e as tabelas de resultados anteriores permanecem integralmente preservados.
+- Interface validada em 1440, 1024, 768, 390 e 320 px, incluindo detalhes, inspeção, rótulos e estado vazio.
+
+**Limitações expressamente aceitas, sem bloqueio ao encerramento técnico.**
+
+1. A busca textual ampla em um milhão de eventos apresentou mediana de aproximadamente 533 ms e p95 de 561 ms (valores medidos: 533,45 e 561,15 ms).
+2. Essas medições constituem linha de base sintética em host compartilhado, não garantia de desempenho ou dimensionamento de produção.
+3. Uma otimização futura deve considerar frequência real de uso, seletividade dos filtros, planos SQL medidos e impacto nas inserções.
+4. Esta homologação não autoriza infraestrutura externa, índices especulativos ou particionamento.
+5. Retenção e arquivamento dependem de política futura; não há autorização de descarte de histórico.
+6. O ensaio prolongado de memória não substitui medições com carga simultânea sustentada em produção. A variação do contêiner e a estabilidade da memória PHP permanecem registradas como evidência limitada.
+
+**Condições futuras de implantação.** O encerramento técnico não representa implantação. Permanecem necessários autorização operacional própria, backup verificado, exportação e reconciliação das origens legadas quando aplicável, ensaio prévio em cópia isolada, conferência de escopo e privacidade e atualização controlada dos workers. A credencial de execução deve ter os privilégios necessários de dados, separada da credencial administrativa de migrations. Bases oficiais e produção não foram alteradas; nenhum histórico foi excluído nesta formalização. Monitoramento de consultas e memória em carga real e política de retenção/arquivamento continuam pendências operacionais futuras.
+
+**Checkpoint documental e Git.** Conferência desta homologação: branch `feat/filtros-calendario-titulos`, HEAD `845218a`, 11 arquivos modificados, nenhum em staging, não rastreado ou stash. Os diffs correspondem à complementação da E08 apresentada na validação anterior: `SyncPermissionsAction.php`, `config/audit.php`, ajuda e convenção de auditoria, este plano, tour de auditoria, `AuditAndGuidanceTest.php`, README de Performance e os três harnesses E08. Não foi identificada alteração adicional de outra frente pelos caminhos e conteúdo atuais; a autoria de sessão não é um atributo recuperável do Git. Todos os diffs existentes foram preservados.
+
+Esta intervenção acrescenta somente a homologação neste plano (cabeçalho, quadro, registro de decisões e este encerramento). Essa alteração documental fica identificada para um futuro checkpoint junto da complementação já validada. Nenhum código, teste, migration, configuração ou outro documento foi modificado nesta formalização. Sem commit ou push; a autorização anterior de envio dizia respeito à frente já encerrada de estabilização. E01 a E07 não foram reabertas, e E09 e E10 não foram iniciadas.
+
 ## 27. Contrato para módulos futuros
 
 ### 27.1 Checklist oficial
@@ -3178,7 +3341,9 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | E06 | Início do estabelecimento como destino do seletor; 403 orientado para contexto inativo; consolidado somente leitura; seletor em todas as telas da conta | Proposta, em validação | 20/11/2026 | Registro de execução da E06 |
 | E07 | Descoberta comercial por POST consultivo, com documento no corpo e resposta privada sem cache | Aprovada | 21/11/2026 | Preserva CSRF, escopo empresarial, autorização e inspeção somente leitura |
 | E07 | Fechamento da etapa e aceite do tema disponível | Concluída | 21/11/2026 | Homologação final na seção 26 |
-| E08 | E08-D1 a E08-D6: lista da PD-02, integridade por FKs compostas e CHECKs, identificação histórica da inspeção, nó da disponibilidade restrita, índices de leitura e importação legada | D4 aprovada. D1 a D3, D5 e D6 validadas tecnicamente | 21/11/2026 | Revisão técnica da seção 26 |
+| E08 | E08-D1 a E08-D6: lista da PD-02, integridade por FKs compostas e CHECKs, identificação histórica da inspeção, nó da disponibilidade restrita, índices de leitura e importação legada | Aprovadas na homologação técnica | 23/11/2026 | Revisão técnica de 21/11/2026 preservada; homologação formal na seção 26 |
+| E08 | Encerramento técnico: núcleo `7cd9b9d` e complementação validada sobre `845218a`, com contrato de Pessoas interno preservado | Concluída | 23/11/2026 | 256 testes PHP e 3.315 asserções; 18 testes E08 e 378 asserções; 19 testes frontend; sem implantação ou autorização de E09/E10 |
+| E08 | Limitações de busca ampla, linha de base sintética, memória, retenção e arquivamento | Aceitas, sem bloqueio técnico | 23/11/2026 | Busca em um milhão: mediana aproximada 533 ms e p95 561 ms; otimização futura baseada em uso, planos e custo de inserção; sem infraestrutura ou índices especulativos |
 | RF-01 | Padronização de CPF e CNPJ: máscara na digitação, validação visual, CNPJ alfanumérico e correção de listagens e fichas | Aprovada | 23/11/2026 | Revisão complementar fiscal na seção 26 |
 | RF-02 | A matriz não é pré-requisito da filial: uma empresa pode administrar só filiais no Prospera; a matriz cadastrada aparece só como referência, conforme permissão | Aprovada (cadastro obrigatório da matriz rejeitado) | 23/11/2026 | Complementa DA-04 e a seção 6.5. Sem matriz fictícia nem principal duplicada |
 | RF-03 | Estabelecimentos na navegação administrativa e na arquitetura técnica; Unidades na Área de Trabalho e no seletor organizacional | Aprovada | 23/11/2026 | Sem renomear tabelas, Models, rotas ou domínios |

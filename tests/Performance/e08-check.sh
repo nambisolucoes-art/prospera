@@ -64,6 +64,17 @@ docker exec "$prefix-app" frankenphp version
 docker exec "$prefix-db" postgres --version
 echo "fase: $phase"
 
+# Exige conclusão explícita: uma exceção renderizada pelo bootstrap não basta como sucesso.
+client() {
+    local output
+    output=$(docker exec -e E08_PHASE="$phase" \
+        -e HARNESS_URL="${E08_CLIENT_URL:-http://127.0.0.1:8000}" \
+        -e E08_ISOLATION_WORKERS="${E08_CLIENT_WORKERS:-1}" \
+        "$prefix-app" php /performance/e08-client.php "$@")
+    echo "$output"
+    grep -q '"e08":"verificado"' <<<"$output"
+}
+
 scenario() {
     docker exec "$prefix-app" php -r '
         $data = json_decode(file_get_contents("/tmp/prospera-e08-scenarios.json"), true);
@@ -81,18 +92,18 @@ units30=$(sql "select string_agg(ra.establishment_id::text, ',') from role_assig
 
 for volume in $volumes; do
     docker exec -i "$prefix-db" psql -X -q -U postgres -d e08 -v target="$volume" < "$fixture_dir/e08-volume.sql"
-    docker exec -e E08_PHASE="$phase" "$prefix-app" php /performance/e08-client.php measure "$volume"
+    client measure "$volume"
     echo "== planos em $volume eventos"
     docker exec -i "$prefix-db" psql -X -U postgres -d e08 -v account="$account" -v company="$company" \
         -v unit="$unit" -v units30="$units30" < "$fixture_dir/e08-plans.sql"
 done
 
-docker exec -e E08_PHASE="$phase" "$prefix-app" php /performance/e08-client.php write
-docker exec -e E08_PHASE="$phase" "$prefix-app" php /performance/e08-client.php isolation
+client write
+client isolation
 
 # Concorrência: segunda instância com dois workers, só neste ambiente, e dez alterações simultâneas da mesma Pessoa.
 docker exec -d -e OCTANE_STATE_FILE=/tmp/octane-race-state.json "$prefix-app" \
-    php artisan octane:frankenphp --host=127.0.0.1 --port=8001 --admin-port=2020 --workers=2
+    php artisan octane:frankenphp --host=127.0.0.1 --port=8001 --admin-port=2020 --workers=2 --max-requests=20000
 race_ready=0
 for attempt in {1..60}; do
     if docker exec "$prefix-app" php -r 'exit(@file_get_contents("http://127.0.0.1:8001/up") === false ? 1 : 0);' 2>/dev/null; then
@@ -114,10 +125,13 @@ race_result=$(docker exec "$prefix-app" php /performance/e08-client.php race-che
 echo "$race_result"
 grep -q corrida-verificada <<<"$race_result"
 
+# Repete a alternância de autores, contas e inspeção nos dois workers reais.
+E08_CLIENT_URL=http://127.0.0.1:8001 E08_CLIENT_WORKERS=2 client isolation
+
 # E08_ENDURANCE=0 omite a carga prolongada (8 lotes de 450 requisições sequenciais).
 if [ "${E08_ENDURANCE:-1}" = 1 ]; then
     for batch in 1 2 3 4 5 6 7 8; do
-        docker exec -e E08_PHASE="$phase" "$prefix-app" php /performance/e08-client.php endurance "$batch"
+        client endurance "$batch"
         docker stats --no-stream --format '{"e08":"memoria-conteiner","lote":'"$batch"',"uso":"{{.MemUsage}}"}' \
             "$prefix-app"
     done

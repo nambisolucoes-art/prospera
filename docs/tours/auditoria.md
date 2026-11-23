@@ -27,3 +27,5 @@ Os campos do detalhe mostram os rótulos das opções em português, inclusive p
 E08: o passo de filtros cita Origem e os filtros de Empresa, Estabelecimento e Nível, que só aparecem com mais de uma opção no acesso do usuário. O passo da tabela explica as colunas Onde e Quem fez, com a marca Inspeção e o usuário representado. O novo passo `audit-modal-context` usa a mesma sessão de demonstração do modal e não grava dados. A ordem dos passos existentes foi preservada.
 
 Na revisão de encerramento, o tour foi percorrido a 1440, 1024, 768, 390 e 320 px. Os passos de largura da tabela foram pulados nas duas larguras menores. A demonstração fechou a ficha em todas as larguras.
+
+Revisão da retomada E08: os módulos de etiquetas mostram Clientes, Fornecedores e Cadastro anterior no detalhe histórico. Não há entrada de Pessoas no produto. Alvos, ordem e comportamento do tour permanecem válidos.

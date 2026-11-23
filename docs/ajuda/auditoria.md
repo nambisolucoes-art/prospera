@@ -13,7 +13,7 @@ A auditoria é o histórico das mudanças feitas no Prospera: quem fez, quando, 
 
 Abra **Auditoria** no menu. É necessária a permissão de listar auditoria. Busque pelo nome do registro ou do autor para atualizar a lista automaticamente. A lupa à direita e Enter também executam a busca. Nas datas, digite no formato DD/MM/AAAA ou use o botão de calendário à direita para escolher o dia; **Limpar** remove a data. Uma data inexistente é indicada abaixo do campo e não é aplicada.
 
-Cada linha mostra o registro, a ação, o tipo, **Onde** a mudança aconteceu, **Quem fez** e **Quando**. Em **Onde** aparece o estabelecimento com a empresa abaixo, a empresa, ou Conta quando a mudança é da conta inteira, como a criação de cargos, mudanças de usuários, etiquetas e o cadastro central de Pessoas. A inclusão ou remoção de uma restrição de disponibilidade de cargo aparece na empresa ou no estabelecimento da restrição.
+Cada linha mostra o registro, a ação, o tipo, **Onde** a mudança aconteceu, **Quem fez** e **Quando**. Em **Onde** aparece o estabelecimento com a empresa abaixo, a empresa, ou Conta quando a mudança é da conta inteira, como a criação de cargos, mudanças de usuários, etiquetas e os dados centrais compartilhados usados por Clientes, Fornecedores e Usuários. A inclusão ou remoção de uma restrição de disponibilidade de cargo aparece na empresa ou no estabelecimento da restrição.
 
 ## Filtrar
 
@@ -72,4 +72,4 @@ Os tons seguem a paleta auxiliar compartilhada do sistema, também usada em situ
 
 ## Valores apresentados
 
-O detalhe traduz valores de opções para os nomes usados nos formulários, inclusive em registros antigos: Modo de inspeção mostra Somente leitura ou Leitura e edição, módulo people mostra Pessoas e tipos de pessoa mostram Pessoa física ou Pessoa jurídica. Situações mostram Ativa ou Inativa, e acesso mostra Habilitado ou Revogado. Os valores históricos armazenados são preservados; a formatação acontece na consulta. Textos livres não são traduzidos.
+O detalhe traduz valores de opções para os nomes usados nos formulários, inclusive em registros antigos: Modo de inspeção mostra Somente leitura ou Leitura e edição, módulos de etiquetas mostram Clientes ou Fornecedores, e classificações anteriores mostram Cadastro anterior e tipos de pessoa mostram Pessoa física ou Pessoa jurídica. Situações mostram Ativa ou Inativa, e acesso mostra Habilitado ou Revogado. Os valores históricos armazenados são preservados; a formatação acontece na consulta. Textos livres não são traduzidos.

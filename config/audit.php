@@ -63,7 +63,11 @@ return [
             'tax_regime' => Company::TAX_REGIMES,
         ],
         'tag' => [
-            'module' => ['people' => 'Pessoas'],
+            'module' => [
+                'people' => 'Cadastro anterior',
+                'customers' => 'Clientes',
+                'suppliers' => 'Fornecedores',
+            ],
             'system_key' => ['user' => 'Usuário', 'supplier' => 'Fornecedor', 'customer' => 'Cliente'],
         ],
         'role' => ['system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário']],

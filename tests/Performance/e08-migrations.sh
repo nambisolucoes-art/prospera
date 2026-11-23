@@ -37,6 +37,23 @@ use() {
     app "for path in app bootstrap config database routes; do rm -rf /app/\$path; cp -R /$1/\$path /app/\$path; done;
         rm -f /app/.env /app/bootstrap/cache/config.php /app/bootstrap/cache/routes*.php"
 }
+# Seleciona as migrations da etapa por nome, sem depender de quantas vieram depois dela.
+evolve() {
+    for migration in \
+        2026_11_21_000003_consolidate_contextual_audit \
+        2026_11_21_000004_tune_audit_read_indexes \
+        2026_11_21_000005_protect_committed_audit_history \
+        2026_11_21_000006_remove_legacy_audit_tables; do
+        app "php artisan migrate --path=database/migrations/$migration.php --force" || return 1
+    done
+}
+rollback_named() {
+    local migration=$1
+    local batch
+    batch=$(sql "select batch from migrations where migration = '$migration'")
+    [[ $batch =~ ^[0-9]+$ ]] || { echo "Migration não aplicada: $migration"; exit 1; }
+    app "php artisan migrate:rollback --path=database/migrations/$migration.php --batch=$batch --force -q"
+}
 refused() {
     local output
     if output=$(sql "$1" 2>&1); then
@@ -71,7 +88,7 @@ sql "insert into audit_records (operation_id, actor_name, account_id, context, e
     event, changes, created_at, establishment_id)
     values (gen_random_uuid(), 'Teste', (select min(id) from clients), 'account', 'establishment', 1, 'Incoerente',
     'updated', '{}', now(), (select min(id) from establishments))"
-if app 'php artisan migrate --force' >"$refusal_log" 2>&1; then
+if evolve >"$refusal_log" 2>&1; then
     echo 'Falha: a migration aceitou histórico incoerente'
     exit 1
 fi
@@ -81,7 +98,8 @@ echo 'Recusada a evolução com unidade sem empresa; esquema intacto'
 sql "delete from audit_records where entity_name = 'Incoerente'"
 
 # 3. Evolução: colunas, FKs, CHECKs, índices e importação legada sem duplicatas.
-app 'php artisan migrate --force && php artisan audit:check && php artisan organization:check'
+evolve
+app 'php artisan audit:check && php artisan organization:check'
 [[ $(sql 'select count(*) from audit_records') == $(( before + 1 )) ]]
 [[ $(sql "select count(*) from audit_records where legacy_key like 'e08:%'") == 1 ]]
 [[ $(sql "select count(*) from audit_records where company_id is not null") == "$organizational" ]]
@@ -142,15 +160,17 @@ sql "begin;
 # 5. A remoção preserva a trilha central. O backup descartável restaura as linhas para ensaiar
 # a reversão até a E07 e a reaplicação com os mesmos dados de entrada.
 [[ $(sql "select count(*) from information_schema.tables where table_name in ('directory_audit_events', 'access_catalog_events')") == 0 ]]
-app 'php artisan migrate:rollback --step=1 --force'
+rollback_named 2026_11_21_000006_remove_legacy_audit_tables
 [[ $(sql "select count(*) from directory_audit_events") == 0 ]]
 docker exec -i "$prefix-db" psql -X -q -v ON_ERROR_STOP=1 -U postgres -d e08 < "$legacy_backup"
-app 'php artisan migrate:rollback --step=3 --force'
+rollback_named 2026_11_21_000005_protect_committed_audit_history
+rollback_named 2026_11_21_000004_tune_audit_read_indexes
+rollback_named 2026_11_21_000003_consolidate_contextual_audit
 [[ $(sql 'select count(*) from audit_records') == "$before" ]]
 [[ $(sql "select count(*) from information_schema.columns where table_name = 'audit_records' and column_name in ('inspection_id', 'represented_user_name', 'write_transaction')") == 0 ]]
 [[ $(sql "select count(*) from pg_indexes where indexname = 'audit_records_actor_id_created_at_index'") == 1 ]]
 echo "Reversão: $(sql 'select count(*) from audit_records') eventos (importação da E08 removida, histórico preservado)"
-app 'php artisan migrate --force -q'
+evolve
 [[ $(sql 'select count(*) from audit_records') == $(( before + 1 )) ]]
 [[ $(sql "select count(*) from information_schema.tables where table_name in ('directory_audit_events', 'access_catalog_events')") == 0 ]]
 echo 'Reaplicação: mesma contagem e mesma importação'
@@ -175,7 +195,8 @@ insert_cost() {
     sql 'vacuum analyze audit_records' >/dev/null
 }
 echo "Inserção de 200 mil com os índices da E08: $(insert_cost)"
-app 'php artisan migrate:rollback --step=2 --force -q'
+rollback_named 2026_11_21_000006_remove_legacy_audit_tables
+rollback_named 2026_11_21_000005_protect_committed_audit_history
 echo "Inserção de 200 mil com os mesmos índices, sem a proteção: $(insert_cost)"
 sql 'drop index audit_records_account_id_actor_id_created_at_index;
     drop index audit_records_account_id_entity_type_event_index;

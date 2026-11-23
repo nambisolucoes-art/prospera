@@ -15,3 +15,13 @@ Na versão sem a tela Pessoas, as escritas de prova usam o cadastro de Cliente e
 O cliente deixou de acessar `/conta/pessoas` e `/conta/pontos`: lista e formulário são de Clientes na unidade da URL; escritas usam Clientes na empresa da URL. Confere payload, HTTP 403/404/422/204, total após escrita, revogação e autoria real/representada. A fixture exige também o escopo empresarial na auditoria. Listagem e escrita comerciais constituem nova linha de base, sem comparação direta com Pessoas ou Pontos. As demais telas preservam a responsabilidade original, mas só são comparáveis com ambiente, carga e versão controlados.
 
 `vendor/bin/phpunit tests/Performance/AccountRequestsTest.php` continua usando SQLite em memória imposto pelo bootstrap. Verifica orçamento estrutural, ausência de SQL repetido e payload de 25 Clientes sintéticos; os tempos desse teste não são métricas de PostgreSQL. Medições HTTP e limites estão no registro complementar do plano 001. Nenhum harness E08 precisa ser executado para essa estabilização.
+
+## Retomada da E08
+
+A retomada usa a implementação de `7cd9b9d`, sem recriar a auditoria. Informe `E08_IMAGE=prospera-app:latest` quando a imagem `prospera-app:e08-base` não estiver disponível. Use uma cópia imutável da fonte e do diretório de harnesses por execução, para não misturar revisões durante uma medição.
+
+O runner exige o marcador final `verificado` do cliente, além dos códigos HTTP e das asserções de payload. Uma exceção renderizada pelo bootstrap não é aceita como conclusão. A medição de cadastro atual inclui Pessoa e relação de Cliente: ambos os eventos são conferidos, com conta, autoria e nó próprios. Os nomes sintéticos são únicos entre repetições. A corrida exige dez eventos, cadeia coerente e autor correto, e informa o worker de cada resposta.
+
+A alternância entre contas e inspeção é repetida na instância com dois workers. Requisições sequenciais podem ser atendidas por apenas um deles; os IDs observados são informados. As escritas concorrentes exercitam os dois. As instâncias descartáveis usam limite de reciclagem de 20 mil requisições para separar reciclagem programada de vazamento de contexto. Isso não modifica a configuração oficial.
+
+O harness de migrations seleciona por nome as quatro migrations da E08, em vez de presumir que sejam as últimas migrations do projeto. A instalação limpa continua executando o esquema atual completo. A cópia anterior deve ser um checkpoint pré-E08, como `e0d3cce`, com os dados sintéticos e tabelas de origem esperados. Exportação/restauração das tabelas antigas e testes destrutivos ocorrem somente no PostgreSQL temporário do próprio runner.
