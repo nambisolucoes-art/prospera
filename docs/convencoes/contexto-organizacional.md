@@ -104,7 +104,7 @@ Um tenant com uma empresa e um estabelecimento não percebe a estrutura:
 - o seletor organizacional fica oculto;
 - rotas operacionais sem código redirecionam para o estabelecimento principal, e o contexto continua definido na URL;
 - o filtro de empresa some das listagens, e o menu Empresas leva direto à edição da empresa;
-- formulários de Pessoas mantêm as seções atuais, sem a distinção entre dados centrais e dados desta empresa, apenas com o aviso de que contatos e endereço pertencem ao cadastro compartilhado da conta;
+- as fichas de Clientes e Fornecedores não pedem a escolha de empresa e mantêm apenas o aviso de que os dados centrais pertencem ao cadastro compartilhado da conta;
 - cargos com abrangência "Toda a conta" são o padrão.
 
 A interface só passa a mostrar empresa, estabelecimento e abrangência quando existir mais de uma opção real.
@@ -155,7 +155,7 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 
 | Tipo de tela | Padrão | Exemplo | Etapa |
 | --- | --- | --- | --- |
-| Administração da conta (nó tenant e cadastros) | URLs atuais preservadas em `/conta/...` | `/conta/pessoas`, `/conta/cargos`, `/conta/editar` | atual |
+| Administração da conta (nó tenant e cadastros) | URLs atuais preservadas em `/conta/...` | `/conta/etiquetas`, `/conta/cargos`, `/conta/editar` | atual |
 | Cadastro de empresas e estabelecimentos | `/conta/empresas`, `/conta/estabelecimentos` | `/conta/estabelecimentos/12/editar` | E04 |
 | Módulo de empresa | `/conta/empresa/{empresa}/...` | `/conta/empresa/gartan/clientes` | E06 |
 | Módulo de estabelecimento | `/conta/estabelecimento/{estabelecimento}/...` | `/conta/estabelecimento/gartan-guanambi/vendas` | E06 |

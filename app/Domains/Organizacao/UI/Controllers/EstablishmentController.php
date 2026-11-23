@@ -66,13 +66,38 @@ final class EstablishmentController
 
         $selectedCompany = $establishment === null ? ($request->integer('empresa') ?: null) : null;
 
+        $companyOptions = $establishment === null
+            ? $this->companyOptions($companies, $accountId, $selectedCompany, $nodes)
+            : [];
+
+        $companyIds = $establishment === null
+            ? array_column($companyOptions, 'id')
+            : [$establishment->company_id];
+
+        // A matriz aparece só para quem pode ver estabelecimentos no nó dela.
+        $headquarters = $establishments->headquarters(
+            $accountId,
+            $companyIds,
+            $permissions->nodesFor($request->user(), 'account.establishments.view'),
+        );
+
         return ApiPage::respond([
             'establishment' => $establishment === null ? null : [
                 ...$this->details($establishment),
                 'company' => $this->companyLabel($establishment->company),
             ],
-            'companies' => $establishment ? [] : $this->companyOptions($companies, $accountId, $selectedCompany, $nodes),
+            'companies' => $companyOptions,
             'selectedCompany' => $selectedCompany,
+            'headquarters' => $headquarters
+                ->map(fn (Establishment $unit) => [
+                    'id' => $unit->id,
+                    'company_id' => $unit->company_id,
+                    'name' => $unit->trade_name ?? $unit->name,
+                    'tax_document_label' => TaxDocument::cnpj($unit->tax_document)?->formatted(),
+                    'active' => $unit->active,
+                ])
+                ->values()
+                ->all(),
         ]);
     }
 

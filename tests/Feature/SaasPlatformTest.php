@@ -26,6 +26,37 @@ class SaasPlatformTest extends TestCase
         $this->assertDatabaseCount('clients', 0);
     }
 
+    public function test_the_account_search_keeps_the_letters_of_an_alphanumeric_cnpj(): void
+    {
+        $this->actingAs(User::factory()->create(['is_saas_admin' => true]));
+
+        Client::create([
+            'name' => 'Contratante alfanumérico',
+            'person_type' => 'company',
+            'document' => '12ABC34501DE35',
+            'active' => true,
+        ]);
+
+        Client::create([
+            'name' => 'Contratante numérico',
+            'person_type' => 'company',
+            'document' => '12345010035000',
+            'active' => true,
+        ]);
+
+        // Sem as letras, a busca viraria 1234501 35 e encontraria a conta errada.
+        foreach (['12.ABC.345/01DE-35', '12abc', '345/01de'] as $search) {
+            $this->getJson('/dashboard?q='.urlencode($search))
+                ->assertOk()
+                ->assertJsonCount(1, 'accounts.data')
+                ->assertJsonPath('accounts.data.0.document', '12ABC34501DE35');
+        }
+
+        $this->getJson('/dashboard?q='.urlencode('Contratante'))
+            ->assertOk()
+            ->assertJsonCount(2, 'accounts.data');
+    }
+
     public function test_the_platform_provisions_accounts_and_the_owner_manages_the_account_data(): void
     {
         $this->actingAs(User::factory()->create(['is_saas_admin' => true]));

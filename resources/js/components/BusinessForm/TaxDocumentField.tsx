@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatPersonDocumentInput, type PersonDocumentType } from '@/utils/formatTaxDocument';
+import { formatPersonDocumentInput, taxDocumentProblem, type PersonDocumentType } from '@/utils/formatTaxDocument';
 import { Field, type Errors, type FieldProps } from './BusinessFormFields';
 
 type Props = Omit<FieldProps, 'label' | 'value' | 'inputMode' | 'maxLength' | 'compact'> & {
@@ -16,6 +16,8 @@ export default function TaxDocumentField({
   const [dismissedErrors, setDismissedErrors] = useState<Errors>();
   const company = personType === 'company';
   const validationError = errors !== dismissedErrors ? errors?.[errorKey ?? name ?? 'document'] : undefined;
+  // Documento salvo e somente leitura não recebe aviso de digitação.
+  const typingProblem = props.readOnly ? undefined : taxDocumentProblem(value, personType);
 
   return (
     <Field {...props}
@@ -26,7 +28,7 @@ export default function TaxDocumentField({
       maxLength={18}
       placeholder={placeholder ?? (company ? 'Numérico ou alfanumérico' : '000.000.000-00')}
       value={formatPersonDocumentInput(value, personType)}
-      error={error || validationError}
+      error={error || typingProblem || validationError}
       onChange={(event) => {
         setDismissedErrors(errors);
         onChange?.(event);

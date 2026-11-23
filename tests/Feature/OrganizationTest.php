@@ -475,11 +475,150 @@ final class OrganizationTest extends TestCase
             Establishment::where('name', 'Filial alfanumérica')->value('tax_document'),
         );
 
+        // Letras valem nos 12 primeiros caracteres; os dígitos verificadores são sempre numéricos.
+        $this->post('/conta/estabelecimentos', $this->establishmentPayload($company, [
+            'name' => 'Verificador com letra',
+            'classification' => 'branch',
+            'tax_document' => '12.ABC.345/02DE-0A',
+        ]))->assertSessionHasErrors(['tax_document' => 'Informe um CNPJ válido.']);
+
+        $this->getJson('/conta/estabelecimentos?search=12.abc.345/02de-06')
+            ->assertJsonPath('establishments.data.0.tax_document_label', '12.ABC.345/02DE-06');
+
+        $this->getJson('/conta/empresas?search=12.ABC.345')
+            ->assertJsonPath('companies.data.0.document_label', '12.ABC.345');
+
         // A raiz isolada também identifica a empresa; a unidade principal fica sem CNPJ próprio.
         $rootOnly = $this->createCompany($owner, ['document' => '99.888.777', 'trade_name' => 'Raiz']);
 
         $this->assertSame('99888777', $rootOnly->tax_root);
         $this->assertSame('unregistered', $rootOnly->primaryEstablishment()->sole()->legalClassification());
+    }
+
+    public function test_a_company_may_administer_only_branches_without_its_headquarters(): void
+    {
+        [, $owner] = $this->account();
+        $company = $this->createCompany($owner, [
+            'document' => '11.222.333/0002-62',
+            'primary' => ['classification' => 'branch'],
+        ]);
+        $primary = $company->primaryEstablishment()->sole();
+
+        // A filial é a unidade principal operacional, sem matriz cadastrada e sem matriz fictícia.
+        $this->assertSame('branch', $primary->legalClassification());
+        $this->assertSame('11222333000262', $primary->tax_document);
+        $this->assertSame(1, $company->establishments()->count());
+
+        $this->actingAs($owner)->post('/conta/estabelecimentos', $this->establishmentPayload($company, [
+            'name' => 'Segunda filial',
+            'classification' => 'branch',
+            'tax_document' => '11.222.333/0003-43',
+        ]))->assertSessionHasNoErrors();
+
+        $second = Establishment::where('name', 'Segunda filial')->sole();
+
+        $this->post('/conta/estabelecimentos/'.$second->id.'/principal')->assertSessionHasNoErrors();
+
+        $this->assertTrue($second->refresh()->is_primary);
+        $this->assertFalse($primary->refresh()->is_primary);
+        $this->assertSame(0, $company->establishments()->where('is_headquarters', true)->count());
+        $this->assertSame(2, $company->establishments()->count());
+
+        // Só com a raiz, a principal nasce sem CNPJ próprio e depois recebe a identificação de filial.
+        $rootOnly = $this->createCompany($owner, ['document' => '99.888.777', 'trade_name' => 'Raiz']);
+        $rootPrimary = $rootOnly->primaryEstablishment()->sole();
+
+        $this->patch('/conta/estabelecimentos/'.$rootPrimary->id, [
+            'classification' => 'branch',
+            'tax_document' => '99.888.777/0002-82',
+        ])->assertSessionHasNoErrors();
+
+        $rootPrimary->refresh();
+
+        $this->assertSame('branch', $rootPrimary->legalClassification());
+        $this->assertTrue($rootPrimary->is_primary);
+        $this->assertSame(1, $rootOnly->establishments()->count());
+
+        $this->artisan('organization:check')
+            ->doesntExpectOutputToContain('matriz')
+            ->assertSuccessful();
+    }
+
+    public function test_the_cnpj_order_never_defines_the_classification(): void
+    {
+        [, $owner] = $this->account();
+        $company = $this->createCompany($owner, ['primary' => ['classification' => 'branch']]);
+
+        // Ordem 0002 como matriz e 0001 como filial: vale o que foi declarado.
+        $this->actingAs($owner)->post('/conta/estabelecimentos', $this->establishmentPayload($company, [
+            'name' => 'Sede declarada',
+            'classification' => 'headquarters',
+            'tax_document' => '11.222.333/0002-62',
+        ]))->assertSessionHasNoErrors();
+
+        $this->assertTrue(Establishment::where('name', 'Sede declarada')->sole()->is_headquarters);
+        $this->assertFalse($company->primaryEstablishment()->sole()->is_headquarters);
+
+        // Trocar a matriz exige reclassificar a atual antes; duas matrizes nunca coexistem.
+        $headquarters = Establishment::where('name', 'Sede declarada')->sole();
+        $primary = $company->primaryEstablishment()->sole();
+
+        $this->patch('/conta/estabelecimentos/'.$primary->id, ['classification' => 'headquarters'])
+            ->assertSessionHasErrors('company_id');
+
+        $this->patch('/conta/estabelecimentos/'.$headquarters->id, ['classification' => 'branch'])
+            ->assertSessionHasNoErrors();
+
+        $this->patch('/conta/estabelecimentos/'.$primary->id, ['classification' => 'headquarters'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(1, $company->establishments()->where('is_headquarters', true)->count());
+        $this->assertTrue($primary->refresh()->is_headquarters);
+    }
+
+    public function test_the_branch_form_shows_the_registered_headquarters_only_to_who_may_view_it(): void
+    {
+        [$account, $owner] = $this->account();
+        $company = $this->createCompany($owner);
+        $headquarters = $company->primaryEstablishment()->sole();
+
+        $this->actingAs($owner)->post('/conta/estabelecimentos', $this->establishmentPayload($company, [
+            'name' => 'Filial',
+            'classification' => 'branch',
+            'tax_document' => '11.222.333/0002-62',
+        ]))->assertSessionHasNoErrors();
+
+        $branch = Establishment::where('name', 'Filial')->sole();
+
+        $this->getJson('/conta/estabelecimentos/'.$branch->id.'/editar')
+            ->assertOk()
+            ->assertJsonPath('headquarters.0.id', $headquarters->id)
+            ->assertJsonPath('headquarters.0.company_id', $company->id)
+            ->assertJsonPath('headquarters.0.tax_document_label', '11.222.333/0001-81');
+
+        $this->getJson('/conta/estabelecimentos/cadastrar?empresa='.$company->id)
+            ->assertOk()
+            ->assertJsonPath('headquarters.0.id', $headquarters->id);
+
+        // Quem edita sem poder visualizar estabelecimentos não recebe a matriz.
+        $editor = $this->member($account, ['account.establishments.update']);
+
+        $this->actingAs($editor)
+            ->getJson('/conta/estabelecimentos/'.$branch->id.'/editar')
+            ->assertOk()
+            ->assertJsonPath('headquarters', []);
+
+        // Empresa só com filiais: nada é exibido e nada é exigido.
+        $branchesOnly = $this->createCompany($owner, [
+            'document' => '99.888.777/0002-82',
+            'trade_name' => 'Somente filiais',
+            'primary' => ['classification' => 'branch'],
+        ]);
+
+        $this->actingAs($owner)
+            ->getJson('/conta/estabelecimentos/'.$branchesOnly->primaryEstablishment()->sole()->id.'/editar')
+            ->assertOk()
+            ->assertJsonPath('headquarters', []);
     }
 
     public function test_fiscal_uniqueness_is_per_account_and_never_reveals_other_accounts(): void
@@ -670,9 +809,21 @@ final class OrganizationTest extends TestCase
             ],
         ];
 
+        // O CNPJ do contratante pode ser da matriz ou de uma filial: a classificação nunca é presumida.
         $this->post('/saas/contas', [
             ...$account,
             'organization_setup' => 'automatic',
+            'administrator' => $this->administrator('owner@gartan.test'),
+        ])->assertSessionHasErrors([
+            'contractor_classification' => 'Informe se o CNPJ do contratante é da matriz ou de uma filial.',
+        ]);
+
+        $this->assertDatabaseCount('companies', 0);
+
+        $this->post('/saas/contas', [
+            ...$account,
+            'organization_setup' => 'automatic',
+            'contractor_classification' => 'headquarters',
             'administrator' => $this->administrator('owner@gartan.test'),
         ])->assertSessionHasNoErrors();
 
@@ -702,6 +853,59 @@ final class OrganizationTest extends TestCase
         $this->artisan('organization:check')
             ->expectsOutputToContain('Pendência: Empresa #'.$undeclared->id)
             ->assertSuccessful();
+
+        // Contratante que administra uma filial: a principal nasce filial, sem matriz.
+        $this->post('/saas/contas', [
+            ...$account,
+            'document' => '11.444.777/0002-42',
+            'organization_setup' => 'automatic',
+            'contractor_classification' => 'branch',
+            'administrator' => $this->administrator('owner@filial.test'),
+        ])->assertSessionHasNoErrors();
+
+        $branchCompany = Company::where('tax_root', '11444777')->sole();
+        $branchPrimary = $branchCompany->primaryEstablishment()->sole();
+
+        $this->assertSame('11444777000242', $branchPrimary->tax_document);
+        $this->assertSame('branch', $branchPrimary->legalClassification());
+        $this->assertSame(1, $branchCompany->establishments()->count());
+
+        // Para contratante pessoa física, a unidade não é matriz nem filial e nada é perguntado.
+        $this->post('/saas/contas', [
+            ...$account,
+            'person_type' => 'individual',
+            'document' => '529.982.247-25',
+            'organization_setup' => 'automatic',
+            'administrator' => $this->administrator('owner@individual.test'),
+        ])->assertSessionHasNoErrors();
+
+        $individual = Company::where('individual_document', '52998224725')->sole();
+
+        $this->assertSame('unregistered', $individual->primaryEstablishment()->sole()->legalClassification());
+    }
+
+    public function test_the_contractor_document_is_never_the_company_identity_without_the_explicit_choice(): void
+    {
+        $this->actingAs(User::factory()->create(['is_saas_admin' => true]));
+
+        // A antiga caixa contractor_is_company foi substituída por organization_setup e não tem mais efeito.
+        $this->post('/saas/contas', [
+            'name' => 'Contratante sem escolha',
+            'person_type' => 'company',
+            'document' => '11.222.333/0001-81',
+            'details' => ['phone' => '(77) 3451-0000'],
+            'contractor_is_company' => '1',
+            'administrator' => $this->administrator('owner@sem-escolha.test'),
+        ])->assertSessionHasNoErrors();
+
+        $company = Company::query()->sole();
+        $primary = $company->primaryEstablishment()->sole();
+
+        $this->assertNull($company->tax_root);
+        $this->assertNull($company->person_type);
+        $this->assertNull($primary->tax_document);
+        $this->assertSame('unregistered', $primary->legalClassification());
+        $this->assertSame('11222333000181', Client::query()->sole()->document);
     }
 
     public function test_manual_account_provisioning_validates_and_audits_the_company_and_primary_unit(): void

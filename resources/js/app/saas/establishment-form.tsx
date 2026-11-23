@@ -15,17 +15,24 @@ import ContactFields from './ContactFields';
 import SaasLayout from './SaasLayout';
 import { organizationFormNavigation } from './organizationNavigation';
 import PromoteEstablishmentModal from './PromoteEstablishmentModal';
-import { companyName, type CompanyLabel, type EstablishmentDetails } from './Organization.types';
+import {
+  companyName,
+  type CompanyLabel,
+  type EstablishmentDetails,
+  type HeadquartersLabel,
+} from './Organization.types';
 import { useCnpjLookup } from './useCnpjLookup';
 
 export default function EstablishmentForm({
   establishment,
   companies,
   selectedCompany,
+  headquarters = [],
 }: {
   establishment: EstablishmentDetails | null;
   companies: CompanyLabel[];
   selectedCompany: number | null;
+  headquarters?: HeadquartersLabel[];
 }) {
   const { props: { auth }, url } = useApiPage<SessionProps>();
   const navigation = organizationFormNavigation(url, establishment?.company.id ?? selectedCompany ?? undefined);
@@ -42,6 +49,12 @@ export default function EstablishmentForm({
   const fixedCompany = Boolean(navigation.back && selectedCompany && company?.id === selectedCompany);
   const legalEntity = company?.person_type === 'company' && company.document_label !== null;
   const [classification, setClassification] = useState<string>(establishment?.classification ?? 'unregistered');
+  // A matriz não precisa estar cadastrada; quando estiver e for visível, aparece como referência.
+  const registeredHeadquarters = headquarters.find((unit) =>
+    unit.company_id === company?.id && unit.id !== establishment?.id);
+  const headquartersLabel = registeredHeadquarters && (registeredHeadquarters.tax_document_label
+    ? `${registeredHeadquarters.name}, CNPJ ${registeredHeadquarters.tax_document_label}`
+    : registeredHeadquarters.name);
   const [document, setDocument] = useState(establishment?.tax_document ?? '');
   const [name, setName] = useState(establishment?.name ?? '');
   const [tradeName, setTradeName] = useState(establishment?.trade_name ?? '');
@@ -127,6 +140,7 @@ export default function EstablishmentForm({
                 <BusinessFormSection title="Identificação fiscal" tourTarget="establishment-fiscal">
                   {legalEntity ? (
                     <Select label="Classificação" name="classification" required value={classification}
+                      info="Matriz e Filial são a classificação fiscal informada por você, sem dedução pela ordem do CNPJ. Filiais podem ser cadastradas sem a matriz, e qualquer unidade ativa pode ser a principal."
                       error={errors.classification} onChange={(value) => {
                         setClassification(value);
                         cnpjLookup.reset();
@@ -149,6 +163,16 @@ export default function EstablishmentForm({
                         </FormHelp>
                       )}
                     </>
+                  )}
+                  {legalEntity && classification === 'branch' && headquartersLabel && (
+                    <FormHelp className="business-form__control-start">
+                      {`Matriz cadastrada nesta empresa: ${headquartersLabel}. Apenas referência; a filial não depende dela.`}
+                    </FormHelp>
+                  )}
+                  {legalEntity && classification === 'headquarters' && headquartersLabel && (
+                    <FormHelp className="business-form__control-start">
+                      {`Esta empresa já tem a matriz ${headquartersLabel}. Altere a classificação dela antes de classificar outra unidade como Matriz.`}
+                    </FormHelp>
                   )}
                   {legalEntity && classification !== 'unregistered' && (
                     <TaxDocumentField personType="company" name="tax_document" required errors={errors}

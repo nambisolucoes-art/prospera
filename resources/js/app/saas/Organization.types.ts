@@ -46,6 +46,15 @@ export type EstablishmentDetails = EstablishmentRow & {
   additional_emails: string[] | null;
 };
 
+// Matriz já cadastrada da empresa, exibida como informação complementar no formulário da filial.
+export type HeadquartersLabel = {
+  id: number;
+  company_id: number;
+  name: string;
+  tax_document_label: string | null;
+  active: boolean;
+};
+
 export const classificationLabels: Record<Classification, string> = {
   headquarters: 'Matriz',
   branch: 'Filial',

@@ -10,7 +10,7 @@ Esta política classifica os campos existentes e reserva o lugar dos campos futu
 - **Sem sincronização:** nenhuma rotina copia, sincroniza ou propaga dados entre os dados centrais e as relações, nem entre relações de empresas diferentes.
 - **Alteração explícita:** quem altera um dado central vê que ele vale para todas as empresas. Quem altera um dado da relação altera só a própria empresa.
 - **Contato de uma empresa só:** um contato que interessa a uma única empresa (por exemplo, o e-mail de cobrança da Empresa A) é gravado na relação daquela empresa, nunca no cadastro central.
-- **Uma permissão por ação:** o formulário usa `account.people.update`. O servidor compara cada campo alterado com a classe dele e aplica a regra da classe. Um envio forjado que altere campo não autorizado é rejeitado com 403.
+- **Uma permissão por ação:** os dados centrais são alterados pela ficha de Clientes ou Fornecedores, que exige a permissão de editar do papel na empresa (`account.customers.update` ou `account.suppliers.update`) e aplica `account.people.update` aos campos centrais. O servidor compara cada campo alterado com a classe dele e aplica a regra da classe. Um envio forjado que altere campo não autorizado é rejeitado com 403. Não existe tela nem rota própria de Pessoas.
 
 ## Classes
 
@@ -67,7 +67,7 @@ Esta política classifica os campos existentes e reserva o lugar dos campos futu
 - **Futuros:** histórico de vendas, títulos financeiros, ordens de serviço, créditos.
 - **Proprietário:** a empresa ou o estabelecimento do registro.
 - **Visualização e edição:** permissão do módulo sobre o nó do registro.
-- **Leitura do cadastro:** quem lê o cadastro de Pessoas não vê esses dados. A busca de Pessoas não procura neles.
+- **Leitura do cadastro:** quem lê os dados centrais pela ficha comercial não vê esses dados. As buscas de Clientes e Fornecedores não procuram neles.
 - **Auditoria:** com `company_id` e, quando houver, `establishment_id`.
 
 ### Acesso de usuário
@@ -77,32 +77,27 @@ A etiqueta Usuário, o vínculo e as atribuições seguem [Identidade e vínculo
 ## Etiquetas comerciais
 
 - A partir da E07, Cliente e Fornecedor são derivadas das relações e calculadas para quem está vendo. Cliente aparece somente se houver relação ativa numa empresa onde o leitor tem `account.customers.view`. Fornecedor segue a mesma regra.
-- Os filtros Clientes e Fornecedores da listagem de Pessoas consideram relações ativas nas empresas em que o leitor possui as permissões de listar e visualizar o papel.
-- `person_tag` guarda etiquetas convencionais e Usuário. Cliente e Fornecedor continuam no catálogo como etiquetas especiais, com vínculo calculado a partir das relações ativas e visíveis.
+- As listagens de Clientes e Fornecedores mostram as relações das empresas em que o leitor pode listar o papel; abrir a ficha exige visualizar o papel na mesma empresa.
+- `person_tag` guarda a etiqueta Usuário e etiquetas convencionais anteriores do módulo Pessoas. Desde a remoção do cadastro avulso, nenhuma tela seleciona etiquetas convencionais na Pessoa (pendência registrada no plano). Cliente e Fornecedor continuam no catálogo como etiquetas especiais, com vínculo calculado a partir das relações ativas e visíveis.
 
 Etiquetas convencionais de Clientes e Fornecedores pertencem à relação da empresa. O catálogo pertence à conta, e o módulo da etiqueta determina em qual tipo de relação ela pode ser selecionada. As etiquetas especiais Cliente e Fornecedor continuam derivadas e aparecem fixas no formulário comercial. A seleção específica de uma relação permanece nela, sem passar para a Pessoa ou para a relação de outro papel.
 
 ## Consultas e vínculo
 
-- A Área de Trabalho limita as listagens comerciais às empresas distintas das unidades selecionadas com permissão para a ação. As consultas de Pessoas continuam administrativas.
-- Uma escrita comercial identifica uma empresa. Em Clientes ou Fornecedores, a URL da escrita contém o código da empresa. No formulário de Pessoas, as escolhas são indexadas pela empresa.
+- A Área de Trabalho limita as listagens comerciais às empresas distintas das unidades selecionadas com permissão para a ação.
+- Uma escrita comercial identifica uma empresa: a URL da escrita contém o código da empresa. Empresas adicionais do mesmo cadastro são indicadas pelo código em `add_companies` e `remove_companies`, e cada uma exige a permissão correspondente.
 - Quem pode cadastrar uma relação pode buscar um documento completo na empresa escolhida. O tipo de pessoa é obrigatório no corpo da requisição e determina a validação e a busca por CPF ou CNPJ. A resposta identifica a Pessoa central e informa a situação da relação daquele tipo somente na empresa escolhida.
 - Para vincular uma Pessoa já presente em outra empresa, reutilize o identificador retornado pela busca. A situação de cada relação é independente. Empresas inativas preservam as relações e bloqueiam alterações comerciais.
 
 ## Formulário
 
-Ao editar dados centrais de contato ou endereço, a tela sempre informa que eles pertencem ao cadastro compartilhado da conta, com o texto "Estes dados pertencem ao cadastro compartilhado da conta." Isso vale também para contas com uma empresa só. Dados comerciais específicos continuam na relação comercial da empresa correspondente, e nenhuma rotina sincroniza dados entre empresas.
+As fichas de Clientes e Fornecedores são as entradas da Pessoa. Ao editar dados centrais de identificação, contato ou endereço, a ficha informa que as alterações valem para o cadastro compartilhado da conta. Dados comerciais específicos continuam na relação comercial da empresa correspondente, e nenhuma rotina sincroniza dados entre empresas.
 
-Com mais de uma empresa ativa na conta, o formulário de pessoa separa as seções:
-
-| Seção | Título | Texto de apoio |
-| --- | --- | --- |
-| Identificação, contatos e endereço centrais | **Dados centrais** | "Estes dados pertencem ao cadastro compartilhado da conta e valem para todas as empresas." |
-| Relação comercial | **Dados desta empresa: {nome fantasia da empresa}** | "Valem somente para esta empresa. As outras empresas não veem estes dados." |
-
-- A relação de cada empresa aparece apenas para quem pode visualizá-la naquela empresa.
-- O usuário escolhe em quais empresas autorizadas a relação existe.
-- Com uma empresa só, o formulário mantém as seções atuais, sem esses títulos, mas com o aviso de cadastro compartilhado nos contatos e no endereço. A escolha de empresa é implícita.
+- A ficha abre na empresa da linha e mostra os dados centrais somente a quem tem `account.people.view`.
+- Identificação e contatos centrais seguem a autoridade das classes acima; os campos sem autoridade ficam somente para leitura.
+- Em **Empresas do cadastro**, o usuário marca ou desmarca as empresas autorizadas em que a relação existe. Com uma empresa só, a escolha é implícita.
+- A situação da relação é alterada na ficha ou pelas ações Ativar e Inativar da listagem, sempre com a permissão própria.
+- O acesso de usuário é criado e suspenso em Usuários, nunca pela ficha comercial.
 - Os rótulos de ação seguem o AGENTS.md: **Salvar** e **Cancelar**.
 
 ## Testes obrigatórios

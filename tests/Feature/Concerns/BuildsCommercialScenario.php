@@ -90,6 +90,6 @@ trait BuildsCommercialScenario
     /** @return list<string> */
     protected function peopleSlugs(): array
     {
-        return ['account.people.list', 'account.people.view', 'account.people.create', 'account.people.update'];
+        return ['account.people.view', 'account.people.create', 'account.people.update'];
     }
 }

@@ -6,6 +6,7 @@ use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Organizacao\Application\Data\EstablishmentFiltersData;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Support\TaxDocument;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 final class EstablishmentDirectoryQuery
@@ -60,6 +61,24 @@ final class EstablishmentDirectoryQuery
         return Establishment::where('account_id', $accountId)
             ->with('company:id,account_id,name,trade_name,person_type,tax_root,individual_document,active')
             ->findOrFail($id);
+    }
+
+    /**
+     * Matrizes cadastradas das empresas informadas, só nos nós em que a pessoa vê estabelecimentos. A matriz é
+     * informação complementar: uma empresa pode administrar somente filiais no Prospera.
+     *
+     * @param  list<int>  $companyIds
+     * @return Collection<int, Establishment>
+     */
+    public function headquarters(int $accountId, array $companyIds, AuthorizedNodes $nodes): Collection
+    {
+        $query = Establishment::where('account_id', $accountId)
+            ->whereIn('company_id', $companyIds)
+            ->where('is_headquarters', true);
+
+        $nodes->apply($query, 'company_id', 'id');
+
+        return $query->get(['id', 'company_id', 'name', 'trade_name', 'tax_document', 'active']);
     }
 
     public function count(int $accountId): int

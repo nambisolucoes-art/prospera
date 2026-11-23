@@ -65,7 +65,7 @@ export default function ClientForm({
           </BusinessFormSection>
           <AddressFields initial={client?.details?.address} errors={errors} />
           <ContactFields client={client} errors={errors} required={required} />
-          {!client && <AccountOrganizationFields errors={errors} />}
+          {!client && <AccountOrganizationFields errors={errors} contractorIsCompany={company} />}
           {!client && (
             <BusinessFormSection title="Administrador da conta">
               <UserFields errors={errors} prefix="administrator" />

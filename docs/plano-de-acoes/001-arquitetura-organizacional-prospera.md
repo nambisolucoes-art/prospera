@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 a E07 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 em validação formal. E09 e E10 pendentes |
+| Situação do documento | Aprovado. E01 a E07 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 em validação formal. E09 e E10 pendentes. Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026, encerrada no mesmo dia com a suíte estabilizada (seção 26), sem reabrir etapas homologadas |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
 | Revisão | 6 (20/11/2026): encerramento da E02. Revisão 5 (20/11/2026): execução da E02. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
@@ -334,7 +334,7 @@ Consolida os dois validadores divergentes (A15). Fica em `app/Support/TaxDocumen
 2. Cria a empresa.
 3. Cria o estabelecimento com `is_primary = true`.
    - O endereço e o nome padrão vêm do formulário. O nome sugerido é "Unidade principal" mais o município, e o usuário pode editar.
-   - Se houver CNPJ completo, a unidade é marcada como matriz.
+   - Se houver CNPJ completo, a classificação Matriz ou Filial é informada pelo operador, inclusive no provisionamento automático da conta; nada é deduzido da ordem do CNPJ. A unidade principal pode ser uma filial, e a empresa pode existir sem matriz cadastrada (revisão complementar de 23/11/2026, seção 26).
 4. Registra a auditoria das duas entidades com o mesmo `operation_id`.
 
 Qualquer falha reverte tudo. O índice parcial único `(company_id) where is_primary` impede duas unidades principais, inclusive em concorrência. O provisionamento de um tenant novo (`SaveAccountAction`) chama a mesma Action. Não existe Action separada para "criar principal": é sempre parte da criação da empresa (idempotência pelo próprio índice).
@@ -2953,6 +2953,116 @@ O ensaio prolongado da revisão, anterior ao último ajuste de encerramento da i
 
 **Estado.** A revisão técnica e visual automatizada foi concluída. O quadro mantém a E08 em validação para a homologação formal indicada no plano. Nenhum banco oficial foi migrado. Segurança de tentativas negadas, retenção, arquivamento e descarte controlado são decisões próprias. A E09 segue pendente.
 
+### Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026
+
+**Escopo.** Revisão pedida antes de continuar a E08, sobre a branch `feat/filtros-calendario-titulos` (HEAD `1b78a4b`, árvore limpa no início). A E08 não foi iniciada nem alterada, nenhum ambiente oficial foi tocado e nada foi enviado ao Git. As etapas homologadas continuam com o estado do quadro acima.
+
+**Conceitos preservados.**
+
+- Conta: ambiente contratado do SaaS (`clients`, `account_id`).
+- Empresa: entidade jurídica identificada fiscalmente pela raiz do CNPJ ou pelo CPF (`companies`).
+- Estabelecimento: unidade pertencente à empresa (`establishments`).
+- Matriz ou filial: classificação fiscal do estabelecimento (`is_headquarters` e CNPJ completo), explícita conforme a DA-04.
+- Estabelecimento principal: referência operacional no Prospera (`is_primary`), independente da classificação fiscal.
+
+**Decisões.** RF-01 a RF-03 (seção 28). O cadastro obrigatório da matriz antes da filial não foi aprovado e não existe no código.
+
+**Verificação da E04: já correto antes desta revisão.**
+
+| Regra | Evidência |
+| --- | --- |
+| Empresa só com filiais, sem matriz cadastrada | Nenhuma regra, consulta ou `organization:check` exige matriz. `SaveEstablishmentData` só exige o CNPJ da empresa para classificar Matriz ou Filial |
+| Filial como estabelecimento principal | `forPrimary` aceita `branch`; `PromotePrimaryEstablishmentAction` não consulta a classificação |
+| No máximo uma matriz por empresa | Regra `unique` na Data, índice parcial `establishments_company_id_headquarters_unique` e `organization:check` |
+| CNPJ do estabelecimento com a raiz da empresa | `Company::admitsEstablishmentTaxDocument` na Data e de novo na Action com a empresa travada; troca do documento da empresa bloqueada com unidades de outra raiz |
+| Raízes diferentes em empresas diferentes | `unique(account_id, tax_root)`; CNPJ de outra raiz é recusado no estabelecimento |
+| Sem dedução pelo sufixo `0001` | Classificação explícita no Model, na Data e nas telas; nenhuma regra lê a ordem do CNPJ |
+| Sem matriz fictícia nem principal duplicada | `CreateCompanyAction` cria uma única unidade; a migração `000006` cria a principal sem documento quando o contratante não é declarado |
+| Criação automática da principal | Mantida na mesma transação, com auditoria pelo mesmo `operation_id` |
+| Backend sem perda de letras | `TaxDocument::normalize` remove só a máscara e converte para maiúsculas; formato `[A-Z0-9]{12}\d{2}`; buscas de Empresas, Estabelecimentos, Clientes e Fornecedores usam o documento normalizado |
+| Exibição | Listagens e fichas de Empresas, Estabelecimentos, Clientes, Fornecedores e Contas formatam o CNPJ alfanumérico pelo `TaxDocument` ou por `formatTaxDocument` |
+| Nomenclatura | Estabelecimentos na navegação administrativa; Unidades na Área de Trabalho e no seletor. Nada foi renomeado |
+
+**Correções realizadas.**
+
+1. **Busca de contas da plataforma removia as letras do CNPJ.** `AccountDirectoryQuery` usava `preg_replace('/\D/', ...)`: `12.ABC.345/01DE-35` virava `123450135` e `12abc` encontrava qualquer documento com `12`. Agora a busca usa `TaxDocument::normalize`, com curinga escapado. O teste novo falha com a consulta anterior e passa com a correção.
+2. **Provisionamento da conta presumia Matriz.** No modo automático, `SaveCompanyData::forProvisioning` marcava a principal como matriz sempre que o contratante era pessoa jurídica; no modo manual, o formulário vinha com Matriz pré-selecionada. Agora o modo automático exige `contractor_classification` (Matriz ou Filial) para contratante pessoa jurídica, e os dois modos começam sem seleção. Contratante pessoa física continua com unidade sem CNPJ próprio, sem pergunta.
+3. **Matriz como informação complementar.** O formulário do estabelecimento recebe `headquarters`, consultado por `EstablishmentDirectoryQuery::headquarters` e filtrado no banco pelos nós de `account.establishments.view`. Com Filial selecionada, mostra "Matriz cadastrada nesta empresa" com nome e CNPJ. Com Matriz selecionada e outra matriz existente, orienta a reclassificar a atual. Sem matriz ou sem permissão, nada aparece e nada é exigido.
+4. **Máscara e validação visual no frontend.** `formatPersonDocumentInput` deixava de aplicar a máscara quando havia letra nas duas últimas posições. Agora a máscara acompanha as 14 posições, e `taxDocumentProblem` avisa durante a digitação sobre caractere inválido, letra nos dígitos verificadores, tamanho e dígitos que não conferem. `isValidCnpj` e `isValidCpf` repetem o algoritmo do `TaxDocument`. O servidor continua sendo a validação final.
+
+**Auditoria de letras do CNPJ.** Foram revisadas as normalizações (`TaxDocument`, `SaveAccountData`, `SavePersonDetailsData`, `SaveCompanyData`, `SaveEstablishmentData`, `normalizeTaxDocument`), as máscaras (`TaxDocumentField`, `CompanyDocumentField`), as buscas e os filtros (Contas, Empresas, Estabelecimentos, Clientes, Fornecedores e descoberta por documento), as fichas e as listagens. O único ponto que removia letras era a busca de Contas, corrigida no item 1. A consulta externa de CNPJ exige o documento numérico por limitação do serviço e informa o preenchimento manual para o alfanumérico.
+
+**Arquivos.** `AccountDirectoryQuery`, `SaveAccountData`, `SaveCompanyData`, `EstablishmentDirectoryQuery`, `EstablishmentController`, `AccountOrganizationFields.tsx`, `ClientForm.tsx`, `establishment-form.tsx`, `Organization.types.ts`, `TaxDocumentField.tsx`, `formatTaxDocument.ts`, `guidance.ts`, artigos `estabelecimentos.md`, `empresas.md` e `contas.md`, tours `contas.md` e `organizacao.md`, e os testes `OrganizationTest`, `SaasPlatformTest` e `taxDocument.test.ts`. Não há migration, permissão nova nem campo auditado novo.
+
+**Testes.**
+
+- Linha de base, antes das alterações: 249 testes PHP, 49 falhas.
+- Depois das alterações: 253 testes PHP, 2.508 asserções. As mesmas 49 falhas, com lista idêntica à da linha de base, e os 4 testes novos passando.
+- As 49 falhas são anteriores à revisão: `PeopleDirectoryTest`, `PersonAdditionalContactsTest`, `SupplierDirectoryTest`, `CustomerDirectoryTest`, `CommercialRelationAccessTest` e `CommercialRelationIntegrityTest` ainda chamam `/conta/pessoas`, rota removida em `2ba26f7` (cadastro avulso de Pessoas). Todas respondem 404. Ficam como pendência própria.
+- Testes novos: empresa só com filiais (principal filial, segunda filial, promoção, raiz isolada completada depois como filial, `organization:check` sem violação); ordem do CNPJ sem efeito na classificação e troca de matriz sem coexistência; matriz no formulário só para quem pode visualizá-la; busca de contas com CNPJ alfanumérico. Os testes de provisionamento e de documentos passaram a cobrir a classificação exigida, a principal filial no modo automático, o contratante pessoa física, o dígito verificador com letra e a busca alfanumérica em Empresas e Estabelecimentos.
+- Frontend: 19 casos (3 novos). Arquitetura, tipos, build, Pint, PHPStan, `permissions:sync` (nenhuma mudança), `audit:check` e `organization:check` passaram.
+- Execução em container descartável da imagem local, com SQLite em memória imposto por `tests/bootstrap.php`.
+
+**Validação visual.** Ambiente descartável de `tests/Performance/e04-stack.sh` (PostgreSQL em tmpfs, FrankenPHP, dados sintéticos), em Chromium a 1440, 390 e 320 px, sem rolagem horizontal e sem erro de JavaScript:
+
+- edição de filial com a referência da matriz, que quebra linha no celular;
+- aviso ao escolher Matriz com outra matriz existente;
+- matriz sem referência a si mesma;
+- máscara com letra nos verificadores, aviso de dígito com letra e de dígito errado, e CNPJ alfanumérico válido sem aviso;
+- cadastro de empresa com CNPJ de filial e classificação Filial, salvo como principal sem matriz e sem referência exibida;
+- cadastro de conta no modo automático com a pergunta para pessoa jurídica, erro ao salvar sem a classificação e ocultação para pessoa física.
+
+**Pendências e limitações.**
+
+- As 49 falhas da suíte ligadas à remoção do cadastro avulso de Pessoas.
+- No cadastro de conta em 1440 px, o rótulo "Cadastrar automaticamente?" encosta no ícone de informação. O problema é anterior a esta revisão e não foi alterado.
+- A busca de Contas mantém `like` com curinga inicial, como antes; não houve medição em PostgreSQL porque o custo e o plano da consulta não mudaram.
+- A entrada `contractor_is_company` do provisionamento, sem uso no frontend nem nos testes, foi mantida e segue a mesma exigência de classificação.
+
+### Encerramento da revisão fiscal e estabilização da suíte em 23/11/2026
+
+**Escopo.** Complemento da revisão anterior, aprovada pelo usuário com as decisões RF-01 a RF-03, sem reabrir a E04 nem iniciar a E08. Nenhuma base oficial foi alterada. Não há commit nem push.
+
+**Causa das 49 falhas.** O commit `2ba26f7` (cadastro avulso de Pessoas removido) retirou as rotas `/conta/pessoas`, a ficha de Pessoas com a seção Relações comerciais, a concessão de acesso pela etiqueta Usuário e as permissões `account.people.list` e `account.users.update` (migration `000007`, auditada). Os testes de Clientes, Fornecedores, Pessoas, contatos e relações comerciais ainda usavam essas rotas e o envio `relations`, e todos recebiam 404. A decisão de produto está registrada no próprio commit, em `RoleBasedRegistrationTest` (a rota responde 404 por contrato), na ajuda e na convenção de Pessoas, mas não estava neste plano; fica registrada como RF-05.
+
+**Classificação.** As 49 falhas eram de testes obsoletos. Nenhuma regressão funcional exigiu correção de implementação. Cada invariante coberta foi migrada para o caminho vigente:
+
+| Contrato antigo | Caminho vigente |
+| --- | --- |
+| Cadastro de Pessoa com relações por empresa | `POST /conta/empresa/{empresa}/clientes` ou `/fornecedores`, com `add_companies` para outras empresas |
+| Inativar e reativar pela ficha de Pessoas | Ações Ativar e Inativar da listagem ou campo Situação da ficha comercial |
+| Edição de dados centrais e contatos adicionais | `PATCH` da relação comercial, com a autoridade de Pessoas por classe de dado |
+| Ficha e listagem de Pessoas | Ficha e listagem de Clientes e Fornecedores por empresa e unidade |
+| Acesso pela etiqueta Usuário | Usuários: cadastro sobre Pessoa existente, suspensão e reativação |
+| Etiquetas convencionais na Pessoa | Etiquetas dos módulos Clientes e Fornecedores na relação |
+
+Duas asserções mudaram de sentido por contrato posterior, e não por defeito:
+
+- O teste da E07 esperava que a edição ignorasse a situação sem permissão. Desde `1b78a4b`, a ficha aplica a situação, recusa com 403 quem não pode inativar e desfaz o envio inteiro, como já exigia `RoleBasedRegistrationTest`.
+- A ficha da relação de empresa inativa responde 403 pelo contrato da E06 (rotas operacionais recusadas). O teste prova que a relação fica preservada e volta a ser consultável com a reativação da empresa.
+
+**Consequências do contrato vigente, sem correção.** Operador só com permissões de Pessoas não altera dados centrais, porque a entrada é a ficha comercial e exige a permissão de editar do papel na empresa. Administrador de unidade não alcança dados centrais, porque as rotas comerciais são de empresa. Pessoa sem relação comercial nem acesso não tem tela de edição.
+
+**`contractor_is_company`.** Era a caixa de seleção do primeiro formulário de conta, substituída por `organization_setup` em `49c95fe`. O frontend e os testes migraram naquele commit, e o backend manteve só o fallback, sem consumidor. A entrada foi removida de `SaveAccountData`. A propriedade interna `contractorIsCompany` continua, porque representa a escolha explícita de "Cadastrar automaticamente? Sim". Um teste novo prova que o documento do contratante não vira a identificação da primeira empresa sem essa escolha. Com ela, a classificação Matriz ou Filial é obrigatória (RF-01 a RF-03).
+
+**Correção visual.** No cadastro de Contas, a regra local `white-space: nowrap` do rótulo "Cadastrar automaticamente?" fazia o texto ultrapassar a coluna de rótulos e encostar no ícone. A regra foi removida, e o rótulo passou a quebrar como os demais do `BusinessForm`, com o espaçamento padrão do `FormField`. Em Chromium, a 1440, 390 e 320 px, o rótulo fica dentro da coluna, a 3 px do ícone, sem rolagem horizontal. A 1024 px não há sobreposição, mas a palavra "automaticamente?" avança 15 px além da coluna, dentro do card.
+
+**Convenções.** `pessoas-e-contatos.md` e `contexto-organizacional.md` deixaram de descrever a ficha, a listagem e a URL de Pessoas e passaram a descrever as fichas de Clientes e Fornecedores como entradas da Pessoa.
+
+**Resultados.**
+
+- Suíte PHP completa: 254 testes, 3.279 asserções, sem falhas (antes, 253 testes com 49 falhas).
+- Organização, Plataforma, Pessoas, relações comerciais e `TaxDocument`: 147 testes, 2.146 asserções.
+- Frontend: 19 casos. Arquitetura, tipos e build passaram.
+- PHPStan e Pint sem erros. `permissions:sync` sem mudanças (81 descobertas), `audit:check` com 12 modelos cobertos e `organization:check` sem violações.
+- PostgreSQL 18.7 e FrankenPHP descartáveis: busca de Contas com CNPJ alfanumérico completo, parcial e com máscara, sem trazer a conta numérica parecida.
+
+**Pendências.**
+
+- Etiquetas convencionais do módulo Pessoas ainda podem ser criadas, e são a opção padrão do modal, mas nenhuma tela as aplica desde `2ba26f7`. As já vinculadas podem ser inativadas, não desvinculadas. `Person::assignTags` ficou sem chamadores. Decisão de produto pendente: retirar o módulo da criação ou criar uma entrada própria.
+- `tests/Performance/AccountRequestsTest.php` e `octane-client.php` ainda medem `/conta/pessoas`; o segundo também `/conta/pontos`, removida na E04. Ficam fora da suíte padrão e devem ser atualizados na próxima medição.
+- A 1024 px, o rótulo "Cadastrar automaticamente?" avança 15 px além da coluna de rótulos.
+
 ## 27. Contrato para módulos futuros
 
 ### 27.1 Checklist oficial
@@ -3007,5 +3117,10 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | E07 | Descoberta comercial por POST consultivo, com documento no corpo e resposta privada sem cache | Aprovada | 21/11/2026 | Preserva CSRF, escopo empresarial, autorização e inspeção somente leitura |
 | E07 | Fechamento da etapa e aceite do tema disponível | Concluída | 21/11/2026 | Homologação final na seção 26 |
 | E08 | E08-D1 a E08-D6: lista da PD-02, integridade por FKs compostas e CHECKs, identificação histórica da inspeção, nó da disponibilidade restrita, índices de leitura e importação legada | D4 aprovada. D1 a D3, D5 e D6 validadas tecnicamente | 21/11/2026 | Revisão técnica da seção 26 |
+| RF-01 | Padronização de CPF e CNPJ: máscara na digitação, validação visual, CNPJ alfanumérico e correção de listagens e fichas | Aprovada | 23/11/2026 | Revisão complementar fiscal na seção 26 |
+| RF-02 | A matriz não é pré-requisito da filial: uma empresa pode administrar só filiais no Prospera; a matriz cadastrada aparece só como referência, conforme permissão | Aprovada (cadastro obrigatório da matriz rejeitado) | 23/11/2026 | Complementa DA-04 e a seção 6.5. Sem matriz fictícia nem principal duplicada |
+| RF-03 | Estabelecimentos na navegação administrativa e na arquitetura técnica; Unidades na Área de Trabalho e no seletor organizacional | Aprovada | 23/11/2026 | Sem renomear tabelas, Models, rotas ou domínios |
+| RF-04 | Remoção da entrada obsoleta `contractor_is_company`; só `organization_setup` automático usa os dados do contratante na primeira empresa | Aprovada | 23/11/2026 | Encerramento da revisão fiscal na seção 26 |
+| RF-05 | Pessoas sem tela própria (`2ba26f7`): Clientes, Fornecedores e Usuários são as entradas; `account.people.list` e `account.users.update` retiradas | Registro de decisão já implementada | 21/11/2026 | Registrada em 23/11/2026; testes migrados aos caminhos vigentes |
 
 Decisões novas surgidas durante a execução devem ser registradas aqui antes de alterar o contrato, com a justificativa e o impacto nas etapas.

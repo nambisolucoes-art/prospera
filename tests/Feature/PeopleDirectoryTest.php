@@ -6,23 +6,50 @@ use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
+use App\Domains\Clientes\Domain\Models\Customer;
 use App\Domains\Etiquetas\Domain\Models\Tag;
+use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Tests\Feature\Concerns\BuildsCommercialScenario;
 use Tests\TestCase;
 
+/**
+ * Pessoas sem tela própria (remoção do cadastro avulso): o acesso nasce em Usuários, os papéis comerciais em
+ * Clientes e Fornecedores, e as etiquetas convencionais ficam na relação comercial da empresa.
+ */
 class PeopleDirectoryTest extends TestCase
 {
+    use BuildsCommercialScenario;
     use RefreshDatabase;
 
-    private function owner(): User
+    /** @var array<int, Company> */
+    private array $companies = [];
+
+    private function owner(string $company = 'Empresa de pessoas', string $root = '11222333'): User
     {
         $account = Client::create(['name' => 'Conta teste', 'active' => true]);
+        $this->companies[$account->id] = $this->company($account, $company, $root);
 
         return User::factory()->asAccountAdministrator($account->id)->create();
+    }
+
+    private function customers(User $owner): string
+    {
+        return '/conta/empresa/'.$this->companies[$owner->account_id]->code.'/clientes';
+    }
+
+    private function unit(User $owner): string
+    {
+        return '/conta/estabelecimento/'.$this->companies[$owner->account_id]->primaryEstablishment()->sole()->code;
+    }
+
+    private function memberRole(User $owner): int
+    {
+        return (int) Role::where('account_id', $owner->account_id)->where('system_key', 'member')->value('id');
     }
 
     public function test_person_can_gain_access_without_creating_another_person(): void
@@ -30,34 +57,32 @@ class PeopleDirectoryTest extends TestCase
         Notification::fake();
         $owner = $this->owner();
         $this->actingAs($owner);
-        $this->post('/conta/etiquetas', [
-            'name' => 'Contato comercial',
-            'module' => 'people',
-            'color' => '#123456',
-        ])->assertRedirect();
-        $tag = Tag::whereNull('system_key')->sole();
-        $this->post('/conta/pessoas', [
+
+        $this->postJson($this->customers($owner), [
             'name' => 'Maria',
             'email' => 'maria@example.test',
-            'grant_access' => '0',
-            'tag_ids' => [$tag->id],
-        ])->assertRedirect();
+        ])->assertNoContent();
+
         $person = Person::where('name', 'Maria')->sole();
-        $this->patch('/conta/pessoas/'.$person->id, [
-            'name' => 'Maria',
-            'email' => 'maria@example.test',
-            'grant_access' => '1',
+        $people = Person::count();
+
+        // O acesso nasce em Usuários sobre a Pessoa existente, sem duplicar o cadastro.
+        $this->postJson('/conta/usuarios', [
+            'person_registration' => 'existing',
+            'person_id' => $person->id,
             'mode' => 'invite',
-            'role_id' => Role::where('account_id', auth()->user()->account_id)
-                ->where('system_key', 'member')
-                ->value('id'),
-            'tag_ids' => [$tag->id, Tag::userTag($owner->account_id)->id],
-        ])->assertRedirect();
-        $this->assertDatabaseCount('people', 2);
+            'role_id' => $this->memberRole($owner),
+            'scope' => 'tenant',
+        ])->assertOk();
+
+        $this->assertSame($people, Person::count());
+
         $user = $person->user()->sole();
+
+        $this->assertSame('maria@example.test', $user->email);
         $this->assertSame($owner->account_id, $user->account_id);
-        $this->assertCount(2, $person->tags()->get());
-        $this->getJson('/conta/pessoas')->assertJsonCount(2, 'people.data');
+        $this->assertTrue($person->tags()->where('system_key', 'user')->exists());
+        $this->assertTrue($person->customers()->sole()->active);
         $this->assertDatabaseHas('audit_records', [
             'entity_type' => 'user',
             'actor_id' => $owner->id,
@@ -69,43 +94,61 @@ class PeopleDirectoryTest extends TestCase
     public function test_directory_rejects_other_accounts_and_manual_special_tags(): void
     {
         $a = $this->owner();
-        $b = $this->owner();
+        $b = $this->owner('Empresa da outra conta', '99888777');
         $this->actingAs($a);
-        $this->getJson('/conta/pessoas/'.$this->membership($b)->person_id.'/editar')->assertNotFound();
+
+        // A Pessoa de outra conta não é encontrada para receber acesso.
+        $this->postJson('/conta/usuarios', [
+            'person_registration' => 'existing',
+            'person_id' => $this->membership($b)->person_id,
+            'mode' => 'invite',
+            'role_id' => $this->memberRole($a),
+            'scope' => 'tenant',
+        ])->assertNotFound();
+
         $special = Tag::userTag($a->account_id);
+
         $this->patch('/conta/etiquetas/'.$special->id, [
             'name' => 'Outro',
             'module' => 'people',
             'color' => '#123456',
         ])->assertForbidden();
-        $this->postJson('/conta/pessoas', ['name' => 'Teste', 'tag_ids' => [$special->id]])->assertUnprocessable();
+
+        $this->postJson($this->customers($a), ['name' => 'Teste', 'tag_ids' => [$special->id]])
+            ->assertUnprocessable();
+
         $this->actingAs($b)->post('/conta/etiquetas', [
             'name' => 'Externo',
-            'module' => 'people',
+            'module' => 'customers',
             'color' => '#123456',
         ]);
+
         $external = Tag::where('name', 'Externo')->sole();
-        $this
-            ->actingAs($a)
-            ->postJson('/conta/pessoas', ['name' => 'Teste', 'tag_ids' => [$external->id]])
+
+        $this->actingAs($a)
+            ->postJson($this->customers($a), ['name' => 'Teste', 'tag_ids' => [$external->id]])
             ->assertUnprocessable();
+        $this->assertDatabaseMissing('people', ['name' => 'Teste']);
+
         $member = User::factory()->forAccount($a->account_id)->create();
-        $this->actingAs($member->fresh())->getJson('/conta/pessoas')->assertForbidden();
+
+        $this->actingAs($member->fresh())->getJson($this->unit($a).'/clientes')->assertForbidden();
     }
 
     public function test_duplicate_access_rolls_back_person_and_audit(): void
     {
         $a = $this->owner();
         $this->actingAs($a);
-        $this->postJson('/conta/pessoas', [
+
+        // A resposta do tenant é a mesma quando a identidade já existe, sem criar Pessoa nem evento.
+        $this->postJson('/conta/usuarios', [
             'name' => 'Duplicado',
             'email' => $a->email,
-            'tag_ids' => [Tag::userTag($a->account_id)->id],
             'mode' => 'invite',
-            'role_id' => Role::where('account_id', auth()->user()->account_id)
-                ->where('system_key', 'member')
-                ->value('id'),
+            'role_id' => $this->memberRole($a),
+            'scope' => 'tenant',
         ])->assertOk();
+
         $this->assertDatabaseMissing('people', ['name' => 'Duplicado']);
         $this->assertDatabaseMissing('audit_records', ['entity_type' => 'person', 'entity_name' => 'Duplicado']);
     }
@@ -114,26 +157,33 @@ class PeopleDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         $this->actingAs($owner);
-        $path = '/conta/pessoas/'.$this->membership($owner)->person_id;
+
+        $this->postJson($this->customers($owner), ['person_id' => $this->membership($owner)->person_id])
+            ->assertNoContent();
+
+        $url = $this->customers($owner).'/'.Customer::sole()->id;
         $count = AuditRecord::count();
-        $this->patch($path, [
-            'name' => $owner->name,
-            'email' => $owner->email,
-            'tag_ids' => [Tag::userTag($owner->account_id)->id],
-        ])->assertRedirect();
+
+        $this->patchJson($url, ['name' => $owner->name, 'email' => $owner->email])->assertNoContent();
+
         $this->assertSame($count, AuditRecord::count());
-        $this->patch($path, [
+
+        $this->patchJson($url, [
             'name' => 'Novo nome',
             'email' => 'alterado@example.test',
             'phone' => '71999999999',
-            'tag_ids' => [Tag::userTag($owner->account_id)->id],
-        ])->assertRedirect();
+        ])->assertNoContent();
+
+        $person = $this->membership($owner)->person()->sole();
+
+        // A Pessoa muda; a identidade de login continua a mesma.
         $this->assertSame($owner->name, $owner->fresh()->name);
         $this->assertSame($owner->email, $owner->fresh()->email);
         $this->assertNotNull($owner->fresh()->email_verified_at);
-        $this->assertSame('Novo nome', $this->membership($owner)->person()->sole()->name);
-        $this->assertSame('71999999999', $this->membership($owner)->person()->first()->phone);
-        $this->assertCount(1, $this->membership($owner)->person()->first()->tags()->where('system_key', 'user')->get());
+        $this->assertSame('Novo nome', $person->name);
+        $this->assertSame('alterado@example.test', $person->email);
+        $this->assertSame('71999999999', $person->phone);
+        $this->assertCount(1, $person->tags()->where('system_key', 'user')->get());
         $this->assertGreaterThan($count, AuditRecord::count());
     }
 
@@ -141,24 +191,32 @@ class PeopleDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         $this->actingAs($owner);
-        $this->getJson('/conta/pessoas/cadastrar')->assertJsonFragment(['system_key' => 'user']);
-        $this->post('/conta/pessoas', [
+
+        // O cadastro comercial nunca cria acesso, mesmo com campos de acesso forjados.
+        $this->postJson($this->customers($owner), [
             'name' => 'Sem acesso',
-            'grant_access' => true,
             'email' => 'sem@example.test',
+            'grant_access' => true,
             'mode' => 'invite',
             'role' => 'account-admin',
-        ])->assertRedirect();
+        ])->assertNoContent();
+
         $this->assertFalse(Person::where('name', 'Sem acesso')->sole()->user()->exists());
-        $this
-            ->postJson('/conta/pessoas', ['name' => 'Com acesso', 'tag_ids' => [Tag::userTag($owner->account_id)->id]])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors('email');
-        $this->patchJson('/conta/pessoas/'.$this->membership($owner)->person_id, [
-            'name' => $owner->name,
-            'email' => $owner->email,
-            'tag_ids' => [],
+
+        $this->postJson($this->customers($owner), [
+            'name' => 'Com etiqueta',
+            'tag_ids' => [Tag::userTag($owner->account_id)->id],
         ])->assertUnprocessable()->assertJsonValidationErrors('tag_ids');
+
+        // Em Usuários, o acesso exige o e-mail de acesso.
+        $this->postJson('/conta/usuarios', [
+            'name' => 'Com acesso',
+            'mode' => 'invite',
+            'role_id' => $this->memberRole($owner),
+            'scope' => 'tenant',
+        ])->assertUnprocessable()->assertJsonValidationErrors('email');
+
+        $this->assertDatabaseMissing('people', ['name' => 'Com acesso']);
         $this->assertTrue($this->membership($owner)->person()->sole()->user()->exists());
     }
 
@@ -166,29 +224,35 @@ class PeopleDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         $member = User::factory()->forAccount($owner->account_id)->create();
-        $this->actingAs($owner)->patchJson('/conta/pessoas/'.$this->membership($member)->person_id, [
-            'name' => $member->name,
-            'email' => $member->email,
-            'tag_ids' => [],
-        ])->assertOk();
-        $this->assertTrue($member->fresh()->access_enabled);
         $membership = AccountMembership::where('user_id', $member->id)->sole();
-        $this->assertSame('suspended', $membership->status);
-        $this->assertDatabaseHas('people', ['id' => $this->membership($member)->person_id]);
+        $person = $this->membership($member)->person()->sole();
+
+        $this->actingAs($member)->getJson('/conta')->assertOk();
+
+        $this->actingAs($owner)->patchJson('/conta/usuarios/'.$membership->id.'/suspender')->assertOk();
+
+        // Suspender o vínculo retira a etiqueta Usuário e preserva identidade, Pessoa e histórico.
+        $this->assertTrue($member->fresh()->access_enabled);
+        $this->assertSame('suspended', $membership->fresh()->status);
+        $this->assertDatabaseHas('people', ['id' => $person->id]);
+        $this->assertFalse($person->tags()->where('system_key', 'user')->exists());
+
         $event = AuditRecord::where('entity_type', 'account-membership')
             ->where('entity_id', $membership->id)
             ->where('event', 'updated')
             ->latest('id')
             ->firstOrFail();
+
         $this->assertSame($owner->id, $event->actor_id);
         $this->assertSame($owner->account_id, $event->account_id);
         $this->assertSame('suspended', $event->changes['status']['after']);
-        $this->actingAs($member->fresh())->getJson('/conta/pessoas')->assertForbidden();
-        $this->actingAs($owner)->patchJson('/conta/pessoas/'.$this->membership($member)->person_id, [
-            'name' => $member->name,
-            'email' => $member->email,
-            'tag_ids' => [Tag::userTag($owner->account_id)->id],
-        ])->assertOk();
+
+        $this->actingAs($member->fresh())->getJson('/conta')->assertForbidden();
+
+        $this->actingAs($owner)->patchJson('/conta/usuarios/'.$membership->id.'/reativar')->assertOk();
+
+        $this->assertSame('active', $membership->fresh()->status);
+        $this->assertTrue($person->tags()->where('system_key', 'user')->exists());
         $this->assertTrue($member->fresh()->access_enabled);
     }
 
@@ -199,14 +263,12 @@ class PeopleDirectoryTest extends TestCase
         $role->permissions()->sync(Permission::where('slug', 'account.people.update')->pluck('id'));
         $editor = User::factory()->forAccount($owner->account_id, $role)->create();
         $member = User::factory()->forAccount($owner->account_id)->create();
-        $count = AuditRecord::count();
-        $this->actingAs($editor)->patchJson('/conta/pessoas/'.$this->membership($member)->person_id, [
-            'name' => $member->name,
-            'email' => $member->email,
-            'tag_ids' => [],
-        ])->assertOk();
         $membership = AccountMembership::where('user_id', $member->id)->sole();
-        $this->patchJson('/conta/usuarios/'.$membership->id.'/suspender')->assertForbidden();
+        $count = AuditRecord::count();
+
+        $this->actingAs($editor)->patchJson('/conta/usuarios/'.$membership->id.'/suspender')->assertForbidden();
+
+        $this->assertSame('active', $membership->fresh()->status);
         $this->assertTrue($member->fresh()->access_enabled);
         $this->assertTrue($this->membership($member)->person()->sole()->tags()->where('system_key', 'user')->exists());
         $this->assertSame($count, AuditRecord::count());
@@ -215,79 +277,110 @@ class PeopleDirectoryTest extends TestCase
     public function test_tag_modal_payload_preserves_permissions_colors_and_audit(): void
     {
         $owner = $this->owner();
-        $this
-            ->actingAs($owner)
+
+        $this->actingAs($owner)
             ->getJson('/conta/etiquetas/cadastrar')
             ->assertOk()
             ->assertJsonPath('formOpen', true)
             ->assertJsonPath('canList', true)
             ->assertJsonCount(3, 'tags.data');
+
         $this->postJson('/conta/etiquetas', [
             'name' => 'Etiqueta colorida',
-            'module' => 'people',
+            'module' => 'customers',
             'color' => '#f4db1b',
         ])->assertOk();
+
         $tag = Tag::where('name', 'Etiqueta colorida')->sole();
-        $this
-            ->getJson('/conta/etiquetas/'.$tag->id.'/editar')
+
+        $this->getJson('/conta/etiquetas/'.$tag->id.'/editar')
             ->assertOk()
             ->assertJsonPath('formOpen', true)
             ->assertJsonPath('tag.color', '#f4db1b');
+
         $this->patchJson('/conta/etiquetas/'.$tag->id, [
             'name' => 'Etiqueta colorida',
-            'module' => 'people',
+            'module' => 'customers',
             'color' => '#ad125a',
         ])->assertOk();
+
         $event = AuditRecord::where('entity_type', 'tag')
             ->where('entity_id', $tag->id)
             ->where('event', 'updated')
             ->sole();
+
         $this->assertSame('#f4db1b', $event->changes['color']['before']);
         $this->assertSame('#ad125a', $event->changes['color']['after']);
         $this->assertSame($owner->id, $event->actor_id);
-        $this->postJson('/conta/pessoas', ['name' => 'Pessoa colorida', 'tag_ids' => [$tag->id]])->assertOk();
-        $person = Person::where('name', 'Pessoa colorida')->sole();
-        $this
-            ->getJson('/conta/pessoas/'.$person->id.'/editar')
+
+        $this->postJson($this->customers($owner), ['name' => 'Pessoa colorida', 'tag_ids' => [$tag->id]])
+            ->assertNoContent();
+
+        $customer = Customer::sole();
+        $code = $this->companies[$owner->account_id]->code;
+
+        $this->getJson($this->unit($owner).'/clientes/'.$code.'/'.$customer->id.'/editar')
             ->assertOk()
-            ->assertJsonPath('person.tags.0.color', '#ad125a');
-        $this
-            ->getJson('/conta/pessoas/'.$person->id.'/visualizar')
+            ->assertJsonPath('editing.tag_ids', [$tag->id])
+            ->assertJsonFragment(['id' => $tag->id, 'name' => 'Etiqueta colorida', 'color' => '#ad125a']);
+
+        $this->getJson($this->customers($owner).'/'.$customer->id.'/visualizar')
             ->assertOk()
-            ->assertJsonPath('tags.0.color', '#ad125a');
+            ->assertJsonPath('tags.1.color', '#ad125a');
+
+        $this->getJson($this->unit($owner).'/clientes')
+            ->assertOk()
+            ->assertJsonPath('relations.data.0.tags.1.color', '#ad125a');
     }
 
     public function test_tag_lifecycle_preserves_links_and_audits_deletion(): void
     {
         $owner = $this->owner();
         $this->actingAs($owner);
-        $payload = ['name' => 'Atendimento', 'module' => 'people', 'color' => '#ad125a'];
+        $payload = ['name' => 'Atendimento', 'module' => 'customers', 'color' => '#ad125a'];
+
         $this->postJson('/conta/etiquetas', $payload)->assertOk();
+
         $tag = Tag::where('name', 'Atendimento')->sole();
-        $this->postJson('/conta/pessoas', ['name' => 'Pessoa vinculada', 'tag_ids' => [$tag->id]])->assertOk();
-        $person = Person::where('name', 'Pessoa vinculada')->sole();
+
+        $this->postJson($this->customers($owner), ['name' => 'Pessoa vinculada', 'tag_ids' => [$tag->id]])
+            ->assertNoContent();
+
+        $customer = Customer::sole();
+        $code = $this->companies[$owner->account_id]->code;
+        $editForm = $this->unit($owner).'/clientes/'.$code.'/'.$customer->id.'/editar';
+        $url = $this->customers($owner).'/'.$customer->id;
         $count = AuditRecord::count();
+
         $this->deleteJson('/conta/etiquetas/'.$tag->id)->assertUnprocessable()->assertJsonValidationErrors('_form');
         $this->assertSame($count, AuditRecord::count());
+
         $this->patchJson('/conta/etiquetas/'.$tag->id, [...$payload, 'active' => false])->assertOk();
+
         $this->assertFalse($tag->fresh()->active);
-        $this->getJson('/conta/pessoas/cadastrar')->assertJsonMissing(['name' => 'Atendimento']);
-        $this
-            ->getJson('/conta/pessoas/'.$person->id.'/editar')
-            ->assertJsonFragment(['name' => 'Atendimento', 'active' => false]);
-        $this
-            ->postJson('/conta/pessoas', ['name' => 'Vínculo indevido', 'tag_ids' => [$tag->id]])
+
+        // Inativa: some do cadastro novo, continua na relação que já a possuía.
+        $this->getJson($this->unit($owner).'/clientes/cadastrar')->assertOk()->assertJsonMissing(['name' => 'Atendimento']);
+        $this->getJson($editForm)->assertOk()->assertJsonFragment(['name' => 'Atendimento']);
+
+        $this->postJson($this->customers($owner), ['name' => 'Vínculo indevido', 'tag_ids' => [$tag->id]])
             ->assertUnprocessable();
         $this->assertDatabaseMissing('people', ['name' => 'Vínculo indevido']);
-        $this->patchJson('/conta/pessoas/'.$person->id, ['name' => $person->name, 'tag_ids' => [$tag->id]])->assertOk();
-        $this->assertTrue($person->tags()->whereKey($tag->id)->exists());
+
+        $this->patchJson($url, ['tag_ids' => [$tag->id]])->assertNoContent();
+        $this->assertDatabaseHas('customers_tags', ['relation_id' => $customer->id, 'tag_id' => $tag->id]);
+
         $this->patchJson('/conta/etiquetas/'.$tag->id, [...$payload, 'active' => true])->assertOk();
+
         $event = AuditRecord::where('entity_type', 'tag')->where('entity_id', $tag->id)->latest('id')->firstOrFail();
+
         $this->assertSame($owner->id, $event->actor_id);
         $this->assertSame($owner->account_id, $event->account_id);
         $this->assertTrue($event->changes['active']['after']);
-        $this->patchJson('/conta/pessoas/'.$person->id, ['name' => $person->name, 'tag_ids' => []])->assertOk();
+
+        $this->patchJson($url, ['tag_ids' => []])->assertNoContent();
         $this->deleteJson('/conta/etiquetas/'.$tag->id)->assertOk();
+
         $this->assertDatabaseMissing('tags', ['id' => $tag->id]);
         $this->assertDatabaseHas('audit_records', [
             'entity_type' => 'tag',

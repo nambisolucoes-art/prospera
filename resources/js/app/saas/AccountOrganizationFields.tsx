@@ -39,7 +39,16 @@ function readDefaults(form: HTMLFormElement) {
 
 type Defaults = ReturnType<typeof readDefaults>;
 
-export default function AccountOrganizationFields({ errors }: { errors: Errors }) {
+const classificationOptions = [
+  { value: '', label: 'Selecione Matriz ou Filial' },
+  { value: 'headquarters', label: 'Matriz' },
+  { value: 'branch', label: 'Filial' },
+];
+
+export default function AccountOrganizationFields({ errors, contractorIsCompany }: {
+  errors: Errors;
+  contractorIsCompany: boolean;
+}) {
   const id = useId();
   const section = useRef<HTMLDivElement>(null);
   const [automatic, setAutomatic] = useState(true);
@@ -61,6 +70,11 @@ export default function AccountOrganizationFields({ errors }: { errors: Errors }
           <YesNoControl name="organization_setup" value={automatic} onChange={changeMode}
             labelledBy={`${id}-label`} yesValue="automatic" noValue="manual" />
         </FormField>
+        {automatic && contractorIsCompany && (
+          <Select label="Classificação do CNPJ" name="contractor_classification" required
+            defaultValue="" error={errors.contractor_classification} options={classificationOptions}
+            info="Informe se o CNPJ do contratante é da matriz ou de uma filial. A classificação não é deduzida pela ordem do CNPJ, e a matriz não precisa ser cadastrada para administrar filiais." />
+        )}
       </BusinessFormSection>
       {defaults && <ManualOrganizationFields defaults={defaults} errors={errors} disabled={automatic} />}
     </div>
@@ -102,9 +116,9 @@ function ManualOrganizationFields({ defaults, errors, disabled }: {
         <Field label="Nome" name={`${primary}[name]`} required
           defaultValue={defaults.address.city ? `Unidade principal (${defaults.address.city})` : 'Unidade principal'}
           error={errors['first_company.primary.name']} />
-        {fullCnpj && <Select label="Classificação jurídica" name={`${primary}[classification]`} required
-          defaultValue="headquarters" error={errors['first_company.primary.classification']}
-          options={[{ value: 'headquarters', label: 'Matriz' }, { value: 'branch', label: 'Filial' }]} />}
+        {fullCnpj && <Select label="Classificação jurídica" name={`${primary}[classification]`}
+          required defaultValue="" error={errors['first_company.primary.classification']}
+          options={classificationOptions} />}
         <AddressFields initial={defaults.address} errors={errors} namePrefix={`${primary}[address]`}
           errorPrefix="first_company.primary.address" embedded />
         <ContactFields values={defaults.contact} errors={errors} required={false} namePrefix={primary}

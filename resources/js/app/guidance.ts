@@ -62,7 +62,7 @@ export function tourFor(
         at(
           'account-first-company',
           'Primeira empresa',
-          'Use Sim para criar a empresa do contratante e seu estabelecimento principal. Use Não para editar os dados sugeridos antes de salvar.',
+          'Use Sim para criar a empresa do contratante e seu estabelecimento principal. Com CNPJ, informe se ele é da sede ou de uma filial. Use Não para editar os dados sugeridos antes de salvar.',
         ),
       ] : []),
     ]);
@@ -214,7 +214,7 @@ export function tourFor(
       at(
         'establishment-fiscal',
         'Identificação fiscal',
-        'Matriz e Filial são unidades da empresa selecionada. Informe o CNPJ completo da unidade, com a mesma raiz da empresa. Para um CNPJ numérico, a lupa pode preencher os nomes vazios.',
+        'Matriz e Filial são a classificação fiscal que você informa, sem dedução pela ordem do CNPJ. Filiais podem ser cadastradas sem a matriz; quando ela existe e você pode visualizá-la, aparece como referência. Informe o CNPJ completo, com a mesma raiz da empresa. Para um CNPJ numérico, a lupa pode preencher os nomes vazios.',
       ),
       at('establishment-address', 'Endereço', 'Endereço da unidade, com consulta opcional de CEP.'),
       at('establishment-contact', 'Contatos', 'Telefone, WhatsApp e e-mails da unidade, no mesmo padrão do cadastro da conta.'),

@@ -10,6 +10,6 @@ Os tours são abertos em **Tutorial desta tela**. Os passos comuns de título, n
 | Empresas | Busca por identificação, situação, quantidade de unidades e visualização de detalhes. |
 | Cadastro e edição de empresa | Identificação e consulta de CNPJ, dados fiscais, criação da unidade principal com a pergunta sobre sede ou filial, endereço da unidade e ações do formulário. |
 | Estabelecimentos | Busca, filtros, classificação, selo Principal e ação de promoção quando disponível. |
-| Cadastro e edição de estabelecimento | Empresa e identificação da unidade, classificação conforme o documento da empresa, endereço, contatos e ações do formulário. |
+| Cadastro e edição de estabelecimento | Empresa e identificação da unidade, classificação fiscal informada (sem dedução pela ordem do CNPJ), referência à matriz cadastrada quando visível, endereço, contatos e ações do formulário. |
 
 Artigos relacionados em [Dados da conta](../ajuda/dados-da-conta.md), [Empresas](../ajuda/empresas.md), [Estabelecimentos](../ajuda/estabelecimentos.md) e [Área de trabalho e estabelecimentos](../ajuda/estabelecimento-atual.md). O seletor da barra superior e o início do estabelecimento estão em [Tour da área de trabalho](estabelecimento-atual.md).

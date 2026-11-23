@@ -14,6 +14,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Testing\TestResponse;
 use RuntimeException;
 use Tests\Feature\Concerns\BuildsCommercialScenario;
 use Tests\TestCase;
@@ -47,42 +48,40 @@ final class CommercialRelationIntegrityTest extends TestCase
         $this->owner = $this->administrator($this->gartan);
     }
 
-    /** @param array<int, array<string,string>> $relations */
-    private function saveJoao(array $relations, ?Person $person = null): Person
+    /**
+     * Cadastra João pela entrada de Clientes ou Fornecedores (E07), opcionalmente em várias empresas.
+     *
+     * @param  list<Company>  $others
+     */
+    private function registerJoao(string $segment, Company $company, array $others = [], ?Person $person = null): Person
     {
-        $payload = [
-            'name' => 'João da Silva',
-            'person_type' => 'individual',
-            'document' => '52998224725',
-            'relations' => $relations,
-            // Preserva as etiquetas atuais: retirar Usuário suspenderia o acesso da pessoa.
-            'tag_ids' => $person?->tags()->pluck('tags.id')->all() ?? [],
-        ];
+        $payload = $person === null
+            ? ['name' => 'João da Silva', 'person_type' => 'individual', 'document' => '52998224725']
+            : ['person_id' => $person->id];
 
-        if ($person === null) {
-            $this->actingAs($this->owner)->postJson('/conta/pessoas', $payload)->assertOk();
+        $this->actingAs($this->owner)
+            ->postJson('/conta/empresa/'.$company->code.'/'.$segment, [
+                ...$payload,
+                'add_companies' => array_map(fn (Company $other): string => $other->code, $others),
+            ])
+            ->assertNoContent();
 
-            return Person::where('document', '52998224725')->sole();
-        }
+        return $person ?? Person::where('document', '52998224725')->sole();
+    }
 
-        $this->actingAs($this->owner)->patchJson('/conta/pessoas/'.$person->id, $payload)->assertOk();
-
-        return $person;
+    private function changeStatus(string $segment, Company $company, int $relationId, string $action): TestResponse
+    {
+        return $this->actingAs($this->owner)
+            ->patchJson('/conta/empresa/'.$company->code.'/'.$segment.'/'.$relationId.'/'.$action);
     }
 
     public function test_one_central_person_holds_independent_relations_with_each_company(): void
     {
-        // Itens 1 a 5: sem relação, cliente, fornecedor, ambos e várias empresas.
-        $joao = $this->saveJoao([]);
-        $this->assertSame(0, $joao->customers()->count() + $joao->suppliers()->count());
+        // Itens 1 a 5: cliente em duas empresas e fornecedor em uma, sempre sobre a mesma Pessoa.
+        $joao = $this->registerJoao('clientes', $this->roupas, [$this->express]);
+        $this->registerJoao('fornecedores', $this->roupas, person: $joao);
 
-        $this->saveJoao([
-            $this->roupas->id => ['customer' => '1', 'supplier' => '1'],
-            $this->express->id => ['customer' => '1'],
-        ], $joao);
-
-        $this->assertDatabaseCount('people', 1 + Person::where('account_id', $this->gartan->id)
-            ->where('id', '!=', $joao->id)->count());
+        $this->assertSame(1, Person::where('account_id', $this->gartan->id)->where('document', '52998224725')->count());
         $this->assertSame(
             [$this->roupas->id, $this->express->id],
             $joao->customers()->orderBy('company_id')->pluck('company_id')->all(),
@@ -91,29 +90,26 @@ final class CommercialRelationIntegrityTest extends TestCase
         $this->assertDatabaseMissing('customers', ['company_id' => $this->gartan3->id]);
         $this->assertDatabaseMissing('suppliers', ['company_id' => $this->express->id]);
 
-        $preview = $this->getJson('/conta/pessoas/'.$joao->id.'/visualizar')->assertOk()->json('relations');
-        $this->assertEqualsCanonicalizing([
-            [
-                'company_id' => $this->express->id,
-                'company_name' => 'Gartan Express',
-                'company_active' => true,
-                'customer' => 'active',
-                'supplier' => 'none',
-            ],
-            [
-                'company_id' => $this->roupas->id,
-                'company_name' => 'Gartan Roupas',
-                'company_active' => true,
-                'customer' => 'active',
-                'supplier' => 'active',
-            ],
-        ], $preview);
+        // Cada ficha comercial mostra a mesma identificação central, só na empresa da relação.
+        $roupasCustomer = $joao->customers()->where('company_id', $this->roupas->id)->sole();
+        $expressCustomer = $joao->customers()->where('company_id', $this->express->id)->sole();
+
+        foreach ([[$this->roupas, $roupasCustomer], [$this->express, $expressCustomer]] as [$company, $relation]) {
+            $this->getJson('/conta/empresa/'.$company->code.'/clientes/'.$relation->id.'/visualizar')
+                ->assertOk()
+                ->assertJsonPath('name', 'João da Silva')
+                ->assertJsonPath('document', '52998224725')
+                ->assertJsonPath('tags.0.name', 'Cliente');
+        }
+
+        $this->getJson('/conta/empresa/'.$this->roupas->code.'/clientes/'.$expressCustomer->id.'/visualizar')
+            ->assertNotFound();
     }
 
     public function test_database_rejects_duplicate_and_cross_tenant_relations(): void
     {
         // Itens 6 e 7: o banco garante a unicidade e o mesmo tenant, independentemente da aplicação.
-        $joao = $this->saveJoao([$this->roupas->id => ['customer' => '1']]);
+        $joao = $this->registerJoao('clientes', $this->roupas);
         $customer = Customer::sole();
 
         try {
@@ -144,9 +140,16 @@ final class CommercialRelationIntegrityTest extends TestCase
             }
         }
 
-        // Pela aplicação, a mesma escolha repetida não cria nova linha nem novo evento.
+        // Pela aplicação, repetir o vínculo é recusado e reativar uma relação ativa não gera evento.
         $count = AuditRecord::count();
-        $this->saveJoao([$this->roupas->id => ['customer' => '1']], $joao);
+
+        $this->actingAs($this->owner)
+            ->postJson('/conta/empresa/'.$this->roupas->code.'/clientes', ['person_id' => $joao->id])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('person_id');
+
+        $this->changeStatus('clientes', $this->roupas, $customer->id, 'ativar')->assertNoContent();
+
         $this->assertSame($count, AuditRecord::count());
         $this->assertSame($customer->id, Customer::sole()->id);
     }
@@ -157,24 +160,26 @@ final class CommercialRelationIntegrityTest extends TestCase
         $member = User::factory()->forAccount($this->gartan->id)->create();
         $person = $this->membership($member)->person;
         $identity = $member->only(['email', 'password', 'access_enabled']);
-        $this->saveJoao([
-            $this->roupas->id => ['customer' => '1', 'supplier' => '1'],
-            $this->express->id => ['customer' => '1'],
-        ], $person);
 
-        $this->saveJoao([$this->roupas->id => ['supplier' => '0']], $person);
-        $this->assertFalse(Supplier::where('company_id', $this->roupas->id)->sole()->active);
-        $this->assertTrue(Customer::where('company_id', $this->roupas->id)->sole()->active);
-        $this->assertTrue(Customer::where('company_id', $this->express->id)->sole()->active);
+        $this->registerJoao('clientes', $this->roupas, [$this->express], $person);
+        $this->registerJoao('fornecedores', $this->roupas, person: $person);
 
-        $this->saveJoao([$this->roupas->id => ['customer' => '0']], $person);
-        $this->assertFalse(Customer::where('company_id', $this->roupas->id)->sole()->active);
-        $this->assertTrue(Customer::where('company_id', $this->express->id)->sole()->active);
-        $this->assertSame('João da Silva', $person->fresh()->name);
+        $roupasCustomer = Customer::where('company_id', $this->roupas->id)->sole();
+        $expressCustomer = Customer::where('company_id', $this->express->id)->sole();
+        $supplier = Supplier::where('company_id', $this->roupas->id)->sole();
 
-        $this->saveJoao([$this->roupas->id => ['customer' => '1']], $person);
-        $this->assertTrue(Customer::where('company_id', $this->roupas->id)->sole()->active);
-        $this->assertFalse(Supplier::where('company_id', $this->roupas->id)->sole()->active);
+        $this->changeStatus('fornecedores', $this->roupas, $supplier->id, 'inativar')->assertNoContent();
+        $this->assertFalse($supplier->fresh()->active);
+        $this->assertTrue($roupasCustomer->fresh()->active);
+        $this->assertTrue($expressCustomer->fresh()->active);
+
+        $this->changeStatus('clientes', $this->roupas, $roupasCustomer->id, 'inativar')->assertNoContent();
+        $this->assertFalse($roupasCustomer->fresh()->active);
+        $this->assertTrue($expressCustomer->fresh()->active);
+
+        $this->changeStatus('clientes', $this->roupas, $roupasCustomer->id, 'ativar')->assertNoContent();
+        $this->assertTrue($roupasCustomer->fresh()->active);
+        $this->assertFalse($supplier->fresh()->active);
         $this->assertDatabaseCount('customers', 2);
 
         $this->assertSame($identity, $member->fresh()->only(['email', 'password', 'access_enabled']));
@@ -184,23 +189,31 @@ final class CommercialRelationIntegrityTest extends TestCase
 
     public function test_inactive_company_keeps_relations_but_refuses_changes(): void
     {
-        $joao = $this->saveJoao([$this->express->id => ['customer' => '1']]);
+        $this->registerJoao('clientes', $this->express);
+        $customer = Customer::sole();
         $this->express->forceFill(['active' => false])->saveOrFail();
 
         $count = AuditRecord::count();
-        $this->actingAs($this->owner)
-            ->patchJson('/conta/pessoas/'.$joao->id, [
-                'name' => 'João da Silva',
-                'relations' => [$this->express->id => ['customer' => '0']],
-            ])
-            ->assertUnprocessable()
-            ->assertJsonValidationErrors('_form');
 
-        $this->assertTrue(Customer::sole()->active);
+        $this->changeStatus('clientes', $this->express, $customer->id, 'inativar')->assertForbidden();
+
+        $this->actingAs($this->owner)
+            ->patchJson('/conta/empresa/'.$this->express->code.'/clientes/'.$customer->id, ['active' => '0'])
+            ->assertForbidden();
+
+        $this->assertTrue($customer->fresh()->active);
         $this->assertSame($count, AuditRecord::count());
-        $this->getJson('/conta/pessoas/'.$joao->id.'/visualizar')
-            ->assertJsonPath('relations.0.customer', 'active')
-            ->assertJsonPath('relations.0.company_active', false);
+
+        // Empresa inativa não abre rotas operacionais (E06); a relação fica preservada e volta com a empresa.
+        $this->getJson('/conta/empresa/'.$this->express->code.'/clientes/'.$customer->id.'/visualizar')
+            ->assertForbidden();
+
+        $this->express->forceFill(['active' => true])->saveOrFail();
+
+        $this->getJson('/conta/empresa/'.$this->express->code.'/clientes/'.$customer->id.'/visualizar')
+            ->assertOk()
+            ->assertJsonPath('name', 'João da Silva');
+        $this->assertTrue($customer->fresh()->active);
     }
 
     public function test_migration_assigns_the_single_company_and_derives_commercial_tags(): void
@@ -248,10 +261,7 @@ final class CommercialRelationIntegrityTest extends TestCase
     {
         (require database_path('migrations/2026_11_21_000002_add_commercial_tags.php'))->down();
         $migration = require database_path('migrations/2026_11_21_000001_add_company_to_commercial_relations.php');
-        $joao = $this->saveJoao([
-            $this->roupas->id => ['customer' => '1'],
-            $this->express->id => ['customer' => '1'],
-        ]);
+        $joao = $this->registerJoao('clientes', $this->roupas, [$this->express]);
 
         try {
             $migration->down();

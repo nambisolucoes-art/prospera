@@ -28,6 +28,7 @@ final readonly class SaveAccountData
         public ?array $details,
         public ?CreateUserData $administrator,
         public bool $contractorIsCompany,
+        public ?string $contractorClassification,
         public ?array $firstCompany,
     ) {}
 
@@ -67,10 +68,9 @@ final readonly class SaveAccountData
             active: array_key_exists('active', $validated) ? (bool) $validated['active'] : ($client->active ?? true),
             details: $validated['details'] ?? null,
             administrator: $administrator,
-            contractorIsCompany: $client === null && (
-                ($validated['organization_setup'] ?? null) === 'automatic'
-                || filter_var($input['contractor_is_company'] ?? false, FILTER_VALIDATE_BOOLEAN)
-            ),
+            // Só a escolha explícita do cadastro automático usa os dados do contratante na primeira empresa.
+            contractorIsCompany: $client === null && ($validated['organization_setup'] ?? null) === 'automatic',
+            contractorClassification: $validated['contractor_classification'] ?? null,
             firstCompany: ($validated['organization_setup'] ?? null) === 'manual' ? $input['first_company'] : null,
         );
     }
@@ -78,7 +78,11 @@ final readonly class SaveAccountData
     public function companyFor(Client $account): SaveCompanyData
     {
         if ($this->firstCompany === null) {
-            return SaveCompanyData::forProvisioning($account, $this->contractorIsCompany);
+            return SaveCompanyData::forProvisioning(
+                $account,
+                $this->contractorIsCompany,
+                $this->contractorClassification,
+            );
         }
 
         try {
@@ -112,7 +116,12 @@ final readonly class SaveAccountData
         }
 
         if ($client !== null) {
-            unset($input['administrator'], $input['organization_setup'], $input['first_company']);
+            unset(
+                $input['administrator'],
+                $input['organization_setup'],
+                $input['contractor_classification'],
+                $input['first_company'],
+            );
         } elseif (is_array($input['administrator'] ?? null)) {
             $input['administrator'] = CreateUserData::normalize($input['administrator']);
         }
@@ -176,11 +185,21 @@ final readonly class SaveAccountData
 
         $manual = $client === null && ($input['organization_setup'] ?? null) === 'manual';
 
+        // O CNPJ do contratante pode ser da matriz ou de uma filial: a classificação é sempre declarada.
+        $contractorCnpj = $client === null
+            && $company
+            && ($input['organization_setup'] ?? null) === 'automatic';
+
         return [
             'organization_setup' => ['sometimes', 'required', Rule::in(['automatic', 'manual'])],
             'first_company' => [Rule::excludeIf(! $manual), 'required', 'array:name,trade_name,person_type,document,primary'],
             'first_company.primary' => [Rule::excludeIf(! $manual), 'required', 'array'],
             'first_company.primary.name' => [Rule::excludeIf(! $manual), 'required', 'string', 'max:255'],
+            'contractor_classification' => [
+                Rule::excludeIf(! $contractorCnpj),
+                'required',
+                Rule::in(['headquarters', 'branch']),
+            ],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['sometimes', 'nullable', 'email', 'max:255'],
             'plan' => ['nullable', 'string', 'max:100'],
@@ -252,6 +271,8 @@ final readonly class SaveAccountData
             'first_company.required' => 'Preencha os dados da primeira empresa.',
             'first_company.primary.required' => 'Preencha os dados do estabelecimento principal.',
             'first_company.primary.name.required' => 'Informe o nome do estabelecimento principal.',
+            'contractor_classification.required' => 'Informe se o CNPJ do contratante é da matriz ou de uma filial.',
+            'contractor_classification.in' => 'Selecione Matriz ou Filial.',
             'administrator.required' => 'Preencha os dados do administrador da conta.',
         ];
     }

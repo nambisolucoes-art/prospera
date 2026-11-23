@@ -171,10 +171,14 @@ final readonly class SaveCompanyData
     /**
      * Primeira empresa de uma conta (seção 6.5). Os dados fiscais do contratante só são copiados quando o
      * operador declara que ele é a própria empresa administrada; caso contrário, a empresa nasce sem
-     * documento e a conta completa a identificação depois.
+     * documento e a conta completa a identificação depois. A classificação do CNPJ (matriz ou filial) é
+     * informada pelo operador e nunca deduzida do documento.
      */
-    public static function forProvisioning(Client $account, bool $contractorIsCompany): self
-    {
+    public static function forProvisioning(
+        Client $account,
+        bool $contractorIsCompany,
+        ?string $classification = null,
+    ): self {
         $details = $account->details ?? [];
         $tradeName = is_string($details['trade_name'] ?? null) ? $details['trade_name'] : null;
 
@@ -189,7 +193,7 @@ final readonly class SaveCompanyData
         }
 
         $primaryInput = $contractorIsCompany ? [
-            'classification' => 'headquarters',
+            'classification' => $classification,
             'address' => $details['address'] ?? null,
             'phone' => $details['phone'] ?? null,
             'whatsapp' => $details['whatsapp'] ?? null,

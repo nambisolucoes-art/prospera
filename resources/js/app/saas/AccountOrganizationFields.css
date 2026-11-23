@@ -22,9 +22,3 @@
     padding-block: 0;
   }
 }
-
-@media (min-width: 992px) {
-  .account-organization-mode .formField__label {
-    white-space: nowrap;
-  }
-}
