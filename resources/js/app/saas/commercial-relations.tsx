@@ -6,6 +6,7 @@ import Button from '@/components/Button/Button';
 import SelectControl from '@/components/SelectControl/SelectControl';
 import StatusLabel from '@/components/StatusLabel/StatusLabel';
 import TagLabel from '@/components/TagLabel/TagLabel';
+import TagMarquee from '@/components/TagMarquee/TagMarquee';
 import { useApiForm } from '@/hooks/useApiForm';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
@@ -145,7 +146,7 @@ export default function CommercialRelations({ role, relations, companies, filter
             {
               id: 'tags', label: 'Etiquetas', width: 200,
               render: (relation) => relation.tags.length > 0
-                ? relation.tags.map((tag) => <TagLabel key={tag.id} name={tag.name} color={tag.color} />)
+                ? <TagMarquee>{relation.tags.map((tag) => <TagLabel key={tag.id} name={tag.name} color={tag.color} />)}</TagMarquee>
                 : 'Não informado',
             },
             { id: 'email', label: 'E-mail', width: 220, render: (relation) => relation.email ?? 'Não informado' },

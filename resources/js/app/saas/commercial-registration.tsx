@@ -254,14 +254,16 @@ function RegistrationForm({ role, companies, companyOptions, registrationTags, r
                   {editing && <Field label="Empresa desta ficha" value={company?.name ?? ''} readOnly />}
                   {options.length > 1 && (
                     <>
-                      <SelectChecklist label="Empresas do cadastro" menuLabel="Selecionar empresas"
-                        options={options.map((option) => ({
-                          id: option.code,
-                          label: option.name,
-                          checked: selectedCompanies.includes(option.code),
-                          disabled: option.disabled || processing,
-                        }))}
-                        onChange={selectCompany} />
+                      <div className="business-form__control-start business-form__control-start--select">
+                        <SelectChecklist label="Empresas do cadastro" menuLabel="Selecionar empresas"
+                          options={options.map((option) => ({
+                            id: option.code,
+                            label: option.name,
+                            checked: selectedCompanies.includes(option.code),
+                            disabled: option.disabled || processing,
+                          }))}
+                          onChange={selectCompany} />
+                      </div>
                       <FormHelp className="business-form__control-start">
                         {options.filter((option) => selectedCompanies.includes(option.code)).map((option) => option.name).join(', ')
                           || 'Nenhuma empresa selecionada'}

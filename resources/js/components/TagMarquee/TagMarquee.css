@@ -1,0 +1,50 @@
+.tag-marquee {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+.tag-marquee__track {
+  display: flex;
+  width: max-content;
+}
+.tag-marquee__group {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding-inline-end: 24px;
+  white-space: nowrap;
+}
+.tag-marquee__group .tag-label,
+.tag-marquee__group .tag-label__name {
+  flex: none;
+  white-space: nowrap;
+}
+
+.tag-marquee--running {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+}
+.tag-marquee--running .tag-marquee__track {
+  animation: tag-marquee var(--tag-marquee-duration, 10s) linear infinite;
+}
+.tag-marquee--running:hover .tag-marquee__track,
+.tag-marquee--running:focus-within .tag-marquee__track {
+  animation-play-state: paused;
+}
+
+@keyframes tag-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-1 * var(--tag-marquee-shift))); }
+}
+
+/* Sem animação, as etiquetas ficam numa linha rolável. */
+@media (prefers-reduced-motion: reduce) {
+  .tag-marquee--running {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .tag-marquee--running .tag-marquee__track { animation: none; }
+  .tag-marquee--running .tag-marquee__group[aria-hidden='true'] { display: none; }
+}

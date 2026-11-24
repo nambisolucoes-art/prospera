@@ -35,6 +35,7 @@
   row-gap: 6px;
 }
 .business-form__control-start { margin-inline: 10px; }
+.business-form__control-start--select { margin-block-end: 6px; }
 .business-form__actions-inline {
   display: flex;
   flex-wrap: wrap;
