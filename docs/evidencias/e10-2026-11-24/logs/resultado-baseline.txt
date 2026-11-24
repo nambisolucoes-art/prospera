@@ -1,0 +1,3 @@
+segredos sintéticos conferidos: 17 (janela mínima de 12 caracteres)
+app.log: linhas=546 segredos inteiros=3 segredos com trecho >= 12=11 maior trecho=45 linhas de acesso (console)=459 linhas de acesso (JSON)=0
+storage.log: linhas=0 segredos inteiros=0 segredos com trecho >= 12=0 maior trecho=0 linhas de acesso (console)=0 linhas de acesso (JSON)=0

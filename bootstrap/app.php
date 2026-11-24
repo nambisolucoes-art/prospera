@@ -8,6 +8,7 @@ use App\Http\Middleware\JsonNavigation;
 use App\Http\Middleware\ResolveAccountContext;
 use App\Http\Middleware\ResolveOrganizationContext;
 use App\Http\Middleware\SelfServicePermissions;
+use App\Http\Middleware\SetReferrerPolicy;
 use App\Http\Middleware\ThrottleAccessRecovery;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -28,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'account' => ResolveAccountContext::class,
             'organization' => ResolveOrganizationContext::class,
         ]);
+
+        // Global, para cobrir também as respostas de exceção (redirecionamento de login, 403, 404, 419 e 429).
+        $middleware->append(SetReferrerPolicy::class);
 
         $middleware->web(append: [
             JsonNavigation::class,

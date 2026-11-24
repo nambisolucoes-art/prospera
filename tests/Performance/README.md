@@ -163,6 +163,10 @@ subir. Os scripts recusam prefixos fora de `prospera-e10-lab-*` e só removem re
 - `e10-evolution.sh <árvore pré-E09>`: a árvore é `git archive 48e2191` com `database/seeders` atuais copiados e a linha
   `enter()` de `SeedsAccountScenario` removida. Cria esquema e massa com o código anterior, faz backup, aplica o código
   atual, reverte, reaplica, testa a reversão com vínculo múltiplo e restaura o backup noutro banco.
+- `e10-logs.sh` (`E10_PREFIX`, `E10_PORT`, `E10_MODE=baseline|oficial|oficial-bruto`): sobe um laboratório, executa as
+  jornadas 01 a 10 e `16-logs-limite`, faz requisições extras com `Referer` e links assinados e procura os segredos
+  sintéticos, inteiros ou em trechos de 12 caracteres, nos logs do Octane (`e10-logs-check.py`). Imprime só contagens.
+  `oficial` lê o `--caddyfile` do `CMD` do `Dockerfile`; `baseline` reproduz a configuração anterior à correção.
 - `e10-phpunit.sh [argumentos]`: suíte em container sem rede; o bootstrap continua impondo SQLite em memória.
 - `tests/Browser/e10.mjs`: Playwright instalado fora do projeto (`npm install --prefix /tmp/prospera-e10-browser
   playwright`). `E10_CHROMIUM` aponta um Chromium já existente, `E10_MAIL` a API do Mailpit na rede `*-browser` e

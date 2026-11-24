@@ -43,4 +43,4 @@ RUN composer dump-autoload --optimize --no-interaction \
 FROM php-runtime AS app
 COPY --from=build /app /app
 ENTRYPOINT ["/bin/sh", "/app/docker/start.sh"]
-CMD ["php", "artisan", "octane:frankenphp", "--host=0.0.0.0", "--port=8000", "--workers=2"]
+CMD ["php", "artisan", "octane:frankenphp", "--host=0.0.0.0", "--port=8000", "--workers=2", "--caddyfile=/app/docker/Caddyfile"]

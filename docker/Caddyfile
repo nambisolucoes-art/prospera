@@ -1,0 +1,58 @@
+# Caddyfile do Octane com redação do log de acesso (E10, seção de segurança dos logs).
+# Baseado em vendor/laravel/octane/src/Commands/stubs/Caddyfile. Ao atualizar o Octane, compare os dois arquivos.
+#
+# O log de acesso do Caddy grava a URI completa e os cabeçalhos da requisição. Os filtros abaixo removem do
+# registro os segredos temporários (convite, redefinição de senha, verificação de e-mail e links assinados) e os
+# tokens CSRF. Cookie, Set-Cookie e Authorization já saem como REDACTED por padrão no Caddy.
+{
+	{$CADDY_GLOBAL_OPTIONS}
+
+	admin {$CADDY_SERVER_ADMIN_HOST}:{$CADDY_SERVER_ADMIN_PORT}
+
+	frankenphp {
+		worker {
+			file "{$APP_PUBLIC_PATH}/frankenphp-worker.php"
+			{$CADDY_SERVER_WORKER_DIRECTIVE}
+			{$CADDY_SERVER_WATCH_DIRECTIVES}
+		}
+	}
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+{$CADDY_SERVER_SERVER_NAME} {
+	log {
+		level {$CADDY_SERVER_LOG_LEVEL}
+
+		format filter {
+			wrap {$CADDY_SERVER_LOGGER}
+			fields {
+				# Mantém o prefixo da rota e troca o restante (segredo, identificadores e query) por [REDACTED].
+				# Caminhos com bytes codificados (%63onvites) também são redigidos por inteiro, pois o Laravel os decodifica.
+				request>uri regexp `^/(?:(convites|reset-password|email/verify|settings/profile/email/confirm)|[^?]*%[^?]*)(?:[/?].*)?$` /$1/[REDACTED]
+				request>headers>Referer regexp `^(https?://[^/]+)?/(?:(convites|reset-password|email/verify|settings/profile/email/confirm)|[^?]*%[^?]*)(?:[/?].*)?$` $1/$2/[REDACTED]
+				resp_headers>Location regexp `^(https?://[^/]+)?/(?:(convites|reset-password|email/verify|settings/profile/email/confirm)|[^?]*%[^?]*)(?:[/?].*)?$` $1/$2/[REDACTED]
+				request>headers>X-Xsrf-Token delete
+				request>headers>X-Csrf-Token delete
+			}
+		}
+	}
+
+	# Compressing the Mercure stream costs memory per subscriber and enables BREACH-style attacks...
+	@compressible not path /.well-known/mercure
+
+	route {
+		root * "{$APP_PUBLIC_PATH}"
+		encode @compressible zstd br gzip
+
+		# Mercure configuration is injected here...
+		{$CADDY_SERVER_EXTRA_DIRECTIVES}
+
+		php_server {
+			index frankenphp-worker.php
+			try_files {path} frankenphp-worker.php
+			# Required for the public/storage/ directory...
+			resolve_root_symlink
+		}
+	}
+}

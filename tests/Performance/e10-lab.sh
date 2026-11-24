@@ -44,10 +44,10 @@ docker run -d --rm --label prospera.lab=e10 --name "$prefix-app" --network "$pre
     -e DB_USERNAME=postgres -e DB_PASSWORD=synthetic-e10 -e SESSION_DRIVER=database -e CACHE_STORE=file \
     -e MAIL_MAILER=smtp -e MAIL_HOST=mail -e MAIL_PORT=1025 -e MAIL_SCHEME=smtp \
     -e MAIL_FROM_ADDRESS=prospera@e10.test -e BCRYPT_ROUNDS=4 -e LOG_CHANNEL=stderr \
-    -e PROSPERA_MULTIPLE_ACCOUNTS=true -e E10_METRICS="${E10_METRICS:-0}" -e E10_WORKERS="$workers" \
+    -e PROSPERA_MULTIPLE_ACCOUNTS=true -e E10_METRICS="${E10_METRICS:-0}" -e E10_WORKERS="$workers" -e E10_OCTANE_ARGS="${E10_OCTANE_ARGS-}" \
     prospera-app:latest -c '
         set -eu
-        for path in app bootstrap config database docs resources routes public tests; do
+        for path in app bootstrap config database docker docs resources routes public tests; do
             rm -rf "/app/$path"
             cp -R "/source/$path" "/app/$path"
         done
@@ -64,7 +64,7 @@ docker run -d --rm --label prospera.lab=e10 --name "$prefix-app" --network "$pre
         php artisan audit:check
         php tests/Performance/e10/fixtures.php
         php artisan organization:check
-        exec php artisan octane:frankenphp --host=0.0.0.0 --port=8000 --workers="$E10_WORKERS" --max-requests=20000
+        exec php artisan octane:frankenphp --host=0.0.0.0 --port=8000 --workers="$E10_WORKERS" --max-requests=20000 $E10_OCTANE_ARGS
     ' >/dev/null
 docker network connect "$prefix-browser" "$prefix-app"
 

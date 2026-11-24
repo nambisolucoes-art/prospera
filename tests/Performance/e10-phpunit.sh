@@ -6,10 +6,10 @@ source_dir=$(realpath "$(dirname "$0")/../..")
 docker run --rm --network none --label prospera.lab=e10 -v "$source_dir:/source:ro" \
     -e DB_CONNECTION=pgsql -e DB_HOST=nowhere --entrypoint sh prospera-app:latest -c '
     set -eu
-    for path in app bootstrap config database docs resources routes public tests; do
+    for path in app bootstrap config database docker docs resources routes public tests; do
         rm -rf "/app/$path"; cp -R "/source/$path" "/app/$path"
     done
-    cp /source/phpunit.xml /source/phpstan.neon /source/pint.json /app/
+    cp /source/phpunit.xml /source/phpstan.neon /source/pint.json /source/Dockerfile /app/
     rm -f /app/.env /app/bootstrap/cache/config.php /app/bootstrap/cache/routes*.php
     cd /app
     echo APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= > .env

@@ -1,0 +1,12 @@
+# Amostra do log de acesso do Octane (modo oficial), contagem por método, status e caminho. Laboratório descartável.
+     23 200 GET /convites/[REDACTED]
+      5 429 GET /convites/[REDACTED]
+      5 410 POST /convites/[REDACTED]
+      2 200 POST /reset-password/[REDACTED]
+      2 200 POST /convites/[REDACTED]
+      1 422 POST /reset-password/[REDACTED]
+      1 404 GET /convites/[REDACTED]
+      1 302 GET /settings/profile/email/confirm/[REDACTED]
+      1 302 GET /email/verify/[REDACTED]
+      1 302 GET /convites/[REDACTED]
+      1 200 GET /reset-password/[REDACTED]

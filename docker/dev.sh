@@ -10,7 +10,7 @@ case "${1:-}" in
         fi
 
         # O FrankenPHP reinicia os workers quando os arquivos de config('octane.watch') mudam.
-        exec /bin/sh docker/start.sh php artisan octane:frankenphp --host=0.0.0.0 --port=8000 --workers=2 --watch
+        exec /bin/sh docker/start.sh php artisan octane:frankenphp --host=0.0.0.0 --port=8000 --workers=2 --caddyfile=docker/Caddyfile --watch
         ;;
     vite)
         if ! cmp -s package-lock.json node_modules/.package-lock.copy.json; then

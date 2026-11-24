@@ -33,6 +33,10 @@ No `make dev`, o código do host é montado no container e não há rebuild a ca
 
 O banco é acessível pela rede interna do Compose pelo nome `postgres`. Para definir o nome do banco e as credenciais antes da primeira inicialização, use `DB_DATABASE`, `DB_USERNAME` e `DB_PASSWORD` no `.env` da raiz. Defina `APP_PORT` para alterar a porta do frontend.
 
+### Logs de acesso
+
+O Octane inicia o FrankenPHP com [docker/Caddyfile](docker/Caddyfile) (`--caddyfile` no `CMD` do `Dockerfile` e em `docker/dev.sh`). O log de acesso mantém método, status, duração e rota, mas troca por `[REDACTED]` o segredo das URLs de convite, redefinição de senha, verificação e confirmação de e-mail, além do `Referer` e dos tokens CSRF. As respostas enviam `Referrer-Policy: no-referrer`. Ao criar uma rota que leve credencial temporária no caminho ou na query, acrescente o prefixo ao Caddyfile. Como o Caddyfile copia o do Octane, compare-o com `vendor/laravel/octane/src/Commands/stubs/Caddyfile` ao atualizar o pacote. Qualquer proxy à frente da aplicação precisa de regra equivalente. A prova está em `tests/Performance/e10-logs.sh`.
+
 A raiz encaminha para o login ou para o painel correspondente ao usuário. O cadastro de contas é restrito à administração SaaS. Os exemplos do Bold ficam disponíveis às contas administrativas da plataforma em suas URLs `.html`.
 
 ## Estrutura do frontend
