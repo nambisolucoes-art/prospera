@@ -12,6 +12,13 @@ const at = (
   text,
   group,
 });
+/** Mantém a linha de redimensionamento visível enquanto o passo do tour está ativo. */
+function showResizeLine(target: HTMLElement | null | undefined): () => void {
+  target?.setAttribute('data-tour-focus', 'true');
+
+  return () => target?.removeAttribute('data-tour-focus');
+}
+
 /** Shared by every business list. Demonstrations never navigate or save preferences. */
 export function businessListTourSteps({
   filters,
@@ -58,16 +65,20 @@ export function businessListTourSteps({
         'Cada linha representa um registro. Os títulos identificam os dados de cada coluna.',
       'Tabela',
     ),
-    at(
-      'business-resize',
-      'Largura das colunas',
-      [
-        'Arraste a linha entre os títulos para ajustar a largura de duas colunas.',
-        'A primeira e a última coluna têm largura fixa. A coluna Ações fica sempre no final da tabela.',
-        'Pelo teclado, selecione a linha e use as setas. No próximo passo, vamos demonstrar.',
-      ],
-      'Tabela',
-    ),
+    {
+      ...at(
+        'business-resize',
+        'Largura das colunas',
+        [
+          'Arraste a linha entre os títulos para ajustar a largura de duas colunas.',
+          'A primeira e a última coluna têm largura fixa. A coluna Ações fica sempre no final da tabela.',
+          'Pelo teclado, selecione a linha e use as setas. No próximo passo, vamos demonstrar.',
+        ],
+        'Tabela',
+      ),
+      // A linha só aparece ao passar o mouse; no tour ela fica à vista enquanto o passo está ativo.
+      onEnter: (target) => ({ undo: showResizeLine(target) }),
+    },
     {
       ...at(
         'business-resize',
@@ -77,6 +88,7 @@ export function businessListTourSteps({
       ),
       id: 'business-resize-demo',
       onEnter: (target) => {
+        const hideLine = showResizeLine(target);
         target?.dispatchEvent(
           new CustomEvent('business-list:resize-demo', {
             bubbles: true,
@@ -85,13 +97,15 @@ export function businessListTourSteps({
         );
         return {
           note: 'A demonstração é temporária e não altera suas preferências salvas.',
-          undo: () =>
+          undo: () => {
+            hideLine();
             target?.dispatchEvent(
               new CustomEvent('business-list:resize-demo', {
                 bubbles: true,
                 detail: { active: false },
               }),
-            ),
+            );
+          },
         };
       },
     },

@@ -95,6 +95,12 @@
 
 .business-list__table thead:hover .business-list__resize::after,
 .business-list__resize:is(:focus-visible, :active)::after { opacity: 1; }
+/* Passos do tour: a linha fica à vista e mais espessa, para o destaque mostrar o que arrastar. */
+.business-list__resize[data-tour-focus]::after {
+  inset-inline: 4px;
+  width: 2px;
+  opacity: 1;
+}
 .business-list__resize:focus-visible { outline: 1px solid currentColor; outline-offset: -1px; }
 
 .business-list__table > .table > tbody > tr > td {
