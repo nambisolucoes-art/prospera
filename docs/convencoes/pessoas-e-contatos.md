@@ -56,7 +56,7 @@ Esta política classifica os campos existentes e reserva o lugar dos campos futu
 
 ### Contatos específicos da relação
 
-- **Campos atuais:** nenhum.
+- **Campos atuais:** nenhum em Clientes e Fornecedores. Em Colaboradores, `work_email`, `work_phone` e `work_whatsapp` na relação e `work_contacts` por lotação (contatos profissionais, nunca copiados de Pessoas nem publicados a partir dela).
 - **Campos futuros:** contato comercial, e-mail e telefone de cobrança ou de pedidos, endereço de entrega ou cobrança.
 - **Regra:** mesmas regras dos dados comerciais por empresa.
 - **Componentes:** os campos reutilizam `ContactFields` e os grupos de endereço de Pessoas. Não há duplicação dos dados centrais: a relação guarda só o que é específico.
@@ -70,6 +70,13 @@ Esta política classifica os campos existentes e reserva o lugar dos campos futu
 - **Leitura do cadastro:** quem lê os dados centrais pela ficha comercial não vê esses dados. As buscas de Clientes e Fornecedores não procuram neles.
 - **Auditoria:** com `company_id` e, quando houver, `establishment_id`.
 
+### Dados do colaborador
+
+- **Campos:** `employees` (situação e contatos profissionais), `employee_assignments` (função, departamento, período e contatos da unidade) e `employee_public_profiles` (autorização e apresentação públicas, sem contato).
+- **Proprietário:** a empresa. Edição pelas permissões `account.employees.*` sobre o nó. Dados centrais seguem a classe de identificação e contatos centrais acima.
+- **Efeitos:** só a relação daquela empresa. Nada é sincronizado entre empresas nem com a Pessoa.
+- **Auditoria:** evento com `company_id` e, na lotação, `establishment_id`.
+
 ### Acesso de usuário
 
 A etiqueta Usuário, o vínculo e as atribuições seguem [Identidade e vínculos](identidade-e-vinculos.md). A etiqueta Usuário aparece para quem tem `account.users.list` em algum escopo. Cargos e escopos só aparecem nas telas de acesso.
@@ -79,6 +86,8 @@ A etiqueta Usuário, o vínculo e as atribuições seguem [Identidade e vínculo
 - A partir da E07, Cliente e Fornecedor são derivadas das relações e calculadas para quem está vendo. Cliente aparece somente se houver relação ativa numa empresa onde o leitor tem `account.customers.view`. Fornecedor segue a mesma regra.
 - As listagens de Clientes e Fornecedores mostram as relações das empresas em que o leitor pode listar o papel; abrir a ficha exige visualizar o papel na mesma empresa.
 - `person_tag` guarda a etiqueta Usuário e etiquetas convencionais anteriores do módulo Pessoas. Pessoas é somente uma estrutura central interna: não tem cadastro avulso, menu ou etiquetas próprias no produto. O filtro e o cadastro de Etiquetas oferecem somente Clientes e Fornecedores. Vínculos convencionais anteriores permanecem preservados, sem permitir novos cadastros nessa classificação. Cliente e Fornecedor continuam no catálogo como etiquetas especiais, com vínculo calculado a partir das relações ativas e visíveis.
+
+**Colaborador** é um terceiro papel derivado, com a mesma lógica: relação por empresa (`employees`), etiqueta especial `employee` calculada da relação ativa e visível a quem tem `account.employees.view` sobre a empresa. Não é módulo comercial, não aparece no cadastro de etiquetas convencionais e não é atribuída à mão. A afirmação acima de que o filtro e o cadastro de Etiquetas oferecem somente Clientes e Fornecedores vale para etiquetas **convencionais**. A etiqueta de Colaborador aparece na listagem de Etiquetas como especial e somente leitura, sem estrela fora dela. Pessoas continua sem cadastro avulso, menu ou etiquetas próprias. Contexto em [Institucional, equipe e sites](institucional.md).
 
 Etiquetas convencionais de Clientes e Fornecedores pertencem à relação da empresa. O catálogo pertence à conta, e o módulo da etiqueta determina em qual tipo de relação ela pode ser selecionada. As etiquetas especiais Cliente e Fornecedor continuam derivadas e aparecem fixas no formulário comercial. A seleção específica de uma relação permanece nela, sem passar para a Pessoa ou para a relação de outro papel.
 

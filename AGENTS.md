@@ -12,6 +12,7 @@ O Prospera usa Laravel, PostgreSQL, Octane e FrankenPHP, com React e TypeScript.
 | Módulo novo, dado de negócio, rota, consulta ou tela que dependa de conta, empresa ou estabelecimento | [Contexto organizacional](docs/convencoes/contexto-organizacional.md) e [checklist de módulos](docs/convencoes/checklist-modulos.md) |
 | Cargos, permissões, atribuições e administração de acesso | [Cargos e permissões](docs/convencoes/permissoes.md) e [identidade e vínculos](docs/convencoes/identidade-e-vinculos.md) |
 | Pessoas, contatos, endereços, clientes e fornecedores | [Pessoas e contatos](docs/convencoes/pessoas-e-contatos.md) |
+| Colaboradores, departamentos, funções, lotações, perfil institucional, mídia, sites, diretório e domínios | [Institucional, equipe e sites](docs/convencoes/institucional.md) e, quando a tarefa pertencer a uma etapa, o [plano 002](docs/plano-de-acoes/002-institucional-equipe-sites-white-label.md) |
 | Consultas, serviços com estado, cache, jobs e índices | [Performance](docs/convencoes/performance.md) |
 | Qualquer código PHP: Actions, Models, DTOs, Data, Queries, rotas e testes | [Código do backend](docs/convencoes/codigo-backend.md) |
 
@@ -51,6 +52,12 @@ Priorize o código que uma pessoa entende ao bater o olho, mesmo com mais linhas
 - No Octane com FrankenPHP, serviços com estado de conta, contexto, permissões ou auditoria usam binding `scoped`. Não use estado estático mutável nem guarde `Request`, `User` ou `Session` em objetos longevos. Permissões não ficam em cache entre requisições.
 - Listagens não têm N+1; filtros, paginação, contagem e agregação acontecem no banco. Cada índice novo é justificado por uma consulta e por plano medido; usar índice não é obrigatório.
 - Meça queries, latência, linhas e memória antes e depois de mudanças em consultas críticas, em PostgreSQL isolado e, quando envolver contexto ou autorização, com worker FrankenPHP real. Siga [Performance](docs/convencoes/performance.md).
+
+## Institucional, equipe e sites
+
+- Colaborador é papel de Pessoa por empresa, com etiqueta especial derivada. Não duplica identidade, documento nem contatos centrais e não se confunde com usuário. A atividade profissional chama-se **Função** na interface; **Cargo** é só papel de acesso.
+- Dado público é opt-in e vem de projeção com lista de campos permitidos. Rotas públicas não usam sessão nem `OrganizationContext`: o contexto vem do host (`PublicContext`). Editar rascunho nunca altera o que está publicado.
+- Antes da S14, nenhuma etapa despacha job nem exige agendador, salvo se a medição da própria etapa reprovar o processamento síncrono; nesse caso a etapa incorpora a fila e entrega o fluxo completo. Siga [Institucional, equipe e sites](docs/convencoes/institucional.md).
 
 ## Cargos e permissões
 

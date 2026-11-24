@@ -104,3 +104,6 @@ Responder antes de implementar:
 | Financeiro | Empresa | `company`; caixa em `establishment` | Entre empresas é operação comercial |
 | Ordens de serviço | Estabelecimento | `establishment` | |
 | Relatórios | Conforme a fonte | Conforme a fonte | Sempre pelo descritor autorizado |
+| Colaboradores, departamentos e funções | Empresa (lotação: estabelecimento) | `company`; `establishment` por lotação em `list`, `view` e `assign` | Papel de Pessoa. [Institucional](institucional.md) |
+| Perfil institucional, mídia e sites | Empresa, com `establishment_id` quando é da unidade | `company`, `establishment` | Herança por seção e publicação explícita |
+| Diretório | Empresa ou estabelecimento (ficha); tenant (host) | `company`, `establishment`; `tenant` em `configure` | Leitura pública por projeção |

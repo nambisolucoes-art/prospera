@@ -61,6 +61,16 @@ O contexto do evento é o nó do recurso afetado, nunca a unidade selecionada na
 - **Compartilhado:** a alteração dos dados centrais de uma pessoa é um único evento da conta, sem cópia por empresa relacionada. A relação comercial é evento da empresa, mesmo quando o operador navega por uma filial.
 - **Histórico anterior:** eventos sem empresa ou unidade determinável continuam assim. Nada é preenchido por suposição.
 
+### Frente Institucional
+
+| Evento | Nó do evento |
+| --- | --- |
+| Colaborador, departamento, função, seção da empresa, site, host de site, ficha da empresa | empresa |
+| Lotação, seção da unidade, exceção de horário da unidade, página de unidade, ficha da unidade | estabelecimento, com a empresa |
+| Configuração do host do diretório | conta, sem empresa nem estabelecimento |
+
+Publicar uma seção da empresa grava só a linha da empresa: as unidades que herdam são afetadas por leitura, sem evento próprio, e o evento da empresa leva a contagem de afetados. Cada linha efetivamente escrita gera evento no próprio nó, com o mesmo `operation_id`. Contadores derivados (`content_version`) ficam em `unauditedFields()`. A vigência que expira com a passagem do tempo não é operação e não gera evento. Operações do agendador usam autoria de sistema. Detalhes em [Institucional, equipe e sites](institucional.md).
+
 ### Autoria e inspeção
 
 | Coluna | Conteúdo |

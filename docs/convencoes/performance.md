@@ -14,6 +14,12 @@ O Prospera roda em workers persistentes do FrankenPHP (`octane:frankenphp`). Um 
 - **Cache e jobs:** toda chave de cache inclui o tenant e o nó. Jobs levam o contexto explícito e reautorizam ao executar.
 - **Recursos do Swoole:** `Octane::concurrently`, ticks, `Octane::table` e o cache `octane` não estão disponíveis no FrankenPHP e não são usados.
 
+## Conteúdo público (frente Institucional)
+
+- `PublicContext` e `ProfileResolver` usam binding `scoped`. A chave de cache de página inclui tenant e nó, `site_id`, `content_version` e a revisão publicada. Invalidar é trocar a versão, sem varredura nem job.
+- Resposta que depende da data (lotação, exceção de horário) tem `valid_until` no início do próximo dia civil do fuso do estabelecimento, conferido na leitura, com revalidação a cada acesso (`no-cache` com `ETag`) e sem servir conteúdo vencido. O estado "aberto agora" não vai no HTML em cache.
+- Processamento síncrono só com orçamento medido de memória, tempo e concorrência; se a medição reprovar, a própria etapa incorpora a fila. Nenhuma etapa usa fila ou agendador sem essa medição, e a S14 é a primeira que os exige por contrato. Redis só após medição com worker FrankenPHP real. Detalhes em [Institucional, equipe e sites](institucional.md).
+
 ## Autorização
 
 - As permissões efetivas são resolvidas uma vez por requisição, na primeira checagem, em no máximo 2 queries (atribuições do vínculo e permissões dos cargos distintos). Esse número não cresce com o número de checagens, atribuições ou estabelecimentos.

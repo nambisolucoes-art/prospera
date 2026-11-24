@@ -108,6 +108,16 @@ Na primeira checagem para um usuário da conta, o resolvedor carrega as atribui�
 | `account.users.reactivate`, `account.users.send-password-reset`, `account.users.invite` | E05 ([Identidade e vínculos](identidade-e-vinculos.md)) |
 | `account.points.*` | Removidas na E04 (PD-05) |
 
+## Frente Institucional
+
+Módulos novos (`employees`, `departments`, `job-titles`, `institutional`, `media`, `sites`, `domains`, `directory`), ações e alvos estão em [Institucional, equipe e sites](institucional.md). Pontos que estendem este contrato:
+
+- **Alvo por lotação.** `account.employees.list`, `view` e `assign` admitem `company` e, a partir da S05, `establishment`. Para esse alvo, o recurso avaliado é a **lotação** naquele estabelecimento, como `account.audit.*` já admite os três nós. As demais ações de colaborador admitem só `company`.
+- **Editar e publicar são permissões distintas** em todo recurso publicável, sem aprovação obrigatória em duas etapas. `account.directory.configure` admite só `tenant`.
+- `account.employees.select-team` admite `company` e `establishment` (pela lotação) e é a única ação de equipe pública delegável à unidade; o perfil público e o consentimento são só `company`.
+- Função profissional não gera permissão e não tem relação com cargos.
+- Tentativa negada responde 403 ou 404 sem alterar nada e não gera evento de negócio.
+
 ## Auditoria
 
 Cargos, restrições de disponibilidade, atribuições e sincronizações do catálogo usam `audit_records`. O Model registra o próprio cargo, e `recordAuditFieldChange('permission_ids', ...)` registra as permissões. A inclusão ou remoção de uma restrição de disponibilidade grava o nó da empresa ou do estabelecimento, conforme E08-D4. Cada concessão ou retirada de uma atribuição grava o nó correspondente. Uma operação sobre vários nós conserva o mesmo `operation_id`, com um evento por recurso e nó afetado. Alterações sem mudanças não geram evento. Veja [Auditoria](auditoria.md).

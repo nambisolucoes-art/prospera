@@ -127,6 +127,10 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 - **Escrita:** o módulo verifica a permissão da ação sobre `node()` e filtra por `account_id` e pelo nó da URL (`where establishment_id = ?`). Um registro de outra unidade responde 404. A seleção e o padrão não concedem permissões.
 - **Frontend:** `contextualUrl` é o único resolvedor de endereços `~/`. `navigate` o aplica com a página atual da aba; `ApiLink` e `useApiForm` resolvem pela página que os declarou, e a resolução é idempotente. Por isso, `ApiLink`, `ApiForm`, `useApiForm`, `navigate` e `useBusinessListFilters('~/modulo')` aceitam `~/`. `apiRequest` não resolve `~/`: as chamadas diretas usam `useContextUrl`. Não crie resolvedores por módulo. Links e filtros relativos ao consolidado preservam `unidades`; a paginação usa `withQueryString()`. O contrato é coberto por `npm run test:frontend`. Nas telas sem área de trabalho, o seletor termina com **Abrir área de trabalho**, que aplica a seleção da aba e passa pela entrada sem código. Ao abrir uma unidade do resumo, `voltar-unidades` preserva o link de retorno e não interfere no destino das operações. O seletor na `TopBarPrimary` é alimentado por `organization_context` das rotas `account.*` e aparece a partir de duas unidades autorizadas. Nas telas com contexto, a seleção exibida vem da URL (os códigos de `todos` ou o `voltar-unidades` da unidade aberta); nas telas da conta, vem do armazenamento da aba e, numa aba nova, do padrão pessoal.
 
+## Contexto público (frente Institucional)
+
+O contexto da requisição acima vale para a área autenticada. Sites e diretório públicos **não usam** `OrganizationContext`, sessão nem cookie: o contexto vem do host (`PublicContext`, `scoped`), resolvido em `public_hosts` e usado só por Queries públicas. A sessão continua sem ser autoridade de contexto. Detalhes em [Institucional, equipe e sites](institucional.md). O diretório público é projeção opt-in de cada empresa e **não** é compartilhamento entre empresas (invariante 7).
+
 ## Nomenclatura
 
 ### Código
@@ -199,6 +203,13 @@ Organização
 Controle de acesso
 ├── Usuários               (E05)
 └── Cargos
+Institucional              (S03 em diante, conforme a permissão de listar)
+├── Departamentos
+├── Funções
+├── Colaboradores
+├── Sites
+├── Mídia
+└── Diretório
 Auditoria
 Central de Ajuda
 ```
