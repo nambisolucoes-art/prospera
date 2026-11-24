@@ -1,6 +1,9 @@
 # E10: homologação integrada final da arquitetura organizacional
 
-Estado: **E10 Em validação, aguardando homologação formal.** Data da execução: 24/11/2026.
+Estado: **E10 Concluída e homologada tecnicamente em 24/11/2026**, incluindo a correção dos logs de acesso (seção O).
+Os estados anteriores (Em validação, aguardando homologação formal; pronta para homologação formal) são checkpoints
+históricos, preservados nas seções abaixo. Data da execução: 24/11/2026. A homologação ocorreu em laboratório e não é
+implantação (seção P).
 Não houve commit, push, implantação, alteração de containers oficiais ou uso de banco compartilhado.
 As evidências estão em [evidencias/e10-2026-11-24](../evidencias/e10-2026-11-24/).
 
@@ -137,9 +140,9 @@ Anônimo recebe 401, POST sem CSRF 419 sem gravação, login limitado (429 em po
 existente e inexistente, recuperação de acesso neutra e cookie de sessão HttpOnly com SameSite.
 
 Logs: sem documento, senha, hash, cookie ou caminho de redefinição. Achado: o log de acesso do console do Octane (o
-mesmo comando do `Dockerfile` oficial) imprime o caminho `/convites/{token}` truncado em 46 dos 64 caracteres. O
-token é de uso único e o restante não é recuperável pelo log, mas a política de retenção de logs de acesso deve
-considerar isso (pendência de implantação, seção M).
+mesmo comando do `Dockerfile` oficial) imprime o caminho `/convites/{token}` truncado em 46 dos 64 caracteres.
+**Corrigido na revisão final de segurança dos logs (seção O):** o truncamento era só visual e o registro do Caddy
+guardava a URI inteira; o `Dockerfile` agora inicia o Octane com `docker/Caddyfile`, que redige o segredo.
 
 ## F. Concorrência
 
@@ -287,7 +290,7 @@ janela. Não houve redesenho de tela.
 | E06 | Área de Trabalho, padrão por vínculo, URL como autoridade | Seletor e consolidado | J6, J10 | `OrganizationContextTest`, `CommercialRelationWorkspaceTest`, frontend | Navegador e `workspace_establishments` | Aprovado | Nenhum | | |
 | E07 | Pessoas internas, relações por empresa, etiquetas comerciais | Clientes e Fornecedores | J7, F (documento e pessoa) | `CustomerDirectoryTest`, `SupplierDirectoryTest`, `CommercialRelation*Test`, `PeopleDirectoryTest` | Corridas e planos `auto_explain` | Aprovado | Nenhum | | Retrava constante na escrita |
 | E08 | Auditoria contextual, PD-02, imutabilidade | Histórico e consulta | J8, J9, F, I | `ContextualAuditTest`, `AuditAndGuidanceTest` | Volume 100 mil, planos, UPDATE recusado | Aprovado | Nenhum | | Busca textual cresce com o volume |
-| E09 | Identidade global, convites, chave, URL de conta | Várias contas e convites | J1, J3, J4, J9, J10, F | `MultipleAccountsTest`, `InitialInvitationSecurityTest`, `AccountIsolationTest` | Evolução, reversão, chave desligada, Mailpit, Chromium | Aprovado | Log de acesso com token truncado | Não alterado (implantação) | Retenção de logs |
+| E09 | Identidade global, convites, chave, URL de conta | Várias contas e convites | J1, J3, J4, J9, J10, F | `MultipleAccountsTest`, `InitialInvitationSecurityTest`, `AccountIsolationTest` | Evolução, reversão, chave desligada, Mailpit, Chromium | Aprovado | Log de acesso com token truncado | Redação no Caddy e `Referrer-Policy` (seção O) | Imagem oficial precisa ser reconstruída |
 
 Nenhuma etapa foi considerada validada só porque seus testes antigos continuaram passando: cada linha tem a jornada
 integrada e a evidência correspondentes.
@@ -337,8 +340,8 @@ Riscos técnicos e limitações:
 
 1. Latências e memória são linha de base sintética em host compartilhado, com bcrypt de custo 4; não são SLA.
 2. A busca textual ampla da auditoria cresce com o volume da conta (referência da E08 preservada).
-3. O log de acesso do Octane mostra 46 dos 64 caracteres do token de convite; definir retenção e acesso a esses logs
-   ou um proxy que não registre o caminho completo.
+3. Resolvida na seção O: o log de acesso do Octane não registra mais tokens. Resta definir retenção e acesso aos
+   logs de acesso como higiene operacional, sem dado sensível de convite ou de redefinição neles.
 4. A acessibilidade foi verificada em nível básico (nomes, foco, Escape), sem leitor de tela.
 5. O e-mail foi validado só com Mailpit isolado; nenhum provedor real.
 6. A retrava de conta e pessoa nas escritas comerciais é constante e não foi otimizada (comportamento da E07).
@@ -347,7 +350,8 @@ Condições de implantação, preservadas da E09 e não executadas: backup recup
 janela de migrations, com a contração de `users.account_id` como ponto sem reversão simples após o primeiro vínculo
 múltiplo; política de ativação de `PROSPERA_MULTIPLE_ACCOUNTS` (padrão desligado); configuração e validação do
 provedor de e-mail; reinício controlado dos workers; novo login das sessões anteriores à contração; monitoramento
-inicial de erros, latência, memória e consultas; política de retenção dos logs de acesso (item 3).
+inicial de erros, latência, memória e consultas; política de retenção dos logs de acesso (item 3) e a imagem
+oficial reconstruída para que o `CMD` com `--caddyfile` entre em vigor (seção O.7).
 
 ## N. Estado da E10
 
@@ -357,4 +361,199 @@ Pessoas compartilhadas só dentro da conta, auditoria, inspeção, concorrência
 desempenho sem regressão estrutural, cinco larguras, testes, matriz de rastreabilidade, defeitos corrigidos e
 revalidados, pendências separadas e nenhuma etapa reconstruída.
 
-**E10 Em validação, aguardando homologação formal.** A homologação técnica não é implantação.
+**E10 Em validação, pronta para homologação formal** (checkpoint anterior à homologação definitiva, seção Q).
+
+## O. Revisão final de segurança dos logs de acesso
+
+Intervenção limitada, autorizada depois da execução principal. Não reabriu a arquitetura, não alterou convites,
+autenticação, Pessoas nem as correções D1 e D2.
+
+### O.1 Diagnóstico
+
+Estado do Git: a árvore estava limpa em `0a0502c` (registros de homologação já versionados), sem staging nem stash.
+
+Fluxo real do log de acesso:
+
+1. O FrankenPHP (Caddy 2.11) grava um registro JSON por requisição (`handled request`) com a **URI completa** e todos os
+   cabeçalhos da requisição (menos Cookie, Set-Cookie e Authorization, que o Caddy já mascara). O nível é INFO quando
+   `APP_ENV=local`, como no `compose.yaml`, e WARN fora disso (sem registro de acesso).
+2. O `octane:frankenphp` lê esse JSON do stderr do Caddy e o reimprime em `StartFrankenPhpCommand::writeServerOutput`
+   e `InteractsWithIO::requestInfo`. Só ali ocorre o corte em `largura do terminal - 15` caracteres seguido de `...`.
+   Sem TTY a largura é 80, daí 46 dos 64 caracteres. O corte é visual e **não torna o registro seguro**: 46
+   caracteres de um segredo ainda são parte do segredo, e com `--log-level` o Octane repassa o JSON bruto, com a URI
+   inteira.
+3. Não há outra camada que armazene a URL: o Laravel não loga a rota (`storage/logs` vazio nos ensaios), o Octane não
+   grava arquivo e o Docker guarda só o que o processo imprime.
+
+Credenciais temporárias encontradas nos caminhos e queries:
+
+| Rota | Credencial |
+| --- | --- |
+| `GET/POST /convites/{token}` | token de convite (64 caracteres) |
+| `GET /reset-password/{token}?email=` | token de redefinição e e-mail |
+| `GET /email/verify/{id}/{hash}?expires&signature` | hash e assinatura |
+| `GET /settings/profile/email/confirm?...signature` | assinatura |
+
+Cabeçalhos: `Referer` (carrega o caminho da página anterior, inclusive em requisições do mesmo site) e
+`X-XSRF-TOKEN` ou `X-CSRF-TOKEN` (o Caddy só mascara Cookie, Set-Cookie e Authorization). O app não definia
+`Referrer-Policy`, então o navegador usava o padrão `strict-origin-when-cross-origin`: sem vazamento da URL para
+outro site, mas com a URL completa no `Referer` das requisições internas, que iam para o log.
+
+### O.2 Causa e camada responsável
+
+Camada: configuração do Caddy do servidor de aplicação. O Caddyfile padrão do Octane só redige o parâmetro
+`authorization` (Mercure) e registra o resto. A causa é a ausência de redação para as rotas do Prospera.
+
+### O.3 Solução
+
+- `docker/Caddyfile`: cópia do stub do Octane com filtros de log. `request>uri` vira `/convites/[REDACTED]` (idem para
+  `/reset-password`, `/email/verify` e `/settings/profile/email/confirm`; a query inteira é removida). `Referer` e
+  `Location` da resposta recebem a mesma regra. `X-Xsrf-Token` e `X-Csrf-Token` são removidos. Caminhos com `%`
+  (por exemplo `/%63onvites/...`, que o Laravel decodifica e roteia) são redigidos por inteiro.
+- `Dockerfile` (`CMD`) e `docker/dev.sh`: `--caddyfile=/app/docker/Caddyfile` e `--caddyfile=docker/Caddyfile`.
+- `App\Http\Middleware\SetReferrerPolicy` (global, para cobrir também redirecionamentos, 403, 404, 419 e 429) e
+  `<meta name="referrer" content="no-referrer">` em `app.blade.php`: o navegador não envia `Referer` a lugar nenhum.
+- Sem código de convite, autenticação ou rota alterado. Sem infraestrutura externa.
+
+Preservado no log: método, status, duração, tamanho, IP do cliente, prefixo da rota, `X-Ratelimit-*`, tipo de conteúdo
+e `Referrer-Policy`. Cookies continuam `REDACTED`.
+
+### O.4 Resultado real dos logs
+
+Laboratório descartável por modo (PostgreSQL 18 em tmpfs, FrankenPHP com um worker, Mailpit, `APP_ENV=local`, mesmas
+dez jornadas HTTP e o roteiro `16-logs-limite`, 459 requisições de acesso registradas). Verificação por janela
+deslizante de 12 caracteres sobre 17 segredos sintéticos: tokens de convite e de redefinição extraídos dos e-mails do
+Mailpit, tokens inexistentes, hash e assinaturas sintéticos, valor sintético de `X-XSRF-TOKEN` e caminho codificado.
+
+| Modo | Comando | Segredos inteiros | Segredos com trecho ≥ 12 | Maior trecho |
+| --- | --- | --- | --- | --- |
+| baseline | Octane sem `--caddyfile` (antes da correção) | 3 | 11 | 45 |
+| oficial | `--caddyfile` lido do `CMD` do Dockerfile, saída padrão | 0 | 0 | 0 |
+| oficial-bruto | igual, com `--log-level=INFO` (JSON bruto do Caddy) | 0 | 0 | 0 |
+
+`storage/logs` e o stderr do Laravel também ficaram sem segredos. Nas duas execuções corrigidas os logs mostram, por
+exemplo, `200 GET /convites/[REDACTED]`, `429 GET /convites/[REDACTED]`, `410 POST /convites/[REDACTED]`,
+`302 GET /email/verify/[REDACTED]` e `200 GET /reset-password/[REDACTED]`; nenhum cabeçalho `X-Xsrf-Token` ou
+`X-Csrf-Token` e `Referer` redigido (`http://externo.test/convites/[REDACTED]`). Contagens em
+[amostra-console-oficial.txt](../evidencias/e10-2026-11-24/logs/amostra-console-oficial.txt), registros brutos em
+[amostra-json-bruto.json](../evidencias/e10-2026-11-24/logs/amostra-json-bruto.json) e resultados em
+`docs/evidencias/e10-2026-11-24/logs/resultado-*.txt`. Nenhum token, senha ou credencial foi gravado nas evidências;
+as de baseline trazem só contagens.
+
+### O.5 Testes executados
+
+- Jornadas HTTP 01 a 10 nos três modos, todas sem falhas (35, 36, 92, 38, 37, 32, 42, 35, 34 e 54 verificações),
+  incluindo abertura, aceite, convite inválido, expirado, reutilizado, substituído, revogado, recuperação de senha e
+  login limitado. `16-logs-limite` (sessão real): 20 respostas 200 e depois 429 na abertura de convites.
+- Requisições extras com `Referer` contendo o caminho sensível, `X-XSRF-TOKEN` sintético, links de verificação de
+  e-mail e de confirmação de e-mail assinados, redefinição com query e caminho codificado.
+- Cabeçalho `Referrer-Policy: no-referrer` conferido ao vivo em 200, 302 (login), 404 e `/up`, e a meta no HTML.
+- `AccessLogRedactionTest` (4 testes, 21 asserções): cabeçalho em respostas normais e de exceção, meta, `CMD` do
+  Dockerfile e `dev.sh` com `--caddyfile`, regras do Caddyfile.
+- Uma execução de `php artisan test` no PHP do host terminou com 259 falhas, 1 teste ignorado e 22 aprovados. A causa
+  foi confirmada na saída (seção Q.1): ambiente, sem regressão.
+- PHPUnit completo em container sem rede: **282 testes e 3.813 asserções**, sem falhas (antes 278 e 3.792). PHPStan
+  sem erros e Pint aprovado. `node scripts/check-architecture.mjs` aprovado. `migrate`, `permissions:sync`,
+  `audit:check` e `organization:check` rodam na subida de cada laboratório e passaram.
+- Frontend (testes e build) não reexecutados: nenhum arquivo TypeScript, CSS ou componente mudou; só o HTML do Blade
+  ganhou uma meta.
+- A sintaxe do Caddyfile foi validada com `frankenphp validate` na imagem oficial, e o servidor real subiu com ele nos
+  laboratórios. Os laboratórios trocam só o comando de inicialização (o `CMD` da imagem local é anterior à correção),
+  mas o argumento `--caddyfile` é lido do `CMD` do `Dockerfile` do repositório e o script falha se ele não existir.
+
+Preservado da validação anterior, sem repetir: concorrência (11 cenários), 4.202 requisições de ensaio, Chromium
+(301 verificações), evolução e reversão de migrations, planos de consulta. Justificativa técnica: a mudança não toca
+código de domínio, banco, travas, autorização ou frontend; o diff de `app/` é só o middleware de cabeçalho. D1
+(ordem de travas Conta, Empresa) e D2 (leitura de Etiquetas por qualquer atribuição, sem ampliar entre contas) seguem
+cobertos pelos mesmos testes PHPUnit, todos aprovados, e as jornadas 03 e 05 passaram intactas.
+
+### O.6 Impacto operacional
+
+- Logs de acesso continuam úteis, só sem o segredo. Para diagnosticar um convite, use o horário, o status, o IP e o
+  identificador técnico na auditoria. O prefixo `/convites/[REDACTED]` não distingue um token de outro.
+- `POST /reset-password` aparece como `/reset-password/[REDACTED]`, e caminhos com `%` aparecem como `//[REDACTED]`
+  (perda de detalhe aceita, por segurança).
+- `Referrer-Policy: no-referrer` não afeta CSRF (o Laravel confere token e `Origin`) nem o fluxo funcional.
+- O `docker/Caddyfile` copia o stub do Octane. Ao atualizar o Octane, compare com
+  `vendor/laravel/octane/src/Commands/stubs/Caddyfile`.
+
+### O.7 Riscos residuais e pendências de implantação
+
+1. A correção só vale na imagem oficial depois de reconstruir (o `CMD` mudou). Os containers oficiais em execução
+   não foram reconstruídos nem reiniciados e continuam com o comportamento anterior até a implantação.
+2. Se alguém iniciar o Octane sem `--caddyfile` (comando manual ou outro orquestrador), o problema volta. O teste
+   `AccessLogRedactionTest` cobre `Dockerfile` e `dev.sh`, não comandos externos.
+3. Proxy ou balanceador à frente do app tem o próprio log de acesso e precisa de regra equivalente (não existe no
+   repositório).
+4. Tokens de convite já gravados em logs antigos permanecem lá; são de uso único e expiram, mas a retenção desses
+   logs deve ser curta.
+5. Rotas novas com credencial temporária na URL exigem acrescentar o prefixo ao `docker/Caddyfile`.
+
+### O.8 Arquivos e estado do Git
+
+Modificados: `Dockerfile`, `docker/dev.sh`, `bootstrap/app.php`, `resources/views/app.blade.php`,
+`tests/Performance/e10-lab.sh` (copia `docker/` e aceita `E10_OCTANE_ARGS`), `tests/Performance/e10-phpunit.sh`
+(copia `docker/` e `Dockerfile`), este relatório, o plano 001, o README e o README de Performance.
+Novos: `docker/Caddyfile`, `app/Http/Middleware/SetReferrerPolicy.php`, `tests/Feature/AccessLogRedactionTest.php`,
+`tests/Performance/e10-logs.sh`, `tests/Performance/e10-logs-check.py`, `tests/Performance/e10/16-logs-limite.php` e
+`docs/evidencias/e10-2026-11-24/logs/`. Sem commit, push, staging ou stash; HEAD `0a0502c`, branch
+`feat/filtros-calendario-titulos`. Containers e bancos oficiais não foram tocados, e os três laboratórios foram
+removidos.
+
+## P. Pendências operacionais de implantação
+
+Checklist para uma implantação futura, **sem relação com etapas de desenvolvimento pendentes da arquitetura**. Nada
+abaixo foi executado, e a implantação exige autorização separada.
+
+| # | Item | Condição |
+| --- | --- | --- |
+| 1 | Backup | Backup recuperável e verificado (restauração testada) da base a migrar |
+| 2 | Migrations | Janela própria; a contração de `users.account_id` não tem reversão simples após o primeiro vínculo múltiplo |
+| 3 | Imagem oficial | Reconstruir a imagem para que o `CMD` com `--caddyfile=/app/docker/Caddyfile` entre em vigor; o container em execução mantém o comportamento anterior |
+| 4 | Proxy ou balanceador externo | Regra de redação equivalente à do `docker/Caddyfile` em todo componente que registre requisições com credenciais temporárias; não existe no repositório |
+| 5 | E-mail | Configurar e validar o provedor real (só o Mailpit isolado foi usado) |
+| 6 | Feature flag | Definir a política de `PROSPERA_MULTIPLE_ACCOUNTS` (padrão desligado) |
+| 7 | Workers | Reinício controlado dos workers do Octane |
+| 8 | Sessões | Novo login das sessões anteriores à contração |
+| 9 | Política de logs | Retenção curta e acesso restrito; logs históricos anteriores à correção podem conter tokens de convite (uso único) e devem ser tratados por política operacional |
+| 10 | Monitoramento inicial | Erros, latência, memória e consultas após a implantação |
+| 11 | Manutenção | Novas rotas com token ou assinatura na URL entram no `docker/Caddyfile`; ao atualizar o Octane, comparar o Caddyfile com `vendor/laravel/octane/src/Commands/stubs/Caddyfile` |
+
+## Q. Homologação técnica definitiva (24/11/2026)
+
+**E10 Concluída e homologada tecnicamente em 24/11/2026.** Aprovada pelo usuário após a revisão final de segurança.
+
+### Q.1 Origem das 259 falhas
+
+Conferida na saída, sem presumir. `php artisan test` no PHP do host (que tem `PDO`, mas não `pdo_sqlite`) produziu
+259 falhas, 1 ignorado e 22 aprovados, total de 282 testes. Em todas as 259, a mensagem é `QueryException: could not
+find driver (Connection: sqlite, Database: :memory:)`, e nenhuma outra exceção apareceu. O `tests/bootstrap.php`
+impõe SQLite em memória, então sem o driver nenhum teste com banco consegue rodar. Foi falha **exclusivamente de
+ambiente**. O mesmo código passou no container correto (`e10-phpunit.sh`): **282 testes e 3.813 asserções, sem
+falhas**, referência final preservada. Não há regressão pendente, e a suíte não foi repetida.
+
+### Q.2 Aprovado tecnicamente
+
+`docker/Caddyfile`; redação das rotas com credenciais temporárias; proteção dos cabeçalhos sensíveis (`Referer`,
+`X-Xsrf-Token`, `X-Csrf-Token`, `Location`); caminhos codificados; `Referrer-Policy: no-referrer`; comandos de
+inicialização com `--caddyfile`; os quatro testes de regressão; os ensaios com logs reais de FrankenPHP. Convites,
+Fortify e demais autenticações permaneceram intactos (jornadas 01 a 10 sem falhas). Nenhum mecanismo novo de logging
+ou autenticação foi criado.
+
+### Q.3 Limitações aceitas
+
+A homologação foi feita em laboratório. O ambiente oficial precisa receber a nova imagem. Proxies e balanceadores
+externos precisam de proteção equivalente. Logs históricos podem conter segredos anteriores à correção. Novas rotas
+com token na URL entram nas regras de sanitização. Atualizações do Octane exigem conferir o Caddyfile. Não bloqueiam a
+homologação técnica, mas são condições obrigatórias antes de uma implantação segura (seção P).
+
+### Q.4 Conjunto do checkpoint final e verificação de credenciais
+
+Git: branch `feat/filtros-calendario-titulos`, HEAD `0a0502c`, 10 arquivos modificados e 7 entradas novas, sem
+staging nem stash. Compõem o checkpoint: código e infraestrutura (`Dockerfile`, `docker/dev.sh`, `docker/Caddyfile`,
+`bootstrap/app.php`, `SetReferrerPolicy.php`, `app.blade.php`); teste (`AccessLogRedactionTest.php`); scripts
+(`e10-lab.sh`, `e10-phpunit.sh`, `e10-logs.sh`, `e10-logs-check.py`, `e10/16-logs-limite.php`); documentação (este
+relatório, o plano 001, `README.md` e `tests/Performance/README.md`); evidências (`docs/evidencias/e10-2026-11-24/logs/`).
+Varredura dos arquivos versionáveis por sequências longas, chaves e senhas: só aparecem os marcadores sintéticos
+dos roteiros e a chave e senha sintéticas de laboratório já existentes; nenhum token, e-mail real ou credencial real.
+Sem commit nem push.

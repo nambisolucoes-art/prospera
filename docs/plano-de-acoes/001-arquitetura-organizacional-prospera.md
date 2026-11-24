@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 a E09 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 homologada formalmente em 23/11/2026, com referência em `7cd9b9d` e complementação validada sobre `845218a` (seção 26). E09 homologada formalmente em 23/11/2026 sobre o HEAD `48e2191` com a árvore de trabalho validada (seção 26). E10 pendente. Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026, encerrada no mesmo dia com a suíte estabilizada (seção 26), sem reabrir etapas homologadas |
+| Situação do documento | Aprovado. **E01 a E10 concluídas e homologadas tecnicamente (E10 em 24/11/2026); a implantação continua pendente de autorização separada.** Registros históricos seguintes: E01 a E09 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 homologada formalmente em 23/11/2026, com referência em `7cd9b9d` e complementação validada sobre `845218a` (seção 26). E09 homologada formalmente em 23/11/2026 sobre o HEAD `48e2191` com a árvore de trabalho validada (seção 26). E10 homologada em 24/11/2026 (seção 26). Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026, encerrada no mesmo dia com a suíte estabilizada (seção 26), sem reabrir etapas homologadas |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
 | Homologação técnica da E08 | 23/11/2026: Concluída; evidências, limitações aceitas e condições de implantação na seção 26 |
@@ -2120,7 +2120,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E07 | Concluída | 21/11/2026 | 21/11/2026 | Auditoria final na subseção E07 e homologação nesta seção | Privacidade da descoberta corrigida e verificada; tema disponível aprovado |
 | E08 | Concluída | 21/11/2026 | 23/11/2026 | `7cd9b9d`, retomada, matriz de cobertura, medições e homologação formal na seção 26 | Homologação técnica aprovada; limitações sintéticas aceitas e condições futuras de implantação preservadas |
 | E09 | Concluída | 23/11/2026 | 23/11/2026 | [Validação integrada](001-e09-validacao-integrada.md): PostgreSQL 18, concorrência, FrankenPHP, Chromium e suíte completa, refeitos sobre a árvore final; homologação formal na seção 26 | Homologação técnica aprovada; implantação não executada e condicionada às pendências operacionais registradas |
-| E10 | Em validação | 24/11/2026 | | [Homologação integrada](001-e10-homologacao-integrada.md): laboratório PostgreSQL 18, FrankenPHP, Mailpit e Chromium; 494 verificações HTTP, 301 no navegador, evolução e reversão, concorrência, 8.404 requisições em workers e suíte com 278 testes | Aguardando homologação formal; defeitos D1 (deadlock) e D2 (Etiquetas por atribuição local) corrigidos e revalidados; implantação não executada |
+| E10 | Concluída | 24/11/2026 | 24/11/2026 | [Homologação integrada](001-e10-homologacao-integrada.md): laboratório PostgreSQL 18, FrankenPHP, Mailpit e Chromium; 494 verificações HTTP, 301 no navegador, evolução e reversão, concorrência, 8.404 requisições em workers e suíte com 278 testes | Homologada tecnicamente em laboratório; defeitos D1 (deadlock) e D2 (Etiquetas por atribuição local) corrigidos e revalidados; exposição de tokens nos logs de acesso corrigida (seção O do relatório); implantação não executada; pendências de implantação em [seção P](001-e10-homologacao-integrada.md) |
 
 ### Registro de execução
 
@@ -3519,3 +3519,37 @@ respostas inesperadas e sem crescimento contínuo de memória.
 
 Pendências: as condições operacionais da E09 continuam válidas; acrescenta-se a política de retenção dos logs de
 acesso, que mostram parte do token de convite no caminho. A homologação técnica não autoriza a implantação.
+
+### E10: revisão final de segurança dos logs de acesso (24/11/2026)
+
+**Estado: E10 permanece Em validação, pronta para homologação formal.** Intervenção limitada, sem commit, push,
+implantação, alteração de containers ou bancos oficiais, nem mudança em convites, autenticação, Pessoas ou D1 e D2.
+
+- **Causa e camada.** O log JSON do Caddy (FrankenPHP) guardava a URI inteira e os cabeçalhos `Referer` e
+  `X-XSRF-TOKEN`. O corte em 46 dos 64 caracteres era só do console do Octane e não protegia nada; com `--log-level` o
+  JSON bruto saía completo. O Caddyfile padrão do Octane só redigia o parâmetro `authorization`.
+- **Solução.** `docker/Caddyfile` redige `/convites`, `/reset-password`, `/email/verify` e
+  `/settings/profile/email/confirm` (inclusive query e caminhos com `%`), o `Referer` e o `Location`, e remove os
+  tokens CSRF. `Dockerfile` e `docker/dev.sh` iniciam o Octane com ele. `Referrer-Policy: no-referrer` por middleware
+  global e meta no HTML. Método, status, duração e rota sanitizada continuam no log.
+- **Prova.** FrankenPHP real, dez jornadas HTTP e limite de convites, 459 requisições por modo: antes, 3 segredos
+  inteiros e 11 com trecho de até 45 caracteres; depois, zero nos dois modos de saída (console e JSON bruto).
+  PHPUnit 282 testes e 3.813 asserções, PHPStan e Pint aprovados.
+- **Pendências.** Reconstruir a imagem oficial na implantação; regra equivalente em qualquer proxy externo; logs
+  antigos podem conter tokens de uso único. Relatório e evidências: [seção O](001-e10-homologacao-integrada.md) e
+  `docs/evidencias/e10-2026-11-24/logs/`.
+
+### E10: homologação técnica definitiva e encerramento do plano (24/11/2026)
+
+**E10: Concluída e homologada tecnicamente em 24/11/2026. E01 a E10 estão concluídas.** O plano de arquitetura
+organizacional está encerrado e serve de base aos módulos operacionais do ERP. Os registros anteriores de Em
+validação são checkpoints históricos, preservados sem alteração retroativa dos resultados das etapas.
+
+- **Correção dos logs:** incorporada ao encerramento (redação no `docker/Caddyfile`, `Referrer-Policy`, comandos de
+  inicialização com `--caddyfile`, 4 testes de regressão e ensaios com logs reais do FrankenPHP).
+- **Suíte final de referência:** 282 testes e 3.813 asserções, sem falhas, no container com SQLite. As 259 falhas vistas
+  no PHP do host vieram da ausência do driver `pdo_sqlite` (todas `could not find driver`), sem regressão.
+- **Homologação não é implantação.** O ambiente oficial ainda precisa da nova imagem, e o checklist operacional
+  (backup, migrations, imagem, proxy externo, e-mail, flag, workers, sessões, política de logs, monitoramento) está na
+  [seção P do relatório da E10](001-e10-homologacao-integrada.md). Não são etapas de desenvolvimento pendentes e nada
+  foi executado. Sem commit nem push; containers, bancos e workers oficiais intocados.
