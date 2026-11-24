@@ -1,0 +1,786 @@
+{
+    "e10": "03-acessos",
+    "checks": 92,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo Vendas A cadastrado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo Consulta A cadastrado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo Gerente de unidade cadastrado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo Logística restrita cadastrado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo Somente Ajuda cadastrado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo Operador B na Conta B",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargos da Conta A e da Conta B são independentes",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Permissão platform em cargo da conta recusada",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário henrique@gartan.e10.test criado (Administrador da conta, tenant)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário carlos@gartan.e10.test criado (Vendas A, company)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário consulta@gartan.e10.test criado (Consulta A, tenant)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário unidade@gartan.e10.test criado (Gerente de unidade, establishment)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário logistica@gartan.e10.test criado (Logística restrita, company)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário suspenso@gartan.e10.test criado (Vendas A, company)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário semvinculo@gartan.e10.test criado (Consulta A, tenant)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Usuário ajuda@gartan.e10.test criado (Somente Ajuda, tenant)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cada usuário novo tem uma pessoa própria da Conta A",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo indisponível na empresa recusado",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Cargo indisponível: identidade não criada",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Operador B criado numa unidade da Conta B",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade não concede Administrador",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade não atribui em outra unidade",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade não atribui no nível da empresa",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade não retira atribuição de nível superior",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade não suspende vínculo",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade não cria cargo",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Negações não alteraram dados nem auditoria",
+            "passed": true,
+            "detail": [
+                {
+                    "roles": 14,
+                    "permission_role": 421,
+                    "assignments": 13,
+                    "memberships": {
+                        "active": 13
+                    },
+                    "users": 15,
+                    "customers": 0,
+                    "companies": {
+                        "1": 6
+                    },
+                    "audit": 115
+                },
+                {
+                    "roles": 14,
+                    "permission_role": 421,
+                    "assignments": 13,
+                    "memberships": {
+                        "active": 13
+                    },
+                    "users": 15,
+                    "customers": 0,
+                    "companies": {
+                        "1": 6
+                    },
+                    "audit": 115
+                }
+            ]
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade concede cargo local na própria unidade",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Atribuição local gravada com empresa e unidade",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Evento da atribuição com nó da unidade e autor real",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade vê só as atribuições do próprio escopo",
+            "passed": true,
+            "detail": [
+                14
+            ]
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/empresas",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/empresas/1/visualizar",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/empresas/1/editar",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta PATCH {A}/empresas/1",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta PATCH {A}/empresas/1",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta POST {A}/empresas",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta POST {A}/estabelecimentos",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta PATCH {A}/estabelecimentos/7",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta POST {A}/estabelecimentos/7/principal",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/cargos",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta POST {A}/cargos",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta PATCH {A}/cargos/10",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/usuarios",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta POST {A}/usuarios",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta PATCH {A}/usuarios/6/suspender",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta PATCH {A}/usuarios/6/atribuicoes",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/auditoria",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/editar",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/etiquetas/cadastrar",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta POST {A}/etiquetas",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/estabelecimento/gartan-comercio/clientes",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta GET {A}/estabelecimento/gartan-comercio/clientes/cadastrar",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "consulta POST {A}/empresa/gartan-comercio/clientes",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "vendas GET {A}/cargos",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "vendas GET {A}/empresa/gartan-logistica/clientes/1/visualizar",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "vendas POST {A}/empresa/gartan-logistica/clientes",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "vendas GET {A}/estabelecimento/gartan-logistica/clientes",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "vendas GET /contas/outra-organizacao-servicos/empresas",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "vendas GET {A}/empresas/2/visualizar",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "gerente PATCH {A}/estabelecimentos/7",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "gerente POST {A}/estabelecimentos/7/principal",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "gerente PATCH {A}/estabelecimentos/6",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "gerente PATCH {A}/empresas/1",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Lista de usuários limitada às atribuições do escopo do operador",
+            "passed": true,
+            "detail": [
+                "Gartan Filial Brumado"
+            ]
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Operações negadas preservaram todos os dados e não geraram auditoria",
+            "passed": true,
+            "detail": [
+                {
+                    "roles": 14,
+                    "permission_role": 421,
+                    "assignments": 14,
+                    "memberships": {
+                        "active": 13
+                    },
+                    "users": 15,
+                    "customers": 0,
+                    "companies": {
+                        "1": 6
+                    },
+                    "audit": 118
+                },
+                {
+                    "roles": 14,
+                    "permission_role": 421,
+                    "assignments": 14,
+                    "memberships": {
+                        "active": 13
+                    },
+                    "users": 15,
+                    "customers": 0,
+                    "companies": {
+                        "1": 6
+                    },
+                    "audit": 118
+                }
+            ]
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Gerente de unidade edita a própria unidade",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Retira Empresas: listar do cargo Consulta A",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Revogação vale na requisição seguinte",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Restaura a permissão",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Concessão vale na requisição seguinte",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Alterações do cargo auditadas (duas)",
+            "passed": true,
+            "detail": 2
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Antes da suspensão o vínculo opera",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Suspender vínculo",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Sessão ativa perde acesso na requisição seguinte",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Suspensão preserva atribuições e identidade",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Reativar vínculo",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Reativado volta a operar",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Suspender novamente para o estado da massa",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Vínculo único suspenso: identidade sem vínculo ativo",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Sem vínculo ativo: a seleção só informa a situação, sem endereço de entrada",
+            "passed": true,
+            "detail": {
+                "status": 200,
+                "accounts": [
+                    {
+                        "code": "grupo-gartan",
+                        "name": "Grupo Gartan Participações",
+                        "trade_name": "Grupo Gartan",
+                        "roles": [],
+                        "status": "suspended",
+                        "url": null
+                    }
+                ]
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Sem vínculo ativo: conta recusada",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Retirar a última atribuição",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Última atribuição retirada não suspende o vínculo",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Vínculo sem atribuições não tem permissões de conta",
+            "passed": true,
+            "detail": 403
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Reatribuir Logística restrita na A2",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Suspender o segundo administrador",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Último administrador não retira o próprio cargo",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Último administrador não se suspende",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Administração utilizável preservada",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Reativar o segundo administrador",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J5 acessos",
+            "check": "Envio forjado de e-mail e senha não altera a identidade",
+            "passed": true,
+            "detail": 422
+        }
+    ]
+}

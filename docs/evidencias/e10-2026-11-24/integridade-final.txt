@@ -1,0 +1,7 @@
+Permissões sincronizadas: 0 criadas, 0 atualizadas, 0 removidas, 82 descobertas.
+Auditoria validada: 13 modelos de negócio com campos cobertos.
+Estrutura organizacional validada: nenhuma violação encontrada.
+  2026_11_23_000001_add_code_to_clients .............................. [1] Ran  
+  2026_11_23_000002_create_account_invitations ....................... [1] Ran  
+  2026_11_23_000003_remove_account_from_users ........................ [1] Ran  
+

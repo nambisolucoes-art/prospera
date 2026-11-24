@@ -1,0 +1,191 @@
+Pager usage is off.
+        verificacao        | count 
+---------------------------+-------
+ users.account_id presente |     0
+(1 row)
+
+     table_name      | colunas 
+---------------------+---------
+ account_invitations |      18
+ account_memberships |       9
+ audit_records       |      20
+ clients             |      11
+ companies           |      13
+ customers           |       7
+ establishments      |      20
+ people              |      18
+ role_assignments    |      10
+ role_availability   |       5
+ roles               |       7
+ suppliers           |       7
+ tags                |       9
+ users               |      15
+(14 rows)
+
+       tabela        |                           conname                            | contype |                                                                                                                                                                                         definicao                                                                                                                                                                                          
+---------------------+--------------------------------------------------------------+---------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ clients             | clients_code_format                                          | c       | CHECK ((((code)::text ~ '^[a-z0-9][a-z0-9-]{1,39}$'::text) AND ((code)::text <> ALL ((ARRAY['todos'::character varying, 'cadastrar'::character varying, 'editar'::character varying, 'visualizar'::character varying, 'selecionar'::character varying, 'convites'::character varying, 'inspecao'::character varying, 'conta'::character varying, 'contas'::character varying])::text[]))))
+ clients             | clients_code_unique                                          | u       | UNIQUE (code)
+ clients             | clients_document_unique                                      | u       | UNIQUE (document)
+ clients             | clients_pkey                                                 | p       | PRIMARY KEY (id)
+ people              | people_account_id_document_unique                            | u       | UNIQUE (account_id, document)
+ people              | people_account_id_foreign                                    | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ people              | people_id_account_id_unique                                  | u       | UNIQUE (id, account_id)
+ people              | people_pkey                                                  | p       | PRIMARY KEY (id)
+ tags                | tags_account_id_foreign                                      | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ tags                | tags_account_id_module_name_unique                           | u       | UNIQUE (account_id, module, name)
+ tags                | tags_account_id_module_system_key_unique                     | u       | UNIQUE (account_id, module, system_key)
+ tags                | tags_id_account_id_unique                                    | u       | UNIQUE (id, account_id)
+ tags                | tags_pkey                                                    | p       | PRIMARY KEY (id)
+ roles               | roles_account_id_foreign                                     | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ roles               | roles_account_id_name_unique                                 | u       | UNIQUE (account_id, name)
+ roles               | roles_account_id_system_key_unique                           | u       | UNIQUE (account_id, system_key)
+ roles               | roles_availability_check                                     | c       | CHECK (((availability)::text = ANY ((ARRAY['tenant'::character varying, 'restricted'::character varying])::text[])))
+ roles               | roles_id_account_id_unique                                   | u       | UNIQUE (id, account_id)
+ roles               | roles_pkey                                                   | p       | PRIMARY KEY (id)
+ audit_records       | audit_records_account_id_foreign                             | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ audit_records       | audit_records_company_id_account_id_foreign                  | f       | FOREIGN KEY (company_id, account_id) REFERENCES companies(id, account_id) ON DELETE RESTRICT
+ audit_records       | audit_records_company_requires_account                       | c       | CHECK (((company_id IS NULL) OR (account_id IS NOT NULL)))
+ audit_records       | audit_records_establishment_id_company_id_account_id_foreign | f       | FOREIGN KEY (establishment_id, company_id, account_id) REFERENCES establishments(id, company_id, account_id) ON DELETE RESTRICT
+ audit_records       | audit_records_establishment_requires_company                 | c       | CHECK (((establishment_id IS NULL) OR (company_id IS NOT NULL)))
+ audit_records       | audit_records_legacy_key_unique                              | u       | UNIQUE (legacy_key)
+ audit_records       | audit_records_pkey                                           | p       | PRIMARY KEY (id)
+ suppliers           | suppliers_account_id_foreign                                 | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ suppliers           | suppliers_company_id_account_id_foreign                      | f       | FOREIGN KEY (company_id, account_id) REFERENCES companies(id, account_id) ON DELETE RESTRICT
+ suppliers           | suppliers_company_id_person_id_unique                        | u       | UNIQUE (company_id, person_id)
+ suppliers           | suppliers_id_company_id_account_id_unique                    | u       | UNIQUE (id, company_id, account_id)
+ suppliers           | suppliers_person_id_account_id_foreign                       | f       | FOREIGN KEY (person_id, account_id) REFERENCES people(id, account_id) ON DELETE RESTRICT
+ suppliers           | suppliers_pkey                                               | p       | PRIMARY KEY (id)
+ customers           | customers_account_id_foreign                                 | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ customers           | customers_company_id_account_id_foreign                      | f       | FOREIGN KEY (company_id, account_id) REFERENCES companies(id, account_id) ON DELETE RESTRICT
+ customers           | customers_company_id_person_id_unique                        | u       | UNIQUE (company_id, person_id)
+ customers           | customers_id_company_id_account_id_unique                    | u       | UNIQUE (id, company_id, account_id)
+ customers           | customers_person_id_account_id_foreign                       | f       | FOREIGN KEY (person_id, account_id) REFERENCES people(id, account_id) ON DELETE RESTRICT
+ customers           | customers_pkey                                               | p       | PRIMARY KEY (id)
+ companies           | companies_account_id_code_unique                             | u       | UNIQUE (account_id, code)
+ companies           | companies_account_id_foreign                                 | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ companies           | companies_id_account_id_unique                               | u       | UNIQUE (id, account_id)
+ companies           | companies_pkey                                               | p       | PRIMARY KEY (id)
+ establishments      | establishments_account_id_code_unique                        | u       | UNIQUE (account_id, code)
+ establishments      | establishments_company_id_account_id_foreign                 | f       | FOREIGN KEY (company_id, account_id) REFERENCES companies(id, account_id) ON DELETE RESTRICT
+ establishments      | establishments_id_company_id_account_id_unique               | u       | UNIQUE (id, company_id, account_id)
+ establishments      | establishments_id_company_id_unique                          | u       | UNIQUE (id, company_id)
+ establishments      | establishments_pkey                                          | p       | PRIMARY KEY (id)
+ establishments      | establishments_primary_active_check                          | c       | CHECK (((NOT is_primary) OR active))
+ account_memberships | account_memberships_account_id_foreign                       | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ account_memberships | account_memberships_account_id_person_id_unique              | u       | UNIQUE (account_id, person_id)
+ account_memberships | account_memberships_id_account_id_unique                     | u       | UNIQUE (id, account_id)
+ account_memberships | account_memberships_person_id_account_id_foreign             | f       | FOREIGN KEY (person_id, account_id) REFERENCES people(id, account_id) ON DELETE RESTRICT
+ account_memberships | account_memberships_pkey                                     | p       | PRIMARY KEY (id)
+ account_memberships | account_memberships_status_check                             | c       | CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'suspended'::character varying])::text[])))
+ account_memberships | account_memberships_user_id_account_id_unique                | u       | UNIQUE (user_id, account_id)
+ account_memberships | account_memberships_user_id_foreign                          | f       | FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE RESTRICT
+ role_availability   | role_availability_company_id_account_id_foreign              | f       | FOREIGN KEY (company_id, account_id) REFERENCES companies(id, account_id) ON DELETE RESTRICT
+ role_availability   | role_availability_establishment_id_company_id_foreign        | f       | FOREIGN KEY (establishment_id, company_id) REFERENCES establishments(id, company_id) ON DELETE RESTRICT
+ role_availability   | role_availability_pkey                                       | p       | PRIMARY KEY (id)
+ role_availability   | role_availability_role_id_account_id_foreign                 | f       | FOREIGN KEY (role_id, account_id) REFERENCES roles(id, account_id) ON DELETE RESTRICT
+ role_assignments    | role_assignments_check                                       | c       | CHECK (((((scope)::text = 'tenant'::text) AND (company_id IS NULL) AND (establishment_id IS NULL)) OR (((scope)::text = 'company'::text) AND (company_id IS NOT NULL) AND (establishment_id IS NULL)) OR (((scope)::text = 'establishment'::text) AND (company_id IS NOT NULL) AND (establishment_id IS NOT NULL))))
+ role_assignments    | role_assignments_company_id_account_id_foreign               | f       | FOREIGN KEY (company_id, account_id) REFERENCES companies(id, account_id) ON DELETE RESTRICT
+ role_assignments    | role_assignments_establishment_id_company_id_foreign         | f       | FOREIGN KEY (establishment_id, company_id) REFERENCES establishments(id, company_id) ON DELETE RESTRICT
+ role_assignments    | role_assignments_granted_by_foreign                          | f       | FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE SET NULL
+ role_assignments    | role_assignments_membership_id_account_id_foreign            | f       | FOREIGN KEY (membership_id, account_id) REFERENCES account_memberships(id, account_id) ON DELETE RESTRICT
+ role_assignments    | role_assignments_pkey                                        | p       | PRIMARY KEY (id)
+ role_assignments    | role_assignments_role_id_account_id_foreign                  | f       | FOREIGN KEY (role_id, account_id) REFERENCES roles(id, account_id) ON DELETE RESTRICT
+ account_invitations | account_invitations_accepted_by_foreign                      | f       | FOREIGN KEY (accepted_by) REFERENCES users(id) ON DELETE RESTRICT
+ account_invitations | account_invitations_account_id_foreign                       | f       | FOREIGN KEY (account_id) REFERENCES clients(id) ON DELETE RESTRICT
+ account_invitations | account_invitations_check                                    | c       | CHECK (((((scope)::text = 'tenant'::text) AND (company_id IS NULL) AND (establishment_id IS NULL)) OR (((scope)::text = 'company'::text) AND (company_id IS NOT NULL) AND (establishment_id IS NULL)) OR (((scope)::text = 'establishment'::text) AND (company_id IS NOT NULL) AND (establishment_id IS NOT NULL))))
+ account_invitations | account_invitations_check1                                   | c       | CHECK ((((status)::text = 'accepted'::text) = ((accepted_at IS NOT NULL) AND (accepted_by IS NOT NULL))))
+ account_invitations | account_invitations_check2                                   | c       | CHECK (((accepted_by IS NULL) OR (accepted_by = recipient_id)))
+ account_invitations | account_invitations_company_id_account_id_foreign            | f       | FOREIGN KEY (company_id, account_id) REFERENCES companies(id, account_id) ON DELETE RESTRICT
+ account_invitations | account_invitations_email_check                              | c       | CHECK (((email)::text = lower((email)::text)))
+ account_invitations | account_invitations_establishment_id_company_id_foreign      | f       | FOREIGN KEY (establishment_id, company_id) REFERENCES establishments(id, company_id) ON DELETE RESTRICT
+ account_invitations | account_invitations_invited_by_foreign                       | f       | FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE SET NULL
+ account_invitations | account_invitations_person_id_account_id_foreign             | f       | FOREIGN KEY (person_id, account_id) REFERENCES people(id, account_id) ON DELETE RESTRICT
+ account_invitations | account_invitations_pkey                                     | p       | PRIMARY KEY (id)
+ account_invitations | account_invitations_recipient_id_foreign                     | f       | FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE RESTRICT
+ account_invitations | account_invitations_role_id_account_id_foreign               | f       | FOREIGN KEY (role_id, account_id) REFERENCES roles(id, account_id) ON DELETE RESTRICT
+ account_invitations | account_invitations_status_check                             | c       | CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'accepted'::character varying, 'revoked'::character varying])::text[])))
+ account_invitations | account_invitations_token_hash_unique                        | u       | UNIQUE (token_hash)
+(82 rows)
+
+      tablename      |                     indexname                      |                                                                                   indexdef                                                                                    
+---------------------+----------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ account_invitations | account_invitations_account_id_status_index        | CREATE INDEX account_invitations_account_id_status_index ON public.account_invitations USING btree (account_id, status)
+ account_invitations | account_invitations_pending                        | CREATE UNIQUE INDEX account_invitations_pending ON public.account_invitations USING btree (account_id, email) WHERE ((status)::text = 'pending'::text)
+ account_invitations | account_invitations_pkey                           | CREATE UNIQUE INDEX account_invitations_pkey ON public.account_invitations USING btree (id)
+ account_invitations | account_invitations_token_hash_unique              | CREATE UNIQUE INDEX account_invitations_token_hash_unique ON public.account_invitations USING btree (token_hash)
+ account_memberships | account_memberships_account_id_person_id_unique    | CREATE UNIQUE INDEX account_memberships_account_id_person_id_unique ON public.account_memberships USING btree (account_id, person_id)
+ account_memberships | account_memberships_account_id_status_index        | CREATE INDEX account_memberships_account_id_status_index ON public.account_memberships USING btree (account_id, status)
+ account_memberships | account_memberships_id_account_id_unique           | CREATE UNIQUE INDEX account_memberships_id_account_id_unique ON public.account_memberships USING btree (id, account_id)
+ account_memberships | account_memberships_pkey                           | CREATE UNIQUE INDEX account_memberships_pkey ON public.account_memberships USING btree (id)
+ account_memberships | account_memberships_user_id_account_id_unique      | CREATE UNIQUE INDEX account_memberships_user_id_account_id_unique ON public.account_memberships USING btree (user_id, account_id)
+ audit_records       | audit_records_account_id_actor_id_created_at_index | CREATE INDEX audit_records_account_id_actor_id_created_at_index ON public.audit_records USING btree (account_id, actor_id, created_at)
+ audit_records       | audit_records_account_id_created_at_id_index       | CREATE INDEX audit_records_account_id_created_at_id_index ON public.audit_records USING btree (account_id, created_at, id)
+ audit_records       | audit_records_account_id_entity_type_event_index   | CREATE INDEX audit_records_account_id_entity_type_event_index ON public.audit_records USING btree (account_id, entity_type, event)
+ audit_records       | audit_records_company_id_created_at_id_index       | CREATE INDEX audit_records_company_id_created_at_id_index ON public.audit_records USING btree (company_id, created_at, id)
+ audit_records       | audit_records_establishment_id_created_at_id_index | CREATE INDEX audit_records_establishment_id_created_at_id_index ON public.audit_records USING btree (establishment_id, created_at, id)
+ audit_records       | audit_records_legacy_key_unique                    | CREATE UNIQUE INDEX audit_records_legacy_key_unique ON public.audit_records USING btree (legacy_key)
+ audit_records       | audit_records_operation_id_index                   | CREATE INDEX audit_records_operation_id_index ON public.audit_records USING btree (operation_id)
+ audit_records       | audit_records_pkey                                 | CREATE UNIQUE INDEX audit_records_pkey ON public.audit_records USING btree (id)
+ clients             | clients_code_unique                                | CREATE UNIQUE INDEX clients_code_unique ON public.clients USING btree (code)
+ clients             | clients_document_unique                            | CREATE UNIQUE INDEX clients_document_unique ON public.clients USING btree (document)
+ clients             | clients_name_id_index                              | CREATE INDEX clients_name_id_index ON public.clients USING btree (name, id)
+ clients             | clients_pkey                                       | CREATE UNIQUE INDEX clients_pkey ON public.clients USING btree (id)
+ companies           | companies_account_id_code_unique                   | CREATE UNIQUE INDEX companies_account_id_code_unique ON public.companies USING btree (account_id, code)
+ companies           | companies_account_id_individual_document_unique    | CREATE UNIQUE INDEX companies_account_id_individual_document_unique ON public.companies USING btree (account_id, individual_document) WHERE (individual_document IS NOT NULL)
+ companies           | companies_account_id_tax_root_unique               | CREATE UNIQUE INDEX companies_account_id_tax_root_unique ON public.companies USING btree (account_id, tax_root) WHERE (tax_root IS NOT NULL)
+ companies           | companies_id_account_id_unique                     | CREATE UNIQUE INDEX companies_id_account_id_unique ON public.companies USING btree (id, account_id)
+ companies           | companies_pkey                                     | CREATE UNIQUE INDEX companies_pkey ON public.companies USING btree (id)
+ customers           | customers_company_id_person_id_unique              | CREATE UNIQUE INDEX customers_company_id_person_id_unique ON public.customers USING btree (company_id, person_id)
+ customers           | customers_id_company_id_account_id_unique          | CREATE UNIQUE INDEX customers_id_company_id_account_id_unique ON public.customers USING btree (id, company_id, account_id)
+ customers           | customers_person_id_index                          | CREATE INDEX customers_person_id_index ON public.customers USING btree (person_id)
+ customers           | customers_pkey                                     | CREATE UNIQUE INDEX customers_pkey ON public.customers USING btree (id)
+ establishments      | establishments_account_id_code_unique              | CREATE UNIQUE INDEX establishments_account_id_code_unique ON public.establishments USING btree (account_id, code)
+ establishments      | establishments_account_id_tax_document_unique      | CREATE UNIQUE INDEX establishments_account_id_tax_document_unique ON public.establishments USING btree (account_id, tax_document) WHERE (tax_document IS NOT NULL)
+ establishments      | establishments_company_id_active_name_index        | CREATE INDEX establishments_company_id_active_name_index ON public.establishments USING btree (company_id, active, name)
+ establishments      | establishments_company_id_headquarters_unique      | CREATE UNIQUE INDEX establishments_company_id_headquarters_unique ON public.establishments USING btree (company_id) WHERE is_headquarters
+ establishments      | establishments_company_id_primary_unique           | CREATE UNIQUE INDEX establishments_company_id_primary_unique ON public.establishments USING btree (company_id) WHERE is_primary
+ establishments      | establishments_id_company_id_account_id_unique     | CREATE UNIQUE INDEX establishments_id_company_id_account_id_unique ON public.establishments USING btree (id, company_id, account_id)
+ establishments      | establishments_id_company_id_unique                | CREATE UNIQUE INDEX establishments_id_company_id_unique ON public.establishments USING btree (id, company_id)
+ establishments      | establishments_pkey                                | CREATE UNIQUE INDEX establishments_pkey ON public.establishments USING btree (id)
+ people              | people_account_id_document_unique                  | CREATE UNIQUE INDEX people_account_id_document_unique ON public.people USING btree (account_id, document)
+ people              | people_id_account_id_unique                        | CREATE UNIQUE INDEX people_id_account_id_unique ON public.people USING btree (id, account_id)
+ people              | people_pkey                                        | CREATE UNIQUE INDEX people_pkey ON public.people USING btree (id)
+ role_assignments    | role_assignments_account_id_company_id_index       | CREATE INDEX role_assignments_account_id_company_id_index ON public.role_assignments USING btree (account_id, company_id)
+ role_assignments    | role_assignments_account_id_establishment_id_index | CREATE INDEX role_assignments_account_id_establishment_id_index ON public.role_assignments USING btree (account_id, establishment_id)
+ role_assignments    | role_assignments_account_id_role_id_index          | CREATE INDEX role_assignments_account_id_role_id_index ON public.role_assignments USING btree (account_id, role_id)
+ role_assignments    | role_assignments_company                           | CREATE UNIQUE INDEX role_assignments_company ON public.role_assignments USING btree (membership_id, role_id, company_id) WHERE ((scope)::text = 'company'::text)
+ role_assignments    | role_assignments_pkey                              | CREATE UNIQUE INDEX role_assignments_pkey ON public.role_assignments USING btree (id)
+ role_assignments    | role_assignments_tenant                            | CREATE UNIQUE INDEX role_assignments_tenant ON public.role_assignments USING btree (membership_id, role_id) WHERE ((scope)::text = 'tenant'::text)
+ role_assignments    | role_assignments_unit                              | CREATE UNIQUE INDEX role_assignments_unit ON public.role_assignments USING btree (membership_id, role_id, establishment_id) WHERE ((scope)::text = 'establishment'::text)
+ role_availability   | role_availability_company                          | CREATE UNIQUE INDEX role_availability_company ON public.role_availability USING btree (role_id, company_id) WHERE (establishment_id IS NULL)
+ role_availability   | role_availability_pkey                             | CREATE UNIQUE INDEX role_availability_pkey ON public.role_availability USING btree (id)
+ role_availability   | role_availability_unit                             | CREATE UNIQUE INDEX role_availability_unit ON public.role_availability USING btree (role_id, establishment_id) WHERE (establishment_id IS NOT NULL)
+ roles               | roles_account_id_name_unique                       | CREATE UNIQUE INDEX roles_account_id_name_unique ON public.roles USING btree (account_id, name)
+ roles               | roles_account_id_system_key_unique                 | CREATE UNIQUE INDEX roles_account_id_system_key_unique ON public.roles USING btree (account_id, system_key)
+ roles               | roles_id_account_id_unique                         | CREATE UNIQUE INDEX roles_id_account_id_unique ON public.roles USING btree (id, account_id)
+ roles               | roles_pkey                                         | CREATE UNIQUE INDEX roles_pkey ON public.roles USING btree (id)
+ suppliers           | suppliers_company_id_person_id_unique              | CREATE UNIQUE INDEX suppliers_company_id_person_id_unique ON public.suppliers USING btree (company_id, person_id)
+ suppliers           | suppliers_id_company_id_account_id_unique          | CREATE UNIQUE INDEX suppliers_id_company_id_account_id_unique ON public.suppliers USING btree (id, company_id, account_id)
+ suppliers           | suppliers_person_id_index                          | CREATE INDEX suppliers_person_id_index ON public.suppliers USING btree (person_id)
+ suppliers           | suppliers_pkey                                     | CREATE UNIQUE INDEX suppliers_pkey ON public.suppliers USING btree (id)
+ tags                | tags_account_id_module_name_unique                 | CREATE UNIQUE INDEX tags_account_id_module_name_unique ON public.tags USING btree (account_id, module, name)
+ tags                | tags_account_id_module_system_key_unique           | CREATE UNIQUE INDEX tags_account_id_module_system_key_unique ON public.tags USING btree (account_id, module, system_key)
+ tags                | tags_id_account_id_unique                          | CREATE UNIQUE INDEX tags_id_account_id_unique ON public.tags USING btree (id, account_id)
+ tags                | tags_pkey                                          | CREATE UNIQUE INDEX tags_pkey ON public.tags USING btree (id)
+ users               | users_email_unique                                 | CREATE UNIQUE INDEX users_email_unique ON public.users USING btree (email)
+ users               | users_pkey                                         | CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)
+(65 rows)
+
+    tgrelid    |             tgname             
+---------------+--------------------------------
+ clients       | clients_code_immutable
+ audit_records | audit_records_protect_rows
+ audit_records | audit_records_protect_truncate
+(3 rows)
+
+ migrations 
+------------
+         39
+(1 row)
+

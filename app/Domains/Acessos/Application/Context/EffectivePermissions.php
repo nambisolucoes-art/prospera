@@ -93,6 +93,8 @@ final class EffectivePermissions
             'account.people.update',
             'account.roles.list',
             'account.roles.view',
+            'account.tags.list',
+            'account.tags.view',
         ] as $ability) {
             if (! $this->nodesFor($user, $ability)->isEmpty()) {
                 $slugs[] = $ability;

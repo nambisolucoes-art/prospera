@@ -1,0 +1,406 @@
+Pager usage is off.
+== índices
+                     indexname                      |  size   
+----------------------------------------------------+---------
+ audit_records_account_id_actor_id_created_at_index | 5704 kB
+ audit_records_account_id_created_at_id_index       | 5368 kB
+ audit_records_account_id_entity_type_event_index   | 1144 kB
+ audit_records_company_id_created_at_id_index       | 5344 kB
+ audit_records_establishment_id_created_at_id_index | 5304 kB
+ audit_records_legacy_key_unique                    | 656 kB
+ audit_records_operation_id_index                   | 4296 kB
+ audit_records_pkey                                 | 2232 kB
+(8 rows)
+
+== 1. conta inteira: página inicial
+                                                                 QUERY PLAN                                                                  
+---------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual time=0.057..0.070 rows=20.00 loops=1)
+   Buffers: shared hit=9
+   ->  Index Scan Backward using audit_records_account_id_created_at_id_index on audit_records (actual time=0.055..0.067 rows=20.00 loops=1)
+         Index Cond: (account_id = 1)
+         Index Searches: 1
+         Buffers: shared hit=9
+ Planning:
+   Buffers: shared hit=128
+ Planning Time: 0.462 ms
+ Execution Time: 0.102 ms
+(10 rows)
+
+== 2. conta inteira: contagem
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=6.979..6.979 rows=1.00 loops=1)
+   Buffers: shared hit=89
+   ->  Index Only Scan using audit_records_account_id_entity_type_event_index on audit_records (actual time=0.028..4.504 rows=42693.00 loops=1)
+         Index Cond: (account_id = 1)
+         Heap Fetches: 76
+         Index Searches: 1
+         Buffers: shared hit=89
+ Planning:
+   Buffers: shared hit=6
+ Planning Time: 0.069 ms
+ Execution Time: 6.994 ms
+(11 rows)
+
+== 3. conta inteira: página profunda (offset 9980)
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual time=7.074..7.087 rows=20.00 loops=1)
+   Buffers: shared hit=9113
+   ->  Index Scan Backward using audit_records_account_id_created_at_id_index on audit_records (actual time=0.031..6.646 rows=10000.00 loops=1)
+         Index Cond: (account_id = 1)
+         Index Searches: 1
+         Buffers: shared hit=9113
+ Planning Time: 0.104 ms
+ Execution Time: 7.114 ms
+(8 rows)
+
+== 4. administrador de empresa: página
+                                                                 QUERY PLAN                                                                  
+---------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual time=0.017..0.031 rows=20.00 loops=1)
+   Buffers: shared hit=17
+   ->  Index Scan Backward using audit_records_company_id_created_at_id_index on audit_records (actual time=0.016..0.028 rows=20.00 loops=1)
+         Index Cond: (company_id = 1)
+         Filter: (account_id = 1)
+         Index Searches: 1
+         Buffers: shared hit=17
+ Planning:
+   Buffers: shared hit=3
+ Planning Time: 0.220 ms
+ Execution Time: 0.051 ms
+(11 rows)
+
+== 5. administrador de empresa: contagem
+                                                           QUERY PLAN                                                           
+--------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=7.044..7.046 rows=1.00 loops=1)
+   Buffers: shared hit=889
+   ->  Bitmap Heap Scan on audit_records (actual time=1.154..6.171 rows=15035.00 loops=1)
+         Recheck Cond: (company_id = 1)
+         Filter: (account_id = 1)
+         Heap Blocks: exact=785
+         Buffers: shared hit=889
+         ->  Bitmap Index Scan on audit_records_company_id_created_at_id_index (actual time=1.058..1.059 rows=15035.00 loops=1)
+               Index Cond: (company_id = 1)
+               Index Searches: 1
+               Buffers: shared hit=104
+ Planning Time: 0.072 ms
+ Execution Time: 7.067 ms
+(13 rows)
+
+== 6. 30 atribuições de unidade: página
+                                                                    QUERY PLAN                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual time=0.027..0.052 rows=20.00 loops=1)
+   Buffers: shared hit=18
+   ->  Index Scan Backward using audit_records_establishment_id_created_at_id_index on audit_records (actual time=0.026..0.049 rows=20.00 loops=1)
+         Index Cond: (establishment_id = 7)
+         Filter: (account_id = 1)
+         Index Searches: 1
+         Buffers: shared hit=18
+ Planning Time: 0.181 ms
+ Execution Time: 0.087 ms
+(9 rows)
+
+== 7. 30 atribuições de unidade: contagem
+                                                                QUERY PLAN                                                                 
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=2.417..2.418 rows=1.00 loops=1)
+   Buffers: shared hit=342
+   ->  Bitmap Heap Scan on audit_records (actual time=1.394..2.221 rows=3346.00 loops=1)
+         Recheck Cond: ((establishment_id = 7) AND (account_id = 1))
+         Heap Blocks: exact=269
+         Buffers: shared hit=342
+         ->  BitmapAnd (actual time=1.358..1.359 rows=0.00 loops=1)
+               Buffers: shared hit=73
+               ->  Bitmap Index Scan on audit_records_establishment_id_created_at_id_index (actual time=0.211..0.211 rows=3346.00 loops=1)
+                     Index Cond: (establishment_id = 7)
+                     Index Searches: 1
+                     Buffers: shared hit=25
+               ->  Bitmap Index Scan on audit_records_account_id_entity_type_event_index (actual time=1.138..1.138 rows=42693.00 loops=1)
+                     Index Cond: (account_id = 1)
+                     Index Searches: 1
+                     Buffers: shared hit=48
+ Planning Time: 0.071 ms
+ Execution Time: 2.434 ms
+(18 rows)
+
+== 8. filtro de unidade dentro da conta: página
+                                                                    QUERY PLAN                                                                     
+---------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual time=0.016..0.029 rows=20.00 loops=1)
+   Buffers: shared hit=18
+   ->  Index Scan Backward using audit_records_establishment_id_created_at_id_index on audit_records (actual time=0.015..0.026 rows=20.00 loops=1)
+         Index Cond: (establishment_id = 7)
+         Filter: (account_id = 1)
+         Index Searches: 1
+         Buffers: shared hit=18
+ Planning Time: 0.122 ms
+ Execution Time: 0.046 ms
+(9 rows)
+
+== 9. período antes da E08 (cast para data)
+                                                                QUERY PLAN                                                                 
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=6.637..6.638 rows=1.00 loops=1)
+   Buffers: shared hit=298
+   ->  Index Only Scan using audit_records_account_id_created_at_id_index on audit_records (actual time=5.688..6.526 rows=1830.00 loops=1)
+         Index Cond: (account_id = 1)
+         Filter: (((created_at)::date >= '2026-10-01'::date) AND ((created_at)::date <= '2026-10-31'::date))
+         Rows Removed by Filter: 40863
+         Heap Fetches: 80
+         Index Searches: 1
+         Buffers: shared hit=298
+ Planning Time: 0.066 ms
+ Execution Time: 6.663 ms
+(11 rows)
+
+== 10. período depois da E08 (intervalo semiaberto)
+                                                                                     QUERY PLAN                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=0.378..0.378 rows=1.00 loops=1)
+   Buffers: shared hit=15
+   ->  Index Only Scan using audit_records_account_id_created_at_id_index on audit_records (actual time=0.017..0.269 rows=1830.00 loops=1)
+         Index Cond: ((account_id = 1) AND (created_at >= '2026-10-01 00:00:00'::timestamp without time zone) AND (created_at < '2026-11-01 00:00:00'::timestamp without time zone))
+         Heap Fetches: 0
+         Index Searches: 1
+         Buffers: shared hit=15
+ Planning:
+   Buffers: shared hit=7
+ Planning Time: 0.196 ms
+ Execution Time: 0.401 ms
+(11 rows)
+
+== 11. autor: contagem
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=0.049..0.050 rows=1.00 loops=1)
+   Buffers: shared hit=4
+   ->  Index Only Scan using audit_records_account_id_actor_id_created_at_index on audit_records (actual time=0.022..0.037 rows=166.00 loops=1)
+         Index Cond: ((account_id = 1) AND (actor_id = 1000007))
+         Heap Fetches: 0
+         Index Searches: 1
+         Buffers: shared hit=4
+ Planning Time: 0.086 ms
+ Execution Time: 0.066 ms
+(9 rows)
+
+== 12. busca sem distinção de maiúsculas
+                                                               QUERY PLAN                                                                
+-----------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=98.086..98.088 rows=1.00 loops=1)
+   Buffers: shared hit=1386
+   ->  Bitmap Heap Scan on audit_records (actual time=4.656..98.037 rows=464.00 loops=1)
+         Recheck Cond: (account_id = 1)
+         Filter: (((entity_name)::text ~~* '%Registro sintético 12%'::text) OR ((actor_name)::text ~~* '%Registro sintético 12%'::text))
+         Rows Removed by Filter: 42229
+         Heap Blocks: exact=1338
+         Buffers: shared hit=1386
+         ->  Bitmap Index Scan on audit_records_account_id_entity_type_event_index (actual time=1.165..1.166 rows=42693.00 loops=1)
+               Index Cond: (account_id = 1)
+               Index Searches: 1
+               Buffers: shared hit=48
+ Planning Time: 0.508 ms
+ Execution Time: 98.114 ms
+(14 rows)
+
+== 13. opções: autores
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ Sort (actual time=23.692..23.706 rows=215.00 loops=1)
+   Sort Key: actor_name
+   Sort Method: quicksort  Memory: 35kB
+   Buffers: shared hit=1389
+   ->  HashAggregate (actual time=22.999..23.064 rows=215.00 loops=1)
+         Group Key: actor_name, actor_id
+         Batches: 1  Memory Usage: 297kB
+         Buffers: shared hit=1386
+         ->  Bitmap Heap Scan on audit_records (actual time=1.320..12.658 rows=42693.00 loops=1)
+               Recheck Cond: (account_id = 1)
+               Filter: (actor_id IS NOT NULL)
+               Heap Blocks: exact=1338
+               Buffers: shared hit=1386
+               ->  Bitmap Index Scan on audit_records_account_id_entity_type_event_index (actual time=1.148..1.149 rows=42693.00 loops=1)
+                     Index Cond: (account_id = 1)
+                     Index Searches: 1
+                     Buffers: shared hit=48
+ Planning:
+   Buffers: shared hit=10
+ Planning Time: 0.181 ms
+ Execution Time: 23.954 ms
+(21 rows)
+
+== 14. opções: tipos e ações
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Unique (actual time=0.026..8.284 rows=12.00 loops=1)
+   Buffers: shared hit=89
+   ->  Index Only Scan using audit_records_account_id_entity_type_event_index on audit_records (actual time=0.025..4.793 rows=42693.00 loops=1)
+         Index Cond: (account_id = 1)
+         Heap Fetches: 76
+         Index Searches: 1
+         Buffers: shared hit=89
+ Planning Time: 0.179 ms
+ Execution Time: 8.308 ms
+(9 rows)
+
+== 15. plataforma (PD-02): página
+                                                           QUERY PLAN                                                            
+---------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual time=26.736..26.742 rows=20.00 loops=1)
+   Buffers: shared hit=3147
+   ->  Sort (actual time=26.730..26.734 rows=20.00 loops=1)
+         Sort Key: created_at DESC, id DESC
+         Sort Method: top-N heapsort  Memory: 52kB
+         Buffers: shared hit=3147
+         ->  Seq Scan on audit_records (actual time=0.014..26.562 rows=319.00 loops=1)
+               Filter: ((account_id IS NULL) OR ((entity_type)::text = 'account'::text) OR ((context)::text = 'platform'::text))
+               Rows Removed by Filter: 100894
+               Buffers: shared hit=3141
+ Planning Time: 0.185 ms
+ Execution Time: 26.776 ms
+(12 rows)
+
+== 16. plataforma (PD-02): contagem
+                                                        QUERY PLAN                                                         
+---------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual time=24.091..24.093 rows=1.00 loops=1)
+   Buffers: shared hit=3141
+   ->  Seq Scan on audit_records (actual time=0.013..24.063 rows=319.00 loops=1)
+         Filter: ((account_id IS NULL) OR ((entity_type)::text = 'account'::text) OR ((context)::text = 'platform'::text))
+         Rows Removed by Filter: 100894
+         Buffers: shared hit=3141
+ Planning Time: 0.175 ms
+ Execution Time: 24.124 ms
+(8 rows)
+
+== 13b. opções: autores por varredura solta (E08)
+                                                                                     QUERY PLAN                                                                                     
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ CTE Scan on actors (actual time=0.046..3.743 rows=215.00 loops=1)
+   Filter: (id IS NOT NULL)
+   Rows Removed by Filter: 1
+   Storage: Memory  Maximum Storage: 23kB
+   Buffers: shared hit=1570
+   CTE actors
+     ->  Recursive Union (actual time=0.027..1.868 rows=216.00 loops=1)
+           Storage: Memory  Maximum Storage: 33kB
+           Buffers: shared hit=710
+           ->  Result (actual time=0.025..0.027 rows=1.00 loops=1)
+                 Buffers: shared hit=5
+                 InitPlan 3
+                   ->  Limit (actual time=0.022..0.023 rows=1.00 loops=1)
+                         Buffers: shared hit=5
+                         ->  Index Only Scan using audit_records_account_id_actor_id_created_at_index on audit_records audit_records_1 (actual time=0.021..0.021 rows=1.00 loops=1)
+                               Index Cond: ((account_id = 1) AND (actor_id IS NOT NULL))
+                               Heap Fetches: 1
+                               Index Searches: 1
+                               Buffers: shared hit=5
+           ->  WorkTable Scan on actors actors_1 (actual time=0.008..0.008 rows=1.00 loops=216)
+                 Filter: (id IS NOT NULL)
+                 Rows Removed by Filter: 0
+                 Buffers: shared hit=705
+                 SubPlan 2
+                   ->  Result (actual time=0.008..0.008 rows=1.00 loops=215)
+                         Buffers: shared hit=705
+                         InitPlan 1
+                           ->  Limit (actual time=0.007..0.007 rows=1.00 loops=215)
+                                 Buffers: shared hit=705
+                                 ->  Index Only Scan using audit_records_account_id_actor_id_created_at_index on audit_records (actual time=0.007..0.007 rows=1.00 loops=215)
+                                       Index Cond: ((account_id = 1) AND (actor_id IS NOT NULL) AND (actor_id > actors_1.id))
+                                       Heap Fetches: 3
+                                       Index Searches: 215
+                                       Buffers: shared hit=705
+   SubPlan 5
+     ->  Limit (actual time=0.008..0.008 rows=1.00 loops=215)
+           Buffers: shared hit=860
+           ->  Index Scan Backward using audit_records_account_id_actor_id_created_at_index on audit_records audit_records_2 (actual time=0.008..0.008 rows=1.00 loops=215)
+                 Index Cond: ((account_id = 1) AND (actor_id = actors.id))
+                 Index Searches: 215
+                 Buffers: shared hit=860
+ Planning:
+   Buffers: shared hit=3
+ Planning Time: 0.360 ms
+ Execution Time: 3.817 ms
+(45 rows)
+
+== 14b. opções: tipos e ações por varredura solta (E08)
+                                                                                        QUERY PLAN                                                                                         
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ CTE Scan on pairs (actual time=0.087..0.472 rows=26.00 loops=1)
+   Filter: (event IS NOT NULL)
+   Rows Removed by Filter: 12
+   Storage: Memory  Maximum Storage: 18kB
+   Buffers: shared hit=155
+   CTE types
+     ->  Recursive Union (actual time=0.052..0.167 rows=13.00 loops=1)
+           Storage: Memory  Maximum Storage: 33kB
+           Buffers: shared hit=48
+           ->  Result (actual time=0.051..0.052 rows=1.00 loops=1)
+                 Buffers: shared hit=4
+                 InitPlan 3
+                   ->  Limit (actual time=0.047..0.048 rows=1.00 loops=1)
+                         Buffers: shared hit=4
+                         ->  Index Only Scan using audit_records_account_id_entity_type_event_index on audit_records audit_records_1 (actual time=0.046..0.047 rows=1.00 loops=1)
+                               Index Cond: ((account_id = 1) AND (entity_type IS NOT NULL))
+                               Heap Fetches: 1
+                               Index Searches: 1
+                               Buffers: shared hit=4
+           ->  WorkTable Scan on types (actual time=0.008..0.008 rows=0.92 loops=13)
+                 Filter: (type IS NOT NULL)
+                 Rows Removed by Filter: 0
+                 Buffers: shared hit=44
+                 SubPlan 2
+                   ->  Result (actual time=0.008..0.008 rows=1.00 loops=12)
+                         Buffers: shared hit=44
+                         InitPlan 1
+                           ->  Limit (actual time=0.008..0.008 rows=0.92 loops=12)
+                                 Buffers: shared hit=44
+                                 ->  Index Only Scan using audit_records_account_id_entity_type_event_index on audit_records (actual time=0.007..0.007 rows=0.92 loops=12)
+                                       Index Cond: ((account_id = 1) AND (entity_type IS NOT NULL) AND (entity_type > types.type))
+                                       Heap Fetches: 9
+                                       Index Searches: 12
+                                       Buffers: shared hit=44
+   CTE pairs
+     ->  Recursive Union (actual time=0.086..0.455 rows=38.00 loops=1)
+           Storage: Memory  Maximum Storage: 34kB
+           Buffers: shared hit=155
+           ->  CTE Scan on types types_1 (actual time=0.085..0.257 rows=12.00 loops=1)
+                 Filter: (type IS NOT NULL)
+                 Rows Removed by Filter: 1
+                 Storage: Memory  Maximum Storage: 17kB
+                 Buffers: shared hit=83
+                 SubPlan 6
+                   ->  Result (actual time=0.006..0.007 rows=1.00 loops=12)
+                         Buffers: shared hit=35
+                         InitPlan 5
+                           ->  Limit (actual time=0.006..0.006 rows=1.00 loops=12)
+                                 Buffers: shared hit=35
+                                 ->  Index Only Scan using audit_records_account_id_entity_type_event_index on audit_records audit_records_2 (actual time=0.006..0.006 rows=1.00 loops=12)
+                                       Index Cond: ((account_id = 1) AND (entity_type = types_1.type) AND (event IS NOT NULL))
+                                       Heap Fetches: 10
+                                       Index Searches: 12
+                                       Buffers: shared hit=35
+           ->  WorkTable Scan on pairs pairs_1 (actual time=0.009..0.047 rows=6.50 loops=4)
+                 Filter: (event IS NOT NULL)
+                 Rows Removed by Filter: 3
+                 Buffers: shared hit=72
+                 SubPlan 8
+                   ->  Result (actual time=0.007..0.007 rows=1.00 loops=26)
+                         Buffers: shared hit=72
+                         InitPlan 7
+                           ->  Limit (actual time=0.006..0.006 rows=0.54 loops=26)
+                                 Buffers: shared hit=72
+                                 ->  Index Only Scan using audit_records_account_id_entity_type_event_index on audit_records audit_records_3 (actual time=0.006..0.006 rows=0.54 loops=26)
+                                       Index Cond: ((account_id = 1) AND (entity_type = pairs_1.type) AND (event IS NOT NULL) AND (event > pairs_1.event))
+                                       Heap Fetches: 8
+                                       Index Searches: 26
+                                       Buffers: shared hit=72
+ Planning:
+   Buffers: shared hit=6
+ Planning Time: 0.487 ms
+ Execution Time: 0.548 ms
+(73 rows)
+

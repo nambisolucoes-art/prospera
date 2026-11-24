@@ -144,3 +144,30 @@ memória, medindo a fronteira da Action. Copie `/tmp/e09-accept-samples.json` do
 arquivo), injete as métricas somente no laboratório e execute `tests/Browser/e09-invitation-performance.mjs`.
 O script recebe `E09_URL` e `E09_SAMPLES_FILE`, usa login e CSRF reais e mede dez aceites HTTP válidos.
 Ele não compara o tempo da Action CLI com o tempo de requisição HTTP. Use um laboratório novo para repetir.
+
+## E10: homologação integrada
+
+Relatório e resultados: `docs/plano-de-acoes/001-e10-homologacao-integrada.md` e `docs/evidencias/e10-2026-11-24/`.
+Requisitos: imagem local `prospera-app:latest`, `postgres:18`, `axllent/mailpit:v1.27` e `npm run build` antes de
+subir. Os scripts recusam prefixos fora de `prospera-e10-lab-*` e só removem recursos com o rótulo `prospera.lab=e10`.
+
+- `e10-lab.sh up|down`: PostgreSQL 18 em tmpfs e Mailpit sem relay em rede interna, FrankenPHP em `127.0.0.1:$E10_PORT`
+  (padrão 18110). `E10_METRICS=1` injeta `OctaneMetrics` só na cópia do bootstrap. O único fixture cria os
+  administradores SaaS; o restante da massa nasce pelas jornadas.
+- `e10-journeys.sh`: recria o laboratório e executa, em ordem, `tests/Performance/e10/01` a `14`, inclusive as corridas
+  contra uma segunda instância com dois workers (porta 8001), a chave de várias contas desligada (porta 8002) e o ensaio
+  de workers. As jornadas dependem da ordem e de um laboratório novo; os resultados JSON vão para
+  `/tmp/prospera-e10/evidence/jornadas`.
+- `e10-run.sh <roteiro>`: executa um roteiro com a versão atual da pasta `e10` (`HARNESS_URL`, `E10_REQUESTS` e
+  `E10_LABEL` são repassados).
+- `e10-evolution.sh <árvore pré-E09>`: a árvore é `git archive 48e2191` com `database/seeders` atuais copiados e a linha
+  `enter()` de `SeedsAccountScenario` removida. Cria esquema e massa com o código anterior, faz backup, aplica o código
+  atual, reverte, reaplica, testa a reversão com vínculo múltiplo e restaura o backup noutro banco.
+- `e10-phpunit.sh [argumentos]`: suíte em container sem rede; o bootstrap continua impondo SQLite em memória.
+- `tests/Browser/e10.mjs`: Playwright instalado fora do projeto (`npm install --prefix /tmp/prospera-e10-browser
+  playwright`). `E10_CHROMIUM` aponta um Chromium já existente, `E10_MAIL` a API do Mailpit na rede `*-browser` e
+  `E10_STATE` a cópia de `/tmp/e10-state.json` do laboratório. Os limitadores reais de login e de leitura de convites
+  continuam ativos; os roteiros aguardam a janela em vez de desativá-los.
+- Planos: `e08-plans.sql` com as variáveis da conta A após `e08-volume.sql`; para as telas, `auto_explain` ligado só no
+  PostgreSQL do laboratório (`alter system`, `octane:reload`, `15-planos.php`) e desligado em seguida. Remova as linhas
+  `Query Parameters` antes de versionar.

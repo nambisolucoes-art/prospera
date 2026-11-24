@@ -1,0 +1,252 @@
+{
+    "e10": "06-area-trabalho",
+    "checks": 32,
+    "failed": 0,
+    "login_throttled": 1,
+    "results": [
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Seletor recebe as cinco unidades autorizadas da Ana na A",
+            "passed": true,
+            "detail": [
+                "account_id",
+                "selected_codes",
+                "mode",
+                "company",
+                "establishment",
+                "consolidated",
+                "establishments"
+            ]
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Uma unidade abre o contexto da unidade",
+            "passed": true,
+            "detail": "http://127.0.0.1:8000/contas/grupo-gartan/estabelecimento/gartan-comercio-gartan-filial-brumado"
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Várias unidades abrem o consolidado do módulo",
+            "passed": true,
+            "detail": "http://127.0.0.1:8000/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio,gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado"
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Consolidado das unidades da A1",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Consolidado com unidades de empresas distintas",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Unidade da Conta B na seleção da A responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Consolidado com unidade de outra conta responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Grava o padrão da Ana na A",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Padrão gravado em account_memberships.workspace_establishments do vínculo da A",
+            "passed": true,
+            "detail": [
+                "gartan-comercio-gartan-filial-brumado",
+                "gartan-logistica"
+            ]
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Padrão da A não altera o vínculo da B",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Padrão efetivo da A devolvido pela consulta",
+            "passed": true,
+            "detail": [
+                "gartan-comercio-gartan-filial-brumado",
+                "gartan-logistica"
+            ]
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Entrada sem código usa o padrão salvo",
+            "passed": true,
+            "detail": "http://127.0.0.1:8000/contas/grupo-gartan/estabelecimento/todos?unidades=gartan-comercio-gartan-filial-brumado,gartan-logistica"
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "A não aceita códigos da B como padrão",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Tentativa inválida preserva o padrão",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Padrão da B é independente",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Padrão da A permanece após gravar a B",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Inativa a filial de Brumado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Unidade inativa fora do padrão efetivo",
+            "passed": true,
+            "detail": [
+                "gartan-logistica"
+            ]
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Unidade inativa recusa operação",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Reativa a filial de Brumado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Carlos grava padrão com Guanambi e Brumado",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Ana retira a atribuição de empresa do Carlos",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Revogação prevalece: só Brumado continua no padrão efetivo",
+            "passed": true,
+            "detail": [
+                "gartan-comercio-gartan-filial-brumado"
+            ]
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Guanambi revogada responde 404 mesmo estando na preferência",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Preferência gravada não foi reescrita pela revogação",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Ana devolve a atribuição de empresa ao Carlos",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Uma unidade: contexto sem seleção múltipla",
+            "passed": true,
+            "detail": 0
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Uma unidade: entrada direta na unidade",
+            "passed": true,
+            "detail": "http://127.0.0.1:8000/contas/outra-organizacao-servicos/estabelecimento/outra-organizacao-servicos"
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Uma unidade: outra unidade da mesma conta responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Código reservado todos não é empresa de escrita",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Empresa da B na rota de escrita da A responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J6 area de trabalho",
+            "check": "Nenhum cliente criado pelas tentativas",
+            "passed": true,
+            "detail": null
+        }
+    ]
+}

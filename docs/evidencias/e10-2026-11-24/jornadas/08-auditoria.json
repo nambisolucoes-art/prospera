@@ -1,0 +1,272 @@
+{
+    "e10": "08-auditoria",
+    "checks": 35,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J8 auditoria",
+            "check": "Auditoria da conta A",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Total da listagem igual ao total da conta no banco",
+            "passed": true,
+            "detail": [
+                117,
+                117
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Nenhum evento de outra conta na página",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Páginas sem repetição",
+            "passed": true,
+            "detail": [
+                25,
+                25
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Filtro por empresa A2 confere com o banco",
+            "passed": true,
+            "detail": [
+                11,
+                11
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Filtro de nível Conta confere com o banco",
+            "passed": true,
+            "detail": [
+                85,
+                85
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Filtro por entidade Cliente confere com o banco",
+            "passed": true,
+            "detail": [
+                4,
+                4
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Busca textual retorna eventos da Pessoa e das relações",
+            "passed": true,
+            "detail": 8
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Opções de empresa só da conta A",
+            "passed": true,
+            "detail": [
+                1,
+                6
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Detalhe do evento central",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Detalhe mostra antes e depois do nome alterado",
+            "passed": true,
+            "detail": "[{\"label\":\"Nome\",\"before\":\"Marta Queiroz\",\"after\":\"Marta Queiroz Lima\"}]"
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Dados técnicos da administradora com nó da conta",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "CPF da pessoa não aparece no histórico (Documento informado)",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "CPF ausente de todo o histórico gravado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Auditoria local do gerente de unidade",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Gerente de unidade vê só os eventos da Brumado (contagem igual ao banco)",
+            "passed": true,
+            "detail": [
+                8,
+                8
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Gerente não abre evento central da conta",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Gerente não abre evento da empresa",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Gerente não abre evento da Conta B",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Gerente abre evento da própria unidade",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Sem auditoria técnica, o detalhe não traz dados técnicos",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Filtro forjado de outra empresa não amplia o escopo",
+            "passed": true,
+            "detail": 0
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Opções de autor calculadas só no escopo autorizado",
+            "passed": true,
+            "detail": [
+                [
+                    3,
+                    10
+                ],
+                [
+                    3,
+                    10
+                ]
+            ]
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Consulta sem auditoria recebe 403",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Administrador da B não abre evento da A pela URL da B",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Busca na B só encontra a Marta da B",
+            "passed": true,
+            "detail": 2
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Plataforma não vê eventos de negócio das contas (PD-02)",
+            "passed": true,
+            "detail": 0
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Plataforma não vê as relações comerciais criadas nas contas",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Salvar unidade sem mudança",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Sem mudança efetiva, nenhum evento",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Alteração efetiva da unidade",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Um evento com nó da unidade, autor real e antes e depois",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Edição com dado inválido",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "Resposta 422 sem evento e sem alteração",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J8 auditoria",
+            "check": "UPDATE no histórico confirmado recusado",
+            "passed": true,
+            "detail": "55000"
+        }
+    ]
+}

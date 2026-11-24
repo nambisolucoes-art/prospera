@@ -1,0 +1,481 @@
+{
+    "e10": "10-seguranca",
+    "checks": 54,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/empresas/1/visualizar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/empresas/1/editar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/empresas/1 -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/empresas/1 -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/estabelecimentos/7/visualizar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/estabelecimentos/7/editar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/estabelecimentos/7 -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B POST /contas/outra-organizacao-servicos/estabelecimentos/7/principal -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B POST /contas/outra-organizacao-servicos/estabelecimentos -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/cargos/9/visualizar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/cargos/9/editar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/cargos/9/impacto-abrangencia -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/cargos/9 -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/usuarios/7/atribuicoes -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/usuarios/7/atribuicoes -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/usuarios/7/suspender -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/usuarios/7/reativar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B POST /contas/outra-organizacao-servicos/usuarios/7/recuperacao -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/usuarios/convites//revogar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/etiquetas/13/visualizar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/etiquetas/13/editar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/etiquetas/13 -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B DELETE /contas/outra-organizacao-servicos/etiquetas/13 -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/empresa/outra-organizacao-servicos/clientes/1/visualizar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/empresa/outra-organizacao-servicos/clientes/1 -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/empresa/outra-organizacao-servicos/clientes/1/inativar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B PATCH /contas/outra-organizacao-servicos/empresa/outra-organizacao-servicos/fornecedores/1/ativar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/estabelecimento/outra-organizacao-servicos/clientes/gartan-comercio/1/editar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/auditoria/228/visualizar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/empresa/gartan-comercio/clientes/1/visualizar -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/estabelecimento/gartan-comercio/clientes -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/outra-organizacao-servicos/estabelecimento/todos/clientes?unidades=gartan-comercio -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "B GET /contas/grupo-gartan/empresas -> 403/404 sem dados da A",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "leak": false
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/usuarios",
+            "passed": true,
+            "detail": {
+                "status": 422,
+                "body": "{\"message\":\"Selecione um cargo desta conta.\",\"errors\":{\"role_id\":[\"Selecione um cargo desta conta.\"]}}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/usuarios",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "body": "{\n    \"message\": \"No query results for model [App\\\\Domains\\\\Organizacao\\\\Domain\\\\Models\\\\Company] 1\"\n}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/usuarios",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "body": "{\n    \"message\": \"No query results for model [App\\\\Domains\\\\Organizacao\\\\Domain\\\\Models\\\\Establishment] 7\"\n}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/usuarios",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "body": "{\n    \"message\": \"No query results for model [App\\\\Domains\\\\Pessoas\\\\Domain\\\\Models\\\\Person] 17\"\n}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/cargos",
+            "passed": true,
+            "detail": {
+                "status": 422,
+                "body": "{\"message\":\"The selected available_companies.0 is invalid.\",\"errors\":{\"available_companies.0\":[\"The selected available_companies.0 is invalid.\"]}}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/cargos",
+            "passed": true,
+            "detail": {
+                "status": 422,
+                "body": "{\"message\":\"The selected available_establishments.0 is invalid.\",\"errors\":{\"available_establishments.0\":[\"The selected available_establishments.0 is invalid.\"]}}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/empresa/outra-organizacao-servicos/clientes",
+            "passed": true,
+            "detail": {
+                "status": 422,
+                "body": "{\"message\":\"Selecione etiquetas ativas deste m\\u00f3dulo.\",\"errors\":{\"tag_ids\":[\"Selecione etiquetas ativas deste m\\u00f3dulo.\"]}}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/empresa/outra-organizacao-servicos/clientes",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "body": "{\n    \"message\": \"No query results for model [App\\\\Domains\\\\Pessoas\\\\Domain\\\\Models\\\\Person] 17\"\n}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: POST {B}/empresa/outra-organizacao-servicos/clientes",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "body": "{\n    \"message\": \"\"\n}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Formulário da B com referência da A recusado: PATCH {B}/usuarios/2/atribuicoes",
+            "passed": true,
+            "detail": {
+                "status": 404,
+                "body": "{\n    \"message\": \"No query results for model [App\\\\Domains\\\\Acessos\\\\Domain\\\\Models\\\\Role] 9\"\n}"
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Filtro de auditoria com empresa da A não conta eventos",
+            "passed": true,
+            "detail": 200
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Busca de etiquetas da B não traz a etiqueta da A",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Nenhuma tentativa alterou o banco (hash de 15 tabelas)",
+            "passed": true,
+            "detail": []
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Anônimo não abre conta",
+            "passed": true,
+            "detail": {
+                "status": 401
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Anônimo não abre seleção",
+            "passed": true,
+            "detail": {
+                "status": 401
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "POST sem CSRF válido recusado",
+            "passed": true,
+            "detail": {
+                "status": 419
+            }
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Sem CSRF nada gravado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Login limitado após tentativas",
+            "passed": true,
+            "detail": [
+                422,
+                422,
+                422,
+                422,
+                422,
+                429,
+                429
+            ]
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Erro de login idêntico para e-mail existente e inexistente",
+            "passed": true,
+            "detail": [
+                422,
+                422
+            ]
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Recuperação de acesso com resposta neutra",
+            "passed": true,
+            "detail": [
+                200,
+                200
+            ]
+        },
+        {
+            "journey": "Seguranca",
+            "check": "Cookie de sessão HttpOnly e SameSite",
+            "passed": true,
+            "detail": null
+        }
+    ]
+}

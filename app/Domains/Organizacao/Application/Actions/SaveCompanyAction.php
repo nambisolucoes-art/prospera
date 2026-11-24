@@ -6,6 +6,7 @@ use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Data\SaveCompanyData;
 use App\Domains\Organizacao\Domain\DTOs\CompanyDTO;
 use App\Domains\Organizacao\Domain\Models\Company;
+use App\Domains\Plataforma\Domain\Models\Client;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -15,6 +16,12 @@ final class SaveCompanyAction
     public function execute(Company $company, SaveCompanyData $data): void
     {
         AuditLog::transaction(function () use ($company, $data): void {
+            // Ordem única de travas: conta, depois empresa. A auditoria da escrita pede FOR KEY SHARE na conta,
+            // e as escritas comerciais travam a conta antes da empresa; a ordem inversa produzia deadlock (E10).
+            Client::whereKey($company->account_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             // A trava da empresa serializa as alterações de situação com as dos estabelecimentos (6.6).
             $lockedCompany = Company::where('account_id', $company->account_id)
                 ->lockForUpdate()

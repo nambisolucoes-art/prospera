@@ -1,0 +1,293 @@
+{
+    "e10": "04-convites",
+    "checks": 38,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J4 convites",
+            "check": "Emissão para identidade nova",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Emissão para identidade existente",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Respostas neutras idênticas (redirect e toast)",
+            "passed": true,
+            "detail": [
+                "{\"redirect\":\"http:\\/\\/127.0.0.1:8000\\/contas\\/outra-organizacao-servicos\\/usuarios\"}",
+                "{\"redirect\":\"http:\\/\\/127.0.0.1:8000\\/contas\\/outra-organizacao-servicos\\/usuarios\"}"
+            ]
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Mensagem pública \"Solicitação de acesso registrada.\"",
+            "passed": true,
+            "detail": {
+                "type": "success",
+                "message": "Solicitação de acesso registrada."
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Identidade nova criada com senha pendente",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Identidade nova recebe o link do Fortify, não um convite de conta",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Definição de senha da identidade nova",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Identidade nova opera a unidade após definir a senha",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Convite entregue à identidade existente com token de 64 caracteres",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Token persistido só como SHA-256",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Convite pendente não abre a Conta B",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Outra identidade não vê os dados do convite",
+            "passed": true,
+            "detail": 200
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Outra identidade não aceita o convite",
+            "passed": true,
+            "detail": {
+                "status": 410
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Convite continua pendente após tentativa alheia",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Destinatária vê conta e cargo do convite",
+            "passed": true,
+            "detail": {
+                "account": "Outra Organização Serviços",
+                "role": "Operador B",
+                "expires_at": "2026-12-01T11:27:41+00:00",
+                "enabled": true
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Aceite legítimo",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Exatamente um vínculo da Ana na Conta B, com pessoa da Conta B",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Atribuição do convite na unidade da Conta B",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Token reutilizado recusado",
+            "passed": true,
+            "detail": {
+                "status": 410
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Reutilização não duplica vínculo",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Conta C convida a Ana",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Ana aceita a Conta C",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Segunda emissão revoga a primeira",
+            "passed": true,
+            "detail": [
+                "pending",
+                "revoked"
+            ]
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Token substituído recusado",
+            "passed": true,
+            "detail": {
+                "status": 410
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Revogar convite pela Conta B",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Convite revogado recusado",
+            "passed": true,
+            "detail": {
+                "status": 410
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Conta A não revoga convite da Conta B",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Convite expirado recusado",
+            "passed": true,
+            "detail": {
+                "status": 410
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Expirado não cria vínculo",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Emissão para quem já tem vínculo suspenso responde neutro",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Vínculo suspenso não recebe convite nem é reativado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Token inexistente responde indisponível sem dados",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Token com formato inválido não é rota",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Cargo só de Ajuda é levado à Central de Ajuda da conta",
+            "passed": true,
+            "detail": {
+                "status": 200,
+                "redirect": "http://127.0.0.1:8000/contas/grupo-gartan/ajuda"
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Ajuda da conta acessível ao cargo só de Ajuda",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Eventos de convite: criação, envio, aceite e revogação",
+            "passed": true,
+            "detail": [
+                "created",
+                "invitation-sent",
+                "updated"
+            ]
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Nenhum token de convite no histórico",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 convites",
+            "check": "Eventos de aceite com autoria da destinatária na conta B",
+            "passed": true,
+            "detail": null
+        }
+    ]
+}

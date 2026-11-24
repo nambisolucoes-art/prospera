@@ -1,0 +1,91 @@
+{
+    "e10": "12-chave-desligada",
+    "checks": 11,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J4 chave desligada",
+            "check": "Convite pendente emitido com a chave ligada",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Vínculo existente continua abrindo grupo-gartan",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Vínculo existente continua abrindo outra-organizacao-servicos",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Vínculo existente continua abrindo filial-unica-distribuidora",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Seleção com três vínculos não escolhe conta com a chave desligada",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Convite informa que a associação está desligada",
+            "passed": true,
+            "detail": {
+                "account": "Outra Organização Serviços",
+                "role": "Operador B",
+                "expires_at": "2026-12-01T11:31:08+00:00",
+                "enabled": false
+            }
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Aceite bloqueado com a chave desligada",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Convite continua pendente e sem vínculo",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Emissão para identidade existente responde neutra com a chave desligada",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Nenhum convite novo com a chave desligada",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J4 chave desligada",
+            "check": "Mesmo convite aceito com a chave ligada",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        }
+    ]
+}

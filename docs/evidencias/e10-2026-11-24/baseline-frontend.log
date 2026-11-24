@@ -1,0 +1,13 @@
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 185.380381
+npm notice run check:architecture
+npm notice run node scripts/check-architecture.mjs
+Arquitetura validada: 822 arquivos, nomes, imports e limites entre camadas.
+npm notice run types:check
+npm notice run tsc --noEmit

@@ -1,0 +1,266 @@
+{
+    "e10": "02-organizacao",
+    "checks": 36,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J2 organizacao",
+            "check": "Filial 0002 da A1 cadastrada",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Filial 0003 da A1 cadastrada",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Filiais da A1 persistidas como filiais não principais",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Segunda matriz recusada",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Segunda matriz: nada gravado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "CNPJ de raiz incompatível recusado",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Raiz incompatível: nada gravado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "CNPJ de estabelecimento repetido recusado",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Empresa A2 com CNPJ alfanumérico cadastrada",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "A2: raiz alfanumérica e raiz distinta da A1",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "A2: ordem 0001 não vira matriz; filial é principal sem matriz cadastrada",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Filial alfanumérica adicional da A2",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Raiz de CNPJ repetida na mesma conta recusada",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Mesma raiz em outra conta aceita",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Filial própria da Conta B",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Empresa de outra conta pelo ID responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Edição de empresa de outra conta responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Promoção da filial a principal",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Principal mudou sem alterar a classificação fiscal",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Uma única principal na A1",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Inativar a principal recusado",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Inativar filial",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Promover unidade inativa recusado",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Principal preservada após tentativa inválida",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Reativar filial",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Inativar empresa A2",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "A2 inativa preserva principal ativa conforme contrato",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Reativar empresa A2",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Código da empresa imutável",
+            "passed": true,
+            "detail": 200
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Eventos de unidade gravam empresa e unidade",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Eventos da A2: criação, inativação e reativação com company_id e sem unidade",
+            "passed": true,
+            "detail": [
+                "created",
+                "updated",
+                "updated"
+            ]
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Tentativas recusadas não geraram evento de segunda matriz ou raiz alheia",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Evento da homônima pertence à Conta B",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "Índice parcial impede segunda matriz no banco",
+            "passed": true,
+            "detail": "23505"
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "FK/índice impede mover unidade entre empresas com principal duplicada",
+            "passed": true,
+            "detail": "23505"
+        },
+        {
+            "journey": "J2 organizacao",
+            "check": "organization:check sem violações",
+            "passed": true,
+            "detail": "Estrutura organizacional validada: nenhuma violação encontrada."
+        }
+    ]
+}

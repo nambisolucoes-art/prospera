@@ -1,0 +1,154 @@
+{
+    "users": {
+        "rows": 13,
+        "sha256": "54595d69a0de439acb5dfeb5790b7ef4dd5a9c13ed247103211a7c81b839d630"
+    },
+    "clients": {
+        "rows": 3,
+        "sha256": "3e73b947967e44f7f6c434f3d685adccdeb0bb9fd93882579f295cc4ae9aefa4"
+    },
+    "companies": {
+        "rows": 6,
+        "sha256": "2b436eb69056294fa01683069af583bdde1166cc2fd3bf70abcd1251ba7d0ffd"
+    },
+    "establishments": {
+        "rows": 12,
+        "sha256": "13264afb3aec942084f6409a194fb1a6dfbf874e739f13fbb0eeab8911c604f4"
+    },
+    "people": {
+        "rows": 32,
+        "sha256": "08931378bf8f4ed18883abf4384afa26cda44093dfdd5b9c1e46e8886a11374f"
+    },
+    "customers": {
+        "rows": 13,
+        "sha256": "fff8a8537e3c2883e4ea8d7b91460f3953fbff841b4ab5400777ad3bdc7a78a8"
+    },
+    "suppliers": {
+        "rows": 11,
+        "sha256": "255a7f0407d8385fc25e4b7dd626ddf3ca91dd279e7e520b1f85b5519171d10f"
+    },
+    "tags": {
+        "rows": 17,
+        "sha256": "b5f8995d002e5aa51302e1d8098450f5def0b18a46bca1b9e4662ad97d4e437c"
+    },
+    "person_tag": {
+        "rows": 12,
+        "sha256": "3b8b0c996cc0ca3be904c4db92a9cd485564dc46ba20adb3ee2508cb5aa0fe2c"
+    },
+    "roles": {
+        "rows": 13,
+        "sha256": "5b74bc1515a3b25c316688763a0863bd8a0ba7071ec69d6d6584c80a17a69bab"
+    },
+    "permission_role": {
+        "rows": 402,
+        "sha256": "db1dd83743ccef761d960454239ba95cceab2c83d5d31b2f6045af2eb8828cac"
+    },
+    "role_availability": {
+        "rows": 1,
+        "sha256": "b21324cc4c6f4a5ad65afd7b44510a4a7bdde2f218584750f3595d69f0b97151"
+    },
+    "account_memberships": {
+        "rows": 13,
+        "sha256": "8a7f5e72754c79045517c3c9e687dd8f8721e473d40296a4de5d447468423f9a"
+    },
+    "role_assignments": {
+        "rows": 21,
+        "sha256": "c3201ab535c28ea01fca590bf313e256b1977a1d1e030f6e28472f419c7d11be"
+    },
+    "audit_records": {
+        "rows": 161,
+        "sha256": "c65aeb3cf04f062e16b861958a009046d60c8c133aa67a49b74c24c595aa6645"
+    },
+    "limites": {
+        "audit_records": 154,
+        "permissions": 81
+    },
+    "audit_records_preexistentes": "430e23172c24894ba6efc686c981f52c3e26379bdc393ce62b2e5be50786a49e",
+    "permission_role_preexistentes": "d08155673d8a62cb035965611b7dfc43046b26f2a9a4e73b371d35884b324ccb",
+    "acrescimos": {
+        "audit_records": {
+            "role-assignment": "created",
+            "permission-catalog": "catalog-synchronized",
+            "person": "created",
+            "account-membership": "created",
+            "role": "updated"
+        },
+        "permissions": [
+            "account.users.revoke-invitation"
+        ]
+    },
+    "users.account_id": false,
+    "clients.code": {
+        "1": "grupo-horizonte",
+        "2": "arvore-acao-comercio",
+        "3": "arvore-acao-comercio-2"
+    },
+    "workspace_preferences": 1,
+    "memberships_by_user": [
+        {
+            "user_id": 2,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 2,
+            "account_id": 2,
+            "status": "active"
+        },
+        {
+            "user_id": 3,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 4,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 5,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 6,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 7,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 8,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 9,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 10,
+            "account_id": 1,
+            "status": "active"
+        },
+        {
+            "user_id": 11,
+            "account_id": 1,
+            "status": "suspended"
+        },
+        {
+            "user_id": 12,
+            "account_id": 2,
+            "status": "active"
+        },
+        {
+            "user_id": 13,
+            "account_id": 3,
+            "status": "active"
+        }
+    ]
+}

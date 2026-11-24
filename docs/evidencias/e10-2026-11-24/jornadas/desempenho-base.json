@@ -1,0 +1,335 @@
+{
+    "rotulo": "base",
+    "eventos_auditoria": 1182,
+    "eventos_conta_a": 1013,
+    "resumo": {
+        "Dashboard da conta": {
+            "caminho": "\/contas\/grupo-gartan",
+            "amostras": 100,
+            "mediana_ms": 16.08,
+            "p95_ms": 20.2,
+            "db_ms_mediana": 7.33,
+            "queries": [
+                12,
+                13
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 123896
+        },
+        "Seleção de contas": {
+            "caminho": "\/contas",
+            "amostras": 100,
+            "mediana_ms": 10.67,
+            "p95_ms": 12.18,
+            "db_ms_mediana": 4.92,
+            "queries": [
+                7,
+                8
+            ],
+            "queries_permissao": [
+                0
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 77064
+        },
+        "Resolução da conta (padrão da Área de Trabalho)": {
+            "caminho": "\/contas\/grupo-gartan\/area-de-trabalho\/padrao",
+            "amostras": 100,
+            "mediana_ms": 11.41,
+            "p95_ms": 15.52,
+            "db_ms_mediana": 5.24,
+            "queries": [
+                8,
+                9
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 121800
+        },
+        "Área de Trabalho consolidada": {
+            "caminho": "\/contas\/grupo-gartan\/estabelecimento\/todos?unidades=gartan-comercio,gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-logistica",
+            "amostras": 100,
+            "mediana_ms": 12.62,
+            "p95_ms": 14.19,
+            "db_ms_mediana": 5.21,
+            "queries": [
+                8,
+                9
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 126688
+        },
+        "Empresas": {
+            "caminho": "\/contas\/grupo-gartan\/empresas",
+            "amostras": 100,
+            "mediana_ms": 15,
+            "p95_ms": 16.78,
+            "db_ms_mediana": 6.55,
+            "queries": [
+                11,
+                12
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 121408
+        },
+        "Estabelecimentos": {
+            "caminho": "\/contas\/grupo-gartan\/estabelecimentos",
+            "amostras": 100,
+            "mediana_ms": 16.52,
+            "p95_ms": 19,
+            "db_ms_mediana": 7.08,
+            "queries": [
+                13,
+                14
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 133464
+        },
+        "Clientes (consolidado)": {
+            "caminho": "\/contas\/grupo-gartan\/estabelecimento\/todos\/clientes?unidades=gartan-comercio,gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-logistica",
+            "amostras": 100,
+            "mediana_ms": 17.61,
+            "p95_ms": 19.55,
+            "db_ms_mediana": 7.51,
+            "queries": [
+                11,
+                12
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 171272
+        },
+        "Fornecedores (consolidado)": {
+            "caminho": "\/contas\/grupo-gartan\/estabelecimento\/todos\/fornecedores?unidades=gartan-comercio,gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-logistica",
+            "amostras": 100,
+            "mediana_ms": 16.73,
+            "p95_ms": 18.35,
+            "db_ms_mediana": 7.8,
+            "queries": [
+                11
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 126344
+        },
+        "Usuários": {
+            "caminho": "\/contas\/grupo-gartan\/usuarios",
+            "amostras": 100,
+            "mediana_ms": 23.39,
+            "p95_ms": 26.36,
+            "db_ms_mediana": 10.37,
+            "queries": [
+                18
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 239104
+        },
+        "Cargos": {
+            "caminho": "\/contas\/grupo-gartan\/cargos",
+            "amostras": 100,
+            "mediana_ms": 17.66,
+            "p95_ms": 19.48,
+            "db_ms_mediana": 7.95,
+            "queries": [
+                11,
+                12
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 133200
+        },
+        "Etiquetas": {
+            "caminho": "\/contas\/grupo-gartan\/etiquetas",
+            "amostras": 100,
+            "mediana_ms": 17.44,
+            "p95_ms": 19.45,
+            "db_ms_mediana": 7.81,
+            "queries": [
+                11,
+                12
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 133016
+        },
+        "Auditoria (conta inteira)": {
+            "caminho": "\/contas\/grupo-gartan\/auditoria",
+            "amostras": 100,
+            "mediana_ms": 27.06,
+            "p95_ms": 28.74,
+            "db_ms_mediana": 11.51,
+            "queries": [
+                14,
+                15
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 295376
+        },
+        "Auditoria (busca textual)": {
+            "caminho": "\/contas\/grupo-gartan\/auditoria?search=Registro",
+            "amostras": 100,
+            "mediana_ms": 22.83,
+            "p95_ms": 24.92,
+            "db_ms_mediana": 12.51,
+            "queries": [
+                13,
+                14
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 167976
+        },
+        "Auditoria (unidade)": {
+            "caminho": "\/contas\/grupo-gartan\/auditoria",
+            "amostras": 100,
+            "mediana_ms": 22.76,
+            "p95_ms": 24.66,
+            "db_ms_mediana": 9.4,
+            "queries": [
+                15,
+                16
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 186296
+        },
+        "Plataforma: contas": {
+            "caminho": "\/saas\/contas",
+            "amostras": 100,
+            "mediana_ms": 8.74,
+            "p95_ms": 9.9,
+            "db_ms_mediana": 2.65,
+            "queries": [
+                6,
+                7
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "queries_atribuicao": [
+                0
+            ],
+            "duplicadas_max": 0,
+            "sql_repetido": [],
+            "pico_incremental_max": 83336
+        }
+    },
+    "paginas_5_50": {
+        "Clientes (consolidado)": [
+            11,
+            11
+        ],
+        "Fornecedores (consolidado)": [
+            11,
+            11
+        ],
+        "Usuários": [
+            18,
+            18
+        ],
+        "Etiquetas": [
+            11,
+            11
+        ],
+        "Auditoria (conta inteira)": [
+            14,
+            14
+        ],
+        "Empresas": [
+            11,
+            11
+        ],
+        "Estabelecimentos": [
+            13,
+            13
+        ]
+    }
+}

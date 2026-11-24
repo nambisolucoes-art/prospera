@@ -9,6 +9,7 @@ use App\Domains\Organizacao\Application\Queries\AvailableOrganizationCodeQuery;
 use App\Domains\Organizacao\Domain\DTOs\EstablishmentDTO;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
+use App\Domains\Plataforma\Domain\Models\Client;
 use App\Support\TaxDocument;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Gate;
@@ -21,6 +22,12 @@ final readonly class SaveEstablishmentAction
     public function execute(Company $company, ?Establishment $establishment, SaveEstablishmentData $data): Establishment
     {
         return AuditLog::transaction(function () use ($company, $establishment, $data): Establishment {
+            // Ordem única de travas: conta, depois empresa. A auditoria da escrita pede FOR KEY SHARE na conta,
+            // e as escritas comerciais travam a conta antes da empresa; a ordem inversa produzia deadlock (E10).
+            Client::whereKey($company->account_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             // Toda alteração de situação ou de principal começa pela trava da empresa (6.6).
             $lockedCompany = Company::where('account_id', $company->account_id)
                 ->lockForUpdate()

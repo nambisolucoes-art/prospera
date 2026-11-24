@@ -1,0 +1,400 @@
+{
+    "requisicoes": 4202,
+    "iteracoes": 3000,
+    "workers": 1,
+    "memoria_inicio_por_worker": {
+        "99c2bc6564eedc2f": {
+            "requisicoes": 4202,
+            "inicio": 15582272,
+            "fim": 15743512,
+            "max": 19067856,
+            "min": 12084688,
+            "media_por_bloco_500": [
+                15313904,
+                15645647,
+                15664087,
+                15714266,
+                15730442,
+                15762454,
+                15492088,
+                15413638,
+                14263205
+            ]
+        }
+    },
+    "resumo": {
+        "A etiquetas (administradora)": {
+            "amostras": 250,
+            "mediana_ms": 16.69,
+            "p95_ms": 18.89,
+            "queries": [
+                11,
+                12
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 7.26,
+            "pico_incremental_max": 133328,
+            "sql_repetido": []
+        },
+        "B etiquetas (mesma identidade, operadora)": {
+            "amostras": 250,
+            "mediana_ms": 15.39,
+            "p95_ms": 17.22,
+            "queries": [
+                10,
+                11
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 6.63,
+            "pico_incremental_max": 103616,
+            "sql_repetido": []
+        },
+        "B etiquetas (uma unidade)": {
+            "amostras": 250,
+            "mediana_ms": 15.32,
+            "p95_ms": 17.61,
+            "queries": [
+                10,
+                11
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 6.54,
+            "pico_incremental_max": 103192,
+            "sql_repetido": []
+        },
+        "A clientes consolidado (empresa A1)": {
+            "amostras": 250,
+            "mediana_ms": 17.85,
+            "p95_ms": 19.56,
+            "queries": [
+                11,
+                12
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 7.9,
+            "pico_incremental_max": 139048,
+            "sql_repetido": []
+        },
+        "A auditoria local (unidade)": {
+            "amostras": 250,
+            "mediana_ms": 22.93,
+            "p95_ms": 25.83,
+            "queries": [
+                15,
+                16
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 9.38,
+            "pico_incremental_max": 187728,
+            "sql_repetido": []
+        },
+        "B usuarios (administrador)": {
+            "amostras": 250,
+            "mediana_ms": 23.1,
+            "p95_ms": 26.25,
+            "queries": [
+                19,
+                20
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 10.68,
+            "pico_incremental_max": 188584,
+            "sql_repetido": []
+        },
+        "A empresas (consulta)": {
+            "amostras": 250,
+            "mediana_ms": 15.55,
+            "p95_ms": 17.72,
+            "queries": [
+                11,
+                12
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 6.89,
+            "pico_incremental_max": 98304,
+            "sql_repetido": []
+        },
+        "A auditoria negada (consulta)": {
+            "amostras": 250,
+            "mediana_ms": 10.53,
+            "p95_ms": 12.03,
+            "queries": [
+                6,
+                7
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 4.11,
+            "pico_incremental_max": 131856,
+            "sql_repetido": []
+        },
+        "Selecao de contas": {
+            "amostras": 250,
+            "mediana_ms": 10.48,
+            "p95_ms": 11.82,
+            "queries": [
+                7,
+                8
+            ],
+            "queries_permissao": [
+                0
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 4.72,
+            "pico_incremental_max": 77136,
+            "sql_repetido": []
+        },
+        "Conta inexistente": {
+            "amostras": 250,
+            "mediana_ms": 6.45,
+            "p95_ms": 7.47,
+            "queries": [
+                4,
+                5
+            ],
+            "queries_permissao": [
+                0
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 2.07,
+            "pico_incremental_max": 106176,
+            "sql_repetido": []
+        },
+        "A area de trabalho padrao": {
+            "amostras": 250,
+            "mediana_ms": 10.97,
+            "p95_ms": 12.77,
+            "queries": [
+                8,
+                9
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 4.9,
+            "pico_incremental_max": 121760,
+            "sql_repetido": []
+        },
+        "B area de trabalho padrao": {
+            "amostras": 250,
+            "mediana_ms": 10.3,
+            "p95_ms": 11.89,
+            "queries": [
+                7,
+                8
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 4.42,
+            "pico_incremental_max": 79976,
+            "sql_repetido": []
+        },
+        "A escrita comercial (cliente)": {
+            "amostras": 250,
+            "mediana_ms": 23.9,
+            "p95_ms": 26.97,
+            "queries": [
+                21,
+                22
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 2,
+            "db_ms_mediana": 9.92,
+            "pico_incremental_max": 165504,
+            "sql_repetido": [
+                "select * from \"clients\" where \"clients\".\"id\" = ? limit 1 for update",
+                "select * from \"people\" where \"account_id\" = ? and \"people\".\"id\" = ? limit 1 for update"
+            ]
+        },
+        "A etiqueta invalida (422)": {
+            "amostras": 250,
+            "mediana_ms": 10.74,
+            "p95_ms": 12.43,
+            "queries": [
+                6,
+                7
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 3.83,
+            "pico_incremental_max": 454080,
+            "sql_repetido": []
+        },
+        "Inspecao inicio": {
+            "amostras": 50,
+            "mediana_ms": 13.49,
+            "p95_ms": 16.98,
+            "queries": [
+                13,
+                14
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 5.2,
+            "pico_incremental_max": 94576,
+            "sql_repetido": []
+        },
+        "Inspecao leitura": {
+            "amostras": 50,
+            "mediana_ms": 16.95,
+            "p95_ms": 18.89,
+            "queries": [
+                14
+            ],
+            "queries_permissao": [
+                2
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 7.48,
+            "pico_incremental_max": 105048,
+            "sql_repetido": []
+        },
+        "Inspecao troca de conta": {
+            "amostras": 50,
+            "mediana_ms": 9.27,
+            "p95_ms": 10.69,
+            "queries": [
+                8,
+                9
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 3.59,
+            "pico_incremental_max": 115032,
+            "sql_repetido": []
+        },
+        "Inspecao escrita": {
+            "amostras": 50,
+            "mediana_ms": 26.91,
+            "p95_ms": 31.27,
+            "queries": [
+                25,
+                26
+            ],
+            "queries_permissao": [
+                2
+            ],
+            "duplicadas_max": 2,
+            "db_ms_mediana": 11.68,
+            "pico_incremental_max": 166400,
+            "sql_repetido": [
+                "select * from \"clients\" where \"clients\".\"id\" = ? limit 1 for update",
+                "select * from \"people\" where \"account_id\" = ? and \"people\".\"id\" = ? limit 1 for update"
+            ]
+        },
+        "Inspecao encerramento": {
+            "amostras": 50,
+            "mediana_ms": 13.28,
+            "p95_ms": 15.66,
+            "queries": [
+                14
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 1,
+            "db_ms_mediana": 5.16,
+            "pico_incremental_max": 83400,
+            "sql_repetido": [
+                "select * from \"users\" where \"is_saas_admin\" = ? and \"access_enabled\" = ? and \"email_verified_at\" is not null and \"users\".\"id\" = ? limit 1"
+            ]
+        },
+        "B clientes (administrador)": {
+            "amostras": 250,
+            "mediana_ms": 16.54,
+            "p95_ms": 19.18,
+            "queries": [
+                12,
+                13
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 7.74,
+            "pico_incremental_max": 127776,
+            "sql_repetido": []
+        },
+        "Plataforma contas": {
+            "amostras": 200,
+            "mediana_ms": 9.04,
+            "p95_ms": 10.68,
+            "queries": [
+                6,
+                7
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 2.87,
+            "pico_incremental_max": 141392,
+            "sql_repetido": []
+        },
+        "Revogacao imediata": {
+            "amostras": 1,
+            "mediana_ms": 9.6,
+            "p95_ms": 9.6,
+            "queries": [
+                6
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 3.85,
+            "pico_incremental_max": 119416,
+            "sql_repetido": []
+        },
+        "Concessao imediata": {
+            "amostras": 1,
+            "mediana_ms": 15.17,
+            "p95_ms": 15.17,
+            "queries": [
+                10
+            ],
+            "queries_permissao": [
+                1
+            ],
+            "duplicadas_max": 0,
+            "db_ms_mediana": 6.45,
+            "pico_incremental_max": 102520,
+            "sql_repetido": []
+        }
+    },
+    "inesperadas": []
+}

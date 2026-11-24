@@ -5,6 +5,7 @@ namespace App\Domains\Organizacao\Application\Actions;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
+use App\Domains\Plataforma\Domain\Models\Client;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -16,6 +17,12 @@ final class PromotePrimaryEstablishmentAction
     public function execute(Establishment $establishment): void
     {
         AuditLog::transaction(function () use ($establishment): void {
+            // Ordem única de travas: conta, depois empresa. A auditoria da escrita pede FOR KEY SHARE na conta,
+            // e as escritas comerciais travam a conta antes da empresa; a ordem inversa produzia deadlock (E10).
+            Client::whereKey($establishment->account_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $lockedCompany = Company::where('account_id', $establishment->account_id)
                 ->lockForUpdate()
                 ->findOrFail($establishment->company_id);

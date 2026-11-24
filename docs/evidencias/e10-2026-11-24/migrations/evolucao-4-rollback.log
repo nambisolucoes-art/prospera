@@ -1,0 +1,10 @@
+
+   INFO  Rolling back migrations.  
+
+  2026_11_23_000003_remove_account_from_users ................... 16.41ms DONE
+
+
+   INFO  Running migrations.  
+
+  2026_11_23_000003_remove_account_from_users ................... 15.65ms DONE
+

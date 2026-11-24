@@ -1,0 +1,129 @@
+{
+    "e10": "14-desempenho-volume-100k",
+    "checks": 9,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Sem N+1 em Clientes (consolidado) (5 e 50 por página)",
+            "passed": true,
+            "detail": [
+                11,
+                11
+            ]
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Sem N+1 em Fornecedores (consolidado) (5 e 50 por página)",
+            "passed": true,
+            "detail": [
+                11,
+                11
+            ]
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Sem N+1 em Usuários (5 e 50 por página)",
+            "passed": true,
+            "detail": [
+                18,
+                18
+            ]
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Sem N+1 em Etiquetas (5 e 50 por página)",
+            "passed": true,
+            "detail": [
+                11,
+                11
+            ]
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Sem N+1 em Auditoria (conta inteira) (5 e 50 por página)",
+            "passed": true,
+            "detail": [
+                14,
+                14
+            ]
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Sem N+1 em Empresas (5 e 50 por página)",
+            "passed": true,
+            "detail": [
+                11,
+                11
+            ]
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Sem N+1 em Estabelecimentos (5 e 50 por página)",
+            "passed": true,
+            "detail": [
+                13,
+                13
+            ]
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Consultas de permissão constantes (no máximo 1 por requisição de conta)",
+            "passed": true,
+            "detail": {
+                "Dashboard da conta": [
+                    1
+                ],
+                "Seleção de contas": [
+                    0
+                ],
+                "Resolução da conta (padrão da Área de Trabalho)": [
+                    1
+                ],
+                "Área de Trabalho consolidada": [
+                    1
+                ],
+                "Empresas": [
+                    1
+                ],
+                "Estabelecimentos": [
+                    1
+                ],
+                "Clientes (consolidado)": [
+                    1
+                ],
+                "Fornecedores (consolidado)": [
+                    1
+                ],
+                "Usuários": [
+                    1
+                ],
+                "Cargos": [
+                    1
+                ],
+                "Etiquetas": [
+                    1
+                ],
+                "Auditoria (conta inteira)": [
+                    1
+                ],
+                "Auditoria (busca textual)": [
+                    1
+                ],
+                "Auditoria (unidade)": [
+                    1
+                ],
+                "Plataforma: contas": [
+                    1
+                ]
+            }
+        },
+        {
+            "journey": "Desempenho volume-100k",
+            "check": "Nenhuma assinatura SQL repetida nas leituras",
+            "passed": true,
+            "detail": []
+        }
+    ]
+}

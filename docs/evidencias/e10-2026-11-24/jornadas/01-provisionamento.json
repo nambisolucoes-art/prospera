@@ -1,0 +1,276 @@
+{
+    "e10": "01-provisionamento",
+    "checks": 35,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J1 provisionamento",
+            "check": "Conta A provisionada (manual)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Conta A persistida com código público",
+            "passed": true,
+            "detail": "grupo-gartan"
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Empresa A1 com raiz própria, sem reutilizar o CNPJ do contratante",
+            "passed": true,
+            "detail": {
+                "tax_root": "52300400"
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Conta e Empresa são registros distintos",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Principal da A1 é matriz explícita com o CNPJ informado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Conta B provisionada (automático, matriz)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Automático usa os dados do contratante só por escolha explícita",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Administrador convidado fica com senha pendente",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Link de definição de senha entregue somente ao Mailpit isolado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Senha aleatória inicial não permite login",
+            "passed": true,
+            "detail": 422
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Definição de senha pelo Fortify",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Token de definição de senha não é reutilizável",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Pendência de senha limpa após a definição",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Conta C provisionada (automático, filial)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Conta C: única unidade é filial principal, sem matriz",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Conta D provisionada (pessoa física)",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Pessoa física gera empresa individual sem classificação fiscal",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Automático exige classificação declarada",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Sem classificação: nenhum dado criado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Não infere Matriz pelo sufixo 0001",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Administrador com e-mail já usado recusado",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Falha transacional não deixa conta, empresa, unidade, vínculo nem auditoria",
+            "passed": true,
+            "detail": [
+                {
+                    "clients": 4,
+                    "companies": 4,
+                    "establishments": 4,
+                    "users": 6,
+                    "memberships": 4,
+                    "audit": 52
+                },
+                {
+                    "clients": 4,
+                    "companies": 4,
+                    "establishments": 4,
+                    "users": 6,
+                    "memberships": 4,
+                    "audit": 52
+                }
+            ]
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Resposta neutra sobre o e-mail existente",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Primeira empresa com CNPJ inválido recusada",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Empresa inválida: nada persistido",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Documento de contratante duplicado recusado pela plataforma",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Administradora da Conta A entra na conta",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Administrador integral recebe todas as permissões account e self",
+            "passed": true,
+            "detail": []
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Administrador integral não recebe platform.*",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Vínculo único: seleção leva direto à conta",
+            "passed": true,
+            "detail": "http://127.0.0.1:8000/contas/grupo-gartan"
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Login posterior registrado com a própria administradora como autora",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Eventos da conta, empresa, unidade, vínculo e atribuição registrados",
+            "passed": true,
+            "detail": [
+                "account:created:-:-",
+                "company:created:1:-",
+                "establishment:created:1:1",
+                "user:created:-:-",
+                "role:created:-:-",
+                "role:created:-:-",
+                "person:created:-:-",
+                "account-membership:created:-:-",
+                "role-assignment:created:-:-",
+                "tag:created:-:-",
+                "tag:created:-:-",
+                "tag:created:-:-"
+            ]
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Autor real é o administrador SaaS em todos os eventos do provisionamento",
+            "passed": true,
+            "detail": [
+                1
+            ]
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Origem Plataforma SaaS nos eventos do provisionamento",
+            "passed": true,
+            "detail": [
+                "platform"
+            ]
+        },
+        {
+            "journey": "J1 provisionamento",
+            "check": "Histórico sem senha, hash ou documento do contratante em claro",
+            "passed": true,
+            "detail": null
+        }
+    ]
+}

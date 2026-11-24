@@ -1,0 +1,371 @@
+{
+    "e10": "11-concorrencia",
+    "checks": 26,
+    "failed": 2,
+    "login_throttled": 1,
+    "results": [
+        {
+            "journey": "Concorrencia",
+            "check": "Contas concorrentes com mesmo nome: duas contas e códigos distintos",
+            "passed": true,
+            "detail": {
+                "http": [
+                    422,
+                    422
+                ],
+                "codes": [
+                    "colisao-concorrente-e10",
+                    "colisao-concorrente-e10-2"
+                ]
+            }
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Cada conta concorrente com uma empresa e uma principal",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Aceite simultâneo: um aceito e um 410",
+            "passed": true,
+            "detail": [
+                200,
+                410
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Aceite simultâneo: um único vínculo e convite aceito",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Aceite simultâneo: um único evento de aceite",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Revogação x aceite: estado coerente (aceito com vínculo ou revogado sem vínculo)",
+            "passed": true,
+            "detail": {
+                "status": "accepted",
+                "membership": 1,
+                "http": [
+                    {
+                        "started": 1795517913.997138,
+                        "who": "accept",
+                        "status": 200
+                    },
+                    {
+                        "started": 1795517913.997126,
+                        "who": "revoke",
+                        "status": 422
+                    }
+                ]
+            }
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Último administrador: ao menos um administrador ativo e no máximo uma suspensão",
+            "passed": true,
+            "detail": {
+                "admins": 1,
+                "http": [
+                    {
+                        "started": 1795517914.736777,
+                        "who": "ana suspende henrique",
+                        "status": 200
+                    },
+                    {
+                        "started": 1795517914.736724,
+                        "who": "henrique suspende ana",
+                        "status": 403
+                    }
+                ]
+            }
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Ambos administradores reativados após a prova",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Mesmo CPF simultâneo: uma Pessoa e um Cliente",
+            "passed": true,
+            "detail": {
+                "people": 1,
+                "http": [
+                    204,
+                    422
+                ]
+            }
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Mesmo CPF simultâneo: nenhum erro 500",
+            "passed": true,
+            "detail": [
+                204,
+                422
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Mesmo CPF simultâneo: uma Pessoa auditada uma vez",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Pessoa nova em duas empresas ao mesmo tempo: uma Pessoa",
+            "passed": true,
+            "detail": {
+                "people": 1,
+                "relations": 1,
+                "http": [
+                    204,
+                    422
+                ]
+            }
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Pessoa nova em duas empresas: sem 500",
+            "passed": true,
+            "detail": [
+                204,
+                422
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Escritas concorrentes: dez respostas sem erro",
+            "passed": true,
+            "detail": [
+                204,
+                204,
+                204,
+                204,
+                204,
+                204,
+                204,
+                204,
+                204,
+                204
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Escritas concorrentes: um evento por alteração efetiva",
+            "passed": true,
+            "detail": 10
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Escritas concorrentes: valor final igual ao depois do último evento",
+            "passed": true,
+            "detail": {
+                "final": "7747860007"
+            }
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Escritas concorrentes: cadeia antes/depois coerente (serializada)",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Escritas concorrentes: autor de cada evento é quem escreveu",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Empresa inativada durante cadastro: cinco rodadas sem 500",
+            "passed": false,
+            "detail": [
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                }
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Empresa inativada durante cadastro: fornecedor só existe se confirmado antes da inativação",
+            "passed": true,
+            "detail": [
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                },
+                {
+                    "http": {
+                        "cadastro": 500,
+                        "inativa": 200
+                    },
+                    "supplier": false,
+                    "coherent": true
+                }
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Empresa inativa recusa cadastro comercial",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Edição de unidade durante cadastro na mesma empresa: cinco rodadas sem 500 e ambas concluídas",
+            "passed": false,
+            "detail": [
+                {
+                    "cadastro": 204,
+                    "unidade": 200
+                },
+                {
+                    "cadastro": 500,
+                    "unidade": 200
+                },
+                {
+                    "cadastro": 204,
+                    "unidade": 200
+                },
+                {
+                    "cadastro": 500,
+                    "unidade": 200
+                },
+                {
+                    "cadastro": 500,
+                    "unidade": 200
+                }
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Atribuição igual concorrente: exatamente uma",
+            "passed": true,
+            "detail": {
+                "http": [
+                    422,
+                    422
+                ],
+                "assignments": 1
+            }
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Atribuição igual concorrente: sem 500",
+            "passed": true,
+            "detail": [
+                422,
+                422
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Suspensão em voo: depois da primeira negação, nenhuma escrita aceita",
+            "passed": true,
+            "detail": [
+                204,
+                204,
+                403,
+                403,
+                403,
+                403,
+                403,
+                403
+            ]
+        },
+        {
+            "journey": "Concorrencia",
+            "check": "Suspensão em voo: cada 204 corresponde a um cliente e um evento confirmados, sem sobras das negadas",
+            "passed": true,
+            "detail": {
+                "writes": [
+                    204,
+                    204,
+                    403,
+                    403,
+                    403,
+                    403,
+                    403,
+                    403
+                ],
+                "confirmed": 2,
+                "events": 2
+            }
+        }
+    ]
+}

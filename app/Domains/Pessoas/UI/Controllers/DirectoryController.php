@@ -3,6 +3,7 @@
 namespace App\Domains\Pessoas\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Etiquetas\Application\Actions\DeleteTagAction;
 use App\Domains\Etiquetas\Application\Actions\SaveTagAction;
 use App\Domains\Etiquetas\Application\Data\SaveTagData;
@@ -27,13 +28,18 @@ final class DirectoryController
 
     public function tags(Request $request, PeopleDirectoryQuery $directory): JsonResponse|View
     {
+        // Leitura do catálogo da conta: qualquer atribuição com a permissão (8.2.1), não só a de conta.
+        $listable = ! app(EffectivePermissions::class)->nodesFor($request->user(), 'account.tags.list')->isEmpty();
+
+        abort_unless($listable, 403);
+
         return ApiPage::respond($this->tagsPayload($request, $directory));
     }
 
     /** @return array<string,mixed> */
     private function tagsPayload(Request $request, PeopleDirectoryQuery $directory): array
     {
-        $canList = $request->user()->can('account.tags.list');
+        $canList = ! app(EffectivePermissions::class)->nodesFor($request->user(), 'account.tags.list')->isEmpty();
         $filters = TagFiltersData::fromInput($request->query());
 
         $tags = $directory->tagList(
@@ -52,8 +58,12 @@ final class DirectoryController
         ];
     }
 
-    public function previewTag(PeopleDirectoryQuery $directory, int $tagId): JsonResponse
+    public function previewTag(Request $request, PeopleDirectoryQuery $directory, int $tagId): JsonResponse
     {
+        $viewable = ! app(EffectivePermissions::class)->nodesFor($request->user(), 'account.tags.view')->isEmpty();
+
+        abort_unless($viewable, 403);
+
         return response()->json($directory->tags(app(AccountContext::class)->requireId())->findOrFail($tagId));
     }
 
@@ -82,7 +92,9 @@ final class DirectoryController
         $save->execute($accountId, $tag, $data);
         ApiPage::toast('Etiqueta salva.');
 
-        if ($request->user()->can('account.tags.list')) {
+        $listable = ! app(EffectivePermissions::class)->nodesFor($request->user(), 'account.tags.list')->isEmpty();
+
+        if ($listable) {
             return redirect(app(AccountContext::class)->path('etiquetas'));
         }
 

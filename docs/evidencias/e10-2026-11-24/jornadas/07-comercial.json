@@ -1,0 +1,390 @@
+{
+    "e10": "07-comercial",
+    "checks": 42,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J7 comercial",
+            "check": "Etiqueta Cliente VIP",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Etiqueta Atacado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Etiqueta Homologado",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Nova etiqueta de Pessoas recusada",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Etiquetas de sistema presentes na conta",
+            "passed": true,
+            "detail": [
+                "customer",
+                "supplier",
+                "user"
+            ]
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Etiqueta de sistema não é excluída",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Cliente criado na A1 pelo operador de vendas",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Pessoa central criada uma vez na Conta A",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Busca por CPF por POST",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Busca retorna a Pessoa central e informa o outro papel",
+            "passed": true,
+            "detail": {
+                "id": 17,
+                "name": "Marta Queiroz",
+                "person_type": "individual",
+                "relation": null,
+                "other_role": "Cliente",
+                "central": {
+                    "id": 17,
+                    "name": "Marta Queiroz",
+                    "person_type": "individual",
+                    "document": "51283406780",
+                    "trade_name": null,
+                    "state_registration": null,
+                    "municipal_registration": null,
+                    "email": "marta@cliente.e10.test",
+                    "phone": "7734511000",
+                    "whatsapp": null,
+                    "additional_phones": [],
+                    "additional_emails": [],
+                    "website": null,
+                    "contact_name": null,
+                    "address": {
+                        "postal_code": "46430000",
+                        "street": "Rua Central",
+                        "number": "10",
+                        "city": "Guanambi",
+                        "state": "BA"
+                    }
+                },
+                "can_edit_identification": true,
+                "can_edit_contacts": true
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Fornecedor criado com a mesma Pessoa",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Uma Pessoa, um Cliente e um Fornecedor na A1",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Busca na A2 identifica a Pessoa sem relação na A2",
+            "passed": true,
+            "detail": {
+                "id": 17,
+                "name": "Marta Queiroz",
+                "person_type": "individual",
+                "relation": null,
+                "central": {
+                    "id": 17,
+                    "name": "Marta Queiroz",
+                    "person_type": "individual",
+                    "document": "51283406780",
+                    "trade_name": null,
+                    "state_registration": null,
+                    "municipal_registration": null,
+                    "email": "marta@cliente.e10.test",
+                    "phone": "7734511000",
+                    "whatsapp": null,
+                    "additional_phones": [],
+                    "additional_emails": [],
+                    "website": null,
+                    "contact_name": null,
+                    "address": {
+                        "postal_code": "46430000",
+                        "street": "Rua Central",
+                        "number": "10",
+                        "city": "Guanambi",
+                        "state": "BA"
+                    }
+                },
+                "can_edit_identification": true,
+                "can_edit_contacts": true
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Cliente na A2 com a mesma Pessoa",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Relações independentes por empresa, uma Pessoa",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Etiqueta da A1 não aparece na relação da A2",
+            "passed": true,
+            "detail": [
+                [
+                    "Cliente",
+                    "Cliente VIP"
+                ],
+                [
+                    "Atacado",
+                    "Cliente"
+                ]
+            ]
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Carlos altera o telefone central pela A1",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Telefone central alterado vale para a A2",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Carlos não altera o nome (relação na A2 não coberta)",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Carlos não altera o documento por envio forjado",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Identificação preservada após as recusas",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Ana (conta inteira) altera a identificação",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Alteração central auditada como evento da conta, sem empresa",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Relações não foram tocadas pela alteração central",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Inativar cliente na A1",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Somente a relação da A1 ficou inativa",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Inativação auditada com company_id da relação",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Reativar cliente na A1",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Listagem pesquisável da A1 mostra só a relação da A1 ao operador da A1",
+            "passed": true,
+            "detail": [
+                "gartan-comercio"
+            ]
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Consulta não cadastra cliente",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Consulta não altera cliente",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Consulta não busca documento para cadastro",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Carlos não lê relação da A2",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Busca na B não revela a Pessoa da A",
+            "passed": true,
+            "detail": {
+                "person": null
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "B não vincula a Pessoa da A pelo ID",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "B cria a própria Pessoa com o mesmo CPF",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Pessoas distintas por conta com o mesmo CPF",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "A não lê o cliente da B pelo ID",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Fornecedor PJ na A2 pelo cargo restrito",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Cargo restrito à A2 não cria fornecedor na A1",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Sem tela de Pessoas",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J7 comercial",
+            "check": "Sem cadastro avulso de Pessoas",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        }
+    ]
+}

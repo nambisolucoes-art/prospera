@@ -44,6 +44,11 @@ final class OctaneMetrics
                         && str_contains($query['query'], 'join "clients" as "c"'),
                 )),
                 'duplicates' => count($queries) - count(array_unique($signatures)),
+                // Só o texto SQL das assinaturas repetidas, sem parâmetros, para explicar a duplicação.
+                'duplicate_sql' => array_values(array_unique(array_map(
+                    fn (string $signature): string => mb_substr((string) unserialize($signature)[0], 0, 160),
+                    array_diff_assoc($signatures, array_unique($signatures)),
+                ))),
                 'db_ms' => array_sum(array_column($queries, 'time')),
                 'php_ms' => (hrtime(true) - $start) / 1e6,
                 'start_bytes' => $memory,

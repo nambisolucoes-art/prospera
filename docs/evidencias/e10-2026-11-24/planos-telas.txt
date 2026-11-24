@@ -1,0 +1,1026 @@
+2026-11-24 11:40:58.921 UTC [194] LOG:  duration: 0.022 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.016..0.016 rows=0.00 loops=1)
+	  Buffers: shared hit=1
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.014..0.014 rows=0.00 loops=1)
+	        Index Cond: ((id)::text = 'SxU526sW77bYAz47DpFttRA4ma2kmKXfXrg4krdG'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=1
+2026-11-24 11:40:58.951 UTC [194] LOG:  duration: 0.029 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.027..0.028 rows=0.00 loops=1)
+	  Buffers: shared hit=1
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.025..0.025 rows=0.00 loops=1)
+	        Index Cond: ((id)::text = 'SxU526sW77bYAz47DpFttRA4ma2kmKXfXrg4krdG'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=1
+2026-11-24 11:40:58.952 UTC [194] LOG:  duration: 0.217 ms  plan:
+	Insert on sessions  (cost=0.00..0.01 rows=0 width=0) (actual time=0.216..0.216 rows=0.00 loops=1)
+	  Buffers: shared hit=8 dirtied=1
+	  ->  Result  (cost=0.00..0.01 rows=1 width=700) (actual time=0.003..0.003 rows=1.00 loops=1)
+2026-11-24 11:40:58.960 UTC [194] LOG:  duration: 0.040 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.033..0.034 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.031..0.032 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'SxU526sW77bYAz47DpFttRA4ma2kmKXfXrg4krdG'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.005 UTC [194] LOG:  duration: 0.055 ms  plan:
+	Query Text: select * from "users" where "email" = $1 and "access_enabled" = $2 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.043..0.044 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_email_unique on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.041..0.041 rows=1.00 loops=1)
+	        Index Cond: ((email)::text = 'ana@gartan.e10.test'::text)
+	        Filter: access_enabled
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.012 UTC [194] LOG:  duration: 0.049 ms  plan:
+	Query Text: select * from "users" where "email" = $1 and "access_enabled" = $2 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.036..0.037 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_email_unique on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.034..0.034 rows=1.00 loops=1)
+	        Index Cond: ((email)::text = 'ana@gartan.e10.test'::text)
+	        Filter: access_enabled
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.015 UTC [194] LOG:  duration: 0.050 ms  plan:
+	Delete on sessions  (cost=0.14..8.16 rows=0 width=0) (actual time=0.048..0.049 rows=0.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=6) (actual time=0.021..0.022 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'SxU526sW77bYAz47DpFttRA4ma2kmKXfXrg4krdG'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.022 UTC [194] LOG:  duration: 0.038 ms  plan:
+	Query Text: select "account_id" from "account_memberships" where "account_memberships"."user_id" = $1 and "account_memberships"."user_id" is not null limit 2
+	Limit  (cost=0.00..0.88 rows=2 width=8) (actual time=0.032..0.034 rows=2.00 loops=1)
+	  Buffers: shared hit=1
+	  ->  Seq Scan on account_memberships  (cost=0.00..1.32 rows=3 width=8) (actual time=0.030..0.031 rows=2.00 loops=1)
+	        Filter: (user_id = '3'::bigint)
+	        Rows Removed by Filter: 12
+	        Buffers: shared hit=1
+2026-11-24 11:40:59.023 UTC [194] LOG:  duration: 0.025 ms  plan:
+	Query Text: select * from "users" where "id" = $1 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.016..0.017 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_pkey on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.015..0.015 rows=1.00 loops=1)
+	        Index Cond: (id = '3'::bigint)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.027 UTC [194] LOG:  duration: 0.124 ms  plan:
+	Query Text: select * from "audit_records" where "operation_id" = $1 and "entity_type" = $2 and "entity_id" = $3 and "account_id" is null and "event" in ($4)
+	Index Scan using audit_records_account_id_entity_type_event_index on audit_records  (cost=0.29..8.32 rows=1 width=774) (actual time=0.123..0.123 rows=0.00 loops=1)
+	  Index Cond: ((account_id IS NULL) AND ((entity_type)::text = 'user'::text) AND ((event)::text = 'login'::text))
+	  Filter: ((operation_id = '921b6039-49fc-4726-aad8-cd47e12617af'::uuid) AND (entity_id = '3'::bigint))
+	  Rows Removed by Filter: 35
+	  Index Searches: 1
+	  Buffers: shared hit=17
+2026-11-24 11:40:59.029 UTC [194] LOG:  duration: 0.641 ms  plan:
+	Query Text: insert into "audit_records" ("operation_id", "actor_id", "actor_name", "account_id", "context", "represented_user_id", "entity_type", "entity_id", "entity_name", "event", "changes", "created_at") values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning "id"
+	Insert on audit_records  (cost=0.00..0.01 rows=1 width=2702) (actual time=0.355..0.356 rows=1.00 loops=1)
+	  Buffers: shared hit=40 dirtied=1
+	  ->  Result  (cost=0.00..0.01 rows=1 width=2702) (actual time=0.081..0.081 rows=1.00 loops=1)
+	        Buffers: shared hit=15
+2026-11-24 11:40:59.042 UTC [194] LOG:  duration: 0.031 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.028..0.029 rows=0.00 loops=1)
+	  Buffers: shared hit=1
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.027..0.027 rows=0.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=1
+2026-11-24 11:40:59.042 UTC [194] LOG:  duration: 0.087 ms  plan:
+	Insert on sessions  (cost=0.00..0.01 rows=0 width=0) (actual time=0.085..0.086 rows=0.00 loops=1)
+	  Buffers: shared hit=4
+	  ->  Result  (cost=0.00..0.01 rows=1 width=700) (actual time=0.002..0.003 rows=1.00 loops=1)
+2026-11-24 11:40:59.049 UTC [194] LOG:  duration: 0.061 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.050..0.051 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.048..0.049 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.051 UTC [194] LOG:  duration: 0.041 ms  plan:
+	Query Text: select * from "users" where "id" = $1 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.027..0.028 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_pkey on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.025..0.026 rows=1.00 loops=1)
+	        Index Cond: (id = '3'::bigint)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.056 UTC [194] LOG:  duration: 0.214 ms  plan:
+	Query Text: select "c"."code", "c"."name", "c"."details", "c"."active", "m"."status", (select json_agg(distinct r.name order by r.name) from "role_assignments" as "a" inner join "roles" as "r" on "r"."id" = "a"."role_id" where "a"."membership_id" = "m"."id") as "role_names" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" where "m"."user_id" = $1 order by case when m.status = 'active' and c.active then 0 else 1 end, m.last_used_at is null, "m"."last_used_at" desc, "c"."name" asc, "c"."id" asc
+	Sort  (cost=96.98..96.99 rows=3 width=707) (actual time=0.204..0.207 rows=3.00 loops=1)
+	  Sort Key: (CASE WHEN (((m.status)::text = 'active'::text) AND c.active) THEN 0 ELSE 1 END), ((m.last_used_at IS NULL)), m.last_used_at DESC, c.name, c.id
+	  Sort Method: quicksort  Memory: 25kB
+	  Buffers: shared hit=25
+	  ->  Hash Join  (cost=1.36..96.96 rows=3 width=707) (actual time=0.123..0.155 rows=3.00 loops=1)
+	        Hash Cond: (c.id = m.account_id)
+	        Buffers: shared hit=8
+	        ->  Seq Scan on clients c  (cost=0.00..10.50 rows=50 width=655) (actual time=0.015..0.017 rows=6.00 loops=1)
+	              Buffers: shared hit=1
+	        ->  Hash  (cost=1.32..1.32 rows=3 width=31) (actual time=0.021..0.021 rows=3.00 loops=1)
+	              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	              Buffers: shared hit=1
+	              ->  Seq Scan on account_memberships m  (cost=0.00..1.32 rows=3 width=31) (actual time=0.009..0.011 rows=3.00 loops=1)
+	                    Filter: (user_id = '3'::bigint)
+	                    Rows Removed by Filter: 23
+	                    Buffers: shared hit=1
+	        SubPlan 1
+	          ->  Aggregate  (cost=28.31..28.32 rows=1 width=32) (actual time=0.034..0.034 rows=1.00 loops=3)
+	                Buffers: shared hit=6
+	                ->  Sort  (cost=28.30..28.30 rows=1 width=218) (actual time=0.029..0.030 rows=1.00 loops=3)
+	                      Sort Key: r.name
+	                      Sort Method: quicksort  Memory: 25kB
+	                      Buffers: shared hit=6
+	                      ->  Hash Join  (cost=17.04..28.29 rows=1 width=218) (actual time=0.020..0.023 rows=1.00 loops=3)
+	                            Hash Cond: (r.id = a.role_id)
+	                            Buffers: shared hit=6
+	                            ->  Seq Scan on roles r  (cost=0.00..10.90 rows=90 width=226) (actual time=0.004..0.006 rows=18.00 loops=3)
+	                                  Buffers: shared hit=3
+	                            ->  Hash  (cost=17.00..17.00 rows=3 width=8) (actual time=0.007..0.007 rows=1.00 loops=3)
+	                                  Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                                  Buffers: shared hit=3
+	                                  ->  Seq Scan on role_assignments a  (cost=0.00..17.00 rows=3 width=8) (actual time=0.004..0.005 rows=1.00 loops=3)
+	                                        Filter: (membership_id = m.id)
+	                                        Rows Removed by Filter: 27
+	                                        Buffers: shared hit=3
+2026-11-24 11:40:59.061 UTC [194] LOG:  duration: 0.033 ms  plan:
+	Query Text: select exists(select * from "account_memberships" where "user_id" = $1) as "exists"
+	Result  (cost=0.44..0.45 rows=1 width=1) (actual time=0.029..0.030 rows=1.00 loops=1)
+	  Buffers: shared hit=1
+	  InitPlan 1
+	    ->  Seq Scan on account_memberships  (cost=0.00..1.32 rows=3 width=0) (actual time=0.025..0.025 rows=1.00 loops=1)
+	          Filter: (user_id = '3'::bigint)
+	          Rows Removed by Filter: 12
+	          Buffers: shared hit=1
+2026-11-24 11:40:59.063 UTC [194] LOG:  duration: 0.433 ms  plan:
+	Query Text: select distinct "p"."slug" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" inner join "role_assignments" as "a" on "a"."membership_id" = "m"."id" inner join "permission_role" as "pr" on "pr"."role_id" = "a"."role_id" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "m"."user_id" = $1 and "m"."status" = $2 and "c"."active" = $3 and "p"."is_system" = $4 and "p"."scope" = $5 order by "p"."slug" asc
+	Unique  (cost=40.30..40.32 rows=4 width=24) (actual time=0.414..0.426 rows=17.00 loops=1)
+	  Buffers: shared hit=311
+	  ->  Sort  (cost=40.30..40.31 rows=4 width=24) (actual time=0.413..0.418 rows=36.00 loops=1)
+	        Sort Key: p.slug
+	        Sort Method: quicksort  Memory: 25kB
+	        Buffers: shared hit=311
+	        ->  Nested Loop  (cost=12.66..40.26 rows=4 width=24) (actual time=0.171..0.349 rows=36.00 loops=1)
+	              Buffers: shared hit=311
+	              ->  Nested Loop  (cost=12.52..36.85 rows=18 width=8) (actual time=0.074..0.150 rows=148.00 loops=1)
+	                    Buffers: shared hit=15
+	                    ->  Hash Join  (cost=12.24..29.36 rows=6 width=8) (actual time=0.043..0.051 rows=3.00 loops=1)
+	                          Hash Cond: (m.account_id = c.id)
+	                          Buffers: shared hit=3
+	                          ->  Hash Join  (cost=1.43..18.53 rows=8 width=16) (actual time=0.032..0.040 rows=3.00 loops=1)
+	                                Hash Cond: (a.membership_id = m.id)
+	                                Buffers: shared hit=2
+	                                ->  Seq Scan on role_assignments a  (cost=0.00..15.60 rows=560 width=16) (actual time=0.012..0.014 rows=28.00 loops=1)
+	                                      Buffers: shared hit=1
+	                                ->  Hash  (cost=1.39..1.39 rows=3 width=16) (actual time=0.016..0.016 rows=3.00 loops=1)
+	                                      Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                                      Buffers: shared hit=1
+	                                      ->  Seq Scan on account_memberships m  (cost=0.00..1.39 rows=3 width=16) (actual time=0.011..0.013 rows=3.00 loops=1)
+	                                            Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	                                            Rows Removed by Filter: 23
+	                                            Buffers: shared hit=1
+	                          ->  Hash  (cost=10.50..10.50 rows=25 width=8) (actual time=0.007..0.007 rows=6.00 loops=1)
+	                                Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                                Buffers: shared hit=1
+	                                ->  Seq Scan on clients c  (cost=0.00..10.50 rows=25 width=8) (actual time=0.005..0.006 rows=6.00 loops=1)
+	                                      Filter: active
+	                                      Buffers: shared hit=1
+	                    ->  Index Only Scan using permission_role_pkey on permission_role pr  (cost=0.28..0.92 rows=33 width=16) (actual time=0.015..0.027 rows=49.33 loops=3)
+	                          Index Cond: (role_id = a.role_id)
+	                          Heap Fetches: 148
+	                          Index Searches: 3
+	                          Buffers: shared hit=12
+	              ->  Index Scan using permissions_pkey on permissions p  (cost=0.14..0.19 rows=1 width=32) (actual time=0.001..0.001 rows=0.24 loops=148)
+	                    Index Cond: (id = pr.permission_id)
+	                    Filter: (is_system AND ((scope)::text = 'self'::text))
+	                    Rows Removed by Filter: 1
+	                    Index Searches: 148
+	                    Buffers: shared hit=296
+2026-11-24 11:40:59.067 UTC [194] LOG:  duration: 0.093 ms  plan:
+	Query Text: select count(*) as "aggregate" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" where "m"."user_id" = $1 and "m"."status" = $2 and "c"."active" = $3
+	Aggregate  (cost=12.00..12.01 rows=1 width=8) (actual time=0.086..0.089 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Hash Join  (cost=1.43..11.99 rows=2 width=0) (actual time=0.074..0.081 rows=3.00 loops=1)
+	        Hash Cond: (c.id = m.account_id)
+	        Buffers: shared hit=2
+	        ->  Seq Scan on clients c  (cost=0.00..10.50 rows=25 width=8) (actual time=0.019..0.021 rows=6.00 loops=1)
+	              Filter: active
+	              Buffers: shared hit=1
+	        ->  Hash  (cost=1.39..1.39 rows=3 width=8) (actual time=0.021..0.022 rows=3.00 loops=1)
+	              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	              Buffers: shared hit=1
+	              ->  Seq Scan on account_memberships m  (cost=0.00..1.39 rows=3 width=8) (actual time=0.013..0.017 rows=3.00 loops=1)
+	                    Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	                    Rows Removed by Filter: 23
+	                    Buffers: shared hit=1
+2026-11-24 11:40:59.069 UTC [194] LOG:  duration: 0.130 ms  plan:
+	Update on sessions  (cost=0.14..8.16 rows=0 width=0) (actual time=0.128..0.129 rows=0.00 loops=1)
+	  Buffers: shared hit=11 dirtied=1
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=190) (actual time=0.026..0.028 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.076 UTC [194] LOG:  duration: 0.055 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.047..0.047 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.045..0.046 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=3
+2026-11-24 11:40:59.077 UTC [194] LOG:  duration: 0.036 ms  plan:
+	Query Text: select * from "users" where "id" = $1 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.026..0.026 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_pkey on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.025..0.025 rows=1.00 loops=1)
+	        Index Cond: (id = '3'::bigint)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.082 UTC [194] LOG:  duration: 0.073 ms  plan:
+	Query Text: select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = $1 and "m"."user_id" = $2 limit 1
+	Limit  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.060..0.061 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Nested Loop  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.058..0.059 rows=1.00 loops=1)
+	        Join Filter: (clients.id = m.account_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=3
+	        ->  Index Scan using clients_code_unique on clients  (cost=0.14..8.16 rows=1 width=1489) (actual time=0.033..0.033 rows=1.00 loops=1)
+	              Index Cond: ((code)::text = 'grupo-gartan'::text)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Seq Scan on account_memberships m  (cost=0.00..1.32 rows=3 width=23) (actual time=0.019..0.020 rows=3.00 loops=1)
+	              Filter: (user_id = '3'::bigint)
+	              Rows Removed by Filter: 21
+	              Buffers: shared hit=1
+2026-11-24 11:40:59.088 UTC [194] LOG:  duration: 0.129 ms  plan:
+	Query Text: select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join "clients" as "c" on "c"."id" = "m"."account_id" inner join "roles" as "r" on "r"."id" = "role_assignments"."role_id" where "m"."user_id" = $1 and "m"."account_id" = $2 and "m"."status" = $3 and "c"."active" = $4 and ("r"."system_key" is null or "role_assignments"."scope" = $5) and ("r"."availability" = $6 or exists (select 1 from "role_availability" as "availability" where "availability"."role_id" = "role_assignments"."role_id" and "availability"."company_id" = "role_assignments"."company_id" and ("availability"."establishment_id" is null or "availability"."establishment_id" = "role_assignments"."establishment_id")))
+	Nested Loop  (cost=12.30..37.49 rows=1 width=68) (actual time=0.048..0.125 rows=1.00 loops=1)
+	  Buffers: shared hit=49
+	  ->  Nested Loop  (cost=12.16..29.33 rows=1 width=76) (actual time=0.043..0.119 rows=1.00 loops=1)
+	        Buffers: shared hit=47
+	        ->  Hash Join  (cost=12.03..29.09 rows=1 width=76) (actual time=0.032..0.070 rows=28.00 loops=1)
+	              Hash Cond: (role_assignments.role_id = r.id)
+	              Join Filter: (((r.system_key IS NULL) OR ((role_assignments.scope)::text = 'tenant'::text)) AND (((r.availability)::text = 'tenant'::text) OR EXISTS(SubPlan 1)))
+	              Buffers: shared hit=4
+	              ->  Seq Scan on role_assignments  (cost=0.00..15.60 rows=560 width=76) (actual time=0.009..0.011 rows=28.00 loops=1)
+	                    Buffers: shared hit=1
+	              ->  Hash  (cost=10.90..10.90 rows=90 width=562) (actual time=0.016..0.017 rows=18.00 loops=1)
+	                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                    Buffers: shared hit=1
+	                    ->  Seq Scan on roles r  (cost=0.00..10.90 rows=90 width=562) (actual time=0.007..0.009 rows=18.00 loops=1)
+	                          Buffers: shared hit=1
+	              SubPlan 1
+	                ->  Bitmap Heap Scan on role_availability availability  (cost=8.29..12.31 rows=1 width=0) (actual time=0.021..0.021 rows=1.00 loops=1)
+	                      Recheck Cond: (((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id) AND (establishment_id IS NULL)) OR ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id)))
+	                      Filter: (company_id = role_assignments.company_id)
+	                      Heap Blocks: exact=1
+	                      Buffers: shared hit=2
+	                      ->  BitmapOr  (cost=8.29..8.29 rows=1 width=0) (actual time=0.014..0.014 rows=0.00 loops=1)
+	                            Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_company  (cost=0.00..4.15 rows=1 width=0) (actual time=0.013..0.013 rows=1.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id))
+	                                  Index Searches: 1
+	                                  Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_unit  (cost=0.00..4.13 rows=1 width=0) (actual time=0.000..0.000 rows=0.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id))
+	                                  Index Searches: 0
+	        ->  Index Scan using account_memberships_id_account_id_unique on account_memberships m  (cost=0.14..0.18 rows=1 width=16) (actual time=0.001..0.001 rows=0.04 loops=28)
+	              Index Cond: ((id = role_assignments.membership_id) AND (account_id = '1'::bigint))
+	              Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	              Rows Removed by Filter: 0
+	              Index Searches: 28
+	              Buffers: shared hit=43
+	  ->  Index Scan using clients_pkey on clients c  (cost=0.14..8.16 rows=1 width=8) (actual time=0.004..0.005 rows=1.00 loops=1)
+	        Index Cond: (id = '1'::bigint)
+	        Filter: active
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.090 UTC [194] LOG:  duration: 0.107 ms  plan:
+	Query Text: select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in ($1) and "p"."is_system" = $2 and "p"."scope" in ($3, $4) and ("p"."account_id" is null or "p"."account_id" = $5)
+	Hash Join  (cost=8.92..13.99 rows=60 width=32) (actual time=0.069..0.089 rows=70.00 loops=1)
+	  Hash Cond: (pr.permission_id = p.id)
+	  Buffers: shared hit=5
+	  ->  Bitmap Heap Scan on permission_role pr  (cost=4.82..9.69 rows=70 width=16) (actual time=0.015..0.020 rows=70.00 loops=1)
+	        Recheck Cond: (role_id = '1'::bigint)
+	        Heap Blocks: exact=1
+	        Buffers: shared hit=3
+	        ->  Bitmap Index Scan on permission_role_pkey  (cost=0.00..4.80 rows=70 width=0) (actual time=0.008..0.009 rows=70.00 loops=1)
+	              Index Cond: (role_id = '1'::bigint)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	  ->  Hash  (cost=3.23..3.23 rows=70 width=32) (actual time=0.045..0.045 rows=70.00 loops=1)
+	        Buckets: 1024  Batches: 1  Memory Usage: 13kB
+	        Buffers: shared hit=2
+	        ->  Seq Scan on permissions p  (cost=0.00..3.23 rows=70 width=32) (actual time=0.013..0.031 rows=70.00 loops=1)
+	              Filter: (is_system AND ((scope)::text = ANY ('{account,self}'::text[])) AND ((account_id IS NULL) OR (account_id = '1'::bigint)))
+	              Rows Removed by Filter: 12
+	              Buffers: shared hit=2
+2026-11-24 11:40:59.092 UTC [194] LOG:  duration: 0.099 ms  plan:
+	Query Text: select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_name" as "company_trade_name", "c"."active" as "company_active" from "establishments" as "e" inner join "companies" as "c" on "c"."id" = "e"."company_id" and "c"."account_id" = "e"."account_id" where "e"."account_id" = $1 and "e"."active" = $2 and "c"."active" = $3 order by coalesce(c.trade_name, c.name), "c"."id" asc, "e"."is_primary" desc, "e"."name" asc, "e"."id" asc
+	Sort  (cost=16.34..16.34 rows=1 width=2284) (actual time=0.088..0.089 rows=5.00 loops=1)
+	  Sort Key: (COALESCE(c.trade_name, c.name)), c.id, e.is_primary DESC, e.name, e.id
+	  Sort Method: quicksort  Memory: 25kB
+	  Buffers: shared hit=12
+	  ->  Nested Loop  (cost=0.28..16.32 rows=1 width=2284) (actual time=0.041..0.063 rows=5.00 loops=1)
+	        Join Filter: (c.id = e.company_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=12
+	        ->  Index Scan using establishments_account_id_code_unique on establishments e  (cost=0.14..8.15 rows=1 width=687) (actual time=0.032..0.040 rows=5.00 loops=1)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=1147) (actual time=0.002..0.003 rows=1.40 loops=5)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 5
+	              Buffers: shared hit=10
+2026-11-24 11:40:59.094 UTC [194] LOG:  duration: 0.020 ms  plan:
+	Query Text: select "workspace_establishments" from "account_memberships" where "account_id" = $1 and "user_id" = $2 and "status" = $3 limit 1
+	Limit  (cost=0.00..1.46 rows=1 width=57) (actual time=0.017..0.018 rows=1.00 loops=1)
+	  Buffers: shared hit=1
+	  ->  Seq Scan on account_memberships  (cost=0.00..1.46 rows=1 width=57) (actual time=0.015..0.015 rows=1.00 loops=1)
+	        Filter: ((account_id = '1'::bigint) AND (user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	        Rows Removed by Filter: 23
+	        Buffers: shared hit=1
+2026-11-24 11:40:59.096 UTC [194] LOG:  duration: 0.080 ms  plan:
+	Update on sessions  (cost=0.14..8.16 rows=0 width=0) (actual time=0.079..0.080 rows=0.00 loops=1)
+	  Buffers: shared hit=11 dirtied=1
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=190) (actual time=0.024..0.025 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.103 UTC [194] LOG:  duration: 0.066 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.054..0.056 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.053..0.053 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=3
+2026-11-24 11:40:59.105 UTC [194] LOG:  duration: 0.041 ms  plan:
+	Query Text: select * from "users" where "id" = $1 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.027..0.028 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_pkey on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.025..0.026 rows=1.00 loops=1)
+	        Index Cond: (id = '3'::bigint)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.109 UTC [194] LOG:  duration: 0.084 ms  plan:
+	Query Text: select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = $1 and "m"."user_id" = $2 limit 1
+	Limit  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.070..0.072 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Nested Loop  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.068..0.069 rows=1.00 loops=1)
+	        Join Filter: (clients.id = m.account_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=3
+	        ->  Index Scan using clients_code_unique on clients  (cost=0.14..8.16 rows=1 width=1489) (actual time=0.044..0.045 rows=1.00 loops=1)
+	              Index Cond: ((code)::text = 'grupo-gartan'::text)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Seq Scan on account_memberships m  (cost=0.00..1.32 rows=3 width=23) (actual time=0.018..0.020 rows=3.00 loops=1)
+	              Filter: (user_id = '3'::bigint)
+	              Rows Removed by Filter: 21
+	              Buffers: shared hit=1
+2026-11-24 11:40:59.112 UTC [194] LOG:  duration: 0.130 ms  plan:
+	Query Text: select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join "clients" as "c" on "c"."id" = "m"."account_id" inner join "roles" as "r" on "r"."id" = "role_assignments"."role_id" where "m"."user_id" = $1 and "m"."account_id" = $2 and "m"."status" = $3 and "c"."active" = $4 and ("r"."system_key" is null or "role_assignments"."scope" = $5) and ("r"."availability" = $6 or exists (select 1 from "role_availability" as "availability" where "availability"."role_id" = "role_assignments"."role_id" and "availability"."company_id" = "role_assignments"."company_id" and ("availability"."establishment_id" is null or "availability"."establishment_id" = "role_assignments"."establishment_id")))
+	Nested Loop  (cost=12.30..37.49 rows=1 width=68) (actual time=0.060..0.126 rows=1.00 loops=1)
+	  Buffers: shared hit=49
+	  ->  Nested Loop  (cost=12.16..29.33 rows=1 width=76) (actual time=0.055..0.119 rows=1.00 loops=1)
+	        Buffers: shared hit=47
+	        ->  Hash Join  (cost=12.03..29.09 rows=1 width=76) (actual time=0.037..0.064 rows=28.00 loops=1)
+	              Hash Cond: (role_assignments.role_id = r.id)
+	              Join Filter: (((r.system_key IS NULL) OR ((role_assignments.scope)::text = 'tenant'::text)) AND (((r.availability)::text = 'tenant'::text) OR EXISTS(SubPlan 1)))
+	              Buffers: shared hit=4
+	              ->  Seq Scan on role_assignments  (cost=0.00..15.60 rows=560 width=76) (actual time=0.012..0.014 rows=28.00 loops=1)
+	                    Buffers: shared hit=1
+	              ->  Hash  (cost=10.90..10.90 rows=90 width=562) (actual time=0.017..0.017 rows=18.00 loops=1)
+	                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                    Buffers: shared hit=1
+	                    ->  Seq Scan on roles r  (cost=0.00..10.90 rows=90 width=562) (actual time=0.007..0.010 rows=18.00 loops=1)
+	                          Buffers: shared hit=1
+	              SubPlan 1
+	                ->  Bitmap Heap Scan on role_availability availability  (cost=8.29..12.31 rows=1 width=0) (actual time=0.010..0.010 rows=1.00 loops=1)
+	                      Recheck Cond: (((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id) AND (establishment_id IS NULL)) OR ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id)))
+	                      Filter: (company_id = role_assignments.company_id)
+	                      Heap Blocks: exact=1
+	                      Buffers: shared hit=2
+	                      ->  BitmapOr  (cost=8.29..8.29 rows=1 width=0) (actual time=0.004..0.005 rows=0.00 loops=1)
+	                            Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_company  (cost=0.00..4.15 rows=1 width=0) (actual time=0.003..0.003 rows=1.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id))
+	                                  Index Searches: 1
+	                                  Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_unit  (cost=0.00..4.13 rows=1 width=0) (actual time=0.000..0.000 rows=0.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id))
+	                                  Index Searches: 0
+	        ->  Index Scan using account_memberships_id_account_id_unique on account_memberships m  (cost=0.14..0.18 rows=1 width=16) (actual time=0.002..0.002 rows=0.04 loops=28)
+	              Index Cond: ((id = role_assignments.membership_id) AND (account_id = '1'::bigint))
+	              Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	              Rows Removed by Filter: 0
+	              Index Searches: 28
+	              Buffers: shared hit=43
+	  ->  Index Scan using clients_pkey on clients c  (cost=0.14..8.16 rows=1 width=8) (actual time=0.004..0.005 rows=1.00 loops=1)
+	        Index Cond: (id = '1'::bigint)
+	        Filter: active
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.114 UTC [194] LOG:  duration: 0.116 ms  plan:
+	Query Text: select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in ($1) and "p"."is_system" = $2 and "p"."scope" in ($3, $4) and ("p"."account_id" is null or "p"."account_id" = $5)
+	Hash Join  (cost=8.92..13.99 rows=60 width=32) (actual time=0.078..0.098 rows=70.00 loops=1)
+	  Hash Cond: (pr.permission_id = p.id)
+	  Buffers: shared hit=5
+	  ->  Bitmap Heap Scan on permission_role pr  (cost=4.82..9.69 rows=70 width=16) (actual time=0.015..0.020 rows=70.00 loops=1)
+	        Recheck Cond: (role_id = '1'::bigint)
+	        Heap Blocks: exact=1
+	        Buffers: shared hit=3
+	        ->  Bitmap Index Scan on permission_role_pkey  (cost=0.00..4.80 rows=70 width=0) (actual time=0.009..0.009 rows=70.00 loops=1)
+	              Index Cond: (role_id = '1'::bigint)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	  ->  Hash  (cost=3.23..3.23 rows=70 width=32) (actual time=0.046..0.046 rows=70.00 loops=1)
+	        Buckets: 1024  Batches: 1  Memory Usage: 13kB
+	        Buffers: shared hit=2
+	        ->  Seq Scan on permissions p  (cost=0.00..3.23 rows=70 width=32) (actual time=0.013..0.031 rows=70.00 loops=1)
+	              Filter: (is_system AND ((scope)::text = ANY ('{account,self}'::text[])) AND ((account_id IS NULL) OR (account_id = '1'::bigint)))
+	              Rows Removed by Filter: 12
+	              Buffers: shared hit=2
+2026-11-24 11:40:59.116 UTC [194] LOG:  duration: 0.089 ms  plan:
+	Query Text: select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_name" as "company_trade_name", "c"."active" as "company_active" from "establishments" as "e" inner join "companies" as "c" on "c"."id" = "e"."company_id" and "c"."account_id" = "e"."account_id" where "e"."account_id" = $1 and "e"."active" = $2 and "c"."active" = $3 order by coalesce(c.trade_name, c.name), "c"."id" asc, "e"."is_primary" desc, "e"."name" asc, "e"."id" asc
+	Sort  (cost=16.34..16.34 rows=1 width=2284) (actual time=0.077..0.078 rows=5.00 loops=1)
+	  Sort Key: (COALESCE(c.trade_name, c.name)), c.id, e.is_primary DESC, e.name, e.id
+	  Sort Method: quicksort  Memory: 25kB
+	  Buffers: shared hit=12
+	  ->  Nested Loop  (cost=0.28..16.32 rows=1 width=2284) (actual time=0.034..0.056 rows=5.00 loops=1)
+	        Join Filter: (c.id = e.company_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=12
+	        ->  Index Scan using establishments_account_id_code_unique on establishments e  (cost=0.14..8.15 rows=1 width=687) (actual time=0.025..0.033 rows=5.00 loops=1)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=1147) (actual time=0.002..0.003 rows=1.40 loops=5)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 5
+	              Buffers: shared hit=10
+2026-11-24 11:40:59.121 UTC [194] LOG:  duration: 0.093 ms  plan:
+	Query Text: select count(*) as "aggregate" from "customers" as "r" inner join "people" as "p" on "p"."id" = "r"."person_id" and "p"."account_id" = "r"."account_id" inner join "companies" as "c" on "c"."id" = "r"."company_id" and "c"."account_id" = "r"."account_id" where "r"."account_id" = $1 and "r"."company_id" in ($2, $3) and ("p"."name"::text ilike $4 or "p"."email"::text ilike $5)
+	Aggregate  (cost=17.99..18.00 rows=1 width=8) (actual time=0.090..0.091 rows=1.00 loops=1)
+	  Buffers: shared hit=7
+	  ->  Nested Loop  (cost=0.29..17.98 rows=1 width=0) (actual time=0.074..0.086 rows=2.00 loops=1)
+	        Join Filter: (r.company_id = c.id)
+	        Rows Removed by Join Filter: 1
+	        Buffers: shared hit=7
+	        ->  Nested Loop  (cost=0.15..9.81 rows=1 width=16) (actual time=0.069..0.073 rows=2.00 loops=1)
+	              Buffers: shared hit=3
+	              ->  Seq Scan on people p  (cost=0.00..1.63 rows=1 width=16) (actual time=0.054..0.057 rows=1.00 loops=1)
+	                    Filter: ((account_id = '1'::bigint) AND (((name)::text ~~* '%Marta%'::text) OR ((email)::text ~~* '%Marta%'::text)))
+	                    Rows Removed by Filter: 37
+	                    Buffers: shared hit=1
+	              ->  Index Scan using customers_company_id_person_id_unique on customers r  (cost=0.15..8.17 rows=1 width=24) (actual time=0.013..0.014 rows=2.00 loops=1)
+	                    Index Cond: ((company_id = ANY ('{1,6}'::bigint[])) AND (person_id = p.id))
+	                    Filter: (account_id = '1'::bigint)
+	                    Index Searches: 1
+	                    Buffers: shared hit=2
+	        ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=16) (actual time=0.003..0.005 rows=1.50 loops=2)
+	              Index Cond: (account_id = '1'::bigint)
+	              Index Searches: 2
+	              Buffers: shared hit=4
+2026-11-24 11:40:59.123 UTC [194] LOG:  duration: 0.099 ms  plan:
+	Query Text: select "r"."id", "r"."person_id", "r"."company_id", "r"."active", "p"."name", "p"."person_type", "p"."document", "p"."email", "c"."code" as "company_code", coalesce(c.trade_name, c.name) as company_name, "c"."active" as "company_active" from "customers" as "r" inner join "people" as "p" on "p"."id" = "r"."person_id" and "p"."account_id" = "r"."account_id" inner join "companies" as "c" on "c"."id" = "r"."company_id" and "c"."account_id" = "r"."account_id" where "r"."account_id" = $1 and "r"."company_id" in ($2, $3) and ("p"."name"::text ilike $4 or "p"."email"::text ilike $5) order by "p"."name" asc, "r"."id" asc limit 25 offset 0
+	Limit  (cost=18.00..18.00 rows=1 width=702) (actual time=0.092..0.093 rows=2.00 loops=1)
+	  Buffers: shared hit=7
+	  ->  Sort  (cost=18.00..18.00 rows=1 width=702) (actual time=0.091..0.091 rows=2.00 loops=1)
+	        Sort Key: p.name, r.id
+	        Sort Method: quicksort  Memory: 25kB
+	        Buffers: shared hit=7
+	        ->  Nested Loop  (cost=0.29..17.98 rows=1 width=702) (actual time=0.069..0.080 rows=2.00 loops=1)
+	              Join Filter: (r.company_id = c.id)
+	              Rows Removed by Join Filter: 1
+	              Buffers: shared hit=7
+	              ->  Nested Loop  (cost=0.15..9.81 rows=1 width=95) (actual time=0.063..0.067 rows=2.00 loops=1)
+	                    Buffers: shared hit=3
+	                    ->  Seq Scan on people p  (cost=0.00..1.63 rows=1 width=78) (actual time=0.049..0.052 rows=1.00 loops=1)
+	                          Filter: ((account_id = '1'::bigint) AND (((name)::text ~~* '%Marta%'::text) OR ((email)::text ~~* '%Marta%'::text)))
+	                          Rows Removed by Filter: 37
+	                          Buffers: shared hit=1
+	                    ->  Index Scan using customers_company_id_person_id_unique on customers r  (cost=0.15..8.17 rows=1 width=33) (actual time=0.011..0.013 rows=2.00 loops=1)
+	                          Index Cond: ((company_id = ANY ('{1,6}'::bigint[])) AND (person_id = p.id))
+	                          Filter: (account_id = '1'::bigint)
+	                          Index Searches: 1
+	                          Buffers: shared hit=2
+	              ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=1147) (actual time=0.002..0.005 rows=1.50 loops=2)
+	                    Index Cond: (account_id = '1'::bigint)
+	                    Index Searches: 2
+	                    Buffers: shared hit=4
+2026-11-24 11:40:59.127 UTC [194] LOG:  duration: 0.058 ms  plan:
+	Query Text: select "selected"."relation_id", "tags"."id", "tags"."name", "tags"."color" from "customers_tags" as "selected" inner join "tags" on "tags"."id" = "selected"."tag_id" where "selected"."account_id" = $1 and "selected"."relation_id" in (1, 2) order by "tags"."name" asc
+	Sort  (cost=23.22..23.23 rows=1 width=266) (actual time=0.052..0.054 rows=2.00 loops=1)
+	  Sort Key: tags.name
+	  Sort Method: quicksort  Memory: 25kB
+	  Buffers: shared hit=6
+	  ->  Nested Loop  (cost=4.40..23.21 rows=1 width=266) (actual time=0.038..0.041 rows=2.00 loops=1)
+	        Buffers: shared hit=6
+	        ->  Bitmap Heap Scan on customers_tags selected  (cost=4.26..14.85 rows=1 width=16) (actual time=0.019..0.020 rows=2.00 loops=1)
+	              Recheck Cond: (relation_id = ANY ('{1,2}'::bigint[]))
+	              Filter: (account_id = '1'::bigint)
+	              Heap Blocks: exact=1
+	              Buffers: shared hit=2
+	              ->  Bitmap Index Scan on customers_tags_pkey  (cost=0.00..4.26 rows=14 width=0) (actual time=0.008..0.008 rows=2.00 loops=1)
+	                    Index Cond: (relation_id = ANY ('{1,2}'::bigint[]))
+	                    Index Searches: 1
+	                    Buffers: shared hit=1
+	        ->  Index Scan using tags_id_account_id_unique on tags  (cost=0.14..8.16 rows=1 width=258) (actual time=0.009..0.009 rows=1.00 loops=2)
+	              Index Cond: (id = selected.tag_id)
+	              Index Searches: 2
+	              Buffers: shared hit=4
+2026-11-24 11:40:59.130 UTC [194] LOG:  duration: 0.090 ms  plan:
+	Query Text: select count(*) as "aggregate" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" where "m"."user_id" = $1 and "m"."status" = $2 and "c"."active" = $3
+	Aggregate  (cost=12.00..12.01 rows=1 width=8) (actual time=0.083..0.085 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Hash Join  (cost=1.43..11.99 rows=2 width=0) (actual time=0.072..0.079 rows=3.00 loops=1)
+	        Hash Cond: (c.id = m.account_id)
+	        Buffers: shared hit=2
+	        ->  Seq Scan on clients c  (cost=0.00..10.50 rows=25 width=8) (actual time=0.045..0.048 rows=6.00 loops=1)
+	              Filter: active
+	              Buffers: shared hit=1
+	        ->  Hash  (cost=1.39..1.39 rows=3 width=8) (actual time=0.021..0.022 rows=3.00 loops=1)
+	              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	              Buffers: shared hit=1
+	              ->  Seq Scan on account_memberships m  (cost=0.00..1.39 rows=3 width=8) (actual time=0.013..0.016 rows=3.00 loops=1)
+	                    Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	                    Rows Removed by Filter: 23
+	                    Buffers: shared hit=1
+2026-11-24 11:40:59.133 UTC [194] LOG:  duration: 0.109 ms  plan:
+	Update on sessions  (cost=0.14..8.16 rows=0 width=0) (actual time=0.107..0.107 rows=0.00 loops=1)
+	  Buffers: shared hit=11
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=190) (actual time=0.033..0.035 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.137 UTC [194] LOG:  duration: 0.078 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.066..0.068 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.064..0.065 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=3
+2026-11-24 11:40:59.139 UTC [194] LOG:  duration: 0.031 ms  plan:
+	Query Text: select * from "users" where "id" = $1 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.022..0.022 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_pkey on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.020..0.021 rows=1.00 loops=1)
+	        Index Cond: (id = '3'::bigint)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.141 UTC [194] LOG:  duration: 0.049 ms  plan:
+	Query Text: select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = $1 and "m"."user_id" = $2 limit 1
+	Limit  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.040..0.041 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Nested Loop  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.039..0.039 rows=1.00 loops=1)
+	        Join Filter: (clients.id = m.account_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=3
+	        ->  Index Scan using clients_code_unique on clients  (cost=0.14..8.16 rows=1 width=1489) (actual time=0.024..0.024 rows=1.00 loops=1)
+	              Index Cond: ((code)::text = 'grupo-gartan'::text)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Seq Scan on account_memberships m  (cost=0.00..1.32 rows=3 width=23) (actual time=0.012..0.013 rows=3.00 loops=1)
+	              Filter: (user_id = '3'::bigint)
+	              Rows Removed by Filter: 21
+	              Buffers: shared hit=1
+2026-11-24 11:40:59.143 UTC [194] LOG:  duration: 0.124 ms  plan:
+	Query Text: select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join "clients" as "c" on "c"."id" = "m"."account_id" inner join "roles" as "r" on "r"."id" = "role_assignments"."role_id" where "m"."user_id" = $1 and "m"."account_id" = $2 and "m"."status" = $3 and "c"."active" = $4 and ("r"."system_key" is null or "role_assignments"."scope" = $5) and ("r"."availability" = $6 or exists (select 1 from "role_availability" as "availability" where "availability"."role_id" = "role_assignments"."role_id" and "availability"."company_id" = "role_assignments"."company_id" and ("availability"."establishment_id" is null or "availability"."establishment_id" = "role_assignments"."establishment_id")))
+	Nested Loop  (cost=12.30..37.49 rows=1 width=68) (actual time=0.055..0.120 rows=1.00 loops=1)
+	  Buffers: shared hit=49
+	  ->  Nested Loop  (cost=12.16..29.33 rows=1 width=76) (actual time=0.050..0.113 rows=1.00 loops=1)
+	        Buffers: shared hit=47
+	        ->  Hash Join  (cost=12.03..29.09 rows=1 width=76) (actual time=0.033..0.059 rows=28.00 loops=1)
+	              Hash Cond: (role_assignments.role_id = r.id)
+	              Join Filter: (((r.system_key IS NULL) OR ((role_assignments.scope)::text = 'tenant'::text)) AND (((r.availability)::text = 'tenant'::text) OR EXISTS(SubPlan 1)))
+	              Buffers: shared hit=4
+	              ->  Seq Scan on role_assignments  (cost=0.00..15.60 rows=560 width=76) (actual time=0.010..0.012 rows=28.00 loops=1)
+	                    Buffers: shared hit=1
+	              ->  Hash  (cost=10.90..10.90 rows=90 width=562) (actual time=0.016..0.016 rows=18.00 loops=1)
+	                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                    Buffers: shared hit=1
+	                    ->  Seq Scan on roles r  (cost=0.00..10.90 rows=90 width=562) (actual time=0.007..0.009 rows=18.00 loops=1)
+	                          Buffers: shared hit=1
+	              SubPlan 1
+	                ->  Bitmap Heap Scan on role_availability availability  (cost=8.29..12.31 rows=1 width=0) (actual time=0.010..0.010 rows=1.00 loops=1)
+	                      Recheck Cond: (((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id) AND (establishment_id IS NULL)) OR ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id)))
+	                      Filter: (company_id = role_assignments.company_id)
+	                      Heap Blocks: exact=1
+	                      Buffers: shared hit=2
+	                      ->  BitmapOr  (cost=8.29..8.29 rows=1 width=0) (actual time=0.005..0.005 rows=0.00 loops=1)
+	                            Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_company  (cost=0.00..4.15 rows=1 width=0) (actual time=0.003..0.003 rows=1.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id))
+	                                  Index Searches: 1
+	                                  Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_unit  (cost=0.00..4.13 rows=1 width=0) (actual time=0.000..0.000 rows=0.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id))
+	                                  Index Searches: 0
+	        ->  Index Scan using account_memberships_id_account_id_unique on account_memberships m  (cost=0.14..0.18 rows=1 width=16) (actual time=0.002..0.002 rows=0.04 loops=28)
+	              Index Cond: ((id = role_assignments.membership_id) AND (account_id = '1'::bigint))
+	              Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	              Rows Removed by Filter: 0
+	              Index Searches: 28
+	              Buffers: shared hit=43
+	  ->  Index Scan using clients_pkey on clients c  (cost=0.14..8.16 rows=1 width=8) (actual time=0.004..0.006 rows=1.00 loops=1)
+	        Index Cond: (id = '1'::bigint)
+	        Filter: active
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.144 UTC [194] LOG:  duration: 0.119 ms  plan:
+	Query Text: select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in ($1) and "p"."is_system" = $2 and "p"."scope" in ($3, $4) and ("p"."account_id" is null or "p"."account_id" = $5)
+	Hash Join  (cost=8.92..13.99 rows=60 width=32) (actual time=0.071..0.101 rows=70.00 loops=1)
+	  Hash Cond: (pr.permission_id = p.id)
+	  Buffers: shared hit=5
+	  ->  Bitmap Heap Scan on permission_role pr  (cost=4.82..9.69 rows=70 width=16) (actual time=0.022..0.027 rows=70.00 loops=1)
+	        Recheck Cond: (role_id = '1'::bigint)
+	        Heap Blocks: exact=1
+	        Buffers: shared hit=3
+	        ->  Bitmap Index Scan on permission_role_pkey  (cost=0.00..4.80 rows=70 width=0) (actual time=0.015..0.015 rows=70.00 loops=1)
+	              Index Cond: (role_id = '1'::bigint)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	  ->  Hash  (cost=3.23..3.23 rows=70 width=32) (actual time=0.045..0.045 rows=70.00 loops=1)
+	        Buckets: 1024  Batches: 1  Memory Usage: 13kB
+	        Buffers: shared hit=2
+	        ->  Seq Scan on permissions p  (cost=0.00..3.23 rows=70 width=32) (actual time=0.012..0.031 rows=70.00 loops=1)
+	              Filter: (is_system AND ((scope)::text = ANY ('{account,self}'::text[])) AND ((account_id IS NULL) OR (account_id = '1'::bigint)))
+	              Rows Removed by Filter: 12
+	              Buffers: shared hit=2
+2026-11-24 11:40:59.146 UTC [194] LOG:  duration: 0.087 ms  plan:
+	Query Text: select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_name" as "company_trade_name", "c"."active" as "company_active" from "establishments" as "e" inner join "companies" as "c" on "c"."id" = "e"."company_id" and "c"."account_id" = "e"."account_id" where "e"."account_id" = $1 and "e"."active" = $2 and "c"."active" = $3 order by coalesce(c.trade_name, c.name), "c"."id" asc, "e"."is_primary" desc, "e"."name" asc, "e"."id" asc
+	Sort  (cost=16.34..16.34 rows=1 width=2284) (actual time=0.076..0.077 rows=5.00 loops=1)
+	  Sort Key: (COALESCE(c.trade_name, c.name)), c.id, e.is_primary DESC, e.name, e.id
+	  Sort Method: quicksort  Memory: 25kB
+	  Buffers: shared hit=12
+	  ->  Nested Loop  (cost=0.28..16.32 rows=1 width=2284) (actual time=0.033..0.056 rows=5.00 loops=1)
+	        Join Filter: (c.id = e.company_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=12
+	        ->  Index Scan using establishments_account_id_code_unique on establishments e  (cost=0.14..8.15 rows=1 width=687) (actual time=0.025..0.033 rows=5.00 loops=1)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=1147) (actual time=0.002..0.003 rows=1.40 loops=5)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 5
+	              Buffers: shared hit=10
+2026-11-24 11:40:59.148 UTC [194] LOG:  duration: 0.083 ms  plan:
+	Query Text: select count(*) as "aggregate" from "suppliers" as "r" inner join "people" as "p" on "p"."id" = "r"."person_id" and "p"."account_id" = "r"."account_id" inner join "companies" as "c" on "c"."id" = "r"."company_id" and "c"."account_id" = "r"."account_id" where "r"."account_id" = $1 and "r"."company_id" in ($2, $3)
+	Aggregate  (cost=18.08..18.09 rows=1 width=8) (actual time=0.080..0.080 rows=1.00 loops=1)
+	  Buffers: shared hit=8
+	  ->  Nested Loop  (cost=0.29..18.08 rows=1 width=0) (actual time=0.058..0.076 rows=2.00 loops=1)
+	        Join Filter: (r.person_id = p.id)
+	        Rows Removed by Join Filter: 33
+	        Buffers: shared hit=8
+	        ->  Nested Loop  (cost=0.29..16.34 rows=1 width=16) (actual time=0.029..0.041 rows=2.00 loops=1)
+	              Buffers: shared hit=6
+	              ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=16) (actual time=0.007..0.014 rows=2.00 loops=1)
+	                    Index Cond: (account_id = '1'::bigint)
+	                    Index Searches: 1
+	                    Buffers: shared hit=2
+	              ->  Index Scan using suppliers_company_id_person_id_unique on suppliers r  (cost=0.15..8.17 rows=1 width=24) (actual time=0.011..0.011 rows=1.00 loops=2)
+	                    Index Cond: ((company_id = c.id) AND (company_id = ANY ('{1,6}'::bigint[])))
+	                    Filter: (account_id = '1'::bigint)
+	                    Index Searches: 2
+	                    Buffers: shared hit=4
+	        ->  Seq Scan on people p  (cost=0.00..1.45 rows=23 width=16) (actual time=0.012..0.015 rows=17.50 loops=2)
+	              Filter: (account_id = '1'::bigint)
+	              Rows Removed by Filter: 10
+	              Buffers: shared hit=2
+2026-11-24 11:40:59.150 UTC [194] LOG:  duration: 0.096 ms  plan:
+	Query Text: select "r"."id", "r"."person_id", "r"."company_id", "r"."active", "p"."name", "p"."person_type", "p"."document", "p"."email", "c"."code" as "company_code", coalesce(c.trade_name, c.name) as company_name, "c"."active" as "company_active" from "suppliers" as "r" inner join "people" as "p" on "p"."id" = "r"."person_id" and "p"."account_id" = "r"."account_id" inner join "companies" as "c" on "c"."id" = "r"."company_id" and "c"."account_id" = "r"."account_id" where "r"."account_id" = $1 and "r"."company_id" in ($2, $3) order by "p"."name" asc, "r"."id" asc limit 25 offset 0
+	Limit  (cost=18.09..18.10 rows=1 width=702) (actual time=0.085..0.087 rows=2.00 loops=1)
+	  Buffers: shared hit=8
+	  ->  Sort  (cost=18.09..18.10 rows=1 width=702) (actual time=0.084..0.085 rows=2.00 loops=1)
+	        Sort Key: p.name, r.id
+	        Sort Method: quicksort  Memory: 25kB
+	        Buffers: shared hit=8
+	        ->  Nested Loop  (cost=0.29..18.08 rows=1 width=702) (actual time=0.052..0.070 rows=2.00 loops=1)
+	              Join Filter: (r.person_id = p.id)
+	              Rows Removed by Join Filter: 33
+	              Buffers: shared hit=8
+	              ->  Nested Loop  (cost=0.29..16.34 rows=1 width=1164) (actual time=0.025..0.036 rows=2.00 loops=1)
+	                    Buffers: shared hit=6
+	                    ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=1147) (actual time=0.015..0.022 rows=2.00 loops=1)
+	                          Index Cond: (account_id = '1'::bigint)
+	                          Index Searches: 1
+	                          Buffers: shared hit=2
+	                    ->  Index Scan using suppliers_company_id_person_id_unique on suppliers r  (cost=0.15..8.17 rows=1 width=33) (actual time=0.005..0.005 rows=1.00 loops=2)
+	                          Index Cond: ((company_id = c.id) AND (company_id = ANY ('{1,6}'::bigint[])))
+	                          Filter: (account_id = '1'::bigint)
+	                          Index Searches: 2
+	                          Buffers: shared hit=4
+	              ->  Seq Scan on people p  (cost=0.00..1.45 rows=23 width=78) (actual time=0.010..0.014 rows=17.50 loops=2)
+	                    Filter: (account_id = '1'::bigint)
+	                    Rows Removed by Filter: 10
+	                    Buffers: shared hit=2
+2026-11-24 11:40:59.151 UTC [194] LOG:  duration: 0.040 ms  plan:
+	Query Text: select "selected"."relation_id", "tags"."id", "tags"."name", "tags"."color" from "suppliers_tags" as "selected" inner join "tags" on "tags"."id" = "selected"."tag_id" where "selected"."account_id" = $1 and "selected"."relation_id" in (1, 2) order by "tags"."name" asc
+	Sort  (cost=23.22..23.23 rows=1 width=266) (actual time=0.034..0.036 rows=1.00 loops=1)
+	  Sort Key: tags.name
+	  Sort Method: quicksort  Memory: 25kB
+	  Buffers: shared hit=4
+	  ->  Nested Loop  (cost=4.40..23.21 rows=1 width=266) (actual time=0.026..0.027 rows=1.00 loops=1)
+	        Buffers: shared hit=4
+	        ->  Bitmap Heap Scan on suppliers_tags selected  (cost=4.26..14.85 rows=1 width=16) (actual time=0.018..0.019 rows=1.00 loops=1)
+	              Recheck Cond: (relation_id = ANY ('{1,2}'::bigint[]))
+	              Filter: (account_id = '1'::bigint)
+	              Heap Blocks: exact=1
+	              Buffers: shared hit=2
+	              ->  Bitmap Index Scan on suppliers_tags_pkey  (cost=0.00..4.26 rows=14 width=0) (actual time=0.007..0.007 rows=1.00 loops=1)
+	                    Index Cond: (relation_id = ANY ('{1,2}'::bigint[]))
+	                    Index Searches: 1
+	                    Buffers: shared hit=1
+	        ->  Index Scan using tags_id_account_id_unique on tags  (cost=0.14..8.16 rows=1 width=258) (actual time=0.006..0.006 rows=1.00 loops=1)
+	              Index Cond: (id = selected.tag_id)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+2026-11-24 11:40:59.154 UTC [194] LOG:  duration: 0.041 ms  plan:
+	Query Text: select count(*) as "aggregate" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" where "m"."user_id" = $1 and "m"."status" = $2 and "c"."active" = $3
+	Aggregate  (cost=12.00..12.01 rows=1 width=8) (actual time=0.038..0.039 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Hash Join  (cost=1.43..11.99 rows=2 width=0) (actual time=0.031..0.034 rows=3.00 loops=1)
+	        Hash Cond: (c.id = m.account_id)
+	        Buffers: shared hit=2
+	        ->  Seq Scan on clients c  (cost=0.00..10.50 rows=25 width=8) (actual time=0.015..0.016 rows=6.00 loops=1)
+	              Filter: active
+	              Buffers: shared hit=1
+	        ->  Hash  (cost=1.39..1.39 rows=3 width=8) (actual time=0.011..0.012 rows=3.00 loops=1)
+	              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	              Buffers: shared hit=1
+	              ->  Seq Scan on account_memberships m  (cost=0.00..1.39 rows=3 width=8) (actual time=0.007..0.008 rows=3.00 loops=1)
+	                    Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	                    Rows Removed by Filter: 23
+	                    Buffers: shared hit=1
+2026-11-24 11:40:59.156 UTC [194] LOG:  duration: 0.081 ms  plan:
+	Update on sessions  (cost=0.14..8.16 rows=0 width=0) (actual time=0.080..0.081 rows=0.00 loops=1)
+	  Buffers: shared hit=11
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=190) (actual time=0.027..0.029 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.162 UTC [194] LOG:  duration: 0.054 ms  plan:
+	Limit  (cost=0.14..8.16 rows=1 width=661) (actual time=0.045..0.046 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=661) (actual time=0.043..0.044 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=3
+2026-11-24 11:40:59.163 UTC [194] LOG:  duration: 0.032 ms  plan:
+	Query Text: select * from "users" where "id" = $1 limit 1
+	Limit  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.023..0.023 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Index Scan using users_pkey on users  (cost=0.14..8.16 rows=1 width=1889) (actual time=0.021..0.021 rows=1.00 loops=1)
+	        Index Cond: (id = '3'::bigint)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.167 UTC [194] LOG:  duration: 0.057 ms  plan:
+	Query Text: select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = $1 and "m"."user_id" = $2 limit 1
+	Limit  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.048..0.049 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Nested Loop  (cost=0.14..9.52 rows=1 width=1504) (actual time=0.046..0.047 rows=1.00 loops=1)
+	        Join Filter: (clients.id = m.account_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=3
+	        ->  Index Scan using clients_code_unique on clients  (cost=0.14..8.16 rows=1 width=1489) (actual time=0.030..0.030 rows=1.00 loops=1)
+	              Index Cond: ((code)::text = 'grupo-gartan'::text)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Seq Scan on account_memberships m  (cost=0.00..1.32 rows=3 width=23) (actual time=0.013..0.014 rows=3.00 loops=1)
+	              Filter: (user_id = '3'::bigint)
+	              Rows Removed by Filter: 21
+	              Buffers: shared hit=1
+2026-11-24 11:40:59.170 UTC [194] LOG:  duration: 0.136 ms  plan:
+	Query Text: select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join "clients" as "c" on "c"."id" = "m"."account_id" inner join "roles" as "r" on "r"."id" = "role_assignments"."role_id" where "m"."user_id" = $1 and "m"."account_id" = $2 and "m"."status" = $3 and "c"."active" = $4 and ("r"."system_key" is null or "role_assignments"."scope" = $5) and ("r"."availability" = $6 or exists (select 1 from "role_availability" as "availability" where "availability"."role_id" = "role_assignments"."role_id" and "availability"."company_id" = "role_assignments"."company_id" and ("availability"."establishment_id" is null or "availability"."establishment_id" = "role_assignments"."establishment_id")))
+	Nested Loop  (cost=12.30..37.49 rows=1 width=68) (actual time=0.067..0.132 rows=1.00 loops=1)
+	  Buffers: shared hit=49
+	  ->  Nested Loop  (cost=12.16..29.33 rows=1 width=76) (actual time=0.061..0.124 rows=1.00 loops=1)
+	        Buffers: shared hit=47
+	        ->  Hash Join  (cost=12.03..29.09 rows=1 width=76) (actual time=0.041..0.068 rows=28.00 loops=1)
+	              Hash Cond: (role_assignments.role_id = r.id)
+	              Join Filter: (((r.system_key IS NULL) OR ((role_assignments.scope)::text = 'tenant'::text)) AND (((r.availability)::text = 'tenant'::text) OR EXISTS(SubPlan 1)))
+	              Buffers: shared hit=4
+	              ->  Seq Scan on role_assignments  (cost=0.00..15.60 rows=560 width=76) (actual time=0.016..0.018 rows=28.00 loops=1)
+	                    Buffers: shared hit=1
+	              ->  Hash  (cost=10.90..10.90 rows=90 width=562) (actual time=0.019..0.019 rows=18.00 loops=1)
+	                    Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                    Buffers: shared hit=1
+	                    ->  Seq Scan on roles r  (cost=0.00..10.90 rows=90 width=562) (actual time=0.008..0.011 rows=18.00 loops=1)
+	                          Buffers: shared hit=1
+	              SubPlan 1
+	                ->  Bitmap Heap Scan on role_availability availability  (cost=8.29..12.31 rows=1 width=0) (actual time=0.009..0.010 rows=1.00 loops=1)
+	                      Recheck Cond: (((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id) AND (establishment_id IS NULL)) OR ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id)))
+	                      Filter: (company_id = role_assignments.company_id)
+	                      Heap Blocks: exact=1
+	                      Buffers: shared hit=2
+	                      ->  BitmapOr  (cost=8.29..8.29 rows=1 width=0) (actual time=0.005..0.005 rows=0.00 loops=1)
+	                            Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_company  (cost=0.00..4.15 rows=1 width=0) (actual time=0.003..0.003 rows=1.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (company_id = role_assignments.company_id))
+	                                  Index Searches: 1
+	                                  Buffers: shared hit=1
+	                            ->  Bitmap Index Scan on role_availability_unit  (cost=0.00..4.13 rows=1 width=0) (actual time=0.000..0.000 rows=0.00 loops=1)
+	                                  Index Cond: ((role_id = role_assignments.role_id) AND (establishment_id = role_assignments.establishment_id))
+	                                  Index Searches: 0
+	        ->  Index Scan using account_memberships_id_account_id_unique on account_memberships m  (cost=0.14..0.18 rows=1 width=16) (actual time=0.002..0.002 rows=0.04 loops=28)
+	              Index Cond: ((id = role_assignments.membership_id) AND (account_id = '1'::bigint))
+	              Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	              Rows Removed by Filter: 0
+	              Index Searches: 28
+	              Buffers: shared hit=43
+	  ->  Index Scan using clients_pkey on clients c  (cost=0.14..8.16 rows=1 width=8) (actual time=0.005..0.006 rows=1.00 loops=1)
+	        Index Cond: (id = '1'::bigint)
+	        Filter: active
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.171 UTC [194] LOG:  duration: 0.103 ms  plan:
+	Query Text: select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in ($1) and "p"."is_system" = $2 and "p"."scope" in ($3, $4) and ("p"."account_id" is null or "p"."account_id" = $5)
+	Hash Join  (cost=8.92..13.99 rows=60 width=32) (actual time=0.065..0.085 rows=70.00 loops=1)
+	  Hash Cond: (pr.permission_id = p.id)
+	  Buffers: shared hit=5
+	  ->  Bitmap Heap Scan on permission_role pr  (cost=4.82..9.69 rows=70 width=16) (actual time=0.016..0.021 rows=70.00 loops=1)
+	        Recheck Cond: (role_id = '1'::bigint)
+	        Heap Blocks: exact=1
+	        Buffers: shared hit=3
+	        ->  Bitmap Index Scan on permission_role_pkey  (cost=0.00..4.80 rows=70 width=0) (actual time=0.010..0.010 rows=70.00 loops=1)
+	              Index Cond: (role_id = '1'::bigint)
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	  ->  Hash  (cost=3.23..3.23 rows=70 width=32) (actual time=0.045..0.045 rows=70.00 loops=1)
+	        Buckets: 1024  Batches: 1  Memory Usage: 13kB
+	        Buffers: shared hit=2
+	        ->  Seq Scan on permissions p  (cost=0.00..3.23 rows=70 width=32) (actual time=0.013..0.031 rows=70.00 loops=1)
+	              Filter: (is_system AND ((scope)::text = ANY ('{account,self}'::text[])) AND ((account_id IS NULL) OR (account_id = '1'::bigint)))
+	              Rows Removed by Filter: 12
+	              Buffers: shared hit=2
+2026-11-24 11:40:59.176 UTC [194] LOG:  duration: 0.119 ms  plan:
+	Query Text: select count(*) as "aggregate" from "account_memberships" inner join "people" on "people"."id" = "account_memberships"."person_id" inner join "users" on "users"."id" = "account_memberships"."user_id" where "account_memberships"."account_id" = $1
+	Aggregate  (cost=13.93..13.94 rows=1 width=8) (actual time=0.112..0.115 rows=1.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Hash Join  (cost=3.12..13.90 rows=13 width=0) (actual time=0.093..0.107 rows=13.00 loops=1)
+	        Hash Cond: (users.id = account_memberships.user_id)
+	        Buffers: shared hit=3
+	        ->  Seq Scan on users  (cost=0.00..10.40 rows=40 width=8) (actual time=0.016..0.021 rows=22.00 loops=1)
+	              Buffers: shared hit=1
+	        ->  Hash  (cost=2.95..2.95 rows=13 width=8) (actual time=0.072..0.074 rows=13.00 loops=1)
+	              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	              Buffers: shared hit=2
+	              ->  Hash Join  (cost=1.49..2.95 rows=13 width=8) (actual time=0.049..0.069 rows=13.00 loops=1)
+	                    Hash Cond: (people.id = account_memberships.person_id)
+	                    Buffers: shared hit=2
+	                    ->  Seq Scan on people  (cost=0.00..1.36 rows=36 width=8) (actual time=0.018..0.026 rows=38.00 loops=1)
+	                          Buffers: shared hit=1
+	                    ->  Hash  (cost=1.32..1.32 rows=13 width=16) (actual time=0.025..0.026 rows=13.00 loops=1)
+	                          Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	                          Buffers: shared hit=1
+	                          ->  Seq Scan on account_memberships  (cost=0.00..1.32 rows=13 width=16) (actual time=0.011..0.018 rows=13.00 loops=1)
+	                                Filter: (account_id = '1'::bigint)
+	                                Rows Removed by Filter: 13
+	                                Buffers: shared hit=1
+2026-11-24 11:40:59.178 UTC [194] LOG:  duration: 0.195 ms  plan:
+	Query Text: select "account_memberships".* from "account_memberships" inner join "people" on "people"."id" = "account_memberships"."person_id" inner join "users" on "users"."id" = "account_memberships"."user_id" where "account_memberships"."account_id" = $1 order by "people"."name" asc, "account_memberships"."id" asc limit 25 offset 0
+	Limit  (cost=14.14..14.17 rows=13 width=137) (actual time=0.158..0.165 rows=13.00 loops=1)
+	  Buffers: shared hit=3
+	  ->  Sort  (cost=14.14..14.17 rows=13 width=137) (actual time=0.157..0.161 rows=13.00 loops=1)
+	        Sort Key: people.name, account_memberships.id
+	        Sort Method: quicksort  Memory: 26kB
+	        Buffers: shared hit=3
+	        ->  Hash Join  (cost=3.12..13.90 rows=13 width=137) (actual time=0.108..0.124 rows=13.00 loops=1)
+	              Hash Cond: (users.id = account_memberships.user_id)
+	              Buffers: shared hit=3
+	              ->  Seq Scan on users  (cost=0.00..10.40 rows=40 width=8) (actual time=0.013..0.017 rows=22.00 loops=1)
+	                    Buffers: shared hit=1
+	              ->  Hash  (cost=2.95..2.95 rows=13 width=137) (actual time=0.081..0.083 rows=13.00 loops=1)
+	                    Buckets: 1024  Batches: 1  Memory Usage: 10kB
+	                    Buffers: shared hit=2
+	                    ->  Hash Join  (cost=1.49..2.95 rows=13 width=137) (actual time=0.044..0.067 rows=13.00 loops=1)
+	                          Hash Cond: (people.id = account_memberships.person_id)
+	                          Buffers: shared hit=2
+	                          ->  Seq Scan on people  (cost=0.00..1.36 rows=36 width=25) (actual time=0.014..0.022 rows=38.00 loops=1)
+	                                Buffers: shared hit=1
+	                          ->  Hash  (cost=1.32..1.32 rows=13 width=120) (actual time=0.025..0.025 rows=13.00 loops=1)
+	                                Buckets: 1024  Batches: 1  Memory Usage: 10kB
+	                                Buffers: shared hit=1
+	                                ->  Seq Scan on account_memberships  (cost=0.00..1.32 rows=13 width=120) (actual time=0.013..0.018 rows=13.00 loops=1)
+	                                      Filter: (account_id = '1'::bigint)
+	                                      Rows Removed by Filter: 13
+	                                      Buffers: shared hit=1
+2026-11-24 11:40:59.182 UTC [194] LOG:  duration: 0.050 ms  plan:
+	Query Text: select "id", "email", "profile_photo", "access_enabled", "password_setup_pending" from "users" where "users"."id" in (3, 7, 8, 9, 10, 11, 12, 13, 14, 19, 20, 21, 22)
+	Seq Scan on users  (cost=0.03..10.63 rows=13 width=542) (actual time=0.024..0.033 rows=13.00 loops=1)
+	  Filter: (id = ANY ('{3,7,8,9,10,11,12,13,14,19,20,21,22}'::bigint[]))
+	  Rows Removed by Filter: 9
+	  Buffers: shared hit=1
+2026-11-24 11:40:59.185 UTC [194] LOG:  duration: 0.059 ms  plan:
+	Query Text: select "id", "name" from "people" where "people"."id" in (1, 5, 6, 7, 8, 9, 10, 11, 12, 23, 25, 36, 38)
+	Seq Scan on people  (cost=0.03..1.57 rows=13 width=25) (actual time=0.037..0.047 rows=13.00 loops=1)
+	  Filter: (id = ANY ('{1,5,6,7,8,9,10,11,12,23,25,36,38}'::bigint[]))
+	  Rows Removed by Filter: 25
+	  Buffers: shared hit=1
+2026-11-24 11:40:59.187 UTC [194] LOG:  duration: 0.036 ms  plan:
+	Query Text: select * from "role_assignments" where "role_assignments"."membership_id" in (1, 5, 6, 7, 8, 9, 10, 11, 12, 19, 21, 23, 25)
+	Seq Scan on role_assignments  (cost=0.03..18.43 rows=36 width=116) (actual time=0.014..0.018 rows=15.00 loops=1)
+	  Filter: (membership_id = ANY ('{1,5,6,7,8,9,10,11,12,19,21,23,25}'::bigint[]))
+	  Rows Removed by Filter: 13
+	  Buffers: shared hit=1
+2026-11-24 11:40:59.189 UTC [194] LOG:  duration: 0.039 ms  plan:
+	Query Text: select "id", "name" from "roles" where "roles"."id" in (1, 9, 10, 11, 12, 13)
+	Seq Scan on roles  (cost=0.00..11.57 rows=6 width=226) (actual time=0.023..0.030 rows=6.00 loops=1)
+	  Filter: (id = ANY ('{1,9,10,11,12,13}'::bigint[]))
+	  Rows Removed by Filter: 12
+	  Buffers: shared hit=1
+2026-11-24 11:40:59.191 UTC [194] LOG:  duration: 0.049 ms  plan:
+	Query Text: select "id", "name" from "companies" where "companies"."id" in (1, 6)
+	Bitmap Heap Scan on companies  (cost=4.16..9.50 rows=2 width=524) (actual time=0.043..0.045 rows=2.00 loops=1)
+	  Recheck Cond: (id = ANY ('{1,6}'::bigint[]))
+	  Heap Blocks: exact=1
+	  Buffers: shared hit=2
+	  ->  Bitmap Index Scan on companies_id_account_id_unique  (cost=0.00..4.15 rows=2 width=0) (actual time=0.020..0.020 rows=2.00 loops=1)
+	        Index Cond: (id = ANY ('{1,6}'::bigint[]))
+	        Index Searches: 1
+	        Buffers: shared hit=1
+2026-11-24 11:40:59.194 UTC [194] LOG:  duration: 0.053 ms  plan:
+	Query Text: select "id", "name" from "establishments" where "establishments"."id" in (7)
+	Index Scan using establishments_id_company_id_account_id_unique on establishments  (cost=0.14..8.15 rows=1 width=524) (actual time=0.048..0.049 rows=1.00 loops=1)
+	  Index Cond: (id = 7)
+	  Index Searches: 1
+	  Buffers: shared hit=5
+2026-11-24 11:40:59.198 UTC [194] LOG:  duration: 0.018 ms  plan:
+	Query Text: select "id", "account_id", "email", "role_id", "scope", "company_id", "establishment_id", "expires_at" from "account_invitations" where "account_id" = $1 and "status" = $2 order by "email" asc, "id" asc limit 100
+	Limit  (cost=8.16..8.21 rows=2 width=608) (actual time=0.015..0.016 rows=0.00 loops=1)
+	  Buffers: shared hit=1
+	  ->  Incremental Sort  (cost=8.16..8.21 rows=2 width=608) (actual time=0.014..0.015 rows=0.00 loops=1)
+	        Sort Key: email, id
+	        Presorted Key: email
+	        Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 25kB  Peak Memory: 25kB
+	        Buffers: shared hit=1
+	        ->  Index Scan using account_invitations_pending on account_invitations  (cost=0.14..8.15 rows=1 width=608) (actual time=0.005..0.005 rows=0.00 loops=1)
+	              Index Cond: (account_id = '1'::bigint)
+	              Index Searches: 1
+	              Buffers: shared hit=1
+2026-11-24 11:40:59.201 UTC [194] LOG:  duration: 0.044 ms  plan:
+	Query Text: select count(*) as "aggregate" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" where "m"."user_id" = $1 and "m"."status" = $2 and "c"."active" = $3
+	Aggregate  (cost=12.00..12.01 rows=1 width=8) (actual time=0.040..0.041 rows=1.00 loops=1)
+	  Buffers: shared hit=2
+	  ->  Hash Join  (cost=1.43..11.99 rows=2 width=0) (actual time=0.033..0.036 rows=3.00 loops=1)
+	        Hash Cond: (c.id = m.account_id)
+	        Buffers: shared hit=2
+	        ->  Seq Scan on clients c  (cost=0.00..10.50 rows=25 width=8) (actual time=0.017..0.018 rows=6.00 loops=1)
+	              Filter: active
+	              Buffers: shared hit=1
+	        ->  Hash  (cost=1.39..1.39 rows=3 width=8) (actual time=0.012..0.012 rows=3.00 loops=1)
+	              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+	              Buffers: shared hit=1
+	              ->  Seq Scan on account_memberships m  (cost=0.00..1.39 rows=3 width=8) (actual time=0.007..0.009 rows=3.00 loops=1)
+	                    Filter: ((user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	                    Rows Removed by Filter: 23
+	                    Buffers: shared hit=1
+2026-11-24 11:40:59.203 UTC [194] LOG:  duration: 0.091 ms  plan:
+	Query Text: select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_name" as "company_trade_name", "c"."active" as "company_active" from "establishments" as "e" inner join "companies" as "c" on "c"."id" = "e"."company_id" and "c"."account_id" = "e"."account_id" where "e"."account_id" = $1 and "e"."active" = $2 and "c"."active" = $3 order by coalesce(c.trade_name, c.name), "c"."id" asc, "e"."is_primary" desc, "e"."name" asc, "e"."id" asc
+	Sort  (cost=16.34..16.34 rows=1 width=2284) (actual time=0.079..0.080 rows=5.00 loops=1)
+	  Sort Key: (COALESCE(c.trade_name, c.name)), c.id, e.is_primary DESC, e.name, e.id
+	  Sort Method: quicksort  Memory: 25kB
+	  Buffers: shared hit=12
+	  ->  Nested Loop  (cost=0.28..16.32 rows=1 width=2284) (actual time=0.036..0.059 rows=5.00 loops=1)
+	        Join Filter: (c.id = e.company_id)
+	        Rows Removed by Join Filter: 2
+	        Buffers: shared hit=12
+	        ->  Index Scan using establishments_account_id_code_unique on establishments e  (cost=0.14..8.15 rows=1 width=687) (actual time=0.028..0.036 rows=5.00 loops=1)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 1
+	              Buffers: shared hit=2
+	        ->  Index Scan using companies_account_id_code_unique on companies c  (cost=0.14..8.16 rows=1 width=1147) (actual time=0.002..0.003 rows=1.40 loops=5)
+	              Index Cond: (account_id = '1'::bigint)
+	              Filter: active
+	              Index Searches: 5
+	              Buffers: shared hit=10
+2026-11-24 11:40:59.204 UTC [194] LOG:  duration: 0.020 ms  plan:
+	Query Text: select "workspace_establishments" from "account_memberships" where "account_id" = $1 and "user_id" = $2 and "status" = $3 limit 1
+	Limit  (cost=0.00..1.46 rows=1 width=57) (actual time=0.018..0.018 rows=1.00 loops=1)
+	  Buffers: shared hit=1
+	  ->  Seq Scan on account_memberships  (cost=0.00..1.46 rows=1 width=57) (actual time=0.016..0.017 rows=1.00 loops=1)
+	        Filter: ((account_id = '1'::bigint) AND (user_id = '3'::bigint) AND ((status)::text = 'active'::text))
+	        Rows Removed by Filter: 23
+	        Buffers: shared hit=1
+2026-11-24 11:40:59.205 UTC [194] LOG:  duration: 0.054 ms  plan:
+	Update on sessions  (cost=0.14..8.16 rows=0 width=0) (actual time=0.053..0.053 rows=0.00 loops=1)
+	  Buffers: shared hit=4
+	  ->  Index Scan using sessions_pkey on sessions  (cost=0.14..8.16 rows=1 width=190) (actual time=0.025..0.027 rows=1.00 loops=1)
+	        Index Cond: ((id)::text = 'HpDXJhwR7N6S0zujAj1MLFuOB003xXW97mwD0jr9'::text)
+	        Index Searches: 1
+	        Buffers: shared hit=2
+2026-11-24 11:40:59.334 UTC [201] LOG:  duration: 0.029 ms  plan:
+	Query Text: select pg_reload_conf()
+	Result  (cost=0.00..0.01 rows=1 width=1) (actual time=0.019..0.019 rows=1.00 loops=1)
+2026-11-24 11:40:59.334 UTC [1] LOG:  received SIGHUP, reloading configuration files
+2026-11-24 11:40:59.335 UTC [1] LOG:  parameter "auto_explain.log_analyze" removed from configuration file, reset to default
+2026-11-24 11:40:59.335 UTC [1] LOG:  parameter "session_preload_libraries" removed from configuration file, reset to default
+2026-11-24 11:40:59.335 UTC [1] LOG:  parameter "auto_explain.log_min_duration" removed from configuration file, reset to default
+2026-11-24 11:40:59.335 UTC [1] LOG:  parameter "auto_explain.log_buffers" removed from configuration file, reset to default

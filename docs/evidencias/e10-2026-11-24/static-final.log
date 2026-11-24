@@ -1,0 +1,9 @@
+
+ [OK] No errors                                                                 
+
+  ──────────────────────────────────────────────────────────────────── Laravel  
+    FAIL   ......................................... 344 files, 3 style issues  
+  ⨯ tests/Performance/e10/02-organizacao.php fully_qualified_strict_types, un…  
+  ⨯ tests/Performance/e10/08-auditoria.php fully_qualified_strict_types, unar…  
+  ⨯ tests/Performance/e10/http.php fully_qualified_strict_types, unary_operat…  
+

@@ -1,0 +1,15 @@
+{"e10":"01-provisionamento","checks":35,"failed":0}
+{"e10":"02-organizacao","checks":36,"failed":0}
+{"e10":"03-acessos","checks":92,"failed":0}
+{"e10":"04-convites","checks":38,"failed":0}
+{"e10":"05-multicontas","checks":37,"failed":0}
+{"e10":"06-area-trabalho","checks":32,"failed":0}
+{"e10":"07-comercial","checks":42,"failed":0}
+{"e10":"08-auditoria","checks":35,"failed":0}
+{"e10":"09-inspecao","checks":34,"failed":0}
+{"e10":"10-seguranca","checks":54,"failed":0}
+{"e10":"11-concorrencia","checks":26,"failed":0}
+{"e10":"12-chave-desligada","checks":11,"failed":0}
+{"e10":"13-octane-um-worker","checks":2,"failed":0}
+{"e10":"13-octane-dois-workers","checks":2,"failed":0}
+{"e10":"14-desempenho-base","checks":9,"failed":1}

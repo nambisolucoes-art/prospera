@@ -136,9 +136,9 @@ Route::middleware(['auth', 'verified', 'account'])
         Route::name('directory.')->group(function () {
             $directory = DirectoryController::class;
 
+            // Listar e visualizar valem para qualquer atribuição com a permissão (8.2.1): conferido no controller.
             Route::get('etiquetas', [$directory, 'tags'])
-                ->name('tags.index')
-                ->middleware('can:account.tags.list');
+                ->name('tags.index');
 
             Route::get('etiquetas/cadastrar', [$directory, 'tagForm'])
                 ->name('tags.create')
@@ -146,8 +146,7 @@ Route::middleware(['auth', 'verified', 'account'])
 
             Route::get('etiquetas/{tagId}/visualizar', [$directory, 'previewTag'])
                 ->whereNumber('tagId')
-                ->name('tags.view')
-                ->middleware('can:account.tags.view');
+                ->name('tags.view');
 
             Route::get('etiquetas/{tagId}/editar', [$directory, 'tagForm'])
                 ->whereNumber('tagId')

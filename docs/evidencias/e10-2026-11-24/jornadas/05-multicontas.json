@@ -1,0 +1,343 @@
+{
+    "e10": "05-multicontas",
+    "checks": 37,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J3 multicontas",
+            "check": "Seleção lista exatamente as três contas da identidade",
+            "passed": true,
+            "detail": [
+                "filial-unica-distribuidora",
+                "grupo-gartan",
+                "outra-organizacao-servicos"
+            ]
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Seleção com vários vínculos não escolhe conta",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Seleção informa o cargo de cada conta sem misturar contas",
+            "passed": true,
+            "detail": [
+                {
+                    "code": "grupo-gartan",
+                    "name": "Grupo Gartan Participações",
+                    "trade_name": "Grupo Gartan",
+                    "roles": [
+                        "Administrador da conta"
+                    ],
+                    "status": "active",
+                    "url": "/contas/grupo-gartan"
+                },
+                {
+                    "code": "filial-unica-distribuidora",
+                    "name": "Filial Única Distribuidora",
+                    "trade_name": null,
+                    "roles": [
+                        "Administrador da conta"
+                    ],
+                    "status": "active",
+                    "url": "/contas/filial-unica-distribuidora"
+                },
+                {
+                    "code": "outra-organizacao-servicos",
+                    "name": "Outra Organização Serviços",
+                    "trade_name": null,
+                    "roles": [
+                        "Operador B"
+                    ],
+                    "status": "active",
+                    "url": "/contas/outra-organizacao-servicos"
+                }
+            ]
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Vínculo único entra direto na conta",
+            "passed": true,
+            "detail": "http://127.0.0.1:8000/contas/grupo-gartan"
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Administradora na A",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Operadora na B, sem administração",
+            "passed": true,
+            "detail": [
+                "self.help.list",
+                "self.help.view",
+                "account.establishments.list",
+                "account.people.view",
+                "account.tags.list",
+                "account.tags.view"
+            ]
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Administradora na C",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Contexto da resposta segue a URL de cada requisição",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Criar empresa na B negado",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Criar etiqueta na B negado",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Usuários da B negado",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Editar empresa da B negado",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Empresa da B pela URL da A responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Unidade da B pela URL da A responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Cargo da B pela URL da A responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Negações entre contas sem efeito colateral",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Conta inexistente responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Conta sem vínculo responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Inexistente e sem vínculo têm a mesma resposta",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Endereço /conta com vários vínculos não escolhe conta",
+            "passed": true,
+            "detail": [
+                200,
+                "http://127.0.0.1:8000/contas?destino=etiquetas"
+            ]
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Escrita em /conta recusada",
+            "passed": true,
+            "detail": {
+                "status": 405
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Plataforma inativa a Conta C",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Conta inativa recusada",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Conta A segue disponível",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Seleção mostra a conta inativa sem endereço de entrada",
+            "passed": true,
+            "detail": {
+                "code": "filial-unica-distribuidora",
+                "name": "Filial Única Distribuidora",
+                "trade_name": null,
+                "roles": [],
+                "status": "inactive",
+                "url": null
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Plataforma reativa a Conta C",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Conta C volta a abrir",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Bruno suspende a Ana na B",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Ana perde a B na requisição seguinte",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Ana mantém a A",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Ana mantém a C",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Suspensão na B não alterou a identidade nem os vínculos da A e C",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Bruno reativa a Ana na B",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Ana volta a operar a B",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Usuários da B não revelam conta, cargos ou pessoa da A",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Ana aparece na B só com a atribuição da B",
+            "passed": true,
+            "detail": {
+                "id": 15,
+                "name": "Admin ana@gartan.e10.test",
+                "email": "ana@gartan.e10.test",
+                "status": "active",
+                "photo_url": null,
+                "assignments": [
+                    {
+                        "id": 17,
+                        "role": "Operador B",
+                        "scope": "establishment",
+                        "coverage": "Somente este estabelecimento",
+                        "location": "Unidade principal"
+                    }
+                ],
+                "can_view": true,
+                "can_assign": true
+            }
+        },
+        {
+            "journey": "J3 multicontas",
+            "check": "Eventos da Ana na B pertencem só à B",
+            "passed": true,
+            "detail": [
+                2
+            ]
+        }
+    ]
+}

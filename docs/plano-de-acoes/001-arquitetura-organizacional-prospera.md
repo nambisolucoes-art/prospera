@@ -2120,7 +2120,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E07 | Concluída | 21/11/2026 | 21/11/2026 | Auditoria final na subseção E07 e homologação nesta seção | Privacidade da descoberta corrigida e verificada; tema disponível aprovado |
 | E08 | Concluída | 21/11/2026 | 23/11/2026 | `7cd9b9d`, retomada, matriz de cobertura, medições e homologação formal na seção 26 | Homologação técnica aprovada; limitações sintéticas aceitas e condições futuras de implantação preservadas |
 | E09 | Concluída | 23/11/2026 | 23/11/2026 | [Validação integrada](001-e09-validacao-integrada.md): PostgreSQL 18, concorrência, FrankenPHP, Chromium e suíte completa, refeitos sobre a árvore final; homologação formal na seção 26 | Homologação técnica aprovada; implantação não executada e condicionada às pendências operacionais registradas |
-| E10 | Pendente | | | | |
+| E10 | Em validação | 24/11/2026 | | [Homologação integrada](001-e10-homologacao-integrada.md): laboratório PostgreSQL 18, FrankenPHP, Mailpit e Chromium; 494 verificações HTTP, 301 no navegador, evolução e reversão, concorrência, 8.404 requisições em workers e suíte com 278 testes | Aguardando homologação formal; defeitos D1 (deadlock) e D2 (Etiquetas por atribuição local) corrigidos e revalidados; implantação não executada |
 
 ### Registro de execução
 
@@ -3486,3 +3486,36 @@ alteração de outra frente pelos caminhos e conteúdo; a autoria por sessão n�
 Esta formalização alterou somente este plano, o relatório da E09, o README de Performance e acrescentou
 `tests/Performance/e09-route-queries.php` e a pasta de evidências `homologacao`. Sem commit, push,
 reset ou stash. A E10 não foi iniciada.
+
+### Homologação integrada da E10 em 24/11/2026
+
+**Estado: Em validação, aguardando homologação formal.** Autorizada pelo usuário como última etapa do plano. Não
+houve commit, push, implantação, migração de bases oficiais nem alteração dos containers `prospera-*`.
+
+Referência: branch `feat/filtros-calendario-titulos`, HEAD `af96f3e` (seeders), posterior a `cd4305f` (E09). Linha
+de base: 277 testes PHP e 3.777 asserções, 20 testes frontend, PHPStan, Pint e build aprovados.
+
+O [relatório da E10](001-e10-homologacao-integrada.md) registra laboratório, massa criada pelas próprias jornadas
+HTTP (contas A, B, C e D, empresas com raízes numérica e alfanumérica, filial principal sem matriz e identidades com
+uma, duas e três contas), as dez jornadas, matriz de segurança, concorrência, workers, auditoria, desempenho,
+interface nas cinco larguras e a matriz de rastreabilidade de E01 a E09. Evidências em
+`docs/evidencias/e10-2026-11-24/`; roteiros em `tests/Performance/e10*` e `tests/Browser/e10.mjs`.
+
+Defeitos encontrados, corrigidos na responsabilidade original e revalidados:
+
+- **D1 (E04 e E07):** deadlock entre a escrita de empresa ou estabelecimento e o cadastro comercial na mesma conta
+  (500 em 5 de 5 e 3 de 5 rodadas). `SaveCompanyAction`, `SaveEstablishmentAction` e
+  `PromotePrimaryEstablishmentAction` passam a travar a conta antes da empresa, a ordem das demais Actions. Uma
+  consulta a mais por escrita organizacional.
+- **D2 (E05):** `account.tags.list/view` só funcionava com atribuição de conta, contrariando a seção 8.2.1 ("qualquer
+  atribuição"). Listar e visualizar Etiquetas passam a aceitar qualquer atribuição com a permissão; a manutenção do
+  catálogo continua no escopo da conta. Artigo de ajuda atualizado e `IntegratedArchitectureTest` acrescentado.
+
+Resultado final: 278 testes PHP e 3.792 asserções; 20 testes frontend; arquitetura, tipos, build, PHPStan, Pint e
+`git diff --check` aprovados; `permissions:sync` com 82 permissões, `audit:check` com 13 modelos e
+`organization:check` sem violações. Instalação limpa, evolução a partir de `48e2191` com hashes preservados,
+reversão condicionada e restauração aprovadas. 4.202 requisições integradas com 1 worker e 4.202 com 2 workers, sem
+respostas inesperadas e sem crescimento contínuo de memória.
+
+Pendências: as condições operacionais da E09 continuam válidas; acrescenta-se a política de retenção dos logs de
+acesso, que mostram parte do token de convite no caminho. A homologação técnica não autoriza a implantação.

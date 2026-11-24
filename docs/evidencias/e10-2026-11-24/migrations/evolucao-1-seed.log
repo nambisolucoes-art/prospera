@@ -1,0 +1,51 @@
+
+   INFO  Seeding database.  
+
+  Database\Seeders\Acessos\PermissionCatalogSeeder ................... RUNNING  
+  Database\Seeders\Acessos\PermissionCatalogSeeder ................ 97 ms DONE  
+
+  Database\Seeders\Plataforma\PlatformAdministratorSeeder ............ RUNNING  
+  Database\Seeders\Plataforma\PlatformAdministratorSeeder ......... 41 ms DONE  
+
+  Database\Seeders\Plataforma\TenantAccountSeeder .................... RUNNING  
+  Database\Seeders\Plataforma\TenantAccountSeeder ................ 124 ms DONE  
+
+  Database\Seeders\Organizacao\CompanySeeder ......................... RUNNING  
+  Database\Seeders\Organizacao\CompanySeeder ...................... 35 ms DONE  
+
+  Database\Seeders\Organizacao\EstablishmentSeeder ................... RUNNING  
+  Database\Seeders\Organizacao\EstablishmentSeeder ................ 54 ms DONE  
+
+  Database\Seeders\Etiquetas\CommercialTagSeeder ..................... RUNNING  
+  Database\Seeders\Etiquetas\CommercialTagSeeder .................. 41 ms DONE  
+
+  Database\Seeders\Acessos\RoleSeeder ................................ RUNNING  
+  Database\Seeders\Acessos\RoleSeeder ............................ 226 ms DONE  
+
+  Database\Seeders\Usuarios\AccountUserSeeder ........................ RUNNING  
+  Database\Seeders\Usuarios\AccountUserSeeder .................... 462 ms DONE  
+
+  Database\Seeders\Clientes\CustomerSeeder ........................... RUNNING  
+  Database\Seeders\Clientes\CustomerSeeder ....................... 326 ms DONE  
+
+  Database\Seeders\Fornecedores\SupplierSeeder ....................... RUNNING  
+  Database\Seeders\Fornecedores\SupplierSeeder ................... 268 ms DONE  
+
+
+Usuários de teste. Senha de todos: Prospera@2026
+Entrada: http://localhost/login
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| E-mail                        | Atuação                                                                                                                            |
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+
+| admin@prospera.test           | Administrador da plataforma SaaS                                                                                                   |
+| ana.ribeiro@horizonte.test    | Administrador da conta em toda a conta                                                                                             |
+| henrique.alves@horizonte.test | Administrador da conta em toda a conta                                                                                             |
+| bruno.carvalho@horizonte.test | Gerente de empresa em Horizonte Supermercados                                                                                      |
+| carla.souza@horizonte.test    | Gerente de loja em Loja Brumado; Gerente de loja em Loja Guanambi; Gerente de loja em Centro de Distribuição                       |
+| diego.lima@horizonte.test     | Operador de caixa em Loja Brumado; Operador de caixa em Farmácia Shopping                                                          |
+| elisa.martins@horizonte.test  | Comprador em Horizonte Supermercados; Comprador em Horizonte Atacado; Atendimento ao cliente em Horizonte Farma                    |
+| felipe.rocha@horizonte.test   | Auditor interno em toda a conta                                                                                                    |
+| gabriela.nunes@horizonte.test | Coordenador farmacêutico em Horizonte Farma; Gerente de loja em Farmácia Candeias                                                  |
+| joana.teixeira@horizonte.test | Atendimento ao cliente em Horizonte Supermercados; Atendimento ao cliente em Horizonte Atacado; Operador de caixa em Loja Guanambi |
+| igor.pereira@horizonte.test   | Operador de caixa em Farmácia Candeias (vínculo suspenso)                                                                          |
++-------------------------------+------------------------------------------------------------------------------------------------------------------------------------+

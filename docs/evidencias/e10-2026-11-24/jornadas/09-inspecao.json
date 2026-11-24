@@ -1,0 +1,260 @@
+{
+    "e10": "09-inspecao",
+    "checks": 34,
+    "failed": 0,
+    "login_throttled": 0,
+    "results": [
+        {
+            "journey": "J9 inspecao",
+            "check": "Plataforma lista os representáveis da Conta A",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Representáveis só da Conta A (Bruno ausente)",
+            "passed": true,
+            "detail": [
+                3,
+                14,
+                8,
+                9,
+                7,
+                11,
+                10
+            ]
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Representado de outra conta recusado",
+            "passed": true,
+            "detail": {
+                "status": 422
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Início da inspeção somente leitura",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Evento de início com inspection_id",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Leitura na Conta A durante a inspeção",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Escrita recusada em somente leitura",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Somente leitura sem efeito e sem evento",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Troca de conta pela URL para a B (Ana tem vínculo) responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Troca para conta sem vínculo responde 404",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Preferência da representada não pode ser gravada",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Preferência preservada",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Sessão própria da Ana continua independente",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Ana continua escrevendo na própria sessão",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Encerramento",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Após encerrar, a plataforma não lê a conta",
+            "passed": true,
+            "detail": {
+                "status": 404
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Início em leitura e edição representando o Carlos",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Edição de cliente da A1 com a autoridade do Carlos",
+            "passed": true,
+            "detail": {
+                "status": 204
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Autor real é a plataforma; representado é o Carlos; mesma inspeção",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Vínculo usado é o do representado",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Mesmo em edição, a autoridade é só a do Carlos (sem Empresas: criar)",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Edição não altera a preferência do representado",
+            "passed": true,
+            "detail": {
+                "status": 403
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Encerramento da edição",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Início e encerramento com o mesmo inspection_id",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Inspeção não cria vínculo permanente",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Segundo inspetor inicia",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Leitura antes da revogação",
+            "passed": true,
+            "detail": {
+                "status": 200
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Revogação encerra a inspeção na requisição seguinte",
+            "passed": true,
+            "detail": 401
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Encerramento por perda de autoridade registrado",
+            "passed": true,
+            "detail": "{\"ending\":{\"label\":\"Encerramento\",\"before\":null,\"after\":\"Autom\\u00e1tico: a autoriza\\u00e7\\u00e3o da inspe\\u00e7\\u00e3o deixou de valer\"}}"
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Depois disso, nenhuma leitura da conta",
+            "passed": true,
+            "detail": {
+                "status": 401
+            }
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Auditoria da conta mostra a escrita feita na inspeção",
+            "passed": true,
+            "detail": 7
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Plataforma vê o início da inspeção",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Plataforma não vê a escrita de negócio da inspeção",
+            "passed": true,
+            "detail": null
+        },
+        {
+            "journey": "J9 inspecao",
+            "check": "Representado nunca aparece como autor",
+            "passed": true,
+            "detail": null
+        }
+    ]
+}

@@ -1,0 +1,2076 @@
+{
+  "checks": 301,
+  "failed": 0,
+  "results": [
+    {
+      "check": "Seleção com três contas após o login",
+      "passed": true,
+      "detail": [
+        "grupo-gartan",
+        "filial-unica-distribuidora",
+        "outra-organizacao-servicos"
+      ]
+    },
+    {
+      "check": "Login com várias contas leva à seleção",
+      "passed": true,
+      "detail": "http://127.0.0.1:18110/contas"
+    },
+    {
+      "check": "login 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "login 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/login"
+      }
+    },
+    {
+      "check": "selecao-contas 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "selecao-contas 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas"
+      }
+    },
+    {
+      "check": "inicio-conta-a 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "inicio-conta-a 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan"
+      }
+    },
+    {
+      "check": "empresas 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "empresas 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/empresas"
+      }
+    },
+    {
+      "check": "estabelecimentos 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "estabelecimentos 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos"
+      }
+    },
+    {
+      "check": "organizacao 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "organizacao 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/organizacao"
+      }
+    },
+    {
+      "check": "clientes-consolidado 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "clientes-consolidado 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "fornecedores-consolidado 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/fornecedores?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+      }
+    },
+    {
+      "check": "usuarios 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "usuarios 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/usuarios"
+      }
+    },
+    {
+      "check": "cargos 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargos 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos"
+      }
+    },
+    {
+      "check": "cargo-cadastro 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "cargo-cadastro 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/cargos/cadastrar"
+      }
+    },
+    {
+      "check": "etiquetas 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "etiquetas 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/etiquetas"
+      }
+    },
+    {
+      "check": "auditoria 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "auditoria 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "ajuda 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "ajuda 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/ajuda"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "estabelecimento-cadastro 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimentos/cadastrar"
+      }
+    },
+    {
+      "check": "Estado vazio sem rolagem em 390px",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Avatar com Trocar de conta (1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Seletor da Área de Trabalho sem rolagem (1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Abrir área de trabalho navega para o contexto (1440px)",
+      "passed": true,
+      "detail": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+    },
+    {
+      "check": "Tour abre sem rolagem horizontal (1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Erro de validação visível no modal (1440px)",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "check": "Modal sem rolagem horizontal (1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Toast de sucesso após salvar (1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Navegação por teclado alcança controle visível (1440px)",
+      "passed": true,
+      "detail": {
+        "tag": "BUTTON",
+        "visible": true
+      }
+    },
+    {
+      "check": "Avatar com Trocar de conta (390px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Seletor da Área de Trabalho sem rolagem (390px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Abrir área de trabalho navega para o contexto (390px)",
+      "passed": true,
+      "detail": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+    },
+    {
+      "check": "Tour abre sem rolagem horizontal (390px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Erro de validação visível no modal (390px)",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "check": "Modal sem rolagem horizontal (390px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Toast de sucesso após salvar (390px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Navegação por teclado alcança controle visível (390px)",
+      "passed": true,
+      "detail": {
+        "tag": "BUTTON",
+        "visible": true
+      }
+    },
+    {
+      "check": "Avatar com Trocar de conta (320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Seletor da Área de Trabalho sem rolagem (320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Abrir área de trabalho navega para o contexto (320px)",
+      "passed": true,
+      "detail": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos?unidades=gartan-comercio-gartan-filial-guanamb,gartan-comercio-gartan-filial-brumado,gartan-comercio,gartan-logistica,gartan-logistica-logistica-montes-cla"
+    },
+    {
+      "check": "Tour abre sem rolagem horizontal (320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Erro de validação visível no modal (320px)",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "check": "Modal sem rolagem horizontal (320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Toast de sucesso após salvar (320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Navegação por teclado alcança controle visível (320px)",
+      "passed": true,
+      "detail": {
+        "tag": "BUTTON",
+        "visible": true
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "operadora-b-etiquetas 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+      }
+    },
+    {
+      "check": "Operadora sem Cadastrar etiqueta",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 1, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 2, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 3, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 4, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 5, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 6, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 7, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 8, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 9, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 10, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 11, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 12, 1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour de Etiquetas concluído pela operadora (1440px)",
+      "passed": true,
+      "detail": 12
+    },
+    {
+      "check": "Tour não abriu cadastro para quem não pode cadastrar (1440px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 1, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 2, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 3, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 4, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 5, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 6, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 7, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 8, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 9, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour somente consulta sem rolagem (passo 10, 320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Tour de Etiquetas concluído pela operadora (320px)",
+      "passed": true,
+      "detail": 10
+    },
+    {
+      "check": "Tour não abriu cadastro para quem não pode cadastrar (320px)",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Artigo de Etiquetas visível na ajuda da operadora",
+      "passed": true,
+      "detail": 200
+    },
+    {
+      "check": "gerente-unidade-auditoria 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "gerente-unidade-auditoria 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/auditoria"
+      }
+    },
+    {
+      "check": "Cargo de unidade sem a permissão continua sem Etiquetas",
+      "passed": true,
+      "detail": 403
+    },
+    {
+      "check": "Cargo de unidade com a permissão lista Etiquetas (correção E10)",
+      "passed": true,
+      "detail": 200
+    },
+    {
+      "check": "plataforma-contas 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-contas 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/contas"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "plataforma-auditoria 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/saas/auditoria"
+      }
+    },
+    {
+      "check": "Inspeção iniciada pelo navegador da plataforma",
+      "passed": true,
+      "detail": 200
+    },
+    {
+      "check": "inspecao-clientes 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "inspecao-clientes 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/contas/grupo-gartan/estabelecimento/todos/clientes"
+      }
+    },
+    {
+      "check": "Aviso de inspeção visível",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "check": "Convite entregue ao Mailpit isolado",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "convite 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "Aceite leva à conta da B",
+      "passed": true,
+      "detail": "http://127.0.0.1:18110/contas/outra-organizacao-servicos"
+    },
+    {
+      "check": "convite-reutilizado 1440px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 1440px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 1024px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 1024px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 768px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 768px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 390px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 390px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 320px sem rolagem horizontal",
+      "passed": true,
+      "detail": {
+        "extra": 0,
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "convite-reutilizado 320px renderizada",
+      "passed": true,
+      "detail": {
+        "url": "http://127.0.0.1:18110/convites/{token}"
+      }
+    },
+    {
+      "check": "Convite reutilizado informa indisponível",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 0: aba A continua na Conta A",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 0: aba B continua na Conta B",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 0: aba A pode cadastrar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 0: aba B não pode cadastrar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 1: aba A continua na Conta A",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 1: aba B continua na Conta B",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 1: aba A pode cadastrar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 1: aba B não pode cadastrar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 2: aba A continua na Conta A",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 2: aba B continua na Conta B",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 2: aba A pode cadastrar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Rodada 2: aba B não pode cadastrar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Gravação da aba A depois de recarregar a aba B",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Histórico da aba B permanece na Conta B",
+      "passed": true,
+      "detail": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+    },
+    {
+      "check": "Aba B revogada não troca para a Conta A",
+      "passed": true,
+      "detail": "http://127.0.0.1:18110/contas/outra-organizacao-servicos/etiquetas"
+    },
+    {
+      "check": "Aba A segue operando após a revogação na B",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Troca de unidade na aba A preserva a aba B",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "check": "Nenhum erro JavaScript",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "Nenhuma resposta 5xx",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "jsErrors": [],
+  "serverErrors": []
+}
