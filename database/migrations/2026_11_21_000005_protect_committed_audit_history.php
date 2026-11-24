@@ -16,7 +16,7 @@ return new class extends Migration
         DB::statement('alter table audit_records alter column write_transaction set default pg_current_xact_id()');
 
         DB::unprepared(<<<'SQL'
-            create function audit_records_protect_history() returns trigger
+            create or replace function audit_records_protect_history() returns trigger
             language plpgsql as $$
             begin
                 if TG_OP = 'TRUNCATE' then

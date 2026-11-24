@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Modal from '@/components/Modal/Modal';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import { formatMasked } from './ClientFormFields';
 import { formatTaxDocument } from '@/utils/formatTaxDocument';
 import PreviewSection from './PreviewSection';
@@ -18,9 +19,18 @@ export default function PersonPreview({
 }) {
   const [person, setPerson] = useState<PersonRow>();
   const [error, setError] = useState(false);
+  // O endereço pode vir relativo à conta (@/) ou à unidade (~/): o fetch direto não conhece esses prefixos.
+  const contextUrl = useContextUrl();
   useEffect(() => {
     const controller = new AbortController();
-    fetch(endpoint, {
+    let target: string;
+    try {
+      target = contextUrl(endpoint);
+    } catch {
+      setError(true);
+      return;
+    }
+    fetch(target, {
       signal: controller.signal,
       headers: { Accept: 'application/json' },
     })
@@ -32,7 +42,7 @@ export default function PersonPreview({
         if (!controller.signal.aborted) setError(true);
       });
     return () => controller.abort();
-  }, [endpoint]);
+  }, [contextUrl, endpoint]);
   return (
     <Modal
       open

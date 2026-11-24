@@ -53,7 +53,7 @@ return new class extends Migration
             );
 
             DB::statement(<<<'SQL'
-                create function clients_code_immutable() returns trigger language plpgsql as $$
+                create or replace function clients_code_immutable() returns trigger language plpgsql as $$
                 begin
                     if new.code is distinct from old.code then
                         raise exception 'O código da conta é imutável.' using errcode = '23514';

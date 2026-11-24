@@ -14,7 +14,7 @@ ARTISAN     := $(APP) php artisan
 .DEFAULT_GOAL := help
 
 .PHONY: help up dev dev-logs update down restart build rebuild ps logs logs-all shell tinker art \
-        migrate migrate-status rollback fresh permissions-sync audit-check clear \
+        migrate migrate-status rollback fresh seed permissions-sync audit-check clear \
         test lint create-user prepare-sqlite
 
 help: ## Lista os comandos disponíveis
@@ -84,6 +84,14 @@ fresh: ## APAGA todas as tabelas e roda as migrations de novo
 	@printf 'Isso apaga todos os dados do banco local. Digite sim para continuar: '; read answer; [ "$$answer" = sim ] || { echo Cancelado.; exit 1; }
 	$(ARTISAN) migrate:fresh --force
 	$(ARTISAN) permissions:sync --no-interaction
+
+seed: ## APAGA o banco local e popula o cenário de desenvolvimento. Sem pergunta: make seed CONFIRM=sim
+	@if [ "$(CONFIRM)" != sim ]; then \
+		printf 'Isso apaga todos os dados do banco local e recria o cenário de testes. Digite sim para continuar: '; \
+		read answer; [ "$$answer" = sim ] || { echo Cancelado.; exit 1; }; \
+	fi
+	$(ARTISAN) migrate:fresh --force --seed
+	$(ARTISAN) audit:check
 
 permissions-sync: ## Sincroniza o catálogo de permissões
 	$(ARTISAN) permissions:sync

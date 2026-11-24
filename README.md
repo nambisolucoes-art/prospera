@@ -11,7 +11,7 @@ make up
 # Equivale a docker compose up --build --wait
 ```
 
-`make help` lista os atalhos: `make migrate`, `make logs`, `make test`, `make update` (git pull e make up), `make fresh` (apaga o banco local, com confirmação) e outros. A imagem só recompila os assets quando o código muda.
+`make help` lista os atalhos: `make migrate`, `make logs`, `make test`, `make update` (git pull e make up), `make fresh` (apaga o banco local, com confirmação), `make seed` (apaga o banco local e cria o cenário de desenvolvimento com conta, empresas, estabelecimentos, cargos, usuários, clientes e fornecedores; veja [database/seeders/README.md](database/seeders/README.md)) e outros. A imagem só recompila os assets quando o código muda.
 
 Abra [http://localhost:8000](http://localhost:8000). O Laravel aguarda o PostgreSQL 18 ficar pronto e executa as migrações na inicialização. Os dados do banco ficam no volume `postgres-data`, e a chave da aplicação fica no volume `app-data`.
 
