@@ -7,6 +7,8 @@ import {
   type JSX,
 } from 'react';
 import Theme from '@/app/App';
+import ErrorScreen, { errorCodeFromStatus } from '@/components/ErrorScreen/ErrorScreen';
+import type { ErrorAction, ErrorCode, ErrorDescription } from '@/components/ErrorState/ErrorState.types';
 import FlashLayout from '@/app/FlashLayout';
 import SettingsLayout from '@/app/account/SettingsLayout';
 import { ApiPageContext, type NavigationOptions } from '@/hooks/useApiPage';
@@ -90,6 +92,7 @@ type PageData = SessionProps & { redirect?: string };
 export default function ApiApplication(): JSX.Element {
   const [page, setPage] = useState<Page>();
   const [error, setError] = useState('');
+  const [errorStatus, setErrorStatus] = useState<number>();
   const [failedAssetUrl, setFailedAssetUrl] = useState('');
   const [contextFailure, setContextFailure] = useState<'account' | 'unit' | null>(null);
   const request = useRef<AbortController>(null);
@@ -113,7 +116,9 @@ export default function ApiApplication(): JSX.Element {
         || new URL(url, location.origin).pathname !== new URL(currentPageUrl.current, location.origin).pathname;
       const transitionId = changesPage || appLoaderPreviewEnabled ? startAppPageTransition() : undefined;
       let committed = false;
+      let failedStatus: number | undefined;
       setError('');
+      setErrorStatus(undefined);
       setFailedAssetUrl('');
       setContextFailure(null);
 
@@ -142,6 +147,7 @@ export default function ApiApplication(): JSX.Element {
               target = new URL('/email/verify', location.origin);
               continue;
             }
+            failedStatus = failure instanceof ApiError ? failure.status : undefined;
             // Conta sem vínculo ativo, suspensa ou inativa (E09): orienta sem revelar se a conta existe.
             if (
               failure instanceof ApiError &&
@@ -171,6 +177,7 @@ export default function ApiApplication(): JSX.Element {
             }
             throw failure;
           }
+          failedStatus = undefined;
           if (props.redirect) {
             target = new URL(props.redirect, location.origin);
             continue;
@@ -199,8 +206,10 @@ export default function ApiApplication(): JSX.Element {
             }
             throw failure;
           }
-          if (!component || !Component)
+          if (!component || !Component) {
+            failedStatus = 404;
             throw new Error('Página não encontrada.');
+          }
           if (pending.signal.aborted) return false;
 
           clearPageAssetRetry(target);
@@ -217,12 +226,14 @@ export default function ApiApplication(): JSX.Element {
         }
         throw new Error('Não foi possível abrir a página.');
       } catch (failure) {
-        if (!pending.signal.aborted)
+        if (!pending.signal.aborted) {
+          setErrorStatus(failedStatus);
           setError(
             failure instanceof Error
               ? failure.message
               : 'Não foi possível abrir a página.',
           );
+        }
         return false;
       } finally {
         if (!committed) markAppPageTransitionReady(transitionId);
@@ -248,34 +259,30 @@ export default function ApiApplication(): JSX.Element {
     };
   }, [navigate]);
 
-  if (error)
-    return (
-      <main className="card-box" role="alert">
-        <p>{error}</p>
-        {failedAssetUrl && (
-          <p>
-            <button
-              type="button"
-              className="button button--primary waves-effect waves-light"
-              onClick={() => location.assign(failedAssetUrl)}
-            >
-              Recarregar tela
-            </button>
-          </p>
-        )}
-        {contextFailure === 'unit' && accountBase(location.href) && (
-          <p>
-            <a href={`${accountBase(location.href)}/estabelecimento`}>Abrir área de trabalho</a>
-          </p>
-        )}
-        {contextFailure === 'account' && (
-          <p>
-            <a href="/contas">Escolher outra conta</a>
-          </p>
-        )}
-        <a href="/dashboard">Voltar ao painel</a>
-      </main>
-    );
+  if (error) {
+    const backToPanel: ErrorAction = { label: 'Voltar ao painel', href: '/dashboard' };
+    const code: ErrorCode = errorStatus ? errorCodeFromStatus(errorStatus) : '500';
+    let description: ErrorDescription | undefined;
+    let actions: ErrorAction[] = [backToPanel];
+
+    if (failedAssetUrl) {
+      description = { title: 'Não foi possível carregar a tela', paragraphs: [error] };
+      actions = [{ label: 'Recarregar tela', onClick: () => location.assign(failedAssetUrl) }, backToPanel];
+    } else if (contextFailure === 'account') {
+      description = { title: 'Conta indisponível', paragraphs: [error] };
+      actions = [{ label: 'Escolher outra conta', href: '/contas' }, backToPanel];
+    } else if (contextFailure === 'unit') {
+      description = { title: 'Estabelecimento indisponível', paragraphs: [error] };
+      actions = [
+        ...(accountBase(location.href)
+          ? [{ label: 'Abrir área de trabalho', href: `${accountBase(location.href)}/estabelecimento` }]
+          : []),
+        backToPanel,
+      ];
+    }
+
+    return <ErrorScreen code={code} description={description} actions={actions} />;
+  }
   if (!page) return <p role="status">Carregando…</p>;
 
   const { Component, component, props, url } = page;

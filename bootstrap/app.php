@@ -72,6 +72,26 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request): Response {
+            // Erros de navegação (404, 403, 419, 500, manutenção) recebem a aplicação, que repete o pedido em JSON
+            // e mostra a tela de erro única, no mesmo visual de qualquer outra tela. O 429 já é tratado acima.
+            $status = $response->getStatusCode();
+            $navigationErrors = [400, 403, 404, 419, 500, 503];
+
+            if (
+                $request->isMethodSafe()
+                && ! $request->expectsJson()
+                && in_array($status, $navigationErrors, true)
+                && ($status !== 500 || ! config('app.debug'))
+            ) {
+                $headers = ['Cache-Control' => 'no-store, private'];
+
+                if ($response->headers->has('Retry-After')) {
+                    $headers['Retry-After'] = $response->headers->get('Retry-After');
+                }
+
+                return response()->view('app', [], $status, $headers);
+            }
+
             if ($request->routeIs('account.company.*.find-person')) {
                 $response->headers->set('Cache-Control', 'private, no-store');
             }
