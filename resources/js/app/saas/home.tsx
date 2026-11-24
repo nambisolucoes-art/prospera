@@ -22,7 +22,7 @@ export default function Home({ account, organization }: { account: { name: strin
       tenant
       title="Início"
       actions={editAccount && (
-        <Button href="/conta/organizacao?nivel=conta" tone="primary" leftIconClass="fa fa-sitemap">Organização</Button>
+        <Button href="@/organizacao?nivel=conta" tone="primary" leftIconClass="fa fa-sitemap">Organização</Button>
       )}
     >
       {!!organization.incomplete?.length && (
@@ -36,7 +36,7 @@ export default function Home({ account, organization }: { account: { name: strin
             <ul>
               {organization.incomplete.map((company) => (
                 <li key={company.id}>
-                  {editCompanies ? <Link href={`/conta/empresas/${company.id}/editar?origem=organizacao`}>{company.name}</Link> : company.name}
+                  {editCompanies ? <Link href={`@/empresas/${company.id}/editar?origem=organizacao`}>{company.name}</Link> : company.name}
                 </li>
               ))}
             </ul>
@@ -48,14 +48,14 @@ export default function Home({ account, organization }: { account: { name: strin
           value={account.name}
           title="Dados da conta"
           iconClass="md md-assignment text-custom"
-          href={editAccount ? '/conta/organizacao?nivel=conta' : undefined}
+          href={editAccount ? '@/organizacao?nivel=conta' : undefined}
         />
         {organization.companies !== null && (
           <DashboardTwoStatCard
             value={String(organization.companies)}
             title="Empresas"
             iconClass="md md-business text-primary"
-            href="/conta/organizacao"
+            href="@/organizacao"
           />
         )}
         {organization.establishments !== null && (
@@ -63,7 +63,7 @@ export default function Home({ account, organization }: { account: { name: strin
             value={String(organization.establishments)}
             title="Estabelecimentos"
             iconClass="md md-store-mall-directory text-pink"
-            href="/conta/organizacao?nivel=estabelecimentos"
+            href="@/organizacao?nivel=estabelecimentos"
           />
         )}
       </div>

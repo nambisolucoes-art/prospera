@@ -55,24 +55,24 @@ class AccountInspectionTest extends TestCase
 
         $this->actingAs($platform)->withSession(['auth.password_confirmed_at' => time()])
             ->post(route('saas.accounts.inspection.start', $account), ['user_id' => $owner->id, 'mode' => 'read-only'])
-            ->assertRedirect(route('account.dashboard'))->assertSessionMissing('auth.password_confirmed_at');
+            ->assertRedirect(route('account.dashboard', ['conta' => $account->code]))->assertSessionMissing('auth.password_confirmed_at');
         $this->assertAuthenticatedAs($owner);
         $this
-            ->getJson(route('account.dashboard'))
+            ->getJson(route('account.dashboard', ['conta' => $account->code]))
             ->assertJsonPath('auth.inspection_mode', 'read-only')
             ->assertJsonPath('auth.user.id', $owner->id)
             ->assertJsonPath('account.name', 'Conta ativa');
         $this->getJson(route('two-factor.secret-key'))->assertForbidden();
-        $this->patch(route('account.update'), ['name' => 'Conta renomeada'])->assertForbidden();
+        $this->patch(route('account.update', ['conta' => $account->code]), ['name' => 'Conta renomeada'])->assertForbidden();
         $this->assertDatabaseMissing('clients', ['name' => 'Conta renomeada']);
         $this->get(route('saas.users.index'))->assertForbidden();
 
         $this
-            ->post(route('account.inspection.end'))
+            ->post(route('inspection.end'))
             ->assertRedirect(route('dashboard'))
             ->assertSessionMissing('account_inspection');
         $this->assertAuthenticatedAs($platform);
-        $this->post(route('account.inspection.end'))->assertForbidden();
+        $this->post(route('inspection.end'))->assertForbidden();
     }
 
     public function test_edit_inspection_uses_target_permissions_and_protects_personal_settings(): void
@@ -82,15 +82,15 @@ class AccountInspectionTest extends TestCase
         $owner = User::factory()->asAccountAdministrator($account->id)->create();
         $member = User::factory()->forAccount($account->id)->create();
         $start = route('saas.accounts.inspection.start', $account);
-        $end = route('account.inspection.end');
+        $end = route('inspection.end');
 
         $this->actingAs($platform)->post($start, ['user_id' => $member->id, 'mode' => 'edit'])->assertRedirect();
-        $this->patch(route('account.update'), ['name' => 'Renomeada pelo membro'])->assertForbidden();
+        $this->patch(route('account.update', ['conta' => $account->code]), ['name' => 'Renomeada pelo membro'])->assertForbidden();
         $this->post($end)->assertRedirect(route('dashboard'));
 
         $this->post($start, ['user_id' => $owner->id, 'mode' => 'edit'])->assertRedirect();
-        $this->patch(route('account.update'), ['name' => 'Renomeada pelo administrador'])
-            ->assertRedirect(route('account.dashboard'));
+        $this->patch(route('account.update', ['conta' => $account->code]), ['name' => 'Renomeada pelo administrador'])
+            ->assertRedirect(route('account.dashboard', ['conta' => $account->code]));
         $this->assertSame('Renomeada pelo administrador', $account->refresh()->name);
         $this->patch(route('profile.update'), ['name' => 'Alterado', 'email' => $owner->email])->assertForbidden();
 
@@ -109,7 +109,7 @@ class AccountInspectionTest extends TestCase
             $platform = User::factory()->create(['is_saas_admin' => true]);
 
             $this->actingAs($platform)->post($start, ['user_id' => $owner->id, 'mode' => 'edit'])->assertRedirect();
-            $this->getJson(route('account.dashboard'))->assertOk()->assertJsonPath('auth.user.id', $owner->id);
+            $this->getJson(route('account.dashboard', ['conta' => $account->code]))->assertOk()->assertJsonPath('auth.user.id', $owner->id);
 
             $session = $this->app['session.store'];
             $guardKey = Auth::guard('web')->getName();
@@ -120,7 +120,7 @@ class AccountInspectionTest extends TestCase
 
             $platform->forceFill([$field => $value])->saveOrFail();
 
-            $this->getJson(route('account.dashboard'))->assertUnauthorized()
+            $this->getJson(route('account.dashboard', ['conta' => $account->code]))->assertUnauthorized()
                 ->assertSessionMissing($guardKey)
                 ->assertSessionMissing('account_inspection');
             $this->assertGuest();
@@ -128,10 +128,10 @@ class AccountInspectionTest extends TestCase
             $this->assertNotSame($inspectionSessionId, $session->getId());
             $this->assertNotSame($inspectionToken, $session->token());
 
-            $this->getJson(route('account.dashboard'))->assertUnauthorized();
-            $this->getJson(route('account.establishments.index'))->assertUnauthorized();
-            $this->patchJson(route('account.update'), ['name' => 'Alteração pela sessão encerrada'])->assertUnauthorized();
-            $this->postJson(route('account.inspection.end'))->assertUnauthorized();
+            $this->getJson(route('account.dashboard', ['conta' => $account->code]))->assertUnauthorized();
+            $this->getJson(route('account.establishments.index', ['conta' => $account->code]))->assertUnauthorized();
+            $this->patchJson(route('account.update', ['conta' => $account->code]), ['name' => 'Alteração pela sessão encerrada'])->assertUnauthorized();
+            $this->postJson(route('inspection.end'))->assertUnauthorized();
             $this->assertGuest();
         }
 

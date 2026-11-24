@@ -2,9 +2,11 @@
 
 namespace App\Support;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Organizacao\Domain\DTOs\NavigableEstablishment;
+use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -24,13 +26,18 @@ final class ApiPage
         }
 
         $user = $request->user();
+        $inspection = AccountInspectionSession::current($request->session());
 
         return response()->json([
             ...$data,
             'name' => config('app.name'),
             'auth' => [
                 'permissions' => $user === null ? [] : app(EffectivePermissions::class)->visibleSlugsFor($user),
-                'inspection_mode' => AccountInspectionSession::current($request->session())?->mode->value,
+                'inspection_mode' => $inspection?->mode->value,
+                // A troca de conta só aparece com mais de uma conta disponível e nunca durante a inspeção.
+                'accounts' => $user === null || $user->is_saas_admin || $inspection !== null
+                    ? 0
+                    : app(AccountMembershipsQuery::class)->selectableCount($user->id),
                 'user' => $user ? [
                     ...$user->only(['id', 'name', 'email', 'email_verified_at', 'is_saas_admin']),
                     'photo_url' => $user->profile_photo
@@ -38,9 +45,33 @@ final class ApiPage
                         : null,
                 ] : null,
             ],
+            'account_context' => self::account($request, $user),
             'organization_context' => self::organization($request, $user),
             'toast' => $request->session()->pull('toast'),
         ], headers: ['Cache-Control' => 'private, no-store']);
+    }
+
+    /**
+     * Conta da URL validada pelo middleware account (E09). O frontend monta os endereços da conta com o
+     * prefixo da própria página, nunca com um estado global.
+     *
+     * @return array{code: string, name: string, base: string}|null
+     */
+    private static function account(Request $request, ?User $user): ?array
+    {
+        $account = app(AccountContext::class)->activeAccount($user);
+
+        if ($account === null || ! $request->routeIs('account.*')) {
+            return null;
+        }
+
+        $tradeName = $account->details['trade_name'] ?? null;
+
+        return [
+            'code' => (string) $account->code,
+            'name' => filled($tradeName) ? (string) $tradeName : $account->name,
+            'base' => '/contas/'.$account->code,
+        ];
     }
 
     /**

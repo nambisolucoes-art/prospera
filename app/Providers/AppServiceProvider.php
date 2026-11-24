@@ -12,10 +12,13 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -38,9 +41,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        RateLimiter::for('account-invitations-view', fn (Request $request) => Limit::perMinute(20)
+            ->by('invitation-view:'.$request->user()->id));
+        RateLimiter::for('account-invitations-accept', fn (Request $request) => Limit::perMinute(10)
+            ->by('invitation-accept:'.$request->user()->id));
+
         foreach ([Login::class => 'login', Logout::class => 'logout'] as $event => $action) {
             Event::listen($event, function ($event) use ($action) {
-                if (request()->routeIs('saas.accounts.inspection.start', 'account.inspection.end')) {
+                if (request()->routeIs('saas.accounts.inspection.start', 'inspection.end')) {
                     return;
                 }
                 $user = $event->user;
@@ -56,7 +64,7 @@ class AppServiceProvider extends ServiceProvider
                 AuditLog::record(
                     'user',
                     $user->id,
-                    app(AccountContext::class)->linkedId($user),
+                    app(AccountContext::class)->linkedId($user) ?? $user->auditAccountId(),
                     $action,
                     $user->name,
                 );

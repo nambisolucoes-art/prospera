@@ -2,6 +2,7 @@
 
 namespace App\Domains\Organizacao\UI\Controllers;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Organizacao\Application\Actions\SaveWorkspacePreferenceAction;
 use App\Domains\Organizacao\Application\Data\WorkspaceDestinationData;
@@ -33,7 +34,7 @@ final class EstablishmentContextController
         $codes = $context->workspaceCodes($user, $selection);
         abort_if($codes === [], 403, 'Você não tem acesso a nenhum estabelecimento ativo desta conta.');
 
-        $base = '/conta/estabelecimento/';
+        $base = app(AccountContext::class)->path('estabelecimento').'/';
         $units = implode(',', $codes);
         $suffix = $destination === null ? '' : '/'.$destination->path;
 

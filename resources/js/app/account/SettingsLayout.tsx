@@ -24,8 +24,9 @@ export default function SettingsLayout({ children }: { children: ReactNode }) {
   const category = component === 'settings/confirm-security' ? 'settings/security' : component;
   const current = tabs.find((tab) => tab.component === category) ?? tabs[0];
   const tenant = !auth.user?.is_saas_admin;
-  const entries = accountNavigation(tenant, auth.permissions);
-  const root = tenant ? { label: 'Início', href: '/conta' } : { label: 'Início', href: '/dashboard' };
+  // Configurações pessoais pertencem à identidade e ficam fora de qualquer conta (E09).
+  const entries = accountNavigation(tenant, auth.permissions, undefined, false);
+  const root = tenant ? { label: 'Início', href: '/contas' } : { label: 'Início', href: '/dashboard' };
 
   return (
     <Theme navigation={{ entries }}>{(sidebar) => (

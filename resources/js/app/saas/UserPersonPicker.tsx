@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import { apiRequest } from '@/utils/apiRequest';
@@ -11,6 +12,7 @@ export default function UserPersonPicker({ value, onChange, error }: {
   onChange: (person: PersonCandidate | undefined) => void;
   error?: string;
 }) {
+  const to = useContextUrl();
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<PersonCandidate[]>();
   const [loading, setLoading] = useState(false);
@@ -24,7 +26,7 @@ export default function UserPersonPicker({ value, onChange, error }: {
     setFailed(false);
     try {
       const response = await apiRequest<{ people: PersonCandidate[] }>(
-        `/conta/usuarios/pessoas?q=${encodeURIComponent(query)}`,
+        to(`@/usuarios/pessoas?q=${encodeURIComponent(query)}`),
       );
       setResults(response.people);
     } catch {

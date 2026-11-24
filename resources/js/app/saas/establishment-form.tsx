@@ -61,7 +61,7 @@ export default function EstablishmentForm({
   const cnpjLookup = useCnpjLookup(setName, setTradeName);
   const [promoting, setPromoting] = useState(false);
   const trigger = useRef<HTMLElement | null>(null);
-  const listHref = navigation.back ?? (can('list') ? '/conta/estabelecimentos' : undefined);
+  const listHref = navigation.back ?? (can('list') ? '@/estabelecimentos' : undefined);
   const mayChangeStatus = establishment !== null
     && !establishment.is_primary
     && (establishment.active ? can('deactivate') : can('activate'));
@@ -85,7 +85,7 @@ export default function EstablishmentForm({
       <CardBox>
         <BusinessForm
           className="business-form--wide-labels"
-          action={`${establishment ? `/conta/estabelecimentos/${establishment.id}` : '/conta/estabelecimentos'}${navigation.suffix}`}
+          action={`${establishment ? `@/estabelecimentos/${establishment.id}` : '@/estabelecimentos'}${navigation.suffix}`}
           method={establishment ? 'patch' : 'post'}
         >
           {({ errors, processing }) => (
@@ -204,7 +204,7 @@ export default function EstablishmentForm({
                   tourTarget="establishment-contact" />
               </fieldset>
               {!readOnly && (
-                <BusinessFormActions processing={processing} cancelHref={listHref ?? '/conta'} />
+                <BusinessFormActions processing={processing} cancelHref={listHref ?? '@'} />
               )}
             </>
           )}

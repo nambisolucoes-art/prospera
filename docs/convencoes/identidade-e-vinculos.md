@@ -50,7 +50,7 @@ A plataforma pode iniciar a troca em suporte, com autoria registrada. A conclus�
 
 - O convite é o link de definição de senha enviado à identidade criada sem senha (mecanismo atual de `SendUserInvitationAction`).
 - Reenviar exige `account.users.invite` sobre o tenant e só se aplica a vínculos cuja identidade ainda não definiu a senha. O envio é auditado.
-- Para uma identidade que já existe em outra conta, o convite cria somente o vínculo e a pessoa nesta conta, depois que a pessoa aceita (E09). Até a E09, essa criação é recusada com resposta neutra.
+- Para uma identidade que já existe em outra conta, o convite cria somente o vínculo e a pessoa nesta conta, depois que a pessoa aceita (E09).
 
 ### Suspensão e reativação do vínculo
 
@@ -58,7 +58,7 @@ A plataforma pode iniciar a troca em suporte, com autoria registrada. A conclus�
 - A suspensão bloqueia todas as permissões daquela conta na requisição seguinte e não afeta outras contas, a identidade nem as atribuições gravadas.
 - Administradores de empresa e de estabelecimento não suspendem vínculos. Eles retiram o acesso local removendo as atribuições que gerenciam.
 - `access_enabled = false` bloqueia a identidade inteira e é exclusivo da plataforma.
-- O último vínculo ativo com o cargo Administrador em escopo tenant não pode ser suspenso.
+- O último administrador utilizável no tenant não pode ser suspenso nem perder sua atribuição. O substituto precisa ter vínculo ativo, identidade habilitada, e-mail verificado e senha inicial definida. Convite pendente não conta como substituto.
 
 ### Revogação de atribuições
 
@@ -69,10 +69,10 @@ A plataforma pode iniciar a troca em suporte, com autoria registrada. A conclus�
 
 ## Usuários em vários tenants
 
-- Uma identidade pode ter um vínculo por conta (E09, liberado por chave de configuração). Até a E09, `users.account_id` identifica a conta usada na navegação normal e sua autorização sempre depende de um vínculo ativo.
+- Uma identidade pode ter um vínculo por conta (E09, liberado por chave de configuração). `users.account_id` foi removida; a autorização sempre exige o vínculo ativo da conta da URL.
 - Cada vínculo tem pessoa, situação e atribuições independentes. Revogar um vínculo afeta só aquela conta.
 - Um operador de uma conta não vê nem infere os outros vínculos da identidade: listagens, mensagens de erro e auditoria da conta mostram apenas dados da própria conta.
-- Com mais de um vínculo, a conta vem da URL (`/contas/{conta}/...`, PD-04) e a pessoa escolhe a conta após o login.
+- Para qualquer quantidade de vínculos, a conta vem da URL (`/contas/{conta}/...`, PD-04) e a pessoa escolhe a conta após o login quando houver várias disponíveis.
 - O administrador SaaS não tem vínculo com contas. Ele acessa dados de uma conta apenas por inspeção auditada, com exatamente a autoridade do vínculo representado. A autorização SaaS do autor real é consultada em cada requisição. Se perder a autoridade, a sessão de inspeção é encerrada.
 
 ## Respostas neutras
@@ -81,7 +81,7 @@ Nenhuma resposta a usuário de tenant, nem a visitante anônimo, revela se um e-
 
 | Situação | Resposta |
 | --- | --- |
-| Criar usuário com e-mail de identidade existente | "Convite enviado" depois da E09. Até lá, recusa com mensagem que não confirma a existência |
+| Criar usuário com e-mail de identidade existente | "Solicitação de acesso registrada.", sem confirmar se a identidade ou outros vínculos existem |
 | Editar e-mail da pessoa | Validação limitada às pessoas da própria conta; nunca consulta `users` de outras contas |
 | Esqueci a senha | Mesma mensagem para e-mail existente ou inexistente |
 | Alteração do próprio e-mail para endereço já usado | Mesma mensagem de pedido aceito |
@@ -126,3 +126,23 @@ A correção de I2 é condição para disponibilizar publicamente os fluxos afet
 ## Testes obrigatórios
 
 Cenários 38, 39, 50 a 53 do plano: tentativa de alterar e-mail, senha ou situação da identidade por administradores de qualquer nível; retirada de atribuição fora do escopo; última atribuição local; edição de pessoa sem efeito na identidade; respostas neutras.
+
+
+## Convites na E09
+
+Identidade existente: `account_invitations` pertence à conta, com FKs compostas para cargo, pessoa,
+empresa e estabelecimento. O token aleatório tem 64 caracteres e só seu SHA-256 é persistido. Validade
+padrão de sete dias, uso único, revogação e reenvio que revoga o pendente anterior. O aceite exige a
+identidade destinatária autenticada e verificada. Conta e identidade são revalidadas sob trava; o nó
+da atribuição precisa continuar ativo. O vínculo só é criado após aceite legítimo. Um vínculo já
+existente, inclusive suspenso, nunca é reativado pelo convite. A criação, o envio, a mudança de situação
+e a concessão do vínculo ficam no AuditLog, sem token nem conteúdo do e-mail.
+
+Identidade nova por convite: permanece no Fortify. O vínculo provisionado é inacessível enquanto
+`password_setup_pending` estiver ativo. O broker valida destinatário, expiração de 60 minutos e uso
+único. A conclusão limpa esse marcador, sem reativar vínculo suspenso ou conta inativa. Recuperar a
+identidade não concede um novo vínculo. Senha inicial manual continua no fluxo já aprovado.
+
+Leitura e aceite possuem limitadores separados. Consultar o convite não consome o limite do aceite.
+Em implantação, mantenha `PROSPERA_MULTIPLE_ACCOUNTS=false` até liberar novas associações. A resolução,
+a seleção e os vínculos existentes funcionam nos dois valores; desligar não apaga dados ou permissões.

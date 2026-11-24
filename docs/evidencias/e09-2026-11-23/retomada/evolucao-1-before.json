@@ -1,0 +1,41 @@
+{
+    "account_memberships": {
+        "rows": 4,
+        "sha256": "1e337c233064a3dc6f0d7a656ddd18822a0b0bc8e5c521230c17d81cd342bf35"
+    },
+    "role_assignments": {
+        "rows": 4,
+        "sha256": "39062b0174cce0cf8d20fc3a51486b8719a910e68784cb77c32c5ee743b0b37f"
+    },
+    "audit_records": {
+        "rows": 42,
+        "sha256": "21ace15e9d5a040bcfb6ae2689ab0cf7259306ea8f1efe04b7d2d3d739209d19"
+    },
+    "people": {
+        "rows": 4,
+        "sha256": "3ab152c0fe58eabfdc479d2da2d87e973d297653e26531d67e2a9bcf6610d5ca"
+    },
+    "roles": {
+        "rows": 6,
+        "sha256": "9d6ceacfe3c960140b480d2c069d99607e617839786f71a6737179361264c035"
+    },
+    "permission_role": {
+        "rows": 264,
+        "sha256": "e5ec282177e85570921f48578fdad1c97024d428ed9087315b19d1e43e5c3faa"
+    },
+    "users_ids_emails": "47ebfc415476a15b6049176d1fb98c19f5e0e9af9442bef153b558c4d901e542",
+    "users_account_id_column": true,
+    "legacy_user_accounts": {
+        "legacy-admin@e09.test": 1,
+        "legacy-member@e09.test": 1,
+        "legacy-b@e09.test": 2,
+        "legacy-c@e09.test": 3
+    },
+    "membership_accounts": {
+        "legacy-admin@e09.test": 1,
+        "legacy-member@e09.test": 1,
+        "legacy-b@e09.test": 2,
+        "legacy-c@e09.test": 3
+    },
+    "codes": null
+}

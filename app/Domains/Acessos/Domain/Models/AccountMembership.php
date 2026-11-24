@@ -89,7 +89,9 @@ final class AccountMembership extends Model implements Auditable
             ->where('role_assignments.scope', 'tenant')
             ->where('roles.system_key', 'administrator')
             ->where('m.status', 'active')
-            ->where('users.access_enabled', true);
+            ->where('users.access_enabled', true)
+            ->where('users.password_setup_pending', false)
+            ->whereNotNull('users.email_verified_at');
 
         return (clone $administrators)->where('m.id', $this->id)->exists()
             && ! $administrators->where('m.id', '!=', $this->id)->exists();

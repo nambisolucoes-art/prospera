@@ -18,6 +18,7 @@ return [
         'user' => 'Usuário',
         'role' => 'Cargo',
         'account-membership' => 'Vínculo com a conta',
+        'account-invitation' => 'Convite para a conta',
         'role-assignment' => 'Atribuição de cargo',
         'role-availability' => 'Abrangência do cargo',
         'tag' => 'Etiqueta',
@@ -33,6 +34,7 @@ return [
         'inspection-ended' => 'Inspeção encerrada',
         'password-reset-requested' => 'Redefinição de senha solicitada',
         'invitation-requested' => 'Reenvio de convite solicitado',
+        'invitation-sent' => 'Convite enviado',
         'catalog-synchronized' => 'Sincronização',
     ],
     // Origem da operação: quem a executou, não o nó organizacional afetado.
@@ -71,6 +73,10 @@ return [
             'system_key' => ['user' => 'Usuário', 'supplier' => 'Fornecedor', 'customer' => 'Cliente'],
         ],
         'role' => ['system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário']],
+        'account-invitation' => [
+            'status' => ['pending' => 'Pendente', 'accepted' => 'Aceito', 'revoked' => 'Revogado'],
+            'scope' => ['tenant' => 'Toda a conta', 'company' => 'Empresa', 'establishment' => 'Estabelecimento'],
+        ],
     ],
     'excluded_models' => [
         AuditRecord::class => 'Histórico imutável, sem auditoria recursiva.',

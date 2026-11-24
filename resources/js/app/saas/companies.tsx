@@ -25,7 +25,7 @@ export default function Companies({
     auth.permissions.includes(`account.companies.${action}`);
   const [preview, setPreview] = useState<CompanyRow>();
   const trigger = useRef<HTMLElement | null>(null);
-  const { query, setQuery, submit, apply } = useBusinessListFilters('/conta/empresas', filters.search);
+  const { query, setQuery, submit, apply } = useBusinessListFilters('@/empresas', filters.search);
   return (
     <SaasLayout
       tenant
@@ -33,7 +33,7 @@ export default function Companies({
       actions={
         writable &&
         can('create') && (
-          <Button href="/conta/empresas/cadastrar" tone="primary" labelIconClass="fa fa-plus" aria-label="Cadastrar empresa">
+          <Button href="@/empresas/cadastrar" tone="primary" labelIconClass="fa fa-plus" aria-label="Cadastrar empresa">
             Cadastrar
           </Button>
         )
@@ -81,7 +81,7 @@ export default function Companies({
                   )}
                   {writable && can('update') && (
                     <Button
-                      href={`/conta/empresas/${company.id}/editar`}
+                      href={`@/empresas/${company.id}/editar`}
                       iconOnly
                       tone="primary"
                       leftIconClass="fa fa-pencil"

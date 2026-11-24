@@ -1,0 +1,6 @@
+ℹ tests 20
+ℹ pass 20
+ℹ fail 0
+npm notice run node scripts/check-architecture.mjs
+npm notice run tsc --noEmit
+✓ built in 764ms

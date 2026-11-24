@@ -4,6 +4,6 @@ export function organizationFormNavigation(url: string, companyId?: number) {
 
   return {
     suffix: fromTree ? '?origem=organizacao' : '',
-    back: fromTree ? `/conta/organizacao?${companyId ? `empresa=${companyId}` : 'nivel=conta'}` : undefined,
+    back: fromTree ? `@/organizacao?${companyId ? `empresa=${companyId}` : 'nivel=conta'}` : undefined,
   };
 }

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Ajuda\Application\Queries;
 
+use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Models\User;
 use Illuminate\Support\Facades\File;
@@ -57,6 +58,7 @@ final class HelpCatalog
         )) > 0;
 
         return match ($slug) {
+            'acesso-contas' => ! $user->is_saas_admin && $user->can('self.help.view'),
             'central-de-ajuda' => $user->can('self.help.list'),
             'contas' => $user->is_saas_admin && $can('platform.accounts'),
             'usuarios' => $user->is_saas_admin ? $can('platform.users') : $can('account.users'),
@@ -105,6 +107,13 @@ final class HelpCatalog
             fn ($match) => $user->can('self.help.view') && $this->allowed($user, $match[1]) ? $match[0] : $match[2],
             $article['html'],
         );
+
+        // Dentro de uma conta, os links continuam na ajuda dessa conta (E09).
+        if (app(AccountContext::class)->linkedId($user) !== null) {
+            $base = app(AccountContext::class)->path('ajuda');
+            $article['html'] = str_replace('<a href="/ajuda/', '<a href="'.$base.'/', $article['html']);
+        }
+
         unset($article['body']);
 
         return $article;

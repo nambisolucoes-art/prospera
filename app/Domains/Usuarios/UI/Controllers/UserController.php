@@ -2,12 +2,14 @@
 
 namespace App\Domains\Usuarios\UI\Controllers;
 
+use App\Domains\Acessos\Application\Actions\CreateAccountInvitationAction;
 use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
 use App\Domains\Acessos\Application\Actions\SendMembershipAccessLinkAction;
 use App\Domains\Acessos\Application\Actions\SetMembershipStatusAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Data\SaveRoleAssignmentsData;
+use App\Domains\Acessos\Application\Queries\AccountInvitationsQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentNodeQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentOptionsQuery;
 use App\Domains\Acessos\Application\Queries\MembershipDirectoryQuery;
@@ -50,6 +52,7 @@ final class UserController
         Request $request,
         MembershipDirectoryQuery $directory,
         EffectivePermissions $permissions,
+        AccountInvitationsQuery $invitations,
     ): JsonResponse|View {
         $user = $request->user();
         $accountId = app(AccountContext::class)->requireId();
@@ -62,9 +65,12 @@ final class UserController
         $pageSize = PageSize::fromInput($request->query('per_page'));
         $memberships = $directory->list($accountId, $nodes, $pageSize, $search);
 
+        $canRevokeInvitations = $request->user()->can('account.users.revoke-invitation');
+
         return ApiPage::respond([
             'tenant' => true,
             'search' => $search,
+            'invitations' => $invitations->pending($accountId, $nodes, $canRevokeInvitations),
             'users' => $memberships->through(function (AccountMembership $membership) use ($view, $assign, $directory): array {
                 $canView = $view->tenant || $membership->assignments
                     ->contains(fn ($assignment) => $view->covers($assignment->node()));
@@ -195,6 +201,7 @@ final class UserController
         Request $request,
         CreateUserAction $create,
         SendUserInvitationAction $invite,
+        CreateAccountInvitationAction $inviteExisting,
         AssignmentNodeQuery $nodes,
         EffectivePermissions $permissions,
         PeopleDirectoryQuery $people,
@@ -235,7 +242,10 @@ final class UserController
                     : 'Usuário criado. O link pode ser solicitado em Esqueceu a senha.';
             }
         } catch (IdentityCreationUnavailable) {
-            // A resposta do tenant é a mesma quando a identidade já existe.
+            // Identidade existente: convite para aceitar nesta conta (E09). A resposta é a mesma de sempre.
+            if ($account !== null && $node !== null && $data->roleId !== null) {
+                $inviteExisting->execute($account, $data->user->email, $data->roleId, $node, $person);
+            }
         }
 
         ApiPage::toast($tenant ? 'Solicitação de acesso registrada.' : $message);

@@ -20,7 +20,9 @@ class SaasPlatformTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        $this->get('/dashboard')->assertForbidden();
+        // Sem vínculo, a identidade vai para a seleção, que não mostra nenhuma conta.
+        $this->get('/dashboard')->assertRedirect(route('accounts.select'));
+        $this->getJson('/contas')->assertOk()->assertJsonPath('accounts', []);
         $this->get('/crm-dashboard.html')->assertForbidden();
         $this->post('/saas/contas', ['name' => 'Cliente'])->assertForbidden();
         $this->assertDatabaseCount('clients', 0);
@@ -119,7 +121,7 @@ class SaasPlatformTest extends TestCase
             ->assertJsonPath('details.additional_phones', ['11988882222'])
             ->assertJsonPath('details.additional_emails', [])
             ->assertJsonPath('details.address.postal_code', '01001000');
-        $owner = User::where('account_id', $client->id)->sole();
+        $owner = User::whereHas('memberships', fn ($membership) => $membership->where('account_id', $client->id))->sole();
         $this->assertSame('administrator', $this->membership($owner)->assignments()->sole()->role()->sole()->system_key);
         $this->assertFalse($owner->is_saas_admin);
         $this->assertSame($owner->name, $this->membership($owner)->person()->sole()->name);
@@ -127,7 +129,8 @@ class SaasPlatformTest extends TestCase
         $member = User::factory()->forAccount($client->id)->create();
         $this->actingAs($member)->patch('/conta', ['name' => 'Inválido'])->assertForbidden();
         $this->post('/conta/empresas', ['name' => 'Inválida'])->assertForbidden();
-        $this->actingAs($owner)->get('/dashboard')->assertRedirect(route('account.dashboard'));
+        $this->actingAs($owner)->get('/dashboard')->assertRedirect(route('accounts.select'));
+        $this->get('/contas')->assertRedirect('/contas/'.$client->refresh()->code);
         $this->getJson('/conta/editar')->assertJsonPath('tenant', true)->assertJsonPath('client.id', $client->id);
         $this->patch('/conta', [
             'name' => 'Estabelecimento atualizado',
@@ -135,7 +138,7 @@ class SaasPlatformTest extends TestCase
             'active' => false,
             'plan' => 'Alteração de plano indevida',
             'document' => '52998224725',
-        ])->assertSessionHasNoErrors()->assertRedirect(route('account.dashboard'));
+        ])->assertSessionHasNoErrors()->assertRedirect(route('account.dashboard', ['conta' => $client->code]));
         $this->assertDatabaseHas('clients', [
             'id' => $client->id,
             'active' => true,
@@ -175,7 +178,7 @@ class SaasPlatformTest extends TestCase
             'message' => 'Conta criada. O link para definir a senha foi enviado ao administrador.',
         ]);
 
-        $owner = User::where('account_id', Client::query()->sole()->id)->sole();
+        $owner = User::whereHas('memberships', fn ($membership) => $membership->where('account_id', Client::query()->sole()->id))->sole();
         Notification::assertSentTo($owner, ResetPassword::class);
         $this->assertSame('invite@example.test', $this->membership($owner)->person()->sole()->email);
     }
@@ -216,8 +219,8 @@ class SaasPlatformTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'platform@example.test',
             'is_saas_admin' => true,
-            'account_id' => null,
         ]);
+        $this->assertSame(0, User::where('email', 'platform@example.test')->sole()->memberships()->count());
 
         $this->actingAs($owner)->post('/saas/usuarios', [])->assertForbidden();
         $this->post('/conta/usuarios', [
@@ -227,9 +230,9 @@ class SaasPlatformTest extends TestCase
                 ->where('system_key', 'member')
                 ->value('id'), 'account_id' => $other
                 ->id, 'is_saas_admin' => true,
-        ])->assertRedirect(route('account.users.index'));
+        ])->assertRedirect(route('account.users.index', ['conta' => $account->code]));
         $member = User::query()->where('email', 'member@example.test')->sole();
-        $this->assertSame($account->id, $member->account_id);
+        $this->assertSame($account->id, $this->accountId($member));
         $this->assertFalse($member->is_saas_admin);
         $this->assertSame('member', $this->membership($member)->assignments()->sole()->role()->sole()->system_key);
         $this->assertSame('Colaborador', $this->membership($member)->person()->sole()->name);

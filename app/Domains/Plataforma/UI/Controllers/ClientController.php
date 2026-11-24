@@ -12,21 +12,22 @@ use App\Domains\Plataforma\Application\Data\AccountFiltersData;
 use App\Domains\Plataforma\Application\Data\SaveAccountData;
 use App\Domains\Plataforma\Application\Queries\AccountDirectoryQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 final class ClientController
 {
     public function index(Request $request, AccountDirectoryQuery $directory): JsonResponse|View|RedirectResponse
     {
+        // Identidades de conta passam pela seleção, que entra direto quando há uma só conta disponível.
         if (! $request->user()->can('access-saas')) {
-            abort_unless(app(AccountContext::class)->linkedId($request->user()) !== null, 403);
-
-            return to_route('account.dashboard');
+            return to_route('accounts.select');
         }
 
         if (! $request->user()->hasVerifiedEmail()) {
@@ -83,17 +84,19 @@ final class ClientController
     ): JsonResponse|View|RedirectResponse {
         if (! $request->user()->can('account.dashboard.view')) {
             // Sem acesso ao Início, a pessoa vai para a primeira tela que pode abrir.
+            $context = app(AccountContext::class);
             $fallbacks = [
-                'account.tags.list' => '/conta/etiquetas',
-                'account.companies.list' => '/conta/organizacao',
-                'account.establishments.list' => '/conta/organizacao?nivel=estabelecimentos',
-                'account.roles.list' => '/conta/cargos',
-                'account.users.list' => '/conta/usuarios',
-                'account.users.create' => '/conta/usuarios/cadastrar',
-                'account.audit.list' => '/conta/auditoria',
-                'account.tags.create' => '/conta/etiquetas/cadastrar',
-                'account.roles.create' => '/conta/cargos/cadastrar',
+                'account.tags.list' => $context->path('etiquetas'),
+                'account.companies.list' => $context->path('organizacao'),
+                'account.establishments.list' => $context->path('organizacao?nivel=estabelecimentos'),
+                'account.roles.list' => $context->path('cargos'),
+                'account.users.list' => $context->path('usuarios'),
+                'account.users.create' => $context->path('usuarios/cadastrar'),
+                'account.audit.list' => $context->path('auditoria'),
+                'account.tags.create' => $context->path('etiquetas/cadastrar'),
+                'account.roles.create' => $context->path('cargos/cadastrar'),
                 'self.profile.view' => '/settings/profile',
+                'self.help.list' => $context->path('ajuda'),
             ];
 
             $visible = app(EffectivePermissions::class)->visibleSlugsFor($request->user());
@@ -108,6 +111,13 @@ final class ClientController
         }
 
         $account = app(AccountContext::class)->requireAccount();
+
+        // A última conta usada só ordena a seleção de contas; a inspeção não altera dados da pessoa.
+        if ($request->expectsJson() && AccountInspectionSession::current($request->session()) === null) {
+            $membershipId = app(AccountContext::class)->membershipId($request->user());
+
+            DB::table('account_memberships')->where('id', $membershipId)->update(['last_used_at' => now()]);
+        }
 
         $companyList = $request->user()->can('account.companies.list')
             ? $companies->options($account->id)

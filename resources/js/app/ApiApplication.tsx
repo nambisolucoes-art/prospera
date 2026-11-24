@@ -17,7 +17,7 @@ import {
   markAppPageTransitionReady,
   startAppPageTransition,
 } from '@/utils/appPageTransition';
-import { contextBase, contextualUrl } from '@/utils/organizationContext';
+import { accountBase, contextBase, contextualUrl, screenPath } from '@/utils/organizationContext';
 import {
   clearPageAssetRetry,
   isPageAssetError,
@@ -29,11 +29,15 @@ const screens = import.meta.glob<{ default: ComponentType }>([
   './saas/{clients,account-form,home,users,user-form,tags,roles,role-form,audit,help}.tsx',
   './saas/{organization,companies,company-form,establishments,establishment-form,establishment-home}.tsx',
   './saas/{commercial-relations,commercial-registration}.tsx',
+  './saas/{account-select,invitation}.tsx',
 ]);
 
+// As telas da conta são identificadas sem o código da conta (E09): /contas/x/usuarios casa com /conta/usuarios.
 const routes: Array<[RegExp, string]> = [
+  [/^\/contas$/, 'saas/account-select'],
+  [/^\/convites\/[A-Za-z0-9]{64}$/, 'saas/invitation'],
   [/^\/(?:saas|conta)\/auditoria$/, 'saas/audit'],
-  [/^\/ajuda(?:\/[a-z0-9-]+)?$/, 'saas/help'],
+  [/^\/(?:conta\/)?ajuda(?:\/[a-z0-9-]+)?$/, 'saas/help'],
   [/^\/dashboard$/, 'saas/clients'],
   [/^\/conta$/, 'saas/home'],
   [/^\/conta\/organizacao$/, 'saas/organization'],
@@ -62,9 +66,12 @@ const routes: Array<[RegExp, string]> = [
   [/^\/[a-z0-9][a-z0-9_-]*\.html$/, 'theme'],
 ];
 
-function componentFor(path: string, props: SessionProps) {
-  if (path === '/user/confirm-password' && props.forSecurity)
+function componentFor(pathname: string, props: SessionProps) {
+  if (pathname === '/user/confirm-password' && props.forSecurity)
     return 'settings/confirm-security';
+  // /conta só existe como forma interna do caminho; o endereço real sempre tem a conta.
+  if (/^\/conta(?:\/|$)/.test(pathname)) return null;
+  const path = screenPath(pathname);
   for (const [pattern, component] of routes) {
     if (pattern.test(path)) return path.replace(pattern, component);
   }
@@ -84,7 +91,7 @@ export default function ApiApplication(): JSX.Element {
   const [page, setPage] = useState<Page>();
   const [error, setError] = useState('');
   const [failedAssetUrl, setFailedAssetUrl] = useState('');
-  const [contextFailure, setContextFailure] = useState(false);
+  const [contextFailure, setContextFailure] = useState<'account' | 'unit' | null>(null);
   const request = useRef<AbortController>(null);
   const currentPageUrl = useRef<string | undefined>(undefined);
 
@@ -108,7 +115,7 @@ export default function ApiApplication(): JSX.Element {
       let committed = false;
       setError('');
       setFailedAssetUrl('');
-      setContextFailure(false);
+      setContextFailure(null);
 
       try {
         let target = new URL(url, location.origin);
@@ -135,13 +142,27 @@ export default function ApiApplication(): JSX.Element {
               target = new URL('/email/verify', location.origin);
               continue;
             }
+            // Conta sem vínculo ativo, suspensa ou inativa (E09): orienta sem revelar se a conta existe.
+            if (
+              failure instanceof ApiError &&
+              [403, 404].includes(failure.status) &&
+              accountBase(target.href) &&
+              !contextBase(target.href)
+            ) {
+              setContextFailure('account');
+              throw new Error(
+                failure.status === 403 && failure.message
+                  ? failure.message
+                  : 'Esta conta não está disponível para o seu acesso.',
+              );
+            }
             // Unidade inexistente, sem acesso ou inativa: orienta sem revelar se o código existe.
             if (
               failure instanceof ApiError &&
               [403, 404].includes(failure.status) &&
               contextBase(target.href)
             ) {
-              setContextFailure(true);
+              setContextFailure('unit');
               throw new Error(
                 failure.status === 403 && failure.message.includes('inativ')
                   ? failure.message
@@ -242,9 +263,14 @@ export default function ApiApplication(): JSX.Element {
             </button>
           </p>
         )}
-        {contextFailure && (
+        {contextFailure === 'unit' && accountBase(location.href) && (
           <p>
-            <a href="/conta/estabelecimento">Abrir área de trabalho</a>
+            <a href={`${accountBase(location.href)}/estabelecimento`}>Abrir área de trabalho</a>
+          </p>
+        )}
+        {contextFailure === 'account' && (
+          <p>
+            <a href="/contas">Escolher outra conta</a>
           </p>
         )}
         <a href="/dashboard">Voltar ao painel</a>

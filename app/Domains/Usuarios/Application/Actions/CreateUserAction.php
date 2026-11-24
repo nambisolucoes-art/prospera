@@ -5,6 +5,7 @@ namespace App\Domains\Usuarios\Application\Actions;
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
 use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
+use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Pessoas\Domain\Models\Person;
@@ -29,6 +30,7 @@ final readonly class CreateUserAction
         private SaveRoleAssignmentsAction $assignments,
         private DefaultRolesAction $defaultRoles,
         private RegisterAccountMembershipAction $registerMembership,
+        private EffectivePermissions $permissions,
     ) {}
 
     public function execute(
@@ -49,6 +51,7 @@ final readonly class CreateUserAction
             if ($node !== null) {
                 abort_unless($account?->id === $node->accountId && $roleId !== null, 403);
                 Client::whereKey($node->accountId)->lockForUpdate()->firstOrFail();
+                $this->permissions->forget();
                 Gate::authorize('account.users.create', $node);
                 $assignedRole = $this->assignments->assertAssignable($node->accountId, $roleId, $node);
             }
@@ -58,7 +61,9 @@ final readonly class CreateUserAction
                     throw new IdentityCreationUnavailable;
                 }
 
-                throw ValidationException::withMessages(['email' => 'Não foi possível criar o acesso com os dados informados.']);
+                throw ValidationException::withMessages([
+                    'email' => 'Não foi possível criar o acesso com os dados informados.',
+                ]);
             }
 
             $password = $data->setup === PasswordSetup::Invite ? Str::random(48) : $data->password;
@@ -74,7 +79,7 @@ final readonly class CreateUserAction
 
             $user = new User(['password' => $password]);
             $user->applyIdentity($identityDTO);
-            $user->account()->associate($account);
+            $user->provisionFor($account?->id);
 
             if ($person !== null && ($person->account_id !== $account?->id || $person->user()->exists())) {
                 throw ValidationException::withMessages(['person_id' => 'Pessoa indisponível para este acesso.']);
@@ -93,7 +98,9 @@ final readonly class CreateUserAction
                     throw new IdentityCreationUnavailable;
                 }
 
-                throw ValidationException::withMessages(['email' => 'Não foi possível criar o acesso com os dados informados.']);
+                throw ValidationException::withMessages([
+                    'email' => 'Não foi possível criar o acesso com os dados informados.',
+                ]);
             }
 
             if ($account !== null) {

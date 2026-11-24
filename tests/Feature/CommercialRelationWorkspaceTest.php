@@ -303,13 +303,13 @@ final class CommercialRelationWorkspaceTest extends TestCase
 
         $codes = $this->guanambi->code.','.$this->jequie->code;
         $this->get('/conta/estabelecimento?unidades='.$codes.'&para=clientes')
-            ->assertRedirect('/conta/estabelecimento/todos/clientes?unidades='.$codes);
+            ->assertRedirect($this->accountPath('/conta/estabelecimento/todos/clientes?unidades='.$codes));
         $this->get('/conta/estabelecimento?unidades='.$this->janauba->code.'&para=fornecedores')
-            ->assertRedirect('/conta/estabelecimento/'.$this->janauba->code.'/fornecedores');
+            ->assertRedirect($this->accountPath('/conta/estabelecimento/'.$this->janauba->code.'/fornecedores'));
 
         $this->putJson('/conta/area-de-trabalho/padrao', ['unidades' => [$this->janauba->code]])->assertNoContent();
         $this->get('/conta/estabelecimento?para=clientes')
-            ->assertRedirect('/conta/estabelecimento/'.$this->janauba->code.'/clientes');
+            ->assertRedirect($this->accountPath('/conta/estabelecimento/'.$this->janauba->code.'/clientes'));
         $this->assertSame([$this->janauba->code], json_decode(
             (string) DB::table('account_memberships')->where('user_id', $this->owner->id)->value('workspace_establishments'),
         ));

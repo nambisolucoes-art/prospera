@@ -25,3 +25,122 @@ O runner exige o marcador final `verificado` do cliente, além dos códigos HTTP
 A alternância entre contas e inspeção é repetida na instância com dois workers. Requisições sequenciais podem ser atendidas por apenas um deles; os IDs observados são informados. As escritas concorrentes exercitam os dois. As instâncias descartáveis usam limite de reciclagem de 20 mil requisições para separar reciclagem programada de vazamento de contexto. Isso não modifica a configuração oficial.
 
 O harness de migrations seleciona por nome as quatro migrations da E08, em vez de presumir que sejam as últimas migrations do projeto. A instalação limpa continua executando o esquema atual completo. A cópia anterior deve ser um checkpoint pré-E08, como `e0d3cce`, com os dados sintéticos e tabelas de origem esperados. Exportação/restauração das tabelas antigas e testes destrutivos ocorrem somente no PostgreSQL temporário do próprio runner.
+
+## E09: laboratório, concorrência e navegador
+
+Relatório e resultados: `docs/plano-de-acoes/001-e09-validacao-integrada.md` e
+`docs/evidencias/e09-2026-11-23/`. Os cenários E09 usam código atual, PostgreSQL 18 e FrankenPHP,
+sem adaptar a suíte PHPUnit para PostgreSQL. Não execute os scripts em bases oficiais.
+
+Preparação (usa a imagem local `prospera-app:latest`, com dependências PHP e FrankenPHP):
+
+```sh
+npm run build
+export E09_PREFIX=prospera-e09-lab-revisao
+export E09_PORT=18099
+bash tests/Performance/e09-lab.sh up
+# Aguarde GET http://127.0.0.1:18099/up responder 200 e confira docker logs "$E09_PREFIX-app".
+```
+
+O script copia o código de uma montagem somente leitura para o container descartável. Não executa
+Compose nem monta volumes da aplicação. PostgreSQL fica em rede interna e tmpfs. Só o app recebe uma
+segunda rede e publica a porta em 127.0.0.1. O transporte de e-mail é `array`, sem SMTP. Os usuários
+sintéticos usam `password`. A finalização exige o mesmo prefixo e só remove containers com label E09:
+
+```sh
+bash tests/Performance/e09-lab.sh down
+```
+
+Os fixtures precisam de banco novo. Os ensaios alteram o estado sintético: execute a seleção de cinco
+contas antes da suspensão de administradores, os aceites antes de reutilizar seus tokens e os convites
+antes de outro vínculo do mesmo destinatário. Para repetir desde o início, descarte o laboratório e
+prepare outro prefixo. Não apague linhas de histórico para reaproveitar os fixtures.
+
+Chromium e Playwright ficam fora das dependências do projeto:
+
+```sh
+npm install --prefix /tmp/prospera-e09-browser playwright
+/tmp/prospera-e09-browser/node_modules/.bin/playwright install chromium
+mkdir -p /tmp/prospera-e09-evidence
+node tests/Browser/e09.mjs
+node tests/Browser/e09-workspace.mjs
+```
+
+`E09_PLAYWRIGHT` pode indicar outro `playwright/index.mjs`, e `E09_URL` troca a origem dos scripts.
+As capturas ficam em `/tmp/prospera-e09-evidence`. Os testes usam login real e cookies do navegador,
+sem endpoint que injete autenticação. Para aceite visual, execute primeiro a corrida de aceite da conta
+A (para a identidade já ter um vínculo), emita outro convite com `e09-invitations.php`, copie somente
+o token sintético de `/tmp/e09-browser-invite.txt` do container para
+`/tmp/prospera-e09-browser/invite.txt` e execute `tests/Browser/e09-invite.mjs`. `E09_TOKEN_FILE` altera
+esse caminho, e `E09_ACCOUNT` identifica a conta esperada, com padrão `laboratorio-conta-2`.
+
+Provas PostgreSQL independentes do PHPUnit:
+
+```sh
+docker exec "$E09_PREFIX-app" php tests/Performance/e09-race.php setup
+# Dois processos reais, não duas chamadas sequenciais:
+for process in 1 2; do
+  docker exec "$E09_PREFIX-app" php tests/Performance/e09-race.php accept &
+done
+wait
+for process in 1 2; do
+  docker exec "$E09_PREFIX-app" php tests/Performance/e09-race.php issue &
+done
+wait
+for process in 1 2; do
+  docker exec "$E09_PREFIX-app" php tests/Performance/e09-race.php code "$process" &
+done
+wait
+docker exec "$E09_PREFIX-app" php tests/Performance/e09-constraints.php
+```
+
+Confira explicitamente os marcadores de resultado: uma exceção renderizada pelo bootstrap não garante
+exit code diferente de zero. O aceite deve produzir `accepted` e `denied` com 410. A emissão deixa um
+pendente e um revogado; a criação deixa dois códigos distintos. `permission-setup` seguido de dois
+processos `permission 1` e `permission 2` verifica o cargo concorrente. `admin-setup` seguido de
+`suspend-admin 1` e `suspend-admin 2` protege o último administrador. O script `e09-revoke-race.php`
+prepara outro convite e permite manter a trava enquanto outro processo tenta aceitar. A prova de
+suspensão usa `e09-suspension.php` e um trigger temporário de atraso exclusivamente no laboratório;
+seus resultados e a ordem de execução estão registrados nas evidências.
+
+`e09-migrations.php` verifica rollback ambíguo, preenchimento de códigos e hashes de preservação no
+banco sintético. Execute essa prova em laboratório separado da validação visual, porque ela acrescenta
+contas sem estrutura comercial. A instalação e evolução completas, rollback de vínculo único e
+backup/restauração estão no relatório, com SQL e logs do banco anterior isolado.
+
+Para medir HTTP, injete `Tests\Performance\OctaneMetrics` somente na cópia do bootstrap descartável,
+como os runners das E03/E08 fazem. Não altere o bootstrap oficial. No laboratório E09, suba com
+`E09_METRICS=1 bash tests/Performance/e09-lab.sh up`: o script injeta o middleware apenas na cópia do
+container e falha se a injeção não ocorrer. O cliente E09 usa login e CSRF reais:
+
+```sh
+docker exec -e E09_REQUESTS=6000 "$E09_PREFIX-app" php tests/Performance/e09-client.php
+# Exija o marcador JSON e09=passed, além de conferir o exit code.
+```
+
+Para dois workers, suba uma segunda instância no mesmo container descartável, com
+`OCTANE_STATE_FILE=/tmp/e09-two.json`, `--port=8001 --admin-port=2020 --workers=2` e
+`--max-requests=20000`. Execute o cliente com `HARNESS_URL=http://127.0.0.1:8001`. Para conferir a flag,
+inicie outra instância com `PROSPERA_MULTIPLE_ACCOUNTS=false`, state file e portas exclusivos. Não mude
+variáveis ou workers dos containers oficiais. Os endpoints equivalentes e a quantidade de amostras
+estão discriminados no JSON, incluindo queries, duplicatas, mediana, P95 e memória. As provas de
+latência não usam SQLite e não substituem uma medição no hardware de implantação.
+
+`e09-ui-fixtures.php` acrescenta conta inativa, identidade revogada e registros para paginação real.
+Execute uma vez, antes de `tests/Browser/e09-tabs.mjs`. `e09-login-fixtures.php` cria dez identidades
+por perfil de 1/2/5 contas para `tests/Browser/e09-login-performance.mjs`, respeitando o throttling real.
+`e09-route-queries.php <caminho> [e-mail]` lista o SQL de uma requisição GET como numa requisição nova
+do worker (instâncias scoped descartadas), para comparar consultas entre estados de dados no laboratório.
+`e09-ui-fixtures.php` também cria `help-only@e09.test`, com cargo só de Ajuda, usado por
+`tests/Browser/e09-limits.mjs`, que verifica a entrada direta na Ajuda e o limite de leitura de convites
+em português nas cinco larguras. Execute esse script com pelo menos um minuto de distância de outro
+ensaio de convite da mesma identidade, porque o limitador real continua ativo.
+Esses fixtures são exclusivamente sintéticos e devem rodar depois dos cenários de último administrador,
+pois acrescentam administradores. Os scripts não são seeders operacionais da aplicação.
+
+`e09-invitation-samples.php` prepara dez identidades existentes e emite convites com entrega somente em
+memória, medindo a fronteira da Action. Copie `/tmp/e09-accept-samples.json` do container para
+`/tmp/prospera-e09-browser/accept-samples.json` (tokens exclusivamente sintéticos, não versione esse
+arquivo), injete as métricas somente no laboratório e execute `tests/Browser/e09-invitation-performance.mjs`.
+O script recebe `E09_URL` e `E09_SAMPLES_FILE`, usa login e CSRF reais e mede dez aceites HTTP válidos.
+Ele não compara o tempo da Action CLI com o tempo de requisição HTTP. Use um laboratório novo para repetir.

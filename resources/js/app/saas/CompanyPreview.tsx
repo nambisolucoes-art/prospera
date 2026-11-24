@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import Modal from '@/components/Modal/Modal';
 import StatusLabel from '@/components/StatusLabel/StatusLabel';
 import PreviewSection from './PreviewSection';
@@ -11,11 +12,12 @@ export default function CompanyPreview({
   company: Pick<CompanyRow, 'id' | 'name'>;
   onClose: () => void;
 }) {
+  const to = useContextUrl();
   const [company, setCompany] = useState<CompanyRow>();
   const [error, setError] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`/conta/empresas/${row.id}/visualizar`, {
+    fetch(to(`@/empresas/${row.id}/visualizar`), {
       signal: controller.signal,
       headers: { Accept: 'application/json' },
     })

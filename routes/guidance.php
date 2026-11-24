@@ -14,13 +14,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('can:self.help.view')
         ->name('help.show');
 
-    Route::get('/conta/auditoria', [AuditController::class, 'index'])
-        ->name('account.audit.index');
-
-    Route::get('/conta/auditoria/{recordId}/visualizar', [AuditController::class, 'show'])
-        ->whereNumber('recordId')
-        ->name('account.audit.show');
-
     Route::get('/saas/auditoria', [AuditController::class, 'index'])
         ->middleware(['can:access-saas', 'can:platform.audit.list'])
         ->name('platform.audit.index');

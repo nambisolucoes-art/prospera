@@ -32,7 +32,7 @@ export default function Establishments({
   const [promoting, setPromoting] = useState<EstablishmentRow>();
   const trigger = useRef<HTMLElement | null>(null);
   const restoreFocus = () => requestAnimationFrame(() => trigger.current?.focus());
-  const { query, setQuery, submit, apply } = useBusinessListFilters('/conta/estabelecimentos', filters.search);
+  const { query, setQuery, submit, apply } = useBusinessListFilters('@/estabelecimentos', filters.search);
   const severalCompanies = companies.length > 1;
   return (
     <SaasLayout
@@ -42,7 +42,7 @@ export default function Establishments({
         writable &&
         can('create') && (
           <Button
-            href={filters.company ? `/conta/estabelecimentos/cadastrar?empresa=${filters.company}` : '/conta/estabelecimentos/cadastrar'}
+            href={filters.company ? `@/estabelecimentos/cadastrar?empresa=${filters.company}` : '@/estabelecimentos/cadastrar'}
             tone="primary"
             labelIconClass="fa fa-plus"
             aria-label="Cadastrar estabelecimento"
@@ -102,7 +102,7 @@ export default function Establishments({
                   )}
                   {writable && can('update') && (
                     <Button
-                      href={`/conta/estabelecimentos/${establishment.id}/editar`}
+                      href={`@/estabelecimentos/${establishment.id}/editar`}
                       iconOnly
                       tone="primary"
                       leftIconClass="fa fa-pencil"

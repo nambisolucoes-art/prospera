@@ -19,6 +19,9 @@ services:
   app:
     <<: *dev
     command: ["app"]
+    environment:
+      # E09: convites de identidades existentes ficam liberados no desenvolvimento.
+      PROSPERA_MULTIPLE_ACCOUNTS: ${PROSPERA_MULTIPLE_ACCOUNTS:-true}
     healthcheck:
       start_period: 120s
 

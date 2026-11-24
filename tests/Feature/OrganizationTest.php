@@ -32,7 +32,7 @@ final class OrganizationTest extends TestCase
         $this->actingAs($owner)
             ->post('/conta/empresas', $this->companyPayload())
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/conta/empresas');
+            ->assertRedirect($this->accountPath('/conta/empresas'));
 
         $company = Company::query()->sole();
         $primary = Establishment::query()->sole();
@@ -106,7 +106,7 @@ final class OrganizationTest extends TestCase
             'name' => 'Loja Centro',
             'classification' => 'branch',
             'tax_document' => '11.222.333/0002-62',
-        ]))->assertSessionHasNoErrors()->assertRedirect('/conta/estabelecimentos');
+        ]))->assertSessionHasNoErrors()->assertRedirect($this->accountPath('/conta/estabelecimentos'));
 
         $this->post('/conta/estabelecimentos', $this->establishmentPayload($company, [
             'name' => 'Quiosque Shopping',
@@ -159,15 +159,15 @@ final class OrganizationTest extends TestCase
 
         $this->patch('/conta/empresas/'.$company->id.'?origem=organizacao', ['name' => 'Empresa editada'])
             ->assertSessionHasNoErrors()
-            ->assertRedirect($branch);
+            ->assertRedirect($this->accountPath($branch));
 
         $this->patch('/conta/estabelecimentos/'.$primary->id.'?origem=organizacao', ['name' => 'Unidade editada'])
             ->assertSessionHasNoErrors()
-            ->assertRedirect($branch);
+            ->assertRedirect($this->accountPath($branch));
 
         $this->patch('/conta?origem=organizacao', ['name' => 'Conta editada'])
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/conta/organizacao?nivel=conta');
+            ->assertRedirect($this->accountPath('/conta/organizacao?nivel=conta'));
 
         $member = Role::where('account_id', $company->account_id)->where('system_key', 'member')->sole();
         $reader = User::factory()->forAccount($company->account_id, $member)->create();
@@ -272,7 +272,7 @@ final class OrganizationTest extends TestCase
 
         $this->post('/conta/estabelecimentos/'.$branch->id.'/principal')
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/conta/estabelecimentos');
+            ->assertRedirect($this->accountPath('/conta/estabelecimentos'));
 
         $this->assertTrue($branch->refresh()->is_primary);
         $this->assertFalse($primary->refresh()->is_primary);
@@ -763,6 +763,7 @@ final class OrganizationTest extends TestCase
         $this->assertNull(Permission::where('slug', 'account.establishment.update')->first());
         $this->assertNull(Permission::where('slug', 'like', 'account.points.%')->first());
 
+        $this->assertTrue($this->enterAccount($owner));
         $ownerPermissions = $owner->permissionSlugs();
 
         foreach ([
@@ -776,6 +777,7 @@ final class OrganizationTest extends TestCase
         }
 
         $this->assertNotContains('platform.accounts.list', $ownerPermissions);
+        $this->assertTrue($this->enterAccount($member));
         $this->assertContains('account.establishments.list', $member->permissionSlugs());
         $this->assertNotContains('account.establishments.update', $member->permissionSlugs());
 
@@ -985,7 +987,7 @@ final class OrganizationTest extends TestCase
         $this->assertSame($company->id, $event->company_id);
         $this->assertSame($unit->id, $event->establishment_id);
 
-        $this->post(route('account.inspection.end'));
+        $this->post(route('inspection.end'));
         $this->post(route('saas.accounts.inspection.start', $account), [
             'user_id' => $owner->id,
             'mode' => 'read-only',
@@ -1117,13 +1119,13 @@ final class OrganizationTest extends TestCase
     /** @param array<string,mixed> $overrides */
     private function createCompany(User $owner, array $overrides = []): Company
     {
-        $before = Company::where('account_id', $owner->account_id)->max('id') ?? 0;
+        $before = Company::where('account_id', $this->accountId($owner))->max('id') ?? 0;
 
         $this->actingAs($owner)
             ->post('/conta/empresas', $this->companyPayload($overrides))
             ->assertSessionHasNoErrors();
 
-        return Company::where('account_id', $owner->account_id)->where('id', '>', $before)->sole();
+        return Company::where('account_id', $this->accountId($owner))->where('id', '>', $before)->sole();
     }
 
     /**

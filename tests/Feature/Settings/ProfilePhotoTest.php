@@ -81,10 +81,11 @@ class ProfilePhotoTest extends TestCase
         }
 
         $photo = fn (string $scope, User $user) => route($scope.'.users.photo', [
+            ...($scope === 'account' ? ['conta' => $account->code] : []),
             'userId' => $user->id, 'version' => $user->profile_photo,
         ], absolute: false);
 
-        $this->actingAs($owner)->getJson(route('account.users.index'))
+        $this->actingAs($owner)->getJson('/conta/usuarios')
             ->assertJsonCount(2, 'users.data')
             ->assertJsonPath('users.data.0.photo_url', $photo('account', $member))
             ->assertJsonMissingPath('users.data.0.profile_photo')

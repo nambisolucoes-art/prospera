@@ -5,6 +5,7 @@ namespace App\Domains\Plataforma\Application\Actions;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
 use App\Domains\Plataforma\Application\Data\SaveAccountData;
+use App\Domains\Plataforma\Application\Queries\AccountCodesQuery;
 use App\Domains\Plataforma\Domain\DTOs\AccountDTO;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
@@ -12,6 +13,7 @@ use App\Domains\Usuarios\Application\Actions\SendUserInvitationAction;
 use App\Domains\Usuarios\Domain\Enums\PasswordSetup;
 use App\Domains\Usuarios\Domain\Enums\UserRole;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final readonly class SaveAccountAction
@@ -20,6 +22,7 @@ final readonly class SaveAccountAction
         private CreateUserAction $createUser,
         private SendUserInvitationAction $invite,
         private CreateCompanyAction $createCompany,
+        private AccountCodesQuery $codes,
     ) {}
 
     public function execute(Client $client, #[\SensitiveParameter] SaveAccountData $data): string
@@ -43,10 +46,33 @@ final readonly class SaveAccountAction
                 $client = Client::register($accountDTO);
             }
 
-            try {
-                $client->saveOrFail();
-            } catch (UniqueConstraintViolationException) {
-                throw ValidationException::withMessages(['document' => 'Já existe uma conta com este documento.']);
+            // O código da URL é gerado pelo Model na criação e não muda depois (E09). Uma colisão concorrente
+            // desfaz só o ponto de salvamento e gera o próximo código livre.
+            $attempts = 0;
+
+            while (true) {
+                try {
+                    DB::transaction(fn () => $client->saveOrFail());
+
+                    break;
+                } catch (UniqueConstraintViolationException) {
+                    $attempts++;
+                    $codeTaken = ! $client->exists && $this->codes->exists((string) $client->code);
+
+                    if ($codeTaken && $attempts >= 5) {
+                        throw ValidationException::withMessages([
+                            'name' => 'Não foi possível gerar um código único. Tente novamente.',
+                        ]);
+                    }
+
+                    if (! $codeTaken) {
+                        throw ValidationException::withMessages([
+                            'document' => 'Já existe uma conta com este documento.',
+                        ]);
+                    }
+
+                    $client->code = null;
+                }
             }
 
             if ($administrator === null) {

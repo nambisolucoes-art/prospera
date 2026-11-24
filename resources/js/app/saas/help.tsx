@@ -8,6 +8,7 @@ import Badge from '@/components/Badge/Badge';
 import type { TabItem } from '@/components/Tabs/Tabs';
 import Link from '@/components/ApiLink/ApiLink';
 import { useApiPage } from '@/hooks/useApiPage';
+import { accountBase } from '@/utils/organizationContext';
 import type { SessionProps } from '@/types/Session.types';
 import './Guidance.css';
 type Article = {
@@ -27,13 +28,15 @@ export default function Help({
   article?: Article;
   search?: string;
 }) {
-  const { props, navigate } = useApiPage<SessionProps>();
+  const { props, navigate, url } = useApiPage<SessionProps>();
+  // Na conta, a ajuda mostra os artigos permitidos nela; fora dela, os da identidade (E09).
+  const helpBase = `${accountBase(url) ?? ''}/ajuda`;
   const [query, setQuery] = useState(search);
   const [busy, setBusy] = useState(false);
   const canView = props.auth.permissions.includes('self.help.view');
   function resultList(results: Article[]) {
     return results.length ? results.map((result) => {
-      const href = '/ajuda/' + result.slug + (result.anchor ? '#' + result.anchor : '');
+      const href = helpBase + '/' + result.slug + (result.anchor ? '#' + result.anchor : '');
       return <SearchResultItem key={result.slug}
         result={{ title: result.title, url: ['Ajuda', result.category, result.title].join(' › '), description: result.summary }}
         title={canView ? <Link href={href}>{result.title}</Link> : result.title} />;
@@ -64,7 +67,7 @@ export default function Help({
       title={article?.title ?? 'Central de Ajuda'}
       tenant={!props.auth.user?.is_saas_admin}
       breadcrumb={[
-        { label: 'Central de Ajuda', href: '/ajuda' },
+        { label: 'Central de Ajuda', href: helpBase },
         ...(article ? [{ label: article.title }] : []),
       ]}
     >
@@ -77,7 +80,7 @@ export default function Help({
                 __html: article.html ?? '',
               }}
             />
-            <Link href="/ajuda">Voltar à Central de Ajuda</Link>
+            <Link href={helpBase}>Voltar à Central de Ajuda</Link>
           </article>
         </CardBox>
       ) : (
@@ -94,7 +97,7 @@ export default function Help({
                 buttonTone="primary"
                 onSearch={(value) => {
                   setBusy(true);
-                  void navigate('/ajuda' + (value.trim() ? '?search=' + encodeURIComponent(value.trim()) : ''), { preserveScroll: true })
+                  void navigate(helpBase + (value.trim() ? '?search=' + encodeURIComponent(value.trim()) : ''), { preserveScroll: true })
                     .finally(() => setBusy(false));
                 }}
               />

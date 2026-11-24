@@ -42,7 +42,7 @@ final class AccountInspectionController
             $request->session(),
         );
 
-        return to_route('account.dashboard');
+        return redirect('/contas/'.$client->code);
     }
 
     public function end(Request $request, EndAccountInspectionAction $end): RedirectResponse

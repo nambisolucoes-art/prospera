@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import { useApiPage as usePage } from '@/hooks/useApiPage';
 import BusinessList, { type BusinessColumn, type PageSummary } from '@/components/BusinessList/BusinessList';
 import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
@@ -26,7 +27,10 @@ type UserRow = {
   can_assign?: boolean;
 };
 
-export default function Users({ users, tenant, search = '' }: {
+type InvitationRow = { id: number; email: string; role: string | null; expired: boolean; can_revoke: boolean };
+
+export default function Users({ users, tenant, search = '', invitations = [] }: {
+  invitations?: InvitationRow[];
   users: PageSummary & { data: UserRow[] };
   tenant: boolean;
   search?: string;
@@ -34,7 +38,8 @@ export default function Users({ users, tenant, search = '' }: {
   const { auth } = usePage<SessionProps>().props;
   const readOnly = auth.inspection_mode === 'read-only';
   const can = (permission: string) => auth.permissions.includes(permission);
-  const base = tenant ? '/conta/usuarios' : '/saas/usuarios';
+  const to = useContextUrl();
+  const base = tenant ? to('@/usuarios') : '/saas/usuarios';
   const [assignments, setAssignments] = useState<UserRow>();
   const status = useApiForm({});
   const [preview, setPreview] = useState<UserRow>();
@@ -82,6 +87,24 @@ export default function Users({ users, tenant, search = '' }: {
   return (
     <SaasLayout title={tenant ? 'Usuários da conta' : 'Usuários da plataforma'} tenant={tenant} userPage
       actions={!readOnly && can(tenant ? 'account.users.create' : 'platform.users.create') && <Button href={`${base}/cadastrar`} tone="primary" labelIconClass="fa fa-plus" aria-label="Cadastrar usuário">Cadastrar</Button>}>
+      {tenant && invitations.length > 0 && (
+        <section aria-label="Convites pendentes" data-tour="user-pending-invitations">
+          <h2>Convites pendentes</h2>
+          {invitations.map((invitation) => (
+            <PreviewSection key={invitation.id} title={invitation.email}>
+              <dt>Cargo</dt><dd>{invitation.role || 'Não informado'}</dd>
+              <dt>Situação</dt><dd>{invitation.expired ? 'Expirado' : 'Aguardando aceite'}</dd>
+              {!readOnly && invitation.can_revoke && (
+                <Button tone="danger" disabled={status.processing}
+                  onClick={() => status.submit('patch', `${base}/convites/${invitation.id}/revogar`)}>
+                  Revogar convite
+                </Button>
+              )}
+            </PreviewSection>
+          ))}
+          {Object.values(status.errors).map((message) => <p key={message} role="alert">{message}</p>)}
+        </section>
+      )}
       <BusinessList key={base} preferenceKey={base} label="Listagem de usuários" page={users} rows={users.data}
         filters={tenant ? <BusinessListSearch label="Pesquisar usuários" placeholder="Nome ou e-mail de acesso"
           value={query} onChange={setQuery} onSubmit={submit} /> : undefined}

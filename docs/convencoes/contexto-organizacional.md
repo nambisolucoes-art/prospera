@@ -93,7 +93,7 @@ Não use restrições adiáveis (`DEFERRABLE`): a suíte roda em SQLite em memó
 
 São operações sobre recursos de nó `tenant` (ou `person`): dados da conta, cargos, empresas e estabelecimentos como cadastro, pessoas, etiquetas, usuários e vínculos.
 
-- Usam rotas administrativas sem segmento de contexto organizacional (`/conta/...`).
+- Usam rotas administrativas sem segmento de contexto organizacional (`/contas/{conta}/...`).
 - São auditadas sem `company_id` e sem `establishment_id`, salvo quando o próprio evento é de uma empresa ou unidade (cadastro de empresa, atribuição em um escopo).
 - Funcionam igualmente para tenants com uma ou várias empresas.
 
@@ -122,7 +122,7 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 - **Serviço:** `OrganizationContext` (`scoped`) informa `mode()` (`tenant`, `company`, `establishment` ou `consolidated`), `accountId()`, `membershipId()`, `actorId()` (na inspeção, o administrador SaaS), `company()`, `establishment()`, `node()` e `scopeFor($user, $permissao)`, o descritor que a Query aplica no SQL já restrito à URL. Fora dos grupos com contexto, o modo é `tenant`.
 - **Acesso ao contexto:** é a cobertura do nó por alguma atribuição válida do vínculo ativo (`EffectivePermissions::navigableNodes`), calculada com as atribuições já carregadas, sem consulta extra. Uma atribuição de estabelecimento não abre o contexto da empresa.
 - **Middleware:** `organization:company` ou `organization:establishment`, com as opções `consolidated` (o módulo aceita `todos` com `?unidades=codigo-a,codigo-b`, somente leitura) e `history` (leitura em empresa ou unidade inativa). Código inexistente, de outro tenant ou sem atribuição responde 404; contexto inativo responde 403 com orientação; vínculo suspenso responde 403. A abertura direta pelo navegador recebe só o HTML inicial, e a aplicação valida o contexto na requisição JSON.
-- **Rotas:** `routes/context.php` define as rotas `account.*` com códigos de `OrganizationCode::ROUTE_PATTERN`. A entrada `/conta/estabelecimento` abre a seleção enviada pela aba (`?unidades=`, revalidada; unidade indisponível responde 404) ou, sem ela, o padrão filtrado pelas unidades ainda navegáveis ou a primeira delas. `?para=modulo` só aceita um caminho que corresponda a uma rota GET do grupo de unidade com `organization:establishment` (`WorkspaceDestinationData`); qualquer outro valor responde 404. Com uma unidade, abre o módulo nela; com várias, preserva a seleção em `todos/{modulo}` quando o módulo declara `consolidated` e, sem essa opção, leva à área de trabalho com **Escolha o estabelecimento**. O sistema nunca escolhe uma unidade pelo usuário. `GET /conta/area-de-trabalho/padrao` consulta o padrão efetivo e `PUT` grava os códigos no vínculo próprio ativo. A gravação fica indisponível durante inspeção.
+- **Rotas:** `routes/account.php` define as rotas `account.*` com códigos de `OrganizationCode::ROUTE_PATTERN`. A entrada `/contas/{conta}/estabelecimento` abre a seleção enviada pela aba (`?unidades=`, revalidada; unidade indisponível responde 404) ou, sem ela, o padrão filtrado pelas unidades ainda navegáveis ou a primeira delas. `?para=modulo` só aceita um caminho que corresponda a uma rota GET do grupo de unidade com `organization:establishment` (`WorkspaceDestinationData`); qualquer outro valor responde 404. Com uma unidade, abre o módulo nela; com várias, preserva a seleção em `todos/{modulo}` quando o módulo declara `consolidated` e, sem essa opção, leva à área de trabalho com **Escolha o estabelecimento**. O sistema nunca escolhe uma unidade pelo usuário. `GET /contas/{conta}/area-de-trabalho/padrao` consulta o padrão efetivo e `PUT` grava os códigos no vínculo próprio ativo. A gravação fica indisponível durante inspeção.
 - **Leitura consolidada:** `todos` sem parâmetro consulta todas as unidades navegáveis. Com `unidades`, qualquer código inválido ou indisponível retorna 404. O módulo chama `scopeFor($user, $ability)` e aplica o descritor a partir de uma consulta já filtrada pelo tenant, antes da paginação, contagem ou agregação. O descritor consolidado contém apenas IDs de estabelecimentos ativos selecionados cobertos pela permissão da operação.
 - **Escrita:** o módulo verifica a permissão da ação sobre `node()` e filtra por `account_id` e pelo nó da URL (`where establishment_id = ?`). Um registro de outra unidade responde 404. A seleção e o padrão não concedem permissões.
 - **Frontend:** `contextualUrl` é o único resolvedor de endereços `~/`. `navigate` o aplica com a página atual da aba; `ApiLink` e `useApiForm` resolvem pela página que os declarou, e a resolução é idempotente. Por isso, `ApiLink`, `ApiForm`, `useApiForm`, `navigate` e `useBusinessListFilters('~/modulo')` aceitam `~/`. `apiRequest` não resolve `~/`: as chamadas diretas usam `useContextUrl`. Não crie resolvedores por módulo. Links e filtros relativos ao consolidado preservam `unidades`; a paginação usa `withQueryString()`. O contrato é coberto por `npm run test:frontend`. Nas telas sem área de trabalho, o seletor termina com **Abrir área de trabalho**, que aplica a seleção da aba e passa pela entrada sem código. Ao abrir uma unidade do resumo, `voltar-unidades` preserva o link de retorno e não interfere no destino das operações. O seletor na `TopBarPrimary` é alimentado por `organization_context` das rotas `account.*` e aparece a partir de duas unidades autorizadas. Nas telas com contexto, a seleção exibida vem da URL (os códigos de `todos` ou o `voltar-unidades` da unidade aberta); nas telas da conta, vem do armazenamento da aba e, numa aba nova, do padrão pessoal.
@@ -144,7 +144,7 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 
 ### Identificadores de empresa e estabelecimento
 
-- **Administração:** rotas administrativas usam o ID numérico, como as telas atuais (`/conta/empresas/{companyId}/editar`, com `whereNumber`).
+- **Administração:** rotas administrativas usam o ID numérico, como as telas atuais (`/contas/{conta}/empresas/{companyId}/editar`, com `whereNumber`).
 - **Operação:** rotas operacionais usam o código (`code`) da empresa ou do estabelecimento.
 - **Formato do código:** letras minúsculas sem acento, números e hífen, de 2 a 40 caracteres, começando por letra ou número.
 - **Unicidade:** o código é único por tenant, inclusive o de estabelecimento, que por isso determina a empresa.
@@ -155,12 +155,12 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 
 | Tipo de tela | Padrão | Exemplo | Etapa |
 | --- | --- | --- | --- |
-| Administração da conta (nó tenant e cadastros) | URLs atuais preservadas em `/conta/...` | `/conta/etiquetas`, `/conta/cargos`, `/conta/editar` | atual |
-| Cadastro de empresas e estabelecimentos | `/conta/empresas`, `/conta/estabelecimentos` | `/conta/estabelecimentos/12/editar` | E04 |
-| Módulo de empresa | `/conta/empresa/{empresa}/...` | `/conta/empresa/gartan/clientes` | E06 |
-| Módulo de estabelecimento | `/conta/estabelecimento/{estabelecimento}/...` | `/conta/estabelecimento/gartan-guanambi/vendas` | E06 |
-| Consolidado | código reservado `todos`, somente em telas que declaram suporte | `/conta/estabelecimento/todos?unidades=guanambi,janauba` | por módulo |
-| Tenant na URL (PD-04) | `/contas/{conta}/...` no lugar de `/conta/...`, só com vários vínculos; as URLs sem prefixo redirecionam para a conta escolhida | `/contas/grupo-gartan/pessoas` | E09 |
+| Administração da conta (nó tenant e cadastros) | URLs explícitas em `/contas/{conta}/...` | `/contas/{conta}/etiquetas`, `/contas/{conta}/cargos`, `/contas/{conta}/editar` | atual |
+| Cadastro de empresas e estabelecimentos | `/contas/{conta}/empresas`, `/contas/{conta}/estabelecimentos` | `/contas/{conta}/estabelecimentos/12/editar` | E04 |
+| Módulo de empresa | `/contas/{conta}/empresa/{empresa}/...` | `/contas/{conta}/empresa/gartan/clientes` | E06 |
+| Módulo de estabelecimento | `/contas/{conta}/estabelecimento/{estabelecimento}/...` | `/contas/{conta}/estabelecimento/gartan-guanambi/vendas` | E06 |
+| Consolidado | código reservado `todos`, somente em telas que declaram suporte | `/contas/{conta}/estabelecimento/todos?unidades=guanambi,janauba` | por módulo |
+| Tenant na URL (PD-04 revisada na E09) | `/contas/{conta}/...` para qualquer número de vínculos. GET/HEAD de `/conta/...` só redirecionam sem ambiguidade; escritas antigas são recusadas | `/contas/grupo-gartan/usuarios` | E09 |
 | Plataforma | `/saas/...` preservado | `/saas/contas` | atual |
 | Configurações pessoais e ajuda | `/settings/...` e `/ajuda`, sem prefixo de conta | `/settings/security` | atual |
 
@@ -188,12 +188,12 @@ A interface só passa a mostrar empresa, estabelecimento e abrangência quando e
 Sidebar da conta, a partir das etapas indicadas:
 
 ```text
-Início                     (/conta; hoje rotulado Minha conta)
+Início                     (/contas/{conta}; hoje rotulado Minha conta)
 Cadastros
 ├── Pessoas
 └── Etiquetas
 Organização
-├── Dados da conta         (/conta/editar)
+├── Dados da conta         (/contas/{conta}/editar)
 ├── Empresas               (E04)
 └── Estabelecimentos       (E04)
 Controle de acesso
@@ -208,3 +208,14 @@ Itens aparecem conforme `auth.permissions`. Não há item de Permissões; o resu
 ## Componentes
 
 Telas organizacionais reutilizam `PageHeader`, `BusinessList`, `BusinessListSearch`, `useBusinessListFilters`, `BusinessForm`, `SelectControl`, `SelectChecklist`, `Modal`, `PreviewSection`, `StatusLabel` e os campos de identidade, endereço e contato de Pessoas. O seletor organizacional usa `SelectControl` ou `DropdownMenu` na `TopBarPrimary`. Componentes paralelos a esses não são aceitos. Ajuda, tour e validação visual seguem as convenções do AGENTS.md.
+
+
+## Identidade global na E09
+
+`users.account_id` foi removida. `ResolveAccountContext` valida o código público e o vínculo ativo
+em cada requisição. A sessão não escolhe o tenant. Contas com vínculo único também usam o código
+na URL. A seleção lista só os vínculos da identidade; códigos não autorizam operações.
+
+A chave `prospera.multiple_accounts` controla novos convites para outras contas, não a resolução
+nem a autorização. Vínculos existentes continuam independentes com a chave desligada. Preferências
+ficam em cada vínculo, e a seleção operacional de unidades permanece própria de cada aba.

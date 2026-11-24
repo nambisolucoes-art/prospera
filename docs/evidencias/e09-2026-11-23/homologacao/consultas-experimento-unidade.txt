@@ -1,0 +1,13 @@
+2|empresa-1-unidade-adicional|t
+UPDATE 1
+=== /contas/laboratorio-conta-1/etiquetas (uma unidade navegável)
+status 200 queries 9
+=== /contas/laboratorio-conta-1/area-de-trabalho/padrao (uma unidade navegável)
+status 200 queries 6
+UPDATE 1
+=== /contas/laboratorio-conta-1/etiquetas (duas unidades navegáveis)
+9. select "workspace_establishments" from "account_memberships" where "account_id" = ? and "user_id" = ? and "status" = ? limit 1 | [1,1,"active"]
+status 200 queries 10
+=== /contas/laboratorio-conta-1/area-de-trabalho/padrao (duas unidades navegáveis)
+6. select "workspace_establishments" from "account_memberships" where "account_id" = ? and "user_id" = ? and "status" = ? limit 1 | [1,1,"active"]
+status 200 queries 7

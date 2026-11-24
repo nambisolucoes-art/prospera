@@ -1,3 +1,4 @@
+import { useContextUrl } from '@/hooks/useContextUrl';
 import { useEffect, useRef, useState } from 'react';
 import BusinessList, {
   type PageSummary,
@@ -63,7 +64,8 @@ export default function Audit({
   const [detail, setDetail] = useState<AuditDetail>();
   const [error, setError] = useState('');
   const trigger = useRef<HTMLElement | null>(null);
-  const base = platform ? '/saas/auditoria' : '/conta/auditoria';
+  const to = useContextUrl();
+  const base = platform ? '/saas/auditoria' : to('@/auditoria');
   const canView = props.auth.permissions.includes(
     (platform ? 'platform' : 'account') + '.audit.view',
   );

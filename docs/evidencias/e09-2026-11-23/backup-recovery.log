@@ -1,0 +1,20 @@
+
+   INFO  Rolling back migrations.  
+
+  2026_11_23_000003_remove_account_from_users .................... 9.68ms DONE
+  2026_11_23_000002_create_account_invitations ................... 3.71ms DONE
+  2026_11_23_000001_add_code_to_clients .......................... 1.53ms DONE
+
+f6ee64e0fb862ba8399095a0b9270a0a5f7cdf1fbe3aa15e672634b5e8d5818a  /tmp/prospera-e09-e09-legacy.dump
+
+   INFO  Running migrations.  
+
+  2026_11_23_000001_add_code_to_clients ......................... 10.17ms DONE
+  2026_11_23_000002_create_account_invitations .................. 10.25ms DONE
+  2026_11_23_000003_remove_account_from_users .................... 7.71ms DONE
+
+1
+1
+1
+1
+0

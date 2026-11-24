@@ -1,0 +1,17 @@
+== PHPUnit completo
+Time: 00:25.190, Memory: 93.00 MB
+
+OK (274 tests, 3748 assertions)
+== E09 específicos
+OK (18 tests, 390 assertions)
+== PHPStan
+ [OK] No errors                                                                 
+
+== Pint
+  ⨯ bootstrap/app.php                                          ordered_imports  
+
+    PASS   ......................................................... 314 files  
+
+ [OK] No errors                                                                 
+
+No syntax errors detected in bootstrap/app.php

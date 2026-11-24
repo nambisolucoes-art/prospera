@@ -34,7 +34,7 @@ class PersonAdditionalContactsTest extends TestCase
 
     private function customers(User $owner): string
     {
-        return '/conta/empresa/'.$this->companies[$owner->account_id]->code.'/clientes';
+        return '/conta/empresa/'.$this->companies[$this->accountId($owner)]->code.'/clientes';
     }
 
     /**
@@ -78,7 +78,7 @@ class PersonAdditionalContactsTest extends TestCase
         $this->assertSame(['71999991234', '1133334444'], $event->changes['additional_phones']['after']);
         $this->assertSame(['alternativo@example.test'], $event->changes['additional_emails']['after']);
         $this->assertSame($owner->id, $event->actor_id);
-        $this->assertSame($owner->account_id, $event->account_id);
+        $this->assertSame($this->accountId($owner), $event->account_id);
 
         $this->getJson('/conta/auditoria/'.$event->id.'/visualizar')->assertOk()->assertJsonFragment([
             'label' => 'Telefones adicionais',
@@ -141,7 +141,7 @@ class PersonAdditionalContactsTest extends TestCase
             ->assertJsonValidationErrors('additional_emails');
 
         // A relação de outra conta não é encontrada pela empresa desta conta nem pela dela.
-        $relation = Customer::where('account_id', $other->account_id)->sole();
+        $relation = Customer::where('account_id', $this->accountId($other))->sole();
 
         $this->patchJson($this->customers($owner).'/'.$relation->id, ['additional_phones' => ['71999991234']])
             ->assertNotFound();
@@ -160,7 +160,7 @@ class PersonAdditionalContactsTest extends TestCase
         $platform = User::factory()->create(['is_saas_admin' => true]);
 
         $this->actingAs($platform)
-            ->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])
+            ->postJson('/saas/contas/'.$this->accountId($owner).'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])
             ->assertOk();
 
         $this->patchJson($url, ['additional_emails' => ['inspecao@example.test']])->assertNoContent();
@@ -173,12 +173,12 @@ class PersonAdditionalContactsTest extends TestCase
 
         $this->assertSame($platform->id, $event->actor_id);
         $this->assertSame($owner->id, $event->represented_user_id);
-        $this->assertSame($owner->account_id, $event->account_id);
+        $this->assertSame($this->accountId($owner), $event->account_id);
 
-        $this->postJson('/conta/inspecao/encerrar')->assertOk();
+        $this->postJson('/inspecao/encerrar')->assertOk();
 
         $this->actingAs($platform)
-            ->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
+            ->postJson('/saas/contas/'.$this->accountId($owner).'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
             ->assertOk();
 
         $count = AuditRecord::count();
@@ -210,13 +210,13 @@ class PersonAdditionalContactsTest extends TestCase
     {
         $owner = $this->owner();
         $url = $this->ownerAsCustomer($owner);
-        $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Editor de contatos']);
+        $role = Role::create(['account_id' => $this->accountId($owner), 'name' => 'Editor de contatos']);
         $role->permissions()->sync(Permission::whereIn('slug', [
             'account.customers.update',
             'account.people.view',
             'account.people.update',
         ])->pluck('id'));
-        $editor = User::factory()->forAccount($owner->account_id, $role)->create();
+        $editor = User::factory()->forAccount($this->accountId($owner), $role)->create();
 
         $this->actingAs($editor)->patchJson($url, ['additional_emails' => ['contato@example.test']])->assertNoContent();
 

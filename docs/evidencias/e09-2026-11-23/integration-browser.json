@@ -1,0 +1,189 @@
+{
+  "evidence": [
+    {
+      "round": 0,
+      "path": "/contas/laboratorio-conta-1",
+      "read": 200,
+      "write": 200,
+      "permissions": 70
+    },
+    {
+      "round": 0,
+      "path": "/contas/laboratorio-conta-2",
+      "read": 200,
+      "write": 403,
+      "permissions": 7
+    },
+    {
+      "round": 1,
+      "path": "/contas/laboratorio-conta-1",
+      "read": 200,
+      "write": 200,
+      "permissions": 70
+    },
+    {
+      "round": 1,
+      "path": "/contas/laboratorio-conta-2",
+      "read": 200,
+      "write": 403,
+      "permissions": 7
+    },
+    {
+      "round": 2,
+      "path": "/contas/laboratorio-conta-1",
+      "read": 200,
+      "write": 200,
+      "permissions": 70
+    },
+    {
+      "round": 2,
+      "path": "/contas/laboratorio-conta-2",
+      "read": 200,
+      "write": 403,
+      "permissions": 7
+    },
+    {
+      "round": 3,
+      "path": "/contas/laboratorio-conta-1",
+      "read": 200,
+      "write": 200,
+      "permissions": 70
+    },
+    {
+      "round": 3,
+      "path": "/contas/laboratorio-conta-2",
+      "read": 200,
+      "write": 403,
+      "permissions": 7
+    },
+    {
+      "width": 1440,
+      "path": "/contas",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "path": "/contas/laboratorio-conta-1/etiquetas",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "path": "/contas/laboratorio-conta-1/organizacao",
+      "overflow": false
+    },
+    {
+      "width": 1440,
+      "path": "/ajuda",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "path": "/contas",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "path": "/contas/laboratorio-conta-1/etiquetas",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "path": "/contas/laboratorio-conta-1/organizacao",
+      "overflow": false
+    },
+    {
+      "width": 1024,
+      "path": "/ajuda",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "path": "/contas",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "path": "/contas/laboratorio-conta-1/etiquetas",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "path": "/contas/laboratorio-conta-1/organizacao",
+      "overflow": false
+    },
+    {
+      "width": 768,
+      "path": "/ajuda",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "path": "/contas",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "path": "/contas/laboratorio-conta-1/etiquetas",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "path": "/contas/laboratorio-conta-1/organizacao",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "path": "/ajuda",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "path": "/contas",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "path": "/contas/laboratorio-conta-1/etiquetas",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "path": "/contas/laboratorio-conta-1/organizacao",
+      "overflow": false
+    },
+    {
+      "width": 320,
+      "path": "/ajuda",
+      "overflow": false
+    },
+    {
+      "email": "single@e09.test",
+      "count": 1,
+      "url": "http://127.0.0.1:18099/contas/laboratorio-conta-1"
+    },
+    {
+      "email": "five@e09.test",
+      "count": 5,
+      "url": "http://127.0.0.1:18099/contas"
+    },
+    {
+      "email": "none@e09.test",
+      "count": 0,
+      "url": "http://127.0.0.1:18099/contas"
+    },
+    {
+      "email": "suspended@e09.test",
+      "count": 0,
+      "url": "http://127.0.0.1:18099/contas"
+    },
+    {
+      "state": "expired",
+      "available": false
+    },
+    {
+      "state": "revoked",
+      "available": false
+    }
+  ],
+  "errors": []
+}

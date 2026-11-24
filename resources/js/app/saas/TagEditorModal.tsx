@@ -43,7 +43,7 @@ export default function TagEditorModal({
       <div ref={root} data-tour="tag-editor">
         <BusinessForm
           className="business-form--wide-labels"
-          action={tag ? `/conta/etiquetas/${tag.id}` : '/conta/etiquetas'}
+          action={tag ? `@/etiquetas/${tag.id}` : '@/etiquetas'}
           method={tag ? 'patch' : 'post'}
           options={{ preserveScroll: true }}
           onSuccess={() => onClose(true)}

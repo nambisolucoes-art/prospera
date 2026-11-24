@@ -6,6 +6,7 @@ import { useApiPage } from '@/hooks/useApiPage';
 import type { ContextEstablishment, OrganizationContextProps, SessionProps } from '@/types/Session.types';
 import { apiRequest } from '@/utils/apiRequest';
 import {
+  contextualUrl,
   pageWorkspace,
   readTabWorkspace,
   workspaceEntryUrl,
@@ -15,10 +16,10 @@ import {
 } from '@/utils/organizationContext';
 import './OrganizationSwitcher.css';
 
-const preferenceUrl = '/conta/area-de-trabalho/padrao';
-
 export default function OrganizationSwitcher({ context }: { context: OrganizationContextProps }) {
   const { props, url, navigate } = useApiPage<SessionProps>();
+  // O padrão pessoal é da conta desta aba (E09); outra aba pode estar em outra conta.
+  const preferenceUrl = contextualUrl('@/area-de-trabalho/padrao', url);
   const id = useId();
   const container = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -223,7 +224,7 @@ export default function OrganizationSwitcher({ context }: { context: Organizatio
         {!context.consolidated && (
           <a
             className="organization-switcher__open"
-            href={workspaceEntryUrl(selected.length > 0 ? selected : current)}
+            href={contextualUrl(workspaceEntryUrl(selected.length > 0 ? selected : current), url)}
             aria-disabled={busy}
             onClick={(event) => {
               // Com teclas modificadoras, o navegador abre outra aba, que começa com a própria seleção.

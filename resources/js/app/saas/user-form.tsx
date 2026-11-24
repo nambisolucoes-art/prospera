@@ -16,7 +16,7 @@ export default function UserForm({ tenant, assignmentOptions = [], canReusePerso
   const [mode, setMode] = useState('new');
   const [person, setPerson] = useState<PersonCandidate>();
   const existing = tenant && mode === 'existing';
-  const action = tenant ? '/conta/usuarios' : '/saas/usuarios';
+  const action = tenant ? '@/usuarios' : '/saas/usuarios';
   return (
     <SaasLayout title={tenant ? 'Cadastrar usuário da conta' : 'Cadastrar administrador da plataforma'} tenant={tenant} userPage
       breadcrumb={[{ label: 'Usuários', href: action }, { label: 'Cadastrar' }]}>

@@ -133,10 +133,10 @@ final class AccessController
         ApiPage::toast('Cargo salvo.');
 
         if ($request->user()->can('account.roles.list')) {
-            return redirect('/conta/cargos');
+            return redirect(app(AccountContext::class)->path('cargos'));
         }
 
-        return redirect($roleId ? '/conta/cargos/'.$roleId.'/editar' : '/conta/cargos/cadastrar');
+        return redirect(app(AccountContext::class)->path($roleId ? 'cargos/'.$roleId.'/editar' : 'cargos/cadastrar'));
     }
 
     /**

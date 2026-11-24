@@ -159,9 +159,20 @@ final class EffectivePermissions
 
         return $this->permissions[$key] ??= match (true) {
             $user->is_saas_admin => array_fill_keys($this->global->globalSlugs(['platform', 'self']), new AuthorizedNodes(true)),
-            $accountId === null => array_fill_keys($this->global->globalSlugs(['self']), new AuthorizedNodes(true)),
+            $accountId === null => array_fill_keys($this->identitySlugs($user->id), new AuthorizedNodes(true)),
             default => $this->resolveMembership($key, $user->id, $accountId),
         };
+    }
+
+    /**
+     * Fora de uma conta (perfil, segurança, ajuda), valem as permissões self concedidas pelos vínculos
+     * ativos da identidade, sem escolher uma conta. Uma identidade sem vínculo mantém as permissões self.
+     *
+     * @return list<string>
+     */
+    private function identitySlugs(int $userId): array
+    {
+        return $this->memberships->identitySelfSlugs($userId) ?? array_values($this->global->globalSlugs(['self']));
     }
 
     /** @return array<string, AuthorizedNodes> */

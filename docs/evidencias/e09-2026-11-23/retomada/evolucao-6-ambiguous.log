@@ -1,0 +1,25 @@
+
+   INFO  Rolling back migrations.  
+
+  2026_11_23_000003_remove_account_from_users .................... 5.15ms FAIL
+
+   RuntimeException 
+
+  Reversão interrompida: 1 identidade(s) com vínculos em mais de uma conta. Restaure o backup anterior à implantação da E09.
+
+  at database/migrations/2026_11_23_000003_remove_account_from_users.php:44
+     40▕             ->havingRaw('count(*) > 1');
+     41▕         $several = DB::query()->fromSub($multipleMemberships, 'multiple_memberships')->count();
+     42▕ 
+     43▕         if ($several > 0) {
+  ➜  44▕             throw new RuntimeException(
+     45▕                 "Reversão interrompida: {$several} identidade(s) com vínculos em mais de uma conta. "
+     46▕                 .'Restaure o backup anterior à implantação da E09.',
+     47▕             );
+     48▕         }
+
+      [2m+26 vendor frames [22m
+
+  27  artisan:16
+      Illuminate\Foundation\Application::handleCommand(Object(Symfony\Component\Console\Input\ArgvInput))
+

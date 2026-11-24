@@ -1,0 +1,7 @@
+
+   INFO  Rolling back migrations.  
+
+  2026_11_23_000003_remove_account_from_users ................... 10.57ms DONE
+  2026_11_23_000002_create_account_invitations ................... 4.30ms DONE
+  2026_11_23_000001_add_code_to_clients .......................... 1.86ms DONE
+

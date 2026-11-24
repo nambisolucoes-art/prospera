@@ -1,3 +1,4 @@
+import ApiLink from '@/components/ApiLink/ApiLink';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Button from '@/components/Button/Button';
@@ -327,7 +328,7 @@ export default function GuidedTour({
           </ol>
         )}
         {index >= steps.length - 1 && definition.help && (
-          <a href={definition.help}>Ler ajuda completa</a>
+          <ApiLink href={definition.help}>Ler ajuda completa</ApiLink>
         )}
         <footer className="guided-tour__actions">
           <Button tone="white" disabled={index === 0} onClick={() => go(index - 1)}>

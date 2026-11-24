@@ -1,0 +1,24 @@
+PHPUnit 12.5.44 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.13
+Configuration: /app/phpunit.xml
+
+...............................................................  63 / 265 ( 23%)
+............................................................... 126 / 265 ( 47%)
+............................................................... 189 / 265 ( 71%)
+............................................................... 252 / 265 ( 95%)
+.............                                                   265 / 265 (100%)
+
+Time: 00:25.111, Memory: 91.00 MB
+
+[30;42mOK (265 tests, 3482 assertions)[0m
+PHPUnit 12.5.44 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.5.13
+Configuration: /app/phpunit.xml
+
+.........                                                           9 / 9 (100%)
+
+Time: 00:01.500, Memory: 69.00 MB
+
+[30;42mOK (9 tests, 124 assertions)[0m

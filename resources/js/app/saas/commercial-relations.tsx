@@ -53,7 +53,7 @@ export default function CommercialRelations({ role, relations, companies, filter
   const trigger = useRef<HTMLElement | null>(null);
   const [preview, setPreview] = useState<Relation>();
   const status = useApiForm({});
-  const base = (relation: Relation) => `/conta/empresa/${relation.company.code}/${text.segment}/${relation.id}`;
+  const base = (relation: Relation) => `@/empresa/${relation.company.code}/${text.segment}/${relation.id}`;
   const close = (reset: () => void) => {
     reset();
     trigger.current?.focus();

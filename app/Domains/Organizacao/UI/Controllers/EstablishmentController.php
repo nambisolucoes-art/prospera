@@ -35,7 +35,7 @@ final class EstablishmentController
         $nodes = $permissions->nodesFor($request->user(), 'account.establishments.list');
         abort_if($nodes->isEmpty(), 403);
         $options = $this->companyOptions($companies, $accountId, $filters->companyId, $nodes);
-        $list = $establishments->list($accountId, $filters, '/conta/estabelecimentos', nodes: $nodes);
+        $list = $establishments->list($accountId, $filters, app(AccountContext::class)->path('estabelecimentos'), nodes: $nodes);
 
         return ApiPage::respond([
             'establishments' => $list->through(fn (Establishment $establishment) => [
@@ -150,10 +150,10 @@ final class EstablishmentController
         }
 
         if ($request->user()->can('account.establishments.list')) {
-            return redirect('/conta/estabelecimentos');
+            return redirect(app(AccountContext::class)->path('estabelecimentos'));
         }
 
-        return redirect('/conta/estabelecimentos/'.$saved->id.'/editar');
+        return redirect(app(AccountContext::class)->path('estabelecimentos/'.$saved->id.'/editar'));
     }
 
     public function promote(
@@ -174,7 +174,7 @@ final class EstablishmentController
             return to_route('account.organization', ['empresa' => $establishment->company_id]);
         }
 
-        return redirect('/conta/estabelecimentos');
+        return redirect(app(AccountContext::class)->path('estabelecimentos'));
     }
 
     private function node(Establishment $unit): AccessNode

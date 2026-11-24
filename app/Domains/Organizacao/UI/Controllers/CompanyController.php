@@ -27,7 +27,7 @@ final class CompanyController
         $nodes = $permissions->nodesFor($request->user(), 'account.companies.list');
         abort_if($nodes->isEmpty(), 403);
 
-        $list = $companies->list($accountId, $filters, '/conta/empresas', $nodes);
+        $list = $companies->list($accountId, $filters, app(AccountContext::class)->path('empresas'), $nodes);
 
         return ApiPage::respond([
             'companies' => $list->through(fn (Company $company) => [
@@ -99,10 +99,10 @@ final class CompanyController
         }
 
         if ($request->user()->can('account.companies.list')) {
-            return redirect('/conta/empresas');
+            return redirect(app(AccountContext::class)->path('empresas'));
         }
 
-        return redirect('/conta/empresas/'.$company->id.'/editar');
+        return redirect(app(AccountContext::class)->path('empresas/'.$company->id.'/editar'));
     }
 
     /** @return array<string,mixed> */

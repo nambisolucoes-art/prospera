@@ -6,7 +6,6 @@ use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Domain\DTOs\UserIdentityDTO;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
@@ -14,7 +13,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -30,7 +28,6 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property CarbonInterface|null $email_verified_at
  * @property string $password
  * @property bool $is_saas_admin
- * @property int|null $account_id
  * @property string|null $profile_photo
  * @property string|null $two_factor_secret
  * @property string|null $two_factor_recovery_codes
@@ -59,7 +56,6 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
             'access_enabled' => 'Acesso habilitado',
             'name' => 'Nome',
             'email' => 'E-mail',
-            'account_id' => 'Conta',
             'is_saas_admin' => 'Acesso à plataforma',
             'password' => 'Senha',
             'password_setup_pending' => 'Definição inicial de senha pendente',
@@ -97,6 +93,30 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
         ];
     }
 
+    // Conta que está criando a identidade nesta operação; não é gravada e não concede acesso.
+    private ?int $provisioningAccountId = null;
+
+    public function provisionFor(?int $accountId): void
+    {
+        $this->provisioningAccountId = $accountId;
+    }
+
+    /**
+     * Eventos da identidade (entrada, saída, perfil e segurança) não têm conta na URL (E09). Entram no
+     * histórico da conta que a cria ou, depois, só quando a identidade participa de uma única conta; com
+     * várias, ficam sem conta, sem escolher uma delas.
+     */
+    public function auditAccountId(): ?int
+    {
+        if ($this->provisioningAccountId !== null) {
+            return $this->provisioningAccountId;
+        }
+
+        $accounts = $this->memberships()->limit(2)->pluck('account_id');
+
+        return $accounts->count() === 1 ? (int) $accounts->first() : null;
+    }
+
     /** @return HasMany<AccountMembership, $this> */
     public function memberships(): HasMany
     {
@@ -121,12 +141,6 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail, Passke
     public function emailChangeRevision(): string
     {
         return hash_hmac('sha256', $this->email.'|'.$this->password, (string) config('app.key'));
-    }
-
-    /** @return BelongsTo<Client, $this> */
-    public function account(): BelongsTo
-    {
-        return $this->belongsTo(Client::class, 'account_id');
     }
 
     public static function profilePhotoPath(int $userId, string $version): string

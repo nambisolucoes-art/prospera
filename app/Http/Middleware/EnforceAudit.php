@@ -57,7 +57,7 @@ final class EnforceAudit
                     AuditLog::record(
                         'user',
                         $user->id,
-                        app(AccountContext::class)->linkedId($user),
+                        app(AccountContext::class)->linkedId($user) ?? $user->auditAccountId(),
                         'updated',
                         $user->name,
                         ['passkeys' => ['label' => 'Chaves de acesso', 'before' => null, 'after' => $after]],

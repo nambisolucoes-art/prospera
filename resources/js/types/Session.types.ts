@@ -18,13 +18,23 @@ export type OrganizationContextProps = {
   establishments: ContextEstablishment[];
 };
 
+// Conta da URL (E09), validada pelo servidor nesta requisição. Não é estado global: cada aba tem a sua.
+export type AccountContextProps = {
+  code: string;
+  name: string;
+  base: string;
+};
+
 export type SessionProps = {
   [key: string]: unknown;
   name: string;
+  account_context?: AccountContextProps | null;
   organization_context?: OrganizationContextProps | null;
   auth: {
     permissions: string[];
     inspection_mode: 'read-only' | 'edit' | null;
+    // Quantidade de contas que a identidade pode abrir; a troca de conta aparece a partir de duas.
+    accounts?: number;
     user: { id: number; name: string; email: string; email_verified_at: string | null; photo_url?: string | null; is_saas_admin: boolean } | null;
   };
 };

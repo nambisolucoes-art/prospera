@@ -472,7 +472,7 @@ final class ContextualAuditTest extends TestCase
             ->assertOk();
         $this->postJson($this->customersUrl(), ['name' => 'Bloqueada'])->assertForbidden();
         $this->assertFalse(AuditRecord::where('entity_name', 'Bloqueada')->exists());
-        $this->postJson('/conta/inspecao/encerrar')->assertOk();
+        $this->postJson('/inspecao/encerrar')->assertOk();
 
         // Leitura e edição: a escrita é do administrador, representando o titular.
         $this->actingAs($platform)
@@ -491,7 +491,7 @@ final class ContextualAuditTest extends TestCase
         $this->assertNotNull($write->inspection_id);
         $this->assertSame($started->inspection_id, $write->inspection_id);
 
-        $this->postJson('/conta/inspecao/encerrar')->assertOk();
+        $this->postJson('/inspecao/encerrar')->assertOk();
         $ended = AuditRecord::where('event', 'inspection-ended')->latest('id')->firstOrFail();
         $this->assertSame($started->inspection_id, $ended->inspection_id);
         $this->assertSame('Solicitado pelo administrador', $ended->changes['ending']['after']);
@@ -706,7 +706,7 @@ final class ContextualAuditTest extends TestCase
             ->postJson('/saas/contas/'.$this->gartan->id.'/inspecao', ['user_id' => $this->owner->id, 'mode' => 'edit'])
             ->assertOk();
         $this->postJson($this->customersUrl(), ['name' => 'Escrita em inspeção'])->assertNoContent();
-        $this->postJson('/conta/inspecao/encerrar')->assertOk();
+        $this->postJson('/inspecao/encerrar')->assertOk();
         $inspectionWrite = AuditRecord::where('entity_name', 'Escrita em inspeção')->sole();
 
         $this->actingAs($platform->fresh());

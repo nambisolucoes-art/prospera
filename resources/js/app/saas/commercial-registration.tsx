@@ -86,7 +86,7 @@ function RegistrationForm({ role, companies, companyOptions, registrationTags, r
   const lookupTimer = useRef<number>(undefined);
   const lookupRequest = useRef<AbortController | null>(null);
   const company = companies.find((option) => option.code === companyCode);
-  const action = company ? `/conta/empresa/${company.code}/${segment}${editing ? `/${editing.id}` : ''}` : '#';
+  const action = company ? `@/empresa/${company.code}/${segment}${editing ? `/${editing.id}` : ''}` : '#';
   const roleName = role === 'customer' ? 'Cliente' : 'Fornecedor';
   const roleTag = { id: 0, name: roleName, color: roleTagColor, locked: true, displayOnly: true };
   const noticePerson = found ?? departingPerson;

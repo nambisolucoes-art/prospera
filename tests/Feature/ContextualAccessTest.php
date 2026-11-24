@@ -78,6 +78,8 @@ final class ContextualAccessTest extends TestCase
             ->assertJsonPath('records.data.0.name', 'Evento permitido');
         $this->getJson('/conta/auditoria/'.$matching->id.'/visualizar')->assertOk()->assertJsonPath('technical', null);
 
+        $this->assertTrue($this->enterAccount($operator));
+        $this->assertTrue($operator->can('account.audit.list', AccessNode::company($account->id, $first->company_id)));
         $this->assertFalse($operator->can('account.audit.view', AccessNode::tenant($account->id)));
         $this->assertFalse($operator->can('account.audit.view', AccessNode::company($account->id, $b->id)));
     }
@@ -149,6 +151,7 @@ final class ContextualAccessTest extends TestCase
         $this->patchJson($url, [...$input, 'confirmed_revocations' => [$assignment->id]])->assertOk();
         $this->assertDatabaseMissing('role_assignments', ['id' => $assignment->id]);
         $this->assertDatabaseHas('role_availability', ['role_id' => $role->id, 'company_id' => $company->id]);
+        $this->assertTrue($this->enterAccount($member->fresh()));
         $this->assertFalse($member->fresh()->can('account.audit.list'));
     }
 
@@ -185,6 +188,7 @@ final class ContextualAccessTest extends TestCase
                 continue;
             }
 
+            $this->assertTrue($this->enterAccount($user));
             $permissions = app(EffectivePermissions::class);
             $permissions->forget();
             DB::enableQueryLog();
@@ -207,7 +211,8 @@ final class ContextualAccessTest extends TestCase
         $this->assertFalse(Schema::hasColumn('users', 'role_id'));
         $this->assertFalse(Schema::hasColumn('users', 'person_id'));
         $this->assertFalse(Schema::hasColumn('users', 'is_account_admin'));
-        $this->assertTrue(Schema::hasColumn('users', 'account_id'));
+        // E09: a identidade global não tem conta própria.
+        $this->assertFalse(Schema::hasColumn('users', 'account_id'));
         $this->assertSame('administrator', $this->membership($owner)->assignments()->sole()->role()->sole()->system_key);
         $this->assertSame($owner->name, $this->membership($owner)->person()->sole()->name);
         $this->assertFalse($standalone->memberships()->exists());
@@ -254,6 +259,7 @@ final class ContextualAccessTest extends TestCase
         $this->actingAs($owner)->patchJson('/conta/usuarios/'.$membership->id.'/reativar')->assertOk();
         $this->assertSame('active', $membership->fresh()->status);
         $this->assertFalse($member->fresh()->access_enabled);
+        $this->assertFalse($this->enterAccount($member->fresh()));
         $this->assertFalse($member->fresh()->can('account.establishments.list'));
 
         $this->patchJson('/conta/usuarios/'.$this->membership($owner)->id.'/suspender')->assertUnprocessable();
@@ -380,6 +386,10 @@ final class ContextualAccessTest extends TestCase
         $assignment = $this->membership($user)->assignments()->sole();
         $this->assertSame('establishment', $assignment->scope);
         $this->assertSame($unit->id, $assignment->establishment_id);
+        $this->assertFalse($this->enterAccount($user));
+        $user = $this->completeInitialSetup($user);
+        $this->assertTrue($this->enterAccount($user));
+        $this->assertTrue($user->can('account.establishments.list', AccessNode::establishment($account->id, $a->id, $unit->id)));
         $this->assertFalse($user->can('account.establishments.list', AccessNode::company($account->id, $a->id)));
     }
 
@@ -395,11 +405,14 @@ final class ContextualAccessTest extends TestCase
         $role = $this->role($second, 'Auditor', ['account.audit.list']);
         RoleAssignment::grant($secondMembership, $role, AccessNode::tenant($second->id), null)->saveOrFail();
 
-        $this->actingAs($owner)->patchJson('/conta/usuarios/'.$this->membership($member)->id.'/suspender')->assertOk();
+        $this->actingAs($owner)->patchJson('/conta/usuarios/'.$this->membership($member, $first->id)->id.'/suspender')->assertOk();
 
         $member->refresh();
         $this->assertTrue($member->access_enabled);
+        $this->assertFalse($this->enterAccount($member, $first->id));
         $this->assertFalse($member->can('account.establishments.list'));
+        $this->assertTrue($this->enterAccount($member, $second->id));
+        $this->assertTrue($member->can('account.audit.list'));
         $this->assertSame('active', $secondMembership->fresh()->status);
         $this->assertSame(1, $secondMembership->assignments()->count());
     }
@@ -557,7 +570,8 @@ final class ContextualAccessTest extends TestCase
         $this->getJson($directory)->assertJsonPath('establishments.total', 2);
         $this->postJson($directory, [...$newUnit, 'company_id' => $b->id])->assertNotFound();
 
-        $this->actingAs($platform)->getJson($audit)->assertForbidden();
+        // Sem vínculo, o endereço anterior não leva a nenhuma conta.
+        $this->actingAs($platform)->getJson($audit)->assertNotFound();
         $this->post(route('saas.accounts.inspection.start', $account), [
             'user_id' => $profiles['unidade'][0]->id, 'mode' => 'read-only',
         ])->assertRedirect();
@@ -567,7 +581,7 @@ final class ContextualAccessTest extends TestCase
         $this->getJson($audit.'?search=Verifica')->assertOk()->assertJsonPath('records.total', 1);
         $this->getJson(route('two-factor.secret-key'))->assertForbidden();
         $this->postJson(route('passkey.store'), [])->assertForbidden();
-        $this->post(route('account.inspection.end'))->assertRedirect();
+        $this->post(route('inspection.end'))->assertRedirect();
         $this->assertAuthenticatedAs($platform);
     }
 
@@ -597,6 +611,8 @@ final class ContextualAccessTest extends TestCase
 
         $id = $membership->assignments()->sole()->id;
         $migration = require database_path('migrations/2026_11_20_000007_create_contextual_access.php');
+        $globalIdentity = require database_path('migrations/2026_11_23_000003_remove_account_from_users.php');
+        $globalIdentity->down();
 
         try {
             $migration->down();
@@ -604,6 +620,8 @@ final class ContextualAccessTest extends TestCase
         } catch (\RuntimeException $exception) {
             $this->assertStringContainsString('perderia dados contextuais', $exception->getMessage());
         }
+
+        $globalIdentity->up();
 
         $this->assertDatabaseHas('role_assignments', ['id' => $id]);
         $this->actingAs($owner)->patchJson($url, ['revocations' => [$id]])->assertOk();

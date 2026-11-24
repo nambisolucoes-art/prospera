@@ -22,7 +22,7 @@ final class DirectoryController
         $delete->execute(app(AccountContext::class)->requireId(), $tagId);
         ApiPage::toast('Etiqueta excluída.');
 
-        return redirect('/conta/etiquetas');
+        return redirect(app(AccountContext::class)->path('etiquetas'));
     }
 
     public function tags(Request $request, PeopleDirectoryQuery $directory): JsonResponse|View
@@ -40,7 +40,7 @@ final class DirectoryController
             app(AccountContext::class)->requireId(),
             $filters,
             $canList,
-            $canList ? '/conta/etiquetas' : $request->url(),
+            $canList ? app(AccountContext::class)->path('etiquetas') : $request->url(),
         );
 
         return [
@@ -83,9 +83,9 @@ final class DirectoryController
         ApiPage::toast('Etiqueta salva.');
 
         if ($request->user()->can('account.tags.list')) {
-            return redirect('/conta/etiquetas');
+            return redirect(app(AccountContext::class)->path('etiquetas'));
         }
 
-        return redirect($tagId ? '/conta/etiquetas/'.$tagId.'/editar' : '/conta/etiquetas/cadastrar');
+        return redirect(app(AccountContext::class)->path($tagId ? 'etiquetas/'.$tagId.'/editar' : 'etiquetas/cadastrar'));
     }
 }

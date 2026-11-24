@@ -35,7 +35,7 @@ export default function CompanyForm({
   const cnpjLookup = useCnpjLookup(setName, setTradeName, true);
   const legalEntity = type === 'company';
   const fullCnpj = legalEntity && document.replace(/[.\/\s-]/g, '').length === 14;
-  const listHref = navigation.back ?? (can('list') ? '/conta/empresas' : undefined);
+  const listHref = navigation.back ?? (can('list') ? '@/empresas' : undefined);
   const mayChangeStatus = company !== null && (company.active ? can('deactivate') : can('activate'));
   return (
     <SaasLayout
@@ -49,7 +49,7 @@ export default function CompanyForm({
       <CardBox>
         <BusinessForm
           className="business-form--wide-labels"
-          action={`${company ? `/conta/empresas/${company.id}` : '/conta/empresas'}${navigation.suffix}`}
+          action={`${company ? `@/empresas/${company.id}` : '@/empresas'}${navigation.suffix}`}
           method={company ? 'patch' : 'post'}
         >
           {({ errors, processing }) => (
@@ -132,7 +132,7 @@ export default function CompanyForm({
                 )}
               </fieldset>
               {!readOnly && (
-                <BusinessFormActions processing={processing} cancelHref={listHref ?? '/conta'} />
+                <BusinessFormActions processing={processing} cancelHref={listHref ?? '@'} />
               )}
             </>
           )}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import { BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import { Select, type Errors } from '@/components/BusinessForm/BusinessFormFields';
 import Button from '@/components/Button/Button';
@@ -17,6 +18,7 @@ export default function RoleAvailabilityFields({ role, organization, errors }: {
   organization: AvailabilityOptions;
   errors: Errors;
 }) {
+  const to = useContextUrl();
   const [mode, setMode] = useState(role?.availability ?? 'tenant');
   const [companies, setCompanies] = useState(() => (role?.availability_nodes ?? [])
     .filter((node) => node.establishment_id === null).map((node) => node.company_id));
@@ -41,7 +43,7 @@ export default function RoleAvailabilityFields({ role, organization, errors }: {
     units.forEach((id) => query.append('available_establishments[]', String(id)));
 
     try {
-      const response = await apiRequest<{ assignments: Impact[] }>(`/conta/cargos/${roleId}/impacto-abrangencia?${query}`);
+      const response = await apiRequest<{ assignments: Impact[] }>(to(`@/cargos/${roleId}/impacto-abrangencia?${query}`));
       setImpact(response.assignments);
     } catch (error) {
       setFailure(error instanceof Error ? error.message : 'Não foi possível consultar o impacto.');

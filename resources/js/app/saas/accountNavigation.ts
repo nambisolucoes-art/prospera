@@ -20,7 +20,7 @@ const accountEntries: SidebarEntry[] = [
   {
     key: 'home',
     label: 'Início',
-    href: '/conta',
+    href: '@',
     iconClass: 'ti-home',
   },
 ];
@@ -32,14 +32,24 @@ function entry(permissions: string[], module: string, item: SidebarItem, create?
   return [];
 }
 
-export function accountNavigation(tenant: boolean, permissions: string[] = [], workspaceHref: (module: string) => string = (module) => `/conta/estabelecimento?para=${module}`) {
+// Fora de uma conta (perfil, segurança e ajuda da identidade), o menu leva só à escolha da conta e à ajuda.
+const identityEntries: SidebarEntry[] = [
+  { key: 'accounts', label: 'Contas', href: '/contas', iconClass: 'ti-briefcase' },
+];
+
+export function accountNavigation(
+  tenant: boolean,
+  permissions: string[] = [],
+  workspaceHref: (module: string) => string = (module) => `@/estabelecimento?para=${module}`,
+  inAccount = true,
+) {
   const shared: SidebarEntry[] = [
     ...(permissions.includes((tenant ? 'account' : 'platform') + '.audit.list')
       ? [
           {
             key: 'audit',
             label: 'Auditoria',
-            href: tenant ? '/conta/auditoria' : '/saas/auditoria',
+            href: tenant ? '@/auditoria' : '/saas/auditoria',
             iconClass: 'ti-time',
           },
         ]
@@ -49,20 +59,21 @@ export function accountNavigation(tenant: boolean, permissions: string[] = [], w
           {
             key: 'help',
             label: 'Central de Ajuda',
-            href: '/ajuda',
+            href: tenant && inAccount ? '@/ajuda' : '/ajuda',
             iconClass: 'ti-help-alt',
           },
         ]
       : []),
   ];
   if (!tenant) return [...platformEntries, ...shared];
+  if (!inAccount) return [...identityEntries, ...shared];
   const records: SidebarEntry[] = [
-    ...entry(permissions, 'tags', { key: 'tags', label: 'Etiquetas', href: '/conta/etiquetas', iconClass: 'ti-tag' }, '/conta/etiquetas/cadastrar'),
+    ...entry(permissions, 'tags', { key: 'tags', label: 'Etiquetas', href: '@/etiquetas', iconClass: 'ti-tag' }, '@/etiquetas/cadastrar'),
     // Relações comerciais (E07): abrem na área de trabalho, com as empresas das unidades selecionadas.
     ...entry(permissions, 'customers', { key: 'customers', label: 'Clientes', href: workspaceHref('clientes'), iconClass: 'ti-face-smile' }),
     ...entry(permissions, 'suppliers', { key: 'suppliers', label: 'Fornecedores', href: workspaceHref('fornecedores'), iconClass: 'ti-truck' }),
     // Cargos passa ao grupo Controle de acesso na E05, junto com Usuários.
-    ...entry(permissions, 'roles', { key: 'roles', label: 'Cargos', href: '/conta/cargos', iconClass: 'ti-id-badge' }, '/conta/cargos/cadastrar'),
+    ...entry(permissions, 'roles', { key: 'roles', label: 'Cargos', href: '@/cargos', iconClass: 'ti-id-badge' }, '@/cargos/cadastrar'),
   ];
   const organization: SidebarEntry[] = [
     'account.account-data.update',
@@ -70,13 +81,13 @@ export function accountNavigation(tenant: boolean, permissions: string[] = [], w
     'account.companies.create',
     'account.establishments.list',
   ].some((permission) => permissions.includes(permission))
-    ? [{ key: 'organization', label: 'Organização', href: '/conta/organizacao', iconClass: 'ti-layout-grid2' }]
+    ? [{ key: 'organization', label: 'Organização', href: '@/organizacao', iconClass: 'ti-layout-grid2' }]
     : [];
   return [
     ...(permissions.includes('account.dashboard.view') ? accountEntries : []),
     ...(records.length ? [{ key: 'records', title: 'Cadastros' }, ...records] : []),
     ...organization,
-    ...entry(permissions, 'users', { key: 'users', label: 'Usuários', href: '/conta/usuarios', iconClass: 'ti-user' }, '/conta/usuarios/cadastrar'),
+    ...entry(permissions, 'users', { key: 'users', label: 'Usuários', href: '@/usuarios', iconClass: 'ti-user' }, '@/usuarios/cadastrar'),
     ...shared,
   ];
 }

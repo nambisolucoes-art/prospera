@@ -3,10 +3,11 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da arquitetura multi-tenant, multiempresa e multiestabelecimento |
-| Situação do documento | Aprovado. E01 a E08 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 homologada formalmente em 23/11/2026, com referência em `7cd9b9d` e complementação validada sobre `845218a` (seção 26). E09 e E10 pendentes. Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026, encerrada no mesmo dia com a suíte estabilizada (seção 26), sem reabrir etapas homologadas |
+| Situação do documento | Aprovado. E01 a E09 concluídas. E06 homologada conforme autorização da E07. E07 homologada em 21/11/2026. E08 homologada formalmente em 23/11/2026, com referência em `7cd9b9d` e complementação validada sobre `845218a` (seção 26). E09 homologada formalmente em 23/11/2026 sobre o HEAD `48e2191` com a árvore de trabalho validada (seção 26). E10 pendente. Revisão complementar dos documentos fiscais e de matriz e filial em 23/11/2026, encerrada no mesmo dia com a suíte estabilizada (seção 26), sem reabrir etapas homologadas |
 | Base de código auditada | Branch `feat/filtros-calendario-titulos`, commit `76c698c` |
 | Data da auditoria complementar | 19/11/2026 |
 | Homologação técnica da E08 | 23/11/2026: Concluída; evidências, limitações aceitas e condições de implantação na seção 26 |
+| Homologação técnica da E09 | 23/11/2026: Concluída; evidências, limitações aceitas e condições de implantação na seção 26 e no relatório da E09 |
 | Revisão | 6 (20/11/2026): encerramento da E02. Revisão 5 (20/11/2026): execução da E02. Revisão 4 (19/11/2026): fechamento da E01 com dois refinamentos obrigatórios para a E02 (identidade global sem alteração direta pelo tenant; contatos centrais separados dos contatos da relação comercial). As revisões 2 e 3 seguem válidas. Detalhes no registro da seção 26 |
 | Revisões 5 e 6 | Revisão 6: ajustes da validação (identidade, contatos, segurança de e-mail na E05, URLs) e aprovação de DA-26 a DA-30. Revisão 5: execução da E02 (contrato organizacional). Convenções publicadas em `docs/convencoes/`, `AGENTS.md` emendado e nomenclaturas fechadas (DA-26 a DA-30). Seções 6.2, 6.3, 7.2, 8.2.1, 10.2.1, 12.1, 12.2, E04, R07, 26, 27 e 28 ajustadas. Detalhes no registro da seção 26 |
 | Antecessor | Relatório de auditoria arquitetural apresentado na sessão anterior (não versionado) |
@@ -228,7 +229,7 @@ Decisões consolidadas. O registro formal está na seção 28.
 | DA-25 | Contatos centrais da pessoa separados dos dados e contatos da relação comercial de cada empresa. Alteração local não modifica dados comerciais de outras empresas. A política campo a campo de edição e visibilidade é fechada na E02 (revisão 4) | [DP] |
 | DA-26 | O contrato organizacional é publicado em convenções separadas por assunto (`contexto-organizacional.md`, `identidade-e-vinculos.md`, `pessoas-e-contatos.md`, `performance.md`, `checklist-modulos.md`), além de `permissoes.md` e `auditoria.md` atualizadas, e referenciado no `AGENTS.md` (revisão 5) | [R] Aprovada |
 | DA-27 | Nomes de código: domínio `App\Domains\Organizacao`; `App\Support\TaxDocument`; serviços `scoped` em `App\Domains\Acessos\Application\Context` (`AccountContext`, `EffectivePermissions`, `OrganizationContext`); middleware `ResolveOrganizationContext`; models `Company`, `Establishment`, `AccountMembership`, `RoleAssignment`, `RoleAvailability`; permissões `account.account-data.update`, `account.establishments.promote`, `account.users.reactivate`, `account.users.send-password-reset` e `account.users.invite` (revisões 5 e 6) | [R] Aprovada |
-| DA-28 | URLs e identificadores: operação em `/conta/empresa/{empresa}` e `/conta/estabelecimento/{estabelecimento}`, consolidado pelo código reservado `todos`, tenant em `/contas/{conta}` (E09); administração com ID numérico; código com letras minúsculas, números e hífen, de 2 a 40 caracteres, único por tenant, imutável na v1, com palavras reservadas; terminologia de menus da convenção; o identificador técnico do tenant é definido na E09 (revisões 5 e 6) | [R] Aprovada |
+| DA-28 | URLs e identificadores: operação em `/contas/{conta}/empresa/{empresa}` e `/contas/{conta}/estabelecimento/{estabelecimento}`, consolidado pelo código reservado `todos`, tenant em `/contas/{conta}` (E09); administração com ID numérico; código com letras minúsculas, números e hífen, de 2 a 40 caracteres, único por tenant, imutável na v1, com palavras reservadas; terminologia de menus da convenção; o identificador técnico do tenant é definido na E09 (revisões 5 e 6) | [R] Aprovada |
 | DA-29 | Fluxos de identidade: troca de e-mail só depois da confirmação no novo endereço, com aviso ao anterior e encerramento das demais sessões; respostas neutras também na recuperação de senha e na troca do próprio e-mail; disparo do link de redefinição e reenvio de convite só por escopo tenant; limitação de tentativas; correções I1 e I2 na E05, com I2 como condição para disponibilizar publicamente os fluxos afetados (revisões 5 e 6) | [R] Aprovada |
 | DA-30 | Pessoas: classificação dos campos atuais (identificação central, contatos centrais, endereço, dados comerciais por empresa, contatos da relação, dados operacionais restritos), `contact_name` mantido central, seções "Dados centrais" e "Dados desta empresa" só com mais de uma empresa ativa, aviso permanente de cadastro compartilhado ao editar contatos e endereço centrais e aviso adicional para pessoa com várias empresas; "Pessoa de contato" por empresa avaliada na E07 (revisões 5 e 6) | [R] Aprovada |
 
@@ -838,7 +839,7 @@ A permissão da operação continua sendo verificada pela rota ou Action. São v
 
 - **Códigos:** são únicos por tenant e o estabelecimento determina a empresa. Prefixos, formato do código e palavras reservadas foram fechados na E02 (DA-28, `docs/convencoes/contexto-organizacional.md`). O singular identifica o contexto operacional; o plural, o cadastro administrativo.
 - **Empresa pequena:** se o tenant tem uma empresa e uma unidade, uma rota sem código redireciona para a unidade principal e o seletor fica oculto. O contexto continua sempre definido na URL.
-- **Tenant na URL:** só é necessário com vários vínculos (E09). Prefixo de caminho aprovado (PD-04): `/contas/{conta}/...` no lugar de `/conta/...` (E02, DA-28).
+- **Tenant na URL:** obrigatório para qualquer quantidade de vínculos (E09, revisão da PD-04 de 23/11/2026). Prefixo de caminho aprovado (PD-04): `/contas/{conta}/...` no lugar de `/conta/...` (E02, DA-28).
 
 ### 12.3 Várias abas
 
@@ -1863,11 +1864,11 @@ O pico adicional do PHP foi 282.224 bytes por requisição. O uso inicial perman
 - Convite de identidade existente para outro tenant cria só o vínculo e a pessoa naquele tenant.
 - Revogar o vínculo afeta só aquele tenant.
 - A liberação de vários vínculos por identidade fica atrás de uma chave de configuração, desligada por padrão, até concluir a validação.
-- A remoção de `users.account_id` é a última entrega da etapa e só ocorre depois de um período de estabilidade com a chave ligada. As demais colunas citadas na revisão anterior foram removidas na E05.
+- A remoção definitiva de `users.account_id` foi autorizada sem período artificial de estabilidade, após substituir suas dependências. As demais colunas citadas na revisão anterior foram removidas na E05.
 
 **Escopo técnico.**
 - **Banco:** remoção de `users.account_id` após a seleção de tenant usar o vínculo.
-- **Backend:** resolução do tenant pela URL ou pelo host; seleção de conta; `EnforceAccountInspection` e `AccountInspectionSession` por vínculo; `CreateUserAction` com identidade existente.
+- **Backend:** resolução do tenant exclusivamente pela URL; seleção de conta; `EnforceAccountInspection` e `AccountInspectionSession` por vínculo; `CreateUserAction` com identidade existente.
 - **Frontend:** tela de seleção de conta; seletor de conta na barra superior quando houver mais de uma.
 
 **Componentes envolvidos.**
@@ -2054,7 +2055,7 @@ Regras gerais:
 | E05 | `account_memberships`, `role_availability`, `role_assignments` | Um vínculo por usuário com conta; uma atribuição de escopo tenant por `users.role_id`; todos os cargos com disponibilidade `tenant`. Reproduz exatamente o acesso atual. `000008` remove o cargo único, o indicador de administrador e o vínculo direto com Pessoa | Expansão reversível com dados representáveis. Contração por restauração de cópia anterior |
 | E07 | `company_id` em `customers` e `suppliers`; etiquetas comerciais derivadas | A empresa única de cada tenant (equivalente ao estado atual) | R até existir pessoa com relação em duas empresas; depois a `down()` aborta (recuperação B) |
 | E08 | Índices de leitura; consolidação legada | Linhas legadas copiadas com `legacy_key`; originais mantidas até a validação | R; a remoção das tabelas legadas é B (com exportação) |
-| E09 | Liberação de vários vínculos e remoção de `users.account_id` | Liberação por chave; contração só depois do período de estabilidade | R até a primeira identidade com dois vínculos; depois B. A contração é B |
+| E09 | Liberação de vários vínculos e remoção de `users.account_id` | Liberação por chave; contração autorizada na E09 após substituir dependências e validar, sem espera artificial | R até a primeira identidade com dois vínculos; depois B. A contração é B |
 
 **Antes da E04**, executar no ambiente de produção, em modo leitura e com autorização, as contagens de `clients`, `establishments`, `points`, `users` e `directory_audit_events`. O banco local tem 1 conta, 0 estabelecimentos, 0 pontos, 2 usuários e 2 cargos.
 
@@ -2092,7 +2093,7 @@ Revisão 3: decisões PD-01 a PD-06 **aprovadas** pelo responsável do produto e
 | PD-01 | Campos fiscais próprios de empresa e estabelecimento, com componentes de interface e validação (`TaxDocument`) reutilizáveis | O AGENTS.md diz que CPF/CNPJ pertence a Pessoas: emenda na E02. Os dados de `clients` passam a significar contratante (6.7) | **Aprovada** | E02, E04 |
 | PD-02 | Auditoria global da plataforma restrita aos eventos de plataforma e administrativos das contas, preservando a inspeção autorizada | `AuditAndGuidanceTest` (linhas 95 e 96) espera hoje a visão global: o teste será reescrito. A ajuda `auditoria.md` será revisada. A lista exata de eventos administrativos visíveis (provisionamento, situação, plano, inspeções) será fechada na E08 | **Aprovada** | E08 |
 | PD-03 | Mesmo CNPJ permitido em empresas de tenants distintos (unicidade por tenant) | Sem conflito com `clients.document`, avaliado em separado (PD-07) | **Aprovada** | E02, E04 |
-| PD-04 | Prefixo de caminho para o tenant, inicialmente | As URLs `/conta/...` continuam sem prefixo enquanto houver um vínculo só. Com vários vínculos, o prefixo é obrigatório e as URLs antigas redirecionam para o tenant escolhido. Cookie de sessão único por domínio, compatível porque o contexto vem da URL | **Aprovada** | E09 |
+| PD-04 | Prefixo de caminho para o tenant, inicialmente | Decisão anterior substituída em 23/11/2026: todas as URLs usam `/contas/{conta}/...`, inclusive com vínculo único. GET/HEAD antigos só redirecionam sem ambiguidade; com várias contas, abrem a seleção. Escritas antigas não são executadas nem redirecionadas. Cookie de sessão único por domínio, compatível porque o contexto vem da URL | **Aprovada** | E09 |
 | PD-05 | Remoção controlada de Pontos, condicionada à verificação de dados e dependências | Rotas de Pontos são a escrita de prova em `AccountInspectionTest` (61, 80 e 84) e `SaasPlatformTest` (98 a 116): substituir por rota de estabelecimento. O cargo inicial `member` precisa de permissão substituta (8.4). Ajuda e tours de Minha conta e Contas. Contagem em produção antes da E04 | **Aprovada** | E04 |
 | PD-06 | Resumo de Acesso no lugar de uma tela de Permissões | Nenhuma | **Aprovada** | E02, E05 |
 | PD-07 | Unicidade global de `clients.document` (avaliação separada pedida na aprovação da PD-03) | Recomendação: **manter** como está (6.7). Não exige alteração de código nem de banco; a E04 deixa de tocar nessa coluna. Uma mudança futura exigiria uma entidade de contratante explícita | **Recomendação: manter o estado atual.** Confirmação desejável, mas não bloqueia nenhuma etapa, porque não há mudança | |
@@ -2118,7 +2119,7 @@ Estados: Pendente, Em execução, Bloqueada, Em validação, Concluída.
 | E06 | Concluída (homologada) | 20/11/2026 | | Registro de execução na seção 26 e homologação confirmada na autorização da E07 | Pendências de implantação e de módulos operacionais preservadas |
 | E07 | Concluída | 21/11/2026 | 21/11/2026 | Auditoria final na subseção E07 e homologação nesta seção | Privacidade da descoberta corrigida e verificada; tema disponível aprovado |
 | E08 | Concluída | 21/11/2026 | 23/11/2026 | `7cd9b9d`, retomada, matriz de cobertura, medições e homologação formal na seção 26 | Homologação técnica aprovada; limitações sintéticas aceitas e condições futuras de implantação preservadas |
-| E09 | Pendente | | | | |
+| E09 | Concluída | 23/11/2026 | 23/11/2026 | [Validação integrada](001-e09-validacao-integrada.md): PostgreSQL 18, concorrência, FrankenPHP, Chromium e suíte completa, refeitos sobre a árvore final; homologação formal na seção 26 | Homologação técnica aprovada; implantação não executada e condicionada às pendências operacionais registradas |
 | E10 | Pendente | | | | |
 
 ### Registro de execução
@@ -3344,6 +3345,9 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | E08 | E08-D1 a E08-D6: lista da PD-02, integridade por FKs compostas e CHECKs, identificação histórica da inspeção, nó da disponibilidade restrita, índices de leitura e importação legada | Aprovadas na homologação técnica | 23/11/2026 | Revisão técnica de 21/11/2026 preservada; homologação formal na seção 26 |
 | E08 | Encerramento técnico: núcleo `7cd9b9d` e complementação validada sobre `845218a`, com contrato de Pessoas interno preservado | Concluída | 23/11/2026 | 256 testes PHP e 3.315 asserções; 18 testes E08 e 378 asserções; 19 testes frontend; sem implantação ou autorização de E09/E10 |
 | E08 | Limitações de busca ampla, linha de base sintética, memória, retenção e arquivamento | Aceitas, sem bloqueio técnico | 23/11/2026 | Busca em um milhão: mediana aproximada 533 ms e p95 561 ms; otimização futura baseada em uso, planos e custo de inserção; sem infraestrutura ou índices especulativos |
+| E09 | Identidade global sem `users.account_id`; conta na URL `/contas/{conta}` validada pelo vínculo ativo; `clients.code` único, com formato e imutável; seleção automática com um vínculo e explícita com vários; convite só para identidade existente, token SHA-256 de uso único preso ao destinatário; flag `prospera.multiple_accounts` sem efeito sobre vínculos existentes | Aprovadas na homologação técnica | 23/11/2026 | Relatório da E09 e homologação formal na seção 26 |
+| E09 | Encerramento técnico sobre o HEAD `48e2191` com a árvore de trabalho validada, sem commit | Concluída | 23/11/2026 | 274 testes PHP e 3.748 asserções; 18 testes E09 e 390 asserções; 20 testes frontend; 12.000 requisições FrankenPHP amostradas; sem implantação nem início da E10 |
+| E09 | Limitações de medição sintética, acessibilidade básica e flag desligada por padrão até liberação operacional | Aceitas, sem bloqueio técnico | 23/11/2026 | Medições em host compartilhado e bcrypt de custo 4; auditoria com leitor de tela futura |
 | RF-01 | Padronização de CPF e CNPJ: máscara na digitação, validação visual, CNPJ alfanumérico e correção de listagens e fichas | Aprovada | 23/11/2026 | Revisão complementar fiscal na seção 26 |
 | RF-02 | A matriz não é pré-requisito da filial: uma empresa pode administrar só filiais no Prospera; a matriz cadastrada aparece só como referência, conforme permissão | Aprovada (cadastro obrigatório da matriz rejeitado) | 23/11/2026 | Complementa DA-04 e a seção 6.5. Sem matriz fictícia nem principal duplicada |
 | RF-03 | Estabelecimentos na navegação administrativa e na arquitetura técnica; Unidades na Área de Trabalho e no seletor organizacional | Aprovada | 23/11/2026 | Sem renomear tabelas, Models, rotas ou domínios |
@@ -3351,3 +3355,134 @@ Ver o checklist oficial: propriedade e escopo, permissões e autorização, comp
 | RF-05 | Pessoas sem tela própria (`2ba26f7`): Clientes, Fornecedores e Usuários são as entradas; `account.people.list` e `account.users.update` retiradas | Registro de decisão já implementada | 21/11/2026 | Registrada em 23/11/2026; testes migrados aos caminhos vigentes |
 
 Decisões novas surgidas durante a execução devem ser registradas aqui antes de alterar o contrato, com a justificativa e o impacto nas etapas.
+
+
+### Checkpoint de retomada da E09 em 23/11/2026
+
+**Estado: Em validação, com implementação e evidências ainda incompletas.** Não representa conclusão
+técnica nem homologação. A autorização do usuário cobre E09.2 a E09.10. E10 não foi iniciada.
+
+Decisões aprovadas: código público `clients.code` único na plataforma, imutável e com 2 a 40 caracteres;
+URL explícita para todos os tenants; remoção de `users.account_id` sem espera artificial; convites de
+identidades existentes com hash, validade, revogação e aceite autenticado. O código não autoriza acesso.
+A chave `prospera.multiple_accounts` controla novas associações por convite, preservando resolução,
+autorização e seleção dos vínculos existentes quando desligada. Não escolhe arbitrariamente uma conta.
+
+A revisão da PD-04 substitui a URL implícita para vínculo único para preservar contexto explícito,
+independência entre abas e inspeção SaaS. A migration de contração aborta sua reversão antes de alterar
+o esquema se houver identidade com vários vínculos. Recuperação nesse caso exige correção para frente
+ou restauração de backup verificado com autorização explícita, nunca escolher uma conta arbitrária.
+
+Retomada: preservadas as alterações existentes. Acrescentadas telas ausentes de seleção e aceite,
+exibição e revogação de convites pendentes, imports ausentes, tours, ajuda e contratos de navegação.
+Pessoa do destinatário é criada no aceite, quando não existe pessoa indicada dentro da própria conta.
+Não há concessão de vínculo pendente por correspondência de e-mail.
+
+Verificações: PHPUnit direto em container descartável, sem rede, SQLite em memória: 258 testes e 3.370
+asserções aprovados antes do último cenário adicional. Testes específicos depois: 3 testes e 20
+asserções aprovados, incluindo chave desligada, isolamento, URL antiga de escrita, destinatário,
+uso único, expiração e revogação. Frontend: 20 testes aprovados. PHPStan sem erros e Pint aprovado.
+Build inicial aprovado; nova execução após exposição de convites registrada na sessão.
+
+Limitações e pendências para fechar a entrega: medições antes/depois em PostgreSQL isolado, validação
+de instalação e evolução em PostgreSQL, concorrência de códigos e aceites, workers reais FrankenPHP,
+regressão específica do Fortify para convites revogados, revisão arquitetural das consultas ainda
+presentes fora de Query e filtro de convites antes do limite. Seleção usa duas consultas para incluir
+cargos, enquanto o plano previa uma; precisa de medição e decisão documentada. Validação visual de
+seleção, convite, revogação e tours em 1440, 390 e 320 px ainda não realizada. Não há evidência visual
+nem de performance produzida nesta retomada. Esses itens impedem declarar E09.2 a E09.10 concluídas.
+
+Nenhum container oficial ou banco compartilhado foi alterado. Dependências locais instaladas a partir
+do lock. Sem commit ou push. Ajuda e tours usam a integração já existente; homologação formal pendente.
+
+
+### Validação integrada da E09 em 23/11/2026
+
+**Estado: Em validação, aguardando homologação formal.** Este registro supera o checkpoint parcial
+anterior quanto às lacunas técnicas. Não homologa automaticamente a E09 e não inicia a E10.
+
+O [relatório integrado](001-e09-validacao-integrada.md) registra diagnóstico, decisões reaproveitadas,
+correções, matriz de requisitos, instalação e evolução PostgreSQL 18, remoção de `users.account_id`,
+backup/restauração, concorrência, isolamento, Fortify, flag, autoria, inspeção e Chromium em 1440,
+1024, 768, 390 e 320 px. Evidências e scripts estão versionados, com limitações das medições explícitas.
+
+Resultado final: 267 testes PHP e 3.494 asserções; 11 testes específicos e 136 asserções; 20 testes
+frontend; build, tipos, PHPStan, Pint, permissões, auditoria e estrutura organizacional aprovados.
+Ensaios de 6.000 requisições amostradas com um e dois workers FrankenPHP, além das requisições de
+controle, sem respostas inesperadas. A seleção agora executa uma consulta própria. Convites de
+identidade nova permanecem no Fortify e não permitem operar com senha inicial pendente.
+
+Os bancos descartáveis finais não têm `users.account_id`. Nenhum banco ou container oficial foi
+alterado. Sem commit ou push. Implantação, liberação operacional e homologação formal continuam
+fora desta execução. Não há integração pendente de ajuda ou tours dessas telas.
+
+### Homologação formal e encerramento da E09 em 23/11/2026
+
+**Estado definitivo: Concluída.** O usuário autorizou expressamente a conferência de homologação da E09
+(Identidade global e acesso a múltiplas contas), com base na validação integrada e na retomada. E01 a
+E09 estão concluídas; a E10 permanece pendente, sem autorização de início. Os registros anteriores de
+Em validação (checkpoint de retomada e validação integrada, cujos números de 267 testes foram superados
+pela retomada) são checkpoints históricos preservados. E05 a E08 não foram reabertas.
+
+**Última verificação técnica: consulta adicional em Etiquetas e Área de Trabalho.** A consulta é
+`select workspace_establishments from account_memberships where account_id = ? and user_id = ? and
+status = 'active' limit 1`, feita por `OrganizationContext::defaultCodes` (E06, sem alteração pela
+E09) para ler o padrão pessoal da Área de Trabalho. Ela só ocorre quando a pessoa tem mais de uma
+unidade navegável na conta; com uma unidade não há seletor nem preferência a ler. A linha de base
+(`octane-final-2.json`, 16:00) foi medida antes de os fixtures ganharem a "Unidade adicional" na conta
+1, incluída para a prova da Área de Trabalho; às 16:07 a mesma diferença já aparecia. Prova por
+experimento em PostgreSQL descartável: com a unidade adicional inativa, Etiquetas e Área de Trabalho
+da conta 1 caem para 9 e 6 consultas, sem a leitura; reativada, voltam a 10 e 7, com a leitura; a conta 2,
+de uma unidade, nunca a executa. Conclusão: alteração legítima do fluxo funcional, dependente do dado,
+não redundante (uma leitura por requisição, já filtrada pelo vínculo ativo) e não introduzida pela E09.
+Nenhuma otimização, cache ou índice foi acrescentado. Evidências em
+`docs/evidencias/e09-2026-11-23/homologacao/`; o script reutilizável é `tests/Performance/e09-route-queries.php`.
+
+**Decisões confirmadas.** Identidade global independente dos tenants; `users.account_id` ausente no
+esquema e sem dependência de execução; `clients.code` único, com formato, palavras reservadas e
+imutabilidade no PostgreSQL; URLs `/contas/{conta}/...`; entrada automática com um vínculo e escolha
+explícita com vários, sem seleção implícita para escrita; convites para identidades existentes com
+aceite legítimo, token só como SHA-256, uso único e destinatário preso à identidade; flag sem perda de
+vínculos ou permissões; permissões, dados e auditoria isolados por conta; inspeção SaaS presa à conta
+inspecionada, com autoria real e sem alterar preferências; preferências da Área de Trabalho por usuário
+e conta; abas independentes. Pessoas continua estrutura central interna, sem cadastro avulso, e novas
+etiquetas só nos módulos comerciais; o domínio de Etiquetas não foi alterado pela E09.
+
+**Evidências homologadas.** Repetição nesta conferência, com a árvore final: PHPUnit completo 274 testes
+e 3.748 asserções; específicos da E09 18 testes e 390 asserções; contexto organizacional, Área de
+Trabalho e Pessoas 40 testes e 629 asserções; frontend 20 testes; arquitetura, tipos, build, PHPStan e
+Pint aprovados. Da validação integrada e da retomada: migrations limpas e evolutivas em PostgreSQL 18
+com hashes preservados, reversão condicionada e restauração; corridas reais de aceite, emissão, código,
+revogação, cargo, último administrador, concessão e suspensão em voo; 6.000 requisições amostradas com
+um worker e 6.000 com dois workers FrankenPHP, sem respostas inesperadas e sem crescimento contínuo de
+memória; flag desligada sob HTTP real; Chromium em 1440, 1024, 768, 390 e 320 px; `permissions:sync`
+com 82 permissões, `audit:check` com 13 modelos e `organization:check` sem violações.
+
+**Limitações expressamente aceitas, sem bloqueio ao encerramento técnico.**
+
+1. Latências e memória são linha de base sintética em host compartilhado, com bcrypt de custo 4, sem
+   garantia de desempenho ou dimensionamento de produção.
+2. A acessibilidade foi verificada em nível básico (nomes acessíveis, teclado e Escape), sem auditoria
+   com leitor de tela.
+3. O e-mail foi validado apenas com transporte em memória; nenhum provedor real foi usado.
+4. A flag `prospera.multiple_accounts` tem padrão desligado e só deve ser ligada por decisão operacional.
+5. A resolução da conta e, com mais de uma unidade navegável, a leitura da preferência da Área de
+   Trabalho são feitas a cada requisição, sem cache entre requisições, por segurança no Octane.
+
+**Homologação técnica não é implantação.** Bases oficiais, containers oficiais e produção não foram
+alterados. Permanecem pendências operacionais da implantação futura: backup recuperável e verificado
+da base a migrar; janela de migrations, com a contração de `users.account_id` como ponto sem reversão
+simples após o primeiro vínculo múltiplo; política de ativação da flag; configuração e validação do
+provedor de e-mail; reinício controlado dos workers; tratamento das sessões existentes (novo login
+das sessões anteriores à contração); monitoramento inicial de erros, latência, memória e consultas após
+a implantação; e revisão aprofundada de acessibilidade quando programada.
+
+**Checkpoint documental e Git.** Branch `feat/filtros-calendario-titulos`, HEAD `48e2191`, nada em
+staging nem stash. A árvore contém 100 arquivos rastreados modificados (incluindo a remoção de
+`routes/context.php`, substituído por `routes/account.php`) e 283 arquivos não rastreados em 41
+entradas: código, migrations e testes da E09, scripts de laboratório e navegador, ajuda, tour,
+relatório e 237 arquivos de evidência em `docs/evidencias/e09-2026-11-23/`. Não foi identificada
+alteração de outra frente pelos caminhos e conteúdo; a autoria por sessão não é recuperável pelo Git.
+Esta formalização alterou somente este plano, o relatório da E09, o README de Performance e acrescentou
+`tests/Performance/e09-route-queries.php` e a pasta de evidências `homologacao`. Sem commit, push,
+reset ou stash. A E10 não foi iniciada.

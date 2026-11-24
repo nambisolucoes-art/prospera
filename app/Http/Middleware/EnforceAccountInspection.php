@@ -71,7 +71,7 @@ final readonly class EnforceAccountInspection
                 : to_route('login');
         }
 
-        if ($request->routeIs('account.inspection.end', 'logout')) {
+        if ($request->routeIs('inspection.end', 'logout')) {
             return $next($request);
         }
 

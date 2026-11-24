@@ -54,7 +54,7 @@ export default function Organization({
   const previewTrigger = useRef<HTMLElement | null>(null);
   const companyRows = [...(focusedCompany ? [focusedCompany] : []), ...(companies?.data ?? [])];
   const companyPage = new URLSearchParams(url.split('?')[1]).get('page');
-  const treePath = '/conta/organizacao';
+  const treePath = '@/organizacao';
   const origin = 'origem=organizacao';
   const companyPageParam = companyPage ? `&page=${encodeURIComponent(companyPage)}` : '';
   const closePreview = () => {
@@ -88,7 +88,7 @@ export default function Organization({
                   {writable && (unit.can_update ?? can('account.establishments.update')) && (
                     <Button iconOnly tone="primary" leftIconClass="fa fa-pencil"
                       title="Editar cadastro" aria-label={`Editar estabelecimento ${unit.name}`}
-                      href={`/conta/estabelecimentos/${unit.id}/editar?${origin}`} />
+                      href={`@/estabelecimentos/${unit.id}/editar?${origin}`} />
                   )}
                 </div>
               </NestableRow>
@@ -112,11 +112,11 @@ export default function Organization({
           <div className="business-list__actions organization-tree__actions">
             {writable && can('account.account-data.update') && (
               <Button iconOnly tone="primary" leftIconClass="fa fa-pencil" title="Editar dados da conta"
-                aria-label="Editar dados da conta" href={`/conta/editar?${origin}`} />
+                aria-label="Editar dados da conta" href={`@/editar?${origin}`} />
             )}
             {writable && can('account.companies.create') && (
               <Button iconOnly tone="primary" leftIconClass="fa fa-plus" title="Cadastrar empresa"
-                aria-label="Cadastrar empresa" href={`/conta/empresas/cadastrar?${origin}`} />
+                aria-label="Cadastrar empresa" href={`@/empresas/cadastrar?${origin}`} />
             )}
           </div>
         </NestableRow>
@@ -155,12 +155,12 @@ export default function Organization({
                           {writable && (company.can_update ?? can('account.companies.update')) && (
                             <Button iconOnly tone="primary" leftIconClass="fa fa-pencil"
                               title="Editar cadastro" aria-label={`Editar empresa ${label}`}
-                              href={`/conta/empresas/${company.id}/editar?${origin}`} />
+                              href={`@/empresas/${company.id}/editar?${origin}`} />
                           )}
                           {writable && company.active && (company.can_add_establishments ?? can('account.establishments.create')) && (
                             <Button iconOnly tone="primary" leftIconClass="fa fa-plus"
                               title="Cadastrar estabelecimento" aria-label={`Cadastrar estabelecimento em ${label}`}
-                              href={`/conta/estabelecimentos/cadastrar?empresa=${company.id}&${origin}`} />
+                              href={`@/estabelecimentos/cadastrar?empresa=${company.id}&${origin}`} />
                           )}
                         </div>
                       </NestableRow>

@@ -123,6 +123,7 @@ final class OrganizationMigrationTest extends TestCase
 
         $this->assertContains('account.points.list', $member->permissions()->pluck('slug')->all());
         $this->assertNotContains('account.establishments.list', $member->permissions()->pluck('slug')->all());
+        $this->assertTrue($this->enterAccount($owner->fresh()));
         $this->assertContains('account.points.create', $owner->fresh()?->permissionSlugs() ?? []);
 
         DB::table('points')->insert([

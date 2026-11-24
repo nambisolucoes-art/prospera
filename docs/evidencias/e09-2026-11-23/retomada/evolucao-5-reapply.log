@@ -1,0 +1,7 @@
+
+   INFO  Running migrations.  
+
+  2026_11_23_000001_add_code_to_clients .......................... 8.62ms DONE
+  2026_11_23_000002_create_account_invitations .................. 12.93ms DONE
+  2026_11_23_000003_remove_account_from_users .................... 8.08ms DONE
+

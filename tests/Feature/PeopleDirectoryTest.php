@@ -39,17 +39,17 @@ class PeopleDirectoryTest extends TestCase
 
     private function customers(User $owner): string
     {
-        return '/conta/empresa/'.$this->companies[$owner->account_id]->code.'/clientes';
+        return '/conta/empresa/'.$this->companies[$this->accountId($owner)]->code.'/clientes';
     }
 
     private function unit(User $owner): string
     {
-        return '/conta/estabelecimento/'.$this->companies[$owner->account_id]->primaryEstablishment()->sole()->code;
+        return '/conta/estabelecimento/'.$this->companies[$this->accountId($owner)]->primaryEstablishment()->sole()->code;
     }
 
     private function memberRole(User $owner): int
     {
-        return (int) Role::where('account_id', $owner->account_id)->where('system_key', 'member')->value('id');
+        return (int) Role::where('account_id', $this->accountId($owner))->where('system_key', 'member')->value('id');
     }
 
     public function test_person_can_gain_access_without_creating_another_person(): void
@@ -80,13 +80,13 @@ class PeopleDirectoryTest extends TestCase
         $user = $person->user()->sole();
 
         $this->assertSame('maria@example.test', $user->email);
-        $this->assertSame($owner->account_id, $user->account_id);
+        $this->assertSame($this->accountId($owner), $this->accountId($user));
         $this->assertTrue($person->tags()->where('system_key', 'user')->exists());
         $this->assertTrue($person->customers()->sole()->active);
         $this->assertDatabaseHas('audit_records', [
             'entity_type' => 'user',
             'actor_id' => $owner->id,
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
             'event' => 'created',
         ]);
     }
@@ -106,7 +106,7 @@ class PeopleDirectoryTest extends TestCase
             'scope' => 'tenant',
         ])->assertNotFound();
 
-        $special = Tag::userTag($a->account_id);
+        $special = Tag::userTag($this->accountId($a));
 
         $this->patch('/conta/etiquetas/'.$special->id, [
             'name' => 'Outro',
@@ -130,7 +130,7 @@ class PeopleDirectoryTest extends TestCase
             ->assertUnprocessable();
         $this->assertDatabaseMissing('people', ['name' => 'Teste']);
 
-        $member = User::factory()->forAccount($a->account_id)->create();
+        $member = User::factory()->forAccount($this->accountId($a))->create();
 
         $this->actingAs($member->fresh())->getJson($this->unit($a).'/clientes')->assertForbidden();
     }
@@ -205,7 +205,7 @@ class PeopleDirectoryTest extends TestCase
 
         $this->postJson($this->customers($owner), [
             'name' => 'Com etiqueta',
-            'tag_ids' => [Tag::userTag($owner->account_id)->id],
+            'tag_ids' => [Tag::userTag($this->accountId($owner))->id],
         ])->assertUnprocessable()->assertJsonValidationErrors('tag_ids');
 
         // Em Usuários, o acesso exige o e-mail de acesso.
@@ -223,7 +223,7 @@ class PeopleDirectoryTest extends TestCase
     public function test_removing_user_tag_revokes_access_and_preserves_history(): void
     {
         $owner = $this->owner();
-        $member = User::factory()->forAccount($owner->account_id)->create();
+        $member = User::factory()->forAccount($this->accountId($owner))->create();
         $membership = AccountMembership::where('user_id', $member->id)->sole();
         $person = $this->membership($member)->person()->sole();
 
@@ -244,7 +244,7 @@ class PeopleDirectoryTest extends TestCase
             ->firstOrFail();
 
         $this->assertSame($owner->id, $event->actor_id);
-        $this->assertSame($owner->account_id, $event->account_id);
+        $this->assertSame($this->accountId($owner), $event->account_id);
         $this->assertSame('suspended', $event->changes['status']['after']);
 
         $this->actingAs($member->fresh())->getJson('/conta')->assertForbidden();
@@ -259,10 +259,10 @@ class PeopleDirectoryTest extends TestCase
     public function test_revoking_access_requires_its_own_permission_and_rolls_back(): void
     {
         $owner = $this->owner();
-        $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Editor de pessoas']);
+        $role = Role::create(['account_id' => $this->accountId($owner), 'name' => 'Editor de pessoas']);
         $role->permissions()->sync(Permission::where('slug', 'account.people.update')->pluck('id'));
-        $editor = User::factory()->forAccount($owner->account_id, $role)->create();
-        $member = User::factory()->forAccount($owner->account_id)->create();
+        $editor = User::factory()->forAccount($this->accountId($owner), $role)->create();
+        $member = User::factory()->forAccount($this->accountId($owner))->create();
         $membership = AccountMembership::where('user_id', $member->id)->sole();
         $count = AuditRecord::count();
 
@@ -317,7 +317,7 @@ class PeopleDirectoryTest extends TestCase
             ->assertNoContent();
 
         $customer = Customer::sole();
-        $code = $this->companies[$owner->account_id]->code;
+        $code = $this->companies[$this->accountId($owner)]->code;
 
         $this->getJson($this->unit($owner).'/clientes/'.$code.'/'.$customer->id.'/editar')
             ->assertOk()
@@ -347,7 +347,7 @@ class PeopleDirectoryTest extends TestCase
             ->assertNoContent();
 
         $customer = Customer::sole();
-        $code = $this->companies[$owner->account_id]->code;
+        $code = $this->companies[$this->accountId($owner)]->code;
         $editForm = $this->unit($owner).'/clientes/'.$code.'/'.$customer->id.'/editar';
         $url = $this->customers($owner).'/'.$customer->id;
         $count = AuditRecord::count();
@@ -375,7 +375,7 @@ class PeopleDirectoryTest extends TestCase
         $event = AuditRecord::where('entity_type', 'tag')->where('entity_id', $tag->id)->latest('id')->firstOrFail();
 
         $this->assertSame($owner->id, $event->actor_id);
-        $this->assertSame($owner->account_id, $event->account_id);
+        $this->assertSame($this->accountId($owner), $event->account_id);
         $this->assertTrue($event->changes['active']['after']);
 
         $this->patchJson($url, ['tag_ids' => []])->assertNoContent();
@@ -387,7 +387,7 @@ class PeopleDirectoryTest extends TestCase
             'entity_id' => $tag->id,
             'event' => 'deleted',
             'actor_id' => $owner->id,
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
         ]);
     }
 
@@ -399,13 +399,13 @@ class PeopleDirectoryTest extends TestCase
         $payload = ['name' => 'Permissões de etiqueta', 'module' => 'customers', 'color' => '#123456'];
         $this->postJson('/conta/etiquetas', $payload)->assertOk();
         $tag = Tag::where('name', $payload['name'])->sole();
-        $special = Tag::userTag($owner->account_id);
+        $special = Tag::userTag($this->accountId($owner));
         $this->deleteJson('/conta/etiquetas/'.$special->id)->assertForbidden();
         $this->patchJson('/conta/etiquetas/'.$special->id, [...$payload, 'active' => false])->assertForbidden();
         $this->actingAs($other)->deleteJson('/conta/etiquetas/'.$tag->id)->assertNotFound();
-        $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Somente editar etiqueta']);
+        $role = Role::create(['account_id' => $this->accountId($owner), 'name' => 'Somente editar etiqueta']);
         $role->permissions()->sync(Permission::where('slug', 'account.tags.update')->pluck('id'));
-        $editor = User::factory()->forAccount($owner->account_id, $role)->create();
+        $editor = User::factory()->forAccount($this->accountId($owner), $role)->create();
         $this->actingAs($editor)->patchJson('/conta/etiquetas/'.$tag->id, $payload)->assertOk();
         $count = AuditRecord::count();
         $this->patchJson('/conta/etiquetas/'.$tag->id, [...$payload, 'active' => false])->assertForbidden();
@@ -429,7 +429,7 @@ class PeopleDirectoryTest extends TestCase
             ->assertJsonValidationErrors('module');
         $this->assertDatabaseMissing('tags', ['name' => $payload['name']]);
 
-        $tag = Tag::create(['account_id' => $owner->account_id, ...$payload]);
+        $tag = Tag::create(['account_id' => $this->accountId($owner), ...$payload]);
         $person = $this->membership($owner)->person()->sole();
         $person->tags()->attach($tag->id);
 
@@ -441,7 +441,7 @@ class PeopleDirectoryTest extends TestCase
             'entity_id' => $tag->id,
             'event' => 'updated',
             'actor_id' => $owner->id,
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
         ]);
 
         $this->postJson('/conta/etiquetas', [...$payload, 'module' => 'customers'])->assertOk();
@@ -455,11 +455,11 @@ class PeopleDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         $other = $this->owner();
-        $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Cadastro de etiquetas']);
+        $role = Role::create(['account_id' => $this->accountId($owner), 'name' => 'Cadastro de etiquetas']);
         $role
             ->permissions()
             ->sync(Permission::whereIn('slug', ['account.tags.create', 'account.tags.update'])->pluck('id'));
-        $user = User::factory()->forAccount($owner->account_id, $role)->create();
+        $user = User::factory()->forAccount($this->accountId($owner), $role)->create();
         $this->actingAs($user)->getJson('/conta/etiquetas')->assertForbidden();
         $this
             ->getJson('/conta/etiquetas/cadastrar')
@@ -467,12 +467,12 @@ class PeopleDirectoryTest extends TestCase
             ->assertJsonPath('formOpen', true)
             ->assertJsonPath('canList', false)
             ->assertJsonCount(0, 'tags.data');
-        $foreign = Tag::userTag($other->account_id);
+        $foreign = Tag::userTag($this->accountId($other));
         $this->getJson('/conta/etiquetas/'.$foreign->id.'/editar')->assertNotFound();
         $this
             ->postJson('/conta/etiquetas', ['name' => 'Cadastro permitido', 'module' => 'customers', 'color' => '#123456'])
             ->assertOk()
-            ->assertJsonPath('redirect', fn ($url) => str_ends_with($url, '/conta/etiquetas/cadastrar'));
+            ->assertJsonPath('redirect', fn ($url) => str_ends_with($url, $this->accountPath('/conta/etiquetas/cadastrar')));
         $tag = Tag::where('name', 'Cadastro permitido')->sole();
         $this
             ->getJson('/conta/etiquetas/'.$tag->id.'/editar')
@@ -485,14 +485,14 @@ class PeopleDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         Tag::create([
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
             'module' => 'people',
             'name' => 'Parceiro VIP',
             'color' => '#123456',
             'active' => true,
         ]);
         Tag::create([
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
             'module' => 'people',
             'name' => 'Parceiro antigo',
             'color' => '#123456',
@@ -500,7 +500,7 @@ class PeopleDirectoryTest extends TestCase
         ]);
         $other = $this->owner();
         Tag::create([
-            'account_id' => $other->account_id,
+            'account_id' => $this->accountId($other),
             'module' => 'people',
             'name' => 'Parceiro externo',
             'color' => '#123456',

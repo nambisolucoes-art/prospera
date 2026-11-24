@@ -11,6 +11,7 @@ use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\TestCase;
 
 final class AccountContextTest extends TestCase
@@ -26,7 +27,7 @@ final class AccountContextTest extends TestCase
 
         $this->actingAs($member);
         DB::enableQueryLog();
-        $response = $this->getJson('/ajuda');
+        $response = $this->getJson('/conta/etiquetas');
         $sql = array_column(DB::getQueryLog(), 'query');
         DB::disableQueryLog();
         DB::flushQueryLog();
@@ -35,8 +36,10 @@ final class AccountContextTest extends TestCase
         self::assertContains('account.tags.list', $response->json('auth.permissions'));
         self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "permission_role" as "pr"')));
         self::assertCount(1, array_filter($sql, fn ($query) => str_contains($query, 'from "role_assignments"')));
+        // Fora da conta (E09), valem só as permissões self dos vínculos ativos da identidade.
+        $this->getJson('/ajuda')->assertOk()
+            ->assertJsonPath('auth.permissions', ['self.help.list']);
         $this->getJson('/conta/cargos')->assertForbidden();
-        $this->getJson('/conta/etiquetas')->assertOk();
 
         $role->permissions()->detach(Permission::where('slug', 'account.tags.list')->value('id'));
         $this->getJson('/conta/etiquetas')->assertForbidden();
@@ -68,7 +71,7 @@ final class AccountContextTest extends TestCase
         $this->actingAs($operator)->patchJson('/conta/cargos/'.$role->id, [
             'name' => $role->name,
             'permission_ids' => [$permissions['account.roles.update']],
-        ])->assertOk()->assertJsonPath('redirect', url('/conta/cargos/'.$role->id.'/editar'));
+        ])->assertOk()->assertJsonPath('redirect', url($this->accountPath('/conta/cargos/'.$role->id.'/editar')));
         $this->getJson('/conta/cargos')->assertForbidden();
     }
 
@@ -80,17 +83,37 @@ final class AccountContextTest extends TestCase
         $member = User::factory()->forAccount($second->id)->create();
         $platform = User::factory()->create(['is_saas_admin' => true]);
         $personal = User::factory()->create();
-        $withoutMembership = User::factory()->create(['account_id' => $second->id]);
+        $withoutMembership = User::factory()->create();
         $context = app(AccountContext::class);
         $permissions = app(EffectivePermissions::class);
 
+        // Sem conta na requisição, nenhuma identidade tem conta ativa (E09).
+        self::assertNull($context->activeAccount($owner));
+        self::assertFalse($owner->can('account.tags.list'));
+
+        $context->enter($owner, $first->code);
+        $permissions->forget();
         self::assertSame($first->id, $context->activeAccount($owner)?->id);
-        self::assertSame($second->id, $context->activeAccount($member)?->id);
-        self::assertNull($context->activeAccount($platform));
+        self::assertNull($context->activeAccount($member));
         self::assertTrue($owner->can('account.tags.list'));
         self::assertFalse($owner->can('platform.accounts.list'));
         self::assertFalse($member->can('account.tags.list'));
         self::assertFalse($withoutMembership->can('account.tags.list'));
+
+        $context->enter($member, $second->code);
+        $permissions->forget();
+        self::assertSame($second->id, $context->activeAccount($member)?->id);
+        self::assertNull($context->activeAccount($owner));
+
+        foreach ([[$owner, $second->code], [$withoutMembership, $second->code], [$platform, $first->code]] as [$user, $code]) {
+            try {
+                $context->enter($user, $code);
+                self::fail('A conta sem vínculo não pode ser aberta.');
+            } catch (NotFoundHttpException) {
+                self::assertNull($context->activeAccount($user));
+            }
+        }
+
         self::assertTrue($platform->can('platform.accounts.list'));
         self::assertFalse($platform->can('account.tags.list'));
         self::assertTrue($personal->can('self.help.list'));

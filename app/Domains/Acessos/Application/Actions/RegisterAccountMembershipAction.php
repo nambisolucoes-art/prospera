@@ -17,9 +17,15 @@ final readonly class RegisterAccountMembershipAction
 {
     public function __construct(private AuditContext $audit) {}
 
-    public function execute(User $user, Role $role, AccessNode $node, ?Person $person = null): AccountMembership
-    {
-        return AuditLog::transaction(function () use ($user, $role, $node, $person): AccountMembership {
+    /** $grantedBy identifica quem concedeu o primeiro cargo quando não é o autor da requisição (aceite de convite). */
+    public function execute(
+        User $user,
+        Role $role,
+        AccessNode $node,
+        ?Person $person = null,
+        ?int $grantedBy = null,
+    ): AccountMembership {
+        return AuditLog::transaction(function () use ($user, $role, $node, $person, $grantedBy): AccountMembership {
             if ($person === null) {
                 $data = new PersonDTO(
                     name: $user->name,
@@ -44,7 +50,8 @@ final readonly class RegisterAccountMembershipAction
             $membership = AccountMembership::register($user, $node->accountId, $person->id);
             $membership->saveOrFail();
 
-            $assignment = RoleAssignment::grant($membership, $role, $node, $this->audit->actorId ?? auth()->user()?->id);
+            $grantor = $grantedBy ?? $this->audit->actorId ?? auth()->user()?->id;
+            $assignment = RoleAssignment::grant($membership, $role, $node, $grantor);
             $assignment->saveOrFail();
 
             Tag::supplierTag($node->accountId);

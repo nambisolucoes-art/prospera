@@ -15,10 +15,12 @@ const TopBarProfileDropdown = forwardRef<HTMLLIElement, TopBarProfileDropdownPro
   ref
 ): JSX.Element {
   const logout = useApiForm({});
-  const { auth } = usePage<SessionProps>().props;
+  const { auth, account_context: account } = usePage<SessionProps>().props;
+  // Trocar de conta (E09) é diferente de trocar de empresa ou de estabelecimento na área de trabalho.
   const links = auth.user
     ? [
       { href: '/settings/profile', icon: 'ti-user', label: 'Perfil' },
+      ...((auth.accounts ?? 0) > 1 ? [{ href: '/contas', icon: 'ti-exchange-vertical', label: 'Trocar de conta' }] : []),
     ]
     : [
       { href: '/login', icon: 'ti-user', label: 'Entrar' },
@@ -37,6 +39,12 @@ const TopBarProfileDropdown = forwardRef<HTMLLIElement, TopBarProfileDropdownPro
       </a>
 
       <ul className="topbarDropdown topbarDropdown--profile dropdown-menu">
+        {account && (auth.accounts ?? 0) > 1 && (
+          <li className="topbarDropdown__account" data-tour="current-account">
+            <span className="topbarDropdown__accountLabel">Conta atual</span>
+            <strong className="topbarDropdown__accountName">{account.name}</strong>
+          </li>
+        )}
         {links.map(({ href, icon, label }) => (
           <li key={href}>
             <a href={href} className="topbarDropdown__profileLink">

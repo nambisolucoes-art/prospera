@@ -38,14 +38,14 @@ export default function RoleForm({
       tenant
       title={role ? 'Editar cargo' : 'Cadastrar cargo'}
       breadcrumb={[
-        { label: 'Cargos', href: auth.permissions.includes('account.roles.list') ? '/conta/cargos' : undefined },
+        { label: 'Cargos', href: auth.permissions.includes('account.roles.list') ? '@/cargos' : undefined },
         { label: role ? 'Editar' : 'Cadastrar' },
       ]}
     >
       <CardBox>
         <BusinessForm
           className="business-form--wide-labels"
-          action={role ? `/conta/cargos/${role.id}` : '/conta/cargos'}
+          action={role ? `@/cargos/${role.id}` : '@/cargos'}
           method={role ? 'patch' : 'post'}
         >
           {({ errors, processing }) => (
@@ -107,7 +107,7 @@ export default function RoleForm({
               {!locked && (
                 <BusinessFormActions
                   processing={processing}
-                  cancelHref={auth.permissions.includes('account.roles.list') ? '/conta/cargos' : undefined}
+                  cancelHref={auth.permissions.includes('account.roles.list') ? '@/cargos' : undefined}
                 />
               )}
             </>

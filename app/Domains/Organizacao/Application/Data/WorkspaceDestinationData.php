@@ -34,7 +34,7 @@ final readonly class WorkspaceDestinationData
         abort_unless(is_string($path) && preg_match(self::PATTERN, $path) === 1, 404);
 
         // A unidade da sondagem é o código reservado: só o formato da URL importa aqui.
-        $probe = Request::create('/conta/estabelecimento/'.OrganizationContext::CONSOLIDATED.'/'.$path);
+        $probe = Request::create('/contas/sondagem/estabelecimento/'.OrganizationContext::CONSOLIDATED.'/'.$path);
         $route = collect($router->getRoutes()->get('GET'))
             ->first(fn (Route $route) => $route->matches($probe));
 

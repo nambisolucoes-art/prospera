@@ -1,0 +1,1 @@
+{"boundary":"CreateAccountInvitationAction, CLI, PostgreSQL, transporte em mem\u00f3ria","samples":10,"median_ms":10.718381,"p95_ms":24.273982,"queries":[17,16],"peak_delta_bytes_max":1640536}

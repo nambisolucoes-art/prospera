@@ -1,0 +1,12 @@
+== PHPUnit completo
+OK (274 tests, 3748 assertions)
+== E09 específicos
+OK (18 tests, 390 assertions)
+== Contexto, Área de Trabalho e Pessoas
+OK (40 tests, 629 assertions)
+== PHPStan
+ [OK] No errors                                                                 
+
+== Pint
+
+    PASS   ......................................................... 314 files  

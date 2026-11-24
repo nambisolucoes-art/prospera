@@ -1,4 +1,5 @@
 import { tagModules } from './tagModules';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import { useEffect, useRef, useState } from 'react';
 import BusinessList, {
   type PageSummary,
@@ -31,6 +32,7 @@ export default function Tags({
   tag?: TagRow | null;
   canList?: boolean;
 }) {
+  const to = useContextUrl();
   const {
     navigate,
     props: { auth },
@@ -45,7 +47,7 @@ export default function Tags({
     setEditor(undefined);
     if (restoreFocus) requestAnimationFrame(() => trigger.current?.focus());
     if (formOpen && canList)
-      void navigate('/conta/etiquetas', {
+      void navigate('@/etiquetas', {
         replace: true,
         preserveScroll: true,
       });
@@ -56,7 +58,7 @@ export default function Tags({
   const writable = auth.inspection_mode !== 'read-only';
   const can = (action: string) =>
     auth.permissions.includes(`account.tags.${action}`);
-  const { query, setQuery, submit, apply } = useBusinessListFilters('/conta/etiquetas', filters.search);
+  const { query, setQuery, submit, apply } = useBusinessListFilters('@/etiquetas', filters.search);
   return (
     <SaasLayout
       tenant
@@ -194,7 +196,7 @@ export default function Tags({
       )}
       {deleting && (
         <Modal open bootstrap manageFocus size="small" title="Excluir etiqueta" onClose={() => { setDeleting(undefined); trigger.current?.focus(); }}>
-          <ApiForm action={`/conta/etiquetas/${deleting.id}`} method="delete" onSuccess={() => { setDeleting(undefined); trigger.current?.focus(); }} options={{ preserveScroll: true }}>
+          <ApiForm action={`@/etiquetas/${deleting.id}`} method="delete" onSuccess={() => { setDeleting(undefined); trigger.current?.focus(); }} options={{ preserveScroll: true }}>
             {({ processing }) => (
               <>
                 <p>Excluir a etiqueta {deleting.name}? Esta ação não pode ser desfeita.</p>
@@ -212,7 +214,7 @@ export default function Tags({
       )}
       {preview && (
         <AccessPreview
-          base="/conta/etiquetas"
+          base={to('@/etiquetas')}
           size="default"
           row={preview}
           onClose={() => {

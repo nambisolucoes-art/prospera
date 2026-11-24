@@ -71,7 +71,7 @@ class CustomerDirectoryTest extends TestCase
 
         $customer = $person->customers()->sole();
 
-        $this->assertSame($owner->account_id, $customer->account_id);
+        $this->assertSame($this->accountId($owner), $customer->account_id);
         $this->assertSame($this->company->id, $customer->company_id);
         $this->assertTrue($customer->active);
         $this->assertTrue($person->suppliers()->sole()->active);
@@ -91,7 +91,7 @@ class CustomerDirectoryTest extends TestCase
         $audit = AuditRecord::where('entity_type', 'customer')->sole();
 
         $this->assertSame($owner->id, $audit->actor_id);
-        $this->assertSame($owner->account_id, $audit->account_id);
+        $this->assertSame($this->accountId($owner), $audit->account_id);
         $this->assertSame($this->company->id, $audit->company_id);
         $this->assertNull($audit->establishment_id);
         $this->assertSame($person->name.' (Empresa de clientes)', $audit->entity_name);
@@ -143,10 +143,10 @@ class CustomerDirectoryTest extends TestCase
     {
         $owner = $this->owner();
         $payload = $this->payload();
-        $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Editor de pessoas']);
+        $role = Role::create(['account_id' => $this->accountId($owner), 'name' => 'Editor de pessoas']);
         $base = $this->peopleSlugs();
         $role->permissions()->sync(Permission::whereIn('slug', $base)->pluck('id'));
-        $editor = User::factory()->forAccount($owner->account_id, $role)->create();
+        $editor = User::factory()->forAccount($this->accountId($owner), $role)->create();
         $count = AuditRecord::count();
 
         // Permissões de Pessoas não cadastram cliente.
@@ -206,7 +206,7 @@ class CustomerDirectoryTest extends TestCase
     public function test_special_tag_is_protected_scoped_and_does_not_convert_custom_labels(): void
     {
         $owner = $this->owner();
-        $tag = Tag::customerTag($owner->account_id);
+        $tag = Tag::customerTag($this->accountId($owner));
 
         $this->actingAs($owner)
             ->patchJson('/conta/etiquetas/'.$tag->id, ['name' => 'Alterada', 'active' => false])
@@ -276,7 +276,7 @@ class CustomerDirectoryTest extends TestCase
         $platform = User::factory()->create(['is_saas_admin' => true]);
 
         $this->actingAs($platform)
-            ->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])
+            ->postJson('/saas/contas/'.$this->accountId($owner).'/inspecao', ['user_id' => $owner->id, 'mode' => 'edit'])
             ->assertOk();
 
         $this->postJson($this->customers(), $this->payload())->assertNoContent();
@@ -285,13 +285,13 @@ class CustomerDirectoryTest extends TestCase
 
         $this->assertSame($platform->id, $event->actor_id);
         $this->assertSame($owner->id, $event->represented_user_id);
-        $this->assertSame($owner->account_id, $event->account_id);
+        $this->assertSame($this->accountId($owner), $event->account_id);
         $this->assertSame($this->company->id, $event->company_id);
         $this->assertSame('platform-account', $event->context);
 
-        $this->postJson('/conta/inspecao/encerrar')->assertOk();
+        $this->postJson('/inspecao/encerrar')->assertOk();
 
-        $this->postJson('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
+        $this->postJson('/saas/contas/'.$this->accountId($owner).'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
             ->assertOk();
 
         $count = AuditRecord::count();

@@ -1,3 +1,4 @@
+import { useContextUrl } from '@/hooks/useContextUrl';
 import TagLabel from '@/components/TagLabel/TagLabel';
 import { useEffect, useRef, useState } from 'react';
 import BusinessList, {
@@ -25,7 +26,8 @@ export default function AccessList({
   filters: { search: string; origin: string };
 }) {
   const { auth } = useApiPage<SessionProps>().props;
-  const base = '/conta/cargos';
+  const to = useContextUrl();
+  const base = to('@/cargos');
   const title = 'Cargos';
   const [preview, setPreview] = useState<{ id: number; name: string }>();
   const trigger = useRef<HTMLElement | null>(null);

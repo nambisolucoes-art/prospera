@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import Modal from '@/components/Modal/Modal';
 import StatusLabel from '@/components/StatusLabel/StatusLabel';
 import { formatMasked } from './ClientFormFields';
@@ -14,11 +15,12 @@ export default function EstablishmentPreview({
   establishment: Pick<EstablishmentRow, 'id' | 'name'>;
   onClose: () => void;
 }) {
+  const to = useContextUrl();
   const [establishment, setEstablishment] = useState<EstablishmentDetails>();
   const [error, setError] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`/conta/estabelecimentos/${row.id}/visualizar`, {
+    fetch(to(`@/estabelecimentos/${row.id}/visualizar`), {
       signal: controller.signal,
       headers: { Accept: 'application/json' },
     })

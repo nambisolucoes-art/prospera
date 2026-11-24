@@ -1,0 +1,32 @@
+
+> test:frontend
+> node --test tests/Frontend/*.test.ts
+
+✔ evento de unidade mostra a unidade e a empresa responsável (1.634182ms)
+✔ evento de empresa não inventa unidade (0.344542ms)
+✔ evento da conta não recebe empresa nem unidade (0.210031ms)
+✔ nomes ausentes aparecem como Não informado e a plataforma tem rótulo próprio (0.223466ms)
+✔ ~/ resolve no contexto da página que declarou o endereço (1.467712ms)
+✔ endereços comuns não mudam (0.207336ms)
+✔ a resolução é idempotente, para navigate aceitar endereços já resolvidos por ApiLink e useApiForm (0.287425ms)
+✔ o consolidado preserva a seleção, inclusive com filtros no endereço (0.306079ms)
+✔ a unidade aberta do conjunto mantém o retorno (0.257329ms)
+✔ ~/ fora de um contexto é recusado, em vez de cair numa rota da conta (0.475324ms)
+✔ a entrada da área de trabalho leva a seleção da aba e o destino ao servidor (0.201444ms)
+✔ a troca de seleção mantém só módulos compatíveis (0.385507ms)
+✔ nas telas com contexto, a seleção do seletor vem da URL (1.207057ms)
+✔ menu de Clientes e Fornecedores usa a seleção da URL ou da aba e passa pela entrada (E07) (0.873676ms)
+✔ cada aba resolve sua própria conta e recusa contexto ausente (0.711765ms)
+✔ CPF e CNPJ mantêm a máscara do tipo selecionado durante a digitação (1.186068ms)
+✔ um CNPJ completo no campo CPF não é truncado para outro documento (0.206714ms)
+✔ a máscara do CNPJ preserva letras e acompanha a digitação em todas as posições (0.429519ms)
+✔ CNPJ alfanumérico valida os dígitos verificadores, que são sempre numéricos (0.572616ms)
+✔ o aviso de digitação aponta o problema sem bloquear raiz nem documento incompleto (0.699341ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 143.868891

@@ -13,7 +13,7 @@ export default function PromoteEstablishmentModal({
 }) {
   return (
     <Modal open bootstrap manageFocus size="small" title="Tornar estabelecimento principal" onClose={onClose}>
-      <ApiForm action={`/conta/estabelecimentos/${establishment.id}/principal${actionSuffix}`} method="post" onSuccess={onClose}
+      <ApiForm action={`@/estabelecimentos/${establishment.id}/principal${actionSuffix}`} method="post" onSuccess={onClose}
         options={{ preserveScroll: true }}>
         {({ processing, errors }) => (
           <>

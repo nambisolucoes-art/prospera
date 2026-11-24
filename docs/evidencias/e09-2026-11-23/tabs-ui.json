@@ -1,0 +1,11 @@
+[
+  {
+    label: 'Próxima página',
+    href: 'http://127.0.0.1:18099/contas/laboratorio-conta-1/etiquetas?page=2'
+  },
+  {
+    label: 'Última página',
+    href: 'http://127.0.0.1:18099/contas/laboratorio-conta-1/etiquetas?page=2'
+  }
+]
+{"pagination":true,"preview":true,"modal_save":true,"reload":true,"history":true,"separate_tabs":true,"errors":[]}

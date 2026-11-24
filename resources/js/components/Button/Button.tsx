@@ -2,6 +2,7 @@ import './Button.css';
 import { useState } from 'react';
 import { joinClassNames } from '@/utils/joinClassNames';
 import { navigateAfterWave } from '@/utils/initWaves';
+import { useOptionalContextUrl } from '@/hooks/useContextUrl';
 
 export type ButtonTone =
   | 'default'
@@ -99,6 +100,8 @@ function renderButtonInner({
 }
 
 export default function Button(props: ButtonProps): JSX.Element {
+  // Endereços @/ e ~/ seguem a conta e a unidade da página onde o botão aparece.
+  const resolveHref = useOptionalContextUrl();
   const [pressed, setPressed] = useState<boolean>(false);
   const {
     label,
@@ -148,7 +151,7 @@ export default function Button(props: ButtonProps): JSX.Element {
   if ('href' in props && props.href !== undefined) {
     return (
       <a
-        href={props.href}
+        href={resolveHref(props.href)}
         className={classNames}
         title={props.title}
         aria-disabled={disabled}

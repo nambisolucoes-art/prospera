@@ -39,7 +39,7 @@ final class OrganizationController
         );
 
         $account = $context->requireAccount();
-        $path = '/conta/organizacao';
+        $path = $context->path('organizacao');
         $requestedCompany = $request->integer('empresa') ?: null;
         $companyPage = $listCompanies
             ? $companies->list($account->id, CompanyFiltersData::fromInput([]), $path, $companyNodes)

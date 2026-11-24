@@ -34,7 +34,7 @@ export default function EstablishmentHome({ establishment, workspace, destinatio
           <ul>
             {workspace.map((unit) => (
               <li key={unit.code}>
-                <ApiLink href={`/conta/estabelecimento/${unit.code}${suffix}?voltar-unidades=${codes}`}>
+                <ApiLink href={`@/estabelecimento/${unit.code}${suffix}?voltar-unidades=${codes}`}>
                   {unit.name}
                 </ApiLink>
                 {' ('}{unit.company_name}{')'}
@@ -79,7 +79,7 @@ function SingleEstablishment({ establishment }: { establishment: Establishment }
           )}
           {writable && establishment.can_update && (
             <Button
-              href={`/conta/estabelecimentos/${establishment.id}/editar`}
+              href={`@/estabelecimentos/${establishment.id}/editar`}
               tone="primary"
               leftIconClass="fa fa-pencil"
             >

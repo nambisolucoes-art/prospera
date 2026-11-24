@@ -1,0 +1,1 @@
+{"boundary":"POST autenticado de aceite, HTTP, FrankenPHP e PostgreSQL","samples":10,"median_ms":25.496389000000022,"p95_ms":44.09503900000004,"queries":[34],"duplicates_max":2,"duplicate_sql":[null],"peak_delta_bytes_max":819632,"unexpected":0}

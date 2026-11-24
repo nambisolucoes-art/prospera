@@ -26,7 +26,7 @@ export default function ClientForm({
   const cnpjLookup = useCnpjLookup(setName, setTradeName);
   const company = (tenant ? client?.person_type : type) === 'company';
   const required = !tenant && (!client || Boolean(client.document));
-  const tenantAction = organizationBack ? '/conta?origem=organizacao' : '/conta';
+  const tenantAction = organizationBack ? '@?origem=organizacao' : '@';
   const action = tenant ? tenantAction : client ? `/saas/contas/${client.id}` : '/saas/contas';
 
   function updateDocument(value: string) {
@@ -72,7 +72,7 @@ export default function ClientForm({
             </BusinessFormSection>
           )}
           <BusinessFormActions
-            processing={processing} cancelHref={tenant ? (organizationBack ?? '/conta') : '/dashboard'} />
+            processing={processing} cancelHref={tenant ? (organizationBack ?? '@') : '/dashboard'} />
         </>
       )}
     </BusinessForm>

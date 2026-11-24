@@ -558,7 +558,10 @@ final class CommercialRelationAccessTest extends TestCase
         $document = '52998224725';
 
         $this->actingAsGuest();
-        $this->postJson($endpoint, ['person_type' => 'individual', 'documento' => $document])->assertUnauthorized();
+        $this->postJson('/contas/'.$this->gartan->code.substr($endpoint, strlen('/conta')), [
+            'person_type' => 'individual',
+            'documento' => $document,
+        ])->assertUnauthorized();
         $this->actingAs($this->owner)->getJson($endpoint.'?documento='.$document)->assertMethodNotAllowed();
         $this->postJson($endpoint.'?documento='.$document, ['person_type' => 'individual'])
             ->assertUnprocessable()
@@ -646,7 +649,7 @@ final class CommercialRelationAccessTest extends TestCase
 
         $this->patchJson($deactivate)->assertForbidden();
         $this->assertTrue($relation->fresh()->active);
-        $this->postJson('/conta/inspecao/encerrar')->assertOk();
+        $this->postJson('/inspecao/encerrar')->assertOk();
 
         $this->actingAs($platform)->postJson($start, ['user_id' => $ana->id, 'mode' => 'edit'])->assertOk();
         $this->patchJson($deactivate)->assertNoContent();

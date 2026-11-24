@@ -20,7 +20,7 @@ export default function AccountInspectionBanner() {
       </div>
       <button type="button" className="account-inspection-banner__exit"
         title="Voltar ao SaaS" aria-label="Voltar ao SaaS" disabled={exit.processing}
-        onClick={() => exit.post('/conta/inspecao/encerrar')}>
+        onClick={() => exit.post('/inspecao/encerrar')}>
         <i className="icon-logout" aria-hidden="true" />
       </button>
     </aside>

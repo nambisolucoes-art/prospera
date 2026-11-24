@@ -1,0 +1,44 @@
+
+   INFO  Preparing database.  
+
+  Creating migration table ....................................... 6.79ms DONE
+
+   INFO  Running migrations.  
+
+  0001_01_01_000000_create_users_table ........................... 7.12ms DONE
+  0001_01_01_000001_create_cache_table ........................... 4.68ms DONE
+  0001_01_01_000002_create_jobs_table ............................ 7.40ms DONE
+  2024_01_01_000000_create_passkeys_table ........................ 7.16ms DONE
+  2025_08_14_170933_add_two_factor_columns_to_users_table ........ 1.10ms DONE
+  2026_11_17_000001_create_saas_platform ......................... 8.85ms DONE
+  2026_11_17_000002_add_registration_details_to_clients .......... 1.65ms DONE
+  2026_11_17_000003_add_tenant_accounts_and_people ............... 7.49ms DONE
+  2026_11_17_000004_link_points_to_tenant_accounts ............... 5.37ms DONE
+  2026_11_17_000005_add_profile_photo_to_users ................... 1.14ms DONE
+  2026_11_18_000001_add_people_directory_and_tags ................ 9.55ms DONE
+  2026_11_18_000002_create_access_control ...................... 107.47ms DONE
+  2026_11_18_000003_retire_permission_management ................. 0.79ms DONE
+  2026_11_18_000004_create_central_audit ........................ 47.86ms DONE
+  2026_11_18_000005_add_user_access_enabled ...................... 0.93ms DONE
+  2026_11_18_000006_add_tag_active ............................... 0.76ms DONE
+  2026_11_18_000007_add_supplier_profiles ........................ 5.23ms DONE
+  2026_11_18_000008_move_shared_supplier_fields_to_people ........ 3.93ms DONE
+  2026_11_18_000009_add_person_additional_contacts ............... 1.09ms DONE
+  2026_11_18_000010_add_customer_profiles ........................ 3.45ms DONE
+  2026_11_20_000001_add_reverse_lookup_indexes ................... 1.72ms DONE
+  2026_11_20_000002_remove_points ................................ 6.26ms DONE
+  2026_11_20_000003_create_organization_structure ............... 10.99ms DONE
+  2026_11_20_000004_add_organization_to_audit_records ............ 0.71ms DONE
+  2026_11_20_000005_rename_account_data_permission ............... 0.49ms DONE
+  2026_11_20_000006_provision_account_companies .................. 0.88ms DONE
+  2026_11_20_000007_create_contextual_access .................... 20.26ms DONE
+  2026_11_20_000008_remove_single_role_from_users ................ 2.70ms DONE
+  2026_11_20_000009_add_workspace_preference_to_account_memberships  0.91ms DONE
+  2026_11_21_000001_add_company_to_commercial_relations ......... 13.20ms DONE
+  2026_11_21_000002_add_commercial_tags .......................... 7.55ms DONE
+  2026_11_21_000003_consolidate_contextual_audit ................. 7.20ms DONE
+  2026_11_21_000004_tune_audit_read_indexes ...................... 2.39ms DONE
+  2026_11_21_000005_protect_committed_audit_history .............. 2.31ms DONE
+  2026_11_21_000006_remove_legacy_audit_tables ................... 2.53ms DONE
+  2026_11_21_000007_retire_people_directory_permissions .......... 0.54ms DONE
+

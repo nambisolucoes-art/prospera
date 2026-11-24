@@ -1,0 +1,2 @@
+account_id presente: false
+migration 000003 registrada: true

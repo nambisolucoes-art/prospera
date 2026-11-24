@@ -54,7 +54,7 @@ class UserFactory extends Factory
 
     public function forAccount(int $accountId, ?Role $role = null): static
     {
-        return $this->state(['account_id' => $accountId])->afterCreating(function (User $user) use ($accountId, $role): void {
+        return $this->afterCreating(function (User $user) use ($accountId, $role): void {
             $role ??= app(DefaultRolesAction::class)->execute($accountId)[1];
 
             app(RegisterAccountMembershipAction::class)->execute($user, $role, AccessNode::tenant($accountId));

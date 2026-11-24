@@ -1,3 +1,4 @@
+import { screenPath } from '@/utils/organizationContext';
 import { tagListFormTourSteps } from '@/app/saas/tagTours';
 import { pageHeaderTourSteps } from '@/components/PageHeader/PageHeaderTour';
 import { businessListTourSteps } from '@/components/BusinessList/BusinessListTour';
@@ -15,6 +16,10 @@ export function tourFor(
   path: string,
   permissions: string[],
 ): TourDefinition | undefined {
+  const routePath = screenPath(path);
+  const inAccount = /^\/conta(?:\/|$)/.test(routePath);
+  path = routePath.replace(/^\/conta\/ajuda/, '/ajuda');
+
   let title = '',
     help = '',
     steps: TourStep[] = [];
@@ -35,7 +40,20 @@ export function tourFor(
       'Revise os dados e salve. Campos obrigatórios e mensagens de validação orientam o preenchimento.',
     ),
   ];
-  if (path === '/user/confirm-password') {
+  if (path === '/contas') {
+    title = 'Selecionar conta';
+    help = 'acesso-contas';
+    steps = [
+      ...businessListTourSteps({ filters: 'Confira as contas vinculadas à sua identidade.' }),
+      at('account-selection', 'Abrir uma conta',
+        'Confira a situação e os cargos. Abrir conta muda somente esta aba. Vínculos suspensos não permitem entrada.'),
+    ];
+  } else if (/^\/convites\/[A-Za-z0-9]{64}$/.test(path)) {
+    title = 'Convite para conta';
+    help = 'acesso-contas';
+    steps = [at('account-invitation', 'Conferir e aceitar',
+      'Confira a conta, o cargo e a validade. Salvar confirma o aceite. O tutorial não aceita o convite.')];
+  } else if (path === '/user/confirm-password') {
     title = 'Confirmar acesso';
     help = 'seguranca';
     steps = [
@@ -392,7 +410,7 @@ export function tourFor(
     ],
     help:
       help && permissions.includes('self.help.view')
-        ? '/ajuda/' + help
+        ? (inAccount ? '@/ajuda/' : '/ajuda/') + help
         : undefined,
   };
 }

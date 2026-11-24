@@ -1,0 +1,40 @@
+=== /contas/laboratorio-conta-1/etiquetas (fixtures)
+1. select * from "sessions" where "id" = ? limit 1 | ["<sessão sintética>"]
+2. select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = ? and "m"."user_id" = ? limit 1 | ["labora
+3. select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join 
+4. select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in (?) and "p"."is_system" = ? and "p"."scope" in (?, ?) and ("p"."account_id" is null or "p"."account_id" 
+5. select count(*) as "aggregate" from "tags" where "account_id" = ? | [1]
+6. select "tags".*, (exists (select 1 from customers_tags where tag_id = tags.id) or exists (select 1 from suppliers_tags where tag_id = tags.id)) as commercial_assigned, (select count(*) from "people" inner join "person_tag" on "people"."id" = "person_tag"."pers
+7. select count(*) as "aggregate" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" where "m"."user_id" = ? and "m"."status" = ? and "c"."active" = ? | [1,"active",true]
+8. select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_n
+9. select "workspace_establishments" from "account_memberships" where "account_id" = ? and "user_id" = ? and "status" = ? limit 1 | [1,1,"active"]
+10. update "sessions" set "payload" = ?, "last_activity" = ?, "user_id" = ?, "ip_address" = ?, "user_agent" = ? where "id" = ? | ["<payload de sessão sintética>
+status 200 queries 10
+=== /contas/laboratorio-conta-2/etiquetas (fixtures)
+1. select * from "sessions" where "id" = ? limit 1 | ["<sessão sintética>"]
+2. select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = ? and "m"."user_id" = ? limit 1 | ["labora
+3. select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join 
+4. select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in (?) and "p"."is_system" = ? and "p"."scope" in (?, ?) and ("p"."account_id" is null or "p"."account_id" 
+5. select count(*) as "aggregate" from "tags" where "account_id" = ? | [2]
+6. select "tags".*, (exists (select 1 from customers_tags where tag_id = tags.id) or exists (select 1 from suppliers_tags where tag_id = tags.id)) as commercial_assigned, (select count(*) from "people" inner join "person_tag" on "people"."id" = "person_tag"."pers
+7. select count(*) as "aggregate" from "account_memberships" as "m" inner join "clients" as "c" on "c"."id" = "m"."account_id" where "m"."user_id" = ? and "m"."status" = ? and "c"."active" = ? | [1,"active",true]
+8. select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_n
+9. update "sessions" set "payload" = ?, "last_activity" = ?, "user_id" = ?, "ip_address" = ?, "user_agent" = ? where "id" = ? | ["<payload de sessão sintética>
+status 200 queries 9
+=== /contas/laboratorio-conta-1/area-de-trabalho/padrao (fixtures)
+1. select * from "sessions" where "id" = ? limit 1 | ["<sessão sintética>"]
+2. select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = ? and "m"."user_id" = ? limit 1 | ["labora
+3. select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join 
+4. select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in (?) and "p"."is_system" = ? and "p"."scope" in (?, ?) and ("p"."account_id" is null or "p"."account_id" 
+5. select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_n
+6. select "workspace_establishments" from "account_memberships" where "account_id" = ? and "user_id" = ? and "status" = ? limit 1 | [1,1,"active"]
+7. update "sessions" set "payload" = ?, "last_activity" = ?, "user_id" = ?, "ip_address" = ?, "user_agent" = ? where "id" = ? | ["<payload de sessão sintética>
+status 200 queries 7
+=== /contas/laboratorio-conta-2/area-de-trabalho/padrao (fixtures)
+1. select * from "sessions" where "id" = ? limit 1 | ["<sessão sintética>"]
+2. select "clients".*, "m"."id" as "context_membership_id", "m"."status" as "context_membership_status" from "clients" inner join "account_memberships" as "m" on "m"."account_id" = "clients"."id" where "clients"."code" = ? and "m"."user_id" = ? limit 1 | ["labora
+3. select "role_assignments"."role_id", "role_assignments"."scope", "role_assignments"."company_id", "role_assignments"."establishment_id" from "role_assignments" inner join "account_memberships" as "m" on "m"."id" = "role_assignments"."membership_id" inner join 
+4. select "pr"."role_id", "p"."slug" from "permission_role" as "pr" inner join "permissions" as "p" on "p"."id" = "pr"."permission_id" where "pr"."role_id" in (?) and "p"."is_system" = ? and "p"."scope" in (?, ?) and ("p"."account_id" is null or "p"."account_id" 
+5. select "e"."id", "e"."code", "e"."name", "e"."active", "e"."is_primary", "e"."is_headquarters", case when e.tax_document is null then 0 else 1 end as registered, "c"."id" as "company_id", "c"."code" as "company_code", "c"."name" as "company_name", "c"."trade_n
+6. update "sessions" set "payload" = ?, "last_activity" = ?, "user_id" = ?, "ip_address" = ?, "user_agent" = ? where "id" = ? | ["<payload de sessão sintética>
+status 200 queries 6

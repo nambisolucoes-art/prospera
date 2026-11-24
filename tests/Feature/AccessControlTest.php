@@ -25,10 +25,10 @@ class AccessControlTest extends TestCase
 
     private function operator(User $owner, array $slugs): User
     {
-        $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Operador']);
+        $role = Role::create(['account_id' => $this->accountId($owner), 'name' => 'Operador']);
         $role->permissions()->sync(Permission::whereIn('slug', $slugs)->pluck('id'));
 
-        return User::factory()->forAccount($owner->account_id, $role)->create();
+        return User::factory()->forAccount($this->accountId($owner), $role)->create();
     }
 
     public function test_catalog_is_discovered_idempotently_and_preserves_role_assignments(): void
@@ -40,11 +40,11 @@ class AccessControlTest extends TestCase
             'name' => 'Registro legado',
             'module' => 'legacy',
             'scope' => 'account',
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
             'is_system' => false,
         ]);
         $catalogId = Permission::where('slug', 'account.audit.list')->value('id');
-        $role = Role::create(['account_id' => $owner->account_id, 'name' => 'Atendente']);
+        $role = Role::create(['account_id' => $this->accountId($owner), 'name' => 'Atendente']);
         $role->permissions()->sync([$catalogId]);
         $this->artisan('permissions:sync')->assertSuccessful();
         $count = Permission::count();
@@ -75,7 +75,7 @@ class AccessControlTest extends TestCase
         $user = $this->operator($owner, ['account.audit.list']);
         $this->actingAs($user);
         $this->getJson('/conta/auditoria')->assertOk()->assertJsonPath('auth.permissions.0', 'account.audit.list');
-        $record = AuditRecord::where('account_id', $owner->account_id)->firstOrFail();
+        $record = AuditRecord::where('account_id', $this->accountId($owner))->firstOrFail();
         $this->getJson('/conta/auditoria/'.$record->id.'/visualizar')->assertForbidden();
         $this->getJson('/conta/cargos')->assertForbidden();
         $this->getJson('/saas/contas')->assertForbidden();
@@ -141,13 +141,15 @@ class AccessControlTest extends TestCase
                 ],
             )
             ->assertRedirect();
-        $role = Role::where('account_id', $owner->account_id)->where('name', 'Caixa')->sole();
+        $role = Role::where('account_id', $this->accountId($owner))->where('name', 'Caixa')->sole();
         $this
             ->post('/conta/usuarios', [...$payload, 'role_id' => $role->id])
             ->assertSessionHasNoErrors()
             ->assertRedirect();
         $created = User::where('email', 'pessoa@example.test')->sole();
         $this->assertSame($role->id, $this->membership($created)->assignments()->sole()->role_id);
+        $this->actingAs($created)->getJson('/conta/auditoria')->assertForbidden();
+        $created = $this->completeInitialSetup($created);
         $this->actingAs($created)->getJson('/conta/auditoria')->assertOk();
         $this->getJson('/conta/etiquetas')->assertForbidden();
     }
@@ -156,7 +158,7 @@ class AccessControlTest extends TestCase
     {
         $owner = $this->owner();
         $this->actingAs($owner);
-        $member = Role::where('account_id', $owner->account_id)->where('system_key', 'member')->sole();
+        $member = Role::where('account_id', $this->accountId($owner))->where('system_key', 'member')->sole();
         $membership = $this->membership($owner);
         $original = $membership->assignments()->sole();
         $grant = ['role_id' => $member->id, 'scope' => 'tenant'];
@@ -166,7 +168,7 @@ class AccessControlTest extends TestCase
         ])->assertUnprocessable()->assertJsonValidationErrors('role_id');
         $this->assertSame($original->id, $membership->assignments()->sole()->id);
 
-        $second = User::factory()->asAccountAdministrator($owner->account_id)->create();
+        $second = User::factory()->asAccountAdministrator($this->accountId($owner))->create();
         $secondMembership = $this->membership($second);
         $this->patchJson('/conta/usuarios/'.$secondMembership->id.'/atribuicoes', [
             'grants' => [$grant],
@@ -176,7 +178,7 @@ class AccessControlTest extends TestCase
             'entity_type' => 'role-assignment',
             'event' => 'created',
             'actor_id' => $owner->id,
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
         ]);
         $this->assertSame($member->id, $secondMembership->assignments()->sole()->role_id);
     }
@@ -187,7 +189,7 @@ class AccessControlTest extends TestCase
         $platform = User::factory()->create(['is_saas_admin' => true]);
         $this->actingAs($platform);
         $this
-            ->post('/saas/contas/'.$owner->account_id.'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
+            ->post('/saas/contas/'.$this->accountId($owner).'/inspecao', ['user_id' => $owner->id, 'mode' => 'read-only'])
             ->assertRedirect();
         $this->postJson('/conta/cargos', ['name' => 'Bloqueado'])->assertForbidden();
         $this->postJson('/conta/permissoes', [
@@ -205,7 +207,7 @@ class AccessControlTest extends TestCase
             ->actingAs($creator)
             ->post('/conta/etiquetas', ['name' => 'Etiqueta sem listagem', 'module' => 'customers', 'color' => '#3563e9'])
             ->assertSessionHasNoErrors()
-            ->assertRedirect('/conta/etiquetas/cadastrar');
+            ->assertRedirect($this->accountPath('/conta/etiquetas/cadastrar'));
         $this->getJson('/conta/etiquetas/cadastrar')->assertOk();
         $this->getJson('/conta/etiquetas')->assertForbidden();
     }
@@ -246,7 +248,7 @@ class AccessControlTest extends TestCase
             'scope' => 'account',
             'module' => 'old',
             'is_system' => false,
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
         ]);
         $this
             ->getJson('/conta/cargos/cadastrar')
@@ -276,7 +278,7 @@ class AccessControlTest extends TestCase
             'scope' => 'account',
             'module' => 'permissions',
             'is_system' => false,
-            'account_id' => $owner->account_id,
+            'account_id' => $this->accountId($owner),
         ]);
         $this->membership($owner)->assignments()->sole()->role()->sole()->permissions()->attach($obsolete->id);
         $legacyAudit = require database_path('migrations/2026_11_21_000006_remove_legacy_audit_tables.php');
@@ -287,6 +289,7 @@ class AccessControlTest extends TestCase
         $this->assertDatabaseMissing('permissions', ['id' => $obsolete->id]);
         $this->assertDatabaseMissing('permission_role', ['permission_id' => $obsolete->id]);
         $this->assertDatabaseHas('permissions', ['id' => $legacy->id]);
+        $this->assertTrue($this->enterAccount($owner));
         $this->assertTrue($owner->can('account.audit.list'));
         $this->assertFalse($owner->can($legacy->slug));
         $this->assertDatabaseHas('access_catalog_events', [
@@ -301,9 +304,9 @@ class AccessControlTest extends TestCase
     public function test_role_list_filters_by_search_and_origin_within_the_account(): void
     {
         $owner = $this->owner();
-        Role::create(['account_id' => $owner->account_id, 'name' => 'Caixa noturno']);
-        Role::create(['account_id' => $this->owner()->account_id, 'name' => 'Caixa externo']);
-        $initial = Role::where('account_id', $owner->account_id)->whereNotNull('system_key')->count();
+        Role::create(['account_id' => $this->accountId($owner), 'name' => 'Caixa noturno']);
+        Role::create(['account_id' => $this->accountId($this->owner()), 'name' => 'Caixa externo']);
+        $initial = Role::where('account_id', $this->accountId($owner))->whereNotNull('system_key')->count();
         $this->actingAs($owner);
 
         $this

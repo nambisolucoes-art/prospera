@@ -1,0 +1,115 @@
+ M .env.example
+ M README.md
+ M app/Domains/Acessos/Application/Actions/RegisterAccountMembershipAction.php
+ M app/Domains/Acessos/Application/Context/AccountContext.php
+ M app/Domains/Acessos/Application/Context/EffectivePermissions.php
+ M app/Domains/Acessos/Application/Queries/MembershipAccessQuery.php
+ M app/Domains/Acessos/UI/Controllers/AccessController.php
+ M app/Domains/Ajuda/Application/Queries/HelpCatalog.php
+ M app/Domains/Organizacao/Application/Data/WorkspaceDestinationData.php
+ M app/Domains/Organizacao/UI/Controllers/CompanyController.php
+ M app/Domains/Organizacao/UI/Controllers/EstablishmentContextController.php
+ M app/Domains/Organizacao/UI/Controllers/EstablishmentController.php
+ M app/Domains/Organizacao/UI/Controllers/OrganizationController.php
+ M app/Domains/Pessoas/UI/Controllers/DirectoryController.php
+ M app/Domains/Plataforma/Application/Actions/SaveAccountAction.php
+ M app/Domains/Plataforma/Application/Queries/AccountDirectoryQuery.php
+ M app/Domains/Plataforma/Domain/Models/Client.php
+ M app/Domains/Plataforma/UI/Controllers/AccountInspectionController.php
+ M app/Domains/Plataforma/UI/Controllers/ClientController.php
+ M app/Domains/Usuarios/Application/Actions/CreateUserAction.php
+ M app/Domains/Usuarios/UI/Controllers/UserController.php
+ M app/Http/Middleware/EnforceAccountInspection.php
+ M app/Http/Middleware/EnforceAudit.php
+ M app/Models/User.php
+ M app/Providers/AppServiceProvider.php
+ M app/Support/ApiPage.php
+ M bootstrap/app.php
+ M compose.dev.yaml
+ M config/audit.php
+ M config/permissions.php
+ M database/factories/UserFactory.php
+ M docs/ajuda/usuarios.md
+ M docs/plano-de-acoes/001-arquitetura-organizacional-prospera.md
+ M phpunit.xml
+ M resources/js/app/ApiApplication.tsx
+ M resources/js/app/account/SettingsLayout.tsx
+ M resources/js/app/guidance.ts
+ M resources/js/app/saas/AccessList.tsx
+ M resources/js/app/saas/AccountInspectionBanner.tsx
+ M resources/js/app/saas/ClientForm.tsx
+ M resources/js/app/saas/CompanyPreview.tsx
+ M resources/js/app/saas/EstablishmentPreview.tsx
+ M resources/js/app/saas/MembershipAssignmentsModal.tsx
+ M resources/js/app/saas/OrganizationSwitcher.tsx
+ M resources/js/app/saas/PromoteEstablishmentModal.tsx
+ M resources/js/app/saas/RoleAvailabilityFields.tsx
+ M resources/js/app/saas/SaasLayout.tsx
+ M resources/js/app/saas/TagEditorModal.tsx
+ M resources/js/app/saas/UserPersonPicker.tsx
+ M resources/js/app/saas/accountNavigation.ts
+ M resources/js/app/saas/audit.tsx
+ M resources/js/app/saas/commercial-registration.tsx
+ M resources/js/app/saas/commercial-relations.tsx
+ M resources/js/app/saas/companies.tsx
+ M resources/js/app/saas/company-form.tsx
+ M resources/js/app/saas/establishment-form.tsx
+ M resources/js/app/saas/establishment-home.tsx
+ M resources/js/app/saas/establishments.tsx
+ M resources/js/app/saas/help.tsx
+ M resources/js/app/saas/home.tsx
+ M resources/js/app/saas/organization.tsx
+ M resources/js/app/saas/organizationNavigation.ts
+ M resources/js/app/saas/role-form.tsx
+ M resources/js/app/saas/tags.tsx
+ M resources/js/app/saas/user-form.tsx
+ M resources/js/app/saas/users.tsx
+ M resources/js/components/Button/Button.tsx
+ M resources/js/components/TopBarPrimary/TopBarPrimary.css
+ M resources/js/components/TopBarPrimary/TopBarProfileDropdown.tsx
+ M resources/js/hooks/useContextUrl.ts
+ M resources/js/types/Session.types.ts
+ M resources/js/utils/organizationContext.ts
+ D routes/context.php
+ M routes/guidance.php
+ M routes/saas.php
+ M routes/web.php
+ M tests/Feature/AccessControlTest.php
+ M tests/Feature/AccountContextTest.php
+ M tests/Feature/AccountInspectionTest.php
+ M tests/Feature/AuditAndGuidanceTest.php
+ M tests/Feature/CommercialRelationAccessTest.php
+ M tests/Feature/CommercialRelationWorkspaceTest.php
+ M tests/Feature/ContextualAccessTest.php
+ M tests/Feature/ContextualAuditTest.php
+ M tests/Feature/CustomerDirectoryTest.php
+ M tests/Feature/OrganizationContextTest.php
+ M tests/Feature/OrganizationMigrationTest.php
+ M tests/Feature/OrganizationTest.php
+ M tests/Feature/PeopleDirectoryTest.php
+ M tests/Feature/PersonAdditionalContactsTest.php
+ M tests/Feature/SaasPlatformTest.php
+ M tests/Feature/Settings/ProfilePhotoTest.php
+ M tests/Feature/SupplierDirectoryTest.php
+ M tests/Frontend/organizationContext.test.ts
+ M tests/TestCase.php
+?? app/Domains/Acessos/Application/Actions/AcceptAccountInvitationAction.php
+?? app/Domains/Acessos/Application/Actions/CreateAccountInvitationAction.php
+?? app/Domains/Acessos/Application/Actions/RevokeAccountInvitationAction.php
+?? app/Domains/Acessos/Application/Queries/AccountInvitationsQuery.php
+?? app/Domains/Acessos/Domain/Models/AccountInvitation.php
+?? app/Domains/Acessos/UI/Controllers/AccountInvitationController.php
+?? app/Domains/Acessos/UI/Controllers/AccountSelectionController.php
+?? app/Domains/Plataforma/Application/Queries/AccountCodesQuery.php
+?? app/Domains/Plataforma/Application/Queries/AccountMembershipsQuery.php
+?? app/Domains/Plataforma/Domain/DTOs/AccountCode.php
+?? app/Http/Middleware/ResolveAccountContext.php
+?? config/prospera.php
+?? database/migrations/2026_11_23_000001_add_code_to_clients.php
+?? database/migrations/2026_11_23_000002_create_account_invitations.php
+?? database/migrations/2026_11_23_000003_remove_account_from_users.php
+?? docs/tours/selecao-conta.md
+?? resources/js/app/saas/account-select.tsx
+?? resources/js/app/saas/invitation.tsx
+?? routes/account.php
+?? tests/Feature/MultipleAccountsTest.php

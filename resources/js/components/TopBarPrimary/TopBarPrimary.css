@@ -338,6 +338,29 @@
   }
 }
 
+/* Conta da aba (E09): identifica onde a pessoa trabalha antes de Trocar de conta. */
+.topbarDropdown__account {
+  display: flex;
+  flex-direction: column;
+  max-width: 240px;
+  padding: 6px 20px 8px;
+  border-bottom: 1px solid var(--bold-color-border-soft);
+  margin-bottom: 4px;
+}
+
+.topbarDropdown__accountLabel {
+  color: #98a6ad;
+  font-size: 12px;
+}
+
+.topbarDropdown__accountName {
+  overflow: hidden;
+  color: #4c5667;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 button.topbarDropdown__profileLink {
   width: 100%;
   border: 0;

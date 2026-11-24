@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useContextUrl } from '@/hooks/useContextUrl';
 import BusinessForm, { BusinessFormActions, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import ChoiceControl from '@/components/ChoiceControl/ChoiceControl';
 import Modal from '@/components/Modal/Modal';
@@ -18,7 +19,8 @@ export default function MembershipAssignmentsModal({ membership, name, onClose }
 }) {
   const [data, setData] = useState<Summary>();
   const [error, setError] = useState(false);
-  const action = '/conta/usuarios/' + membership + '/atribuicoes';
+  const to = useContextUrl();
+  const action = to('@/usuarios/' + membership + '/atribuicoes');
 
   useEffect(() => {
     const request = new AbortController();
