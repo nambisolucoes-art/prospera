@@ -1,6 +1,6 @@
 # Tour de Fornecedores
 
-Artigo: [Fornecedores](../ajuda/fornecedores.md). Tela: `/conta/estabelecimento/{codigo|todos}/fornecedores` (E07). Executor na barra superior, configurado em `resources/js/app/guidance.ts`. Nenhum executor ou atalho de tutorial no modal.
+Artigo: [Fornecedores](../ajuda/fornecedores.html). Tela: `/conta/estabelecimento/{codigo|todos}/fornecedores` (E07). Executor na barra superior, configurado em `resources/js/app/guidance.ts`. Nenhum executor ou atalho de tutorial no modal.
 
 | Ordem | Alvo | Título | Orientação |
 | --- | --- | --- | --- |

@@ -127,7 +127,7 @@ O comando descobre as verificações no PHP e sincroniza o catálogo preservando
 
 Toda alteração de negócio é auditada pelo contrato `Auditable` e pelo observer compartilhado. Relacionamentos e eventos de acesso são registrados explicitamente. Operações revertidas não geram histórico concluído. Dados protegidos são substituídos por marcadores, sem senhas, segredos ou imagens. `docker compose exec app php artisan audit:check` verifica a cobertura e também roda na inicialização. Consulte a [convenção de auditoria](docs/convencoes/auditoria.md).
 
-A **Central de Ajuda** está no menu e usa os artigos de `docs/ajuda/`, filtrados no servidor por contexto e permissão. O botão **Tutorial desta tela**, com ícone de informação na barra superior, inicia os passos da página, inclusive no celular. O tour respeita os controles disponíveis, não modifica os dados digitados e pode ser fechado com Esc. As configurações estão em `resources/js/app/guidance.ts` e seus roteiros em `docs/tours/`.
+A **Central de Ajuda** está no menu e usa os artigos em HTML de `docs/ajuda/` (tipografia do Ubold: letra capitular, descrição horizontal e listas sem estilo), filtrados no servidor por contexto e permissão. O botão **Tutorial desta tela**, com ícone de informação na barra superior, inicia os passos da página, inclusive no celular. O tour respeita os controles disponíveis, não modifica os dados digitados e pode ser fechado com Esc. As configurações estão em `resources/js/app/guidance.ts` e seus roteiros em `docs/tours/`.
 
 A suíte impõe SQLite em memória em `tests/bootstrap.php`, antes de carregar o Laravel, para impedir que as variáveis do Docker direcionem os testes ao PostgreSQL da aplicação.
 

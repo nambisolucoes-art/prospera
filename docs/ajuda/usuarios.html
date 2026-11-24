@@ -1,0 +1,110 @@
+<!--
+titulo: Usuários
+resumo: Consulte os usuários na plataforma ou na sua conta.
+categoria: Configurações
+palavras-chave: usuários, equipe, administradores, foto, avatar, iniciais
+-->
+
+<h2 id="consultar-usuarios">Consultar usuários</h2>
+
+<p>
+  <span class="dropcap text-primary">A</span>bra <strong>Usuários</strong> no menu lateral. Na coluna
+  <strong>Nome</strong>, a foto aparece ao lado da pessoa. Se ela ainda não adicionou uma foto ao
+  <a href="/ajuda/perfil">perfil</a>, a tabela mostra as iniciais.
+</p>
+
+<h2 id="acesso-de-usuarios-da-conta">Acesso de usuários da conta</h2>
+
+<p>
+  Nos cadastros com senha inicial, use o ícone de olho para <strong>Mostrar senha</strong> e clique novamente para
+  <strong>Ocultar senha</strong>. A senha e a confirmação têm controles independentes.
+</p>
+
+<p>
+  Em <strong>Usuários</strong>, pesquise por nome ou e-mail de acesso. A coluna <strong>Atribuições</strong> lista
+  cada cargo e o local em que ele vale, conforme o seu acesso. Use o ícone de informação para abrir <strong>Visualizar
+  usuário</strong> e conferir os dados de acesso. Use <strong>Editar atribuições</strong> na coluna
+  <strong>Ações</strong> para ajustar os cargos conforme sua autorização. Quem administra o acesso à conta também pode
+  suspender ou reativar o vínculo pela ficha. O cadastro de um vínculo aplica automaticamente a etiqueta
+  <strong>Usuário</strong>.
+</p>
+
+<p>
+  Em <strong>Tipo de cadastro</strong>, a opção inicial é <strong>Pessoa ainda não cadastrada</strong>. Para conceder
+  acesso a alguém que já tem dados na conta, escolha <strong>Pessoa já cadastrada</strong>, procure pelo nome ou
+  e-mail e selecione o cadastro encontrado. O nome vem da ficha e o e-mail de contato é sugerido como e-mail de
+  acesso. Você pode informar outro e-mail de acesso. A forma de acesso e a primeira atribuição continuam obrigatórias.
+  Essa opção exige autorização para visualizar os dados compartilhados da pessoa e só oferece cadastros sem acesso
+  nesta conta.
+</p>
+
+<p>
+  Ao cadastrar um usuário, escolha o local e o cargo da primeira atribuição. O sistema apresenta a mesma confirmação
+  quando a solicitação usa um e-mail já existente. Até a seleção de múltiplas contas ser disponibilizada, um endereço
+  existente em outra conta não recebe um vínculo novo.
+</p>
+
+<h2 id="orientacao-na-tela">Orientação na tela</h2>
+
+<p>
+  Use <strong>Tutorial desta tela</strong> na barra superior. O tutorial apresenta o cadastro quando permitido, os
+  filtros, as colunas, as ações e a paginação. Ele abre opções e demonstra a largura das colunas no desktop,
+  restaurando as preferências ao sair. <strong>Ver todos os passos</strong> permite escolher um assunto. Esc fecha o
+  tutorial.
+</p>
+
+<h2 id="orientacoes-nos-campos">Orientações nos campos</h2>
+
+<p>
+  As dicas de Forma de acesso e Confirmar senha explicam o envio do convite e a necessidade de repetir exatamente a
+  senha inicial.
+</p>
+
+<blockquote class="help-note help-note--success">
+  <p><strong class="text-success">Dica:</strong>
+    Passe o mouse, use Tab para focar o ícone ou toque nele no celular.
+  </p>
+</blockquote>
+
+<p>
+  Esc fecha a dica sem alterar os dados do formulário.
+</p>
+
+<h2 id="selecionar-conta-e-aceitar-convites">Selecionar conta e aceitar convites</h2>
+
+<p>
+  A mesma identidade pode ter vínculos independentes com várias contas. Após entrar, uma única conta
+  <span class="text-success">ativa</span> abre automaticamente. Com várias contas disponíveis, escolha em Selecionar
+  conta. O endereço sempre contém <code>/contas/{codigo}</code>. Trocar de conta afeta somente a aba atual. Cargos,
+  unidades e preferências de área de trabalho pertencem ao vínculo em cada conta.
+</p>
+
+<blockquote class="help-note help-note--warning">
+  <p><strong class="text-warning">Atenção:</strong>
+    Vínculos <span class="text-warning">suspensos</span> e contas <span class="text-danger">inativas</span> não
+    permitem entrada.
+  </p>
+</blockquote>
+
+<p>
+  Para uma identidade já existente, o cadastro de acesso solicita um convite com resposta neutra. O convite
+  <span class="text-info">pendente</span> não concede acesso. Entre com o e-mail destinatário, abra o link recebido,
+  confira conta, cargo e validade e use Salvar para aceitar. O link tem <mark>uso único</mark>, expira e pode ser
+  <span class="text-danger">revogado</span> por um operador com permissão. Um novo envio revoga o convite
+  <span class="text-info">pendente</span> anterior. Cancelar não concede acesso. Nenhuma conta pode alterar sua
+  identidade de login.
+</p>
+
+<p>
+  A configuração <code>prospera.multiple_accounts</code> controla novas associações por convite. Desligá-la bloqueia
+  esses aceites, preservando os vínculos e a seleção explícita de contas já existentes.
+</p>
+
+<h2 id="preservar-a-administracao-da-conta">Preservar a administração da conta</h2>
+
+<p>
+  Antes de suspender ou retirar o acesso de um administrador, mantenha outro administrador utilizável na mesma conta.
+  O substituto precisa ter acesso <span class="text-success">ativo</span>, identidade habilitada, e-mail verificado e
+  senha inicial definida. Um convite <span class="text-info">pendente</span> não substitui o administrador atual.
+  Suspender um vínculo não altera a identidade de login nem os acessos da pessoa em outras contas.
+</p>

@@ -297,14 +297,37 @@ class AuditAndGuidanceTest extends TestCase
         $this->getJson('/ajuda')->assertForbidden();
     }
 
+    public function test_every_help_article_is_html_with_metadata_unique_anchors_and_the_ubold_typography(): void
+    {
+        $files = glob(base_path('docs/ajuda/*.html'));
+        $this->assertNotEmpty($files);
+        $this->assertSame([], glob(base_path('docs/ajuda/*.md')));
+
+        foreach ($files as $file) {
+            $html = (string) file_get_contents($file);
+            $this->assertMatchesRegularExpression(
+                '/\A<!--\ntitulo: .+\nresumo: .+\ncategoria: .+\npalavras-chave: .+\n-->\n/',
+                $html,
+                basename($file),
+            );
+            preg_match_all('/<h2 id="([^"]+)">/', $html, $ids);
+            $this->assertNotEmpty($ids[1], basename($file));
+            $this->assertSame($ids[1], array_values(array_unique($ids[1])), basename($file));
+            $this->assertStringContainsString('class="dropcap text-primary"', $html, basename($file));
+            $this->assertMatchesRegularExpression('/<(mark|ins|blockquote|abbr)\b/', $html, basename($file));
+            $this->assertDoesNotMatchRegularExpression('/[—–]/u', $html, basename($file));
+        }
+    }
+
     public function test_help_html_is_sanitized_and_search_links_to_a_section(): void
     {
         $owner = $this->owner();
         $article = app(HelpCatalog::class)->render([
-            'body' => "## Uma seção\n<script>alert('x')</script>\n[Link](javascript:alert(1))\n",
+            'body' => "<h2>Uma seção</h2>\n<script>alert('x')</script>\n<p onclick=\"x()\"><a href=\"javascript:alert(1)\">Link</a></p>\n",
         ], $owner);
         $this->assertStringNotContainsString('<script', $article['html']);
         $this->assertStringNotContainsString('href="javascript:', $article['html']);
+        $this->assertStringNotContainsString('onclick', $article['html']);
         $this->assertStringContainsString('id="uma-secao"', $article['html']);
         $this
             ->actingAs($owner)

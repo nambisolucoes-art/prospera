@@ -14,12 +14,16 @@ final class HelpCatalog
     public function articles(User $user): array
     {
         $result = [];
-        foreach (File::files(base_path('docs/ajuda')) as $file) {
-            $slug = $file->getFilenameWithoutExtension();
+        foreach (File::glob(base_path('docs/ajuda/*.html')) as $path) {
+            $slug = basename($path, '.html');
             if (! $this->allowed($user, $slug)) {
                 continue;
-            }$source = $file->getContents();
-            if (! preg_match('/\A---\R(.*?)\R---\R(.*)\z/s', $source, $m)) {
+            }
+
+            $source = (string) file_get_contents($path);
+
+            // Cada artigo é um HTML com a tipografia do Ubold e um comentário de metadados no topo.
+            if (! preg_match('/\A<!--\R(.*?)\R-->\R(.*)\z/s', $source, $m)) {
                 continue;
             }
 
@@ -31,8 +35,7 @@ final class HelpCatalog
                     $meta[trim($parts[0])] = trim($parts[1]);
                 }
             }
-            // Links entre artigos apontam para a rota da Central de Ajuda.
-            $body = preg_replace('/\(([-a-z0-9]+)\.md(#[^)]*)?\)/', '(/ajuda/$1$2)', $m[2]);
+            $body = $m[2];
 
             $result[] = [
                 'slug' => $slug,
@@ -92,14 +95,20 @@ final class HelpCatalog
     public function render(array $article, User $user): array
     {
         unset($article['keywords']);
-        $article['html'] = Str::markdown($article['body'], ['html_input' => 'strip', 'allow_unsafe_links' => false]);
+        $article['html'] = $this->sanitized($article['body']);
         $ids = [];
-        $article['html'] = preg_replace_callback('/<h([1-6])>(.*?)<\/h\1>/s', function ($match) use (&$ids) {
-            $base = Str::slug(html_entity_decode(strip_tags($match[2])));
+        $article['html'] = preg_replace_callback('/<h([1-6])([^>]*)>(.*?)<\/h\1>/s', function ($match) use (&$ids) {
+            if (preg_match('/\bid="([^"]+)"/', $match[2], $existing)) {
+                $ids[$existing[1]] = 1;
+
+                return $match[0];
+            }
+
+            $base = Str::slug(html_entity_decode(strip_tags($match[3])));
             $count = $ids[$base] = ($ids[$base] ?? 0) + 1;
             $id = $base.($count > 1 ? '-'.$count : '');
 
-            return '<h'.$match[1].' id="'.e($id).'">'.$match[2].'</h'.$match[1].'>';
+            return '<h'.$match[1].' id="'.e($id).'"'.$match[2].'>'.$match[3].'</h'.$match[1].'>';
         }, $article['html']);
         // Links para artigos que a pessoa não pode abrir viram texto simples.
         $article['html'] = preg_replace_callback(
@@ -117,5 +126,15 @@ final class HelpCatalog
         unset($article['body']);
 
         return $article;
+    }
+
+    /** O HTML dos artigos é versionado, mas nunca executa script, carrega objeto externo ou usa endereço inseguro. */
+    private function sanitized(string $html): string
+    {
+        $html = preg_replace('#<(script|style|iframe|object|embed|form)\b.*?</\1\s*>#is', '', $html) ?? '';
+        $html = preg_replace('#<(script|style|iframe|object|embed|form|link|meta)\b[^>]*>#i', '', $html) ?? '';
+        $html = preg_replace('/\son[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)/i', '', $html) ?? '';
+
+        return preg_replace('/\s(href|src)\s*=\s*(["\'])\s*(?:javascript|data|vbscript):[^"\']*\2/i', '', $html) ?? '';
     }
 }

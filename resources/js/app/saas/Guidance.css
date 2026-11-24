@@ -47,15 +47,158 @@
 .help-article a {
   color: var(--bold-color-primary);
 }
-.help-summary {
-  font-size: 16px;
-}
 .help-article table {
   display: block;
   overflow: auto;
 }
 .help-article pre {
   white-space: pre-wrap;
+}
+
+/* Tipografia do Ubold (UI Kit, Tipografia) para os artigos em HTML de docs/ajuda. */
+.help-article p {
+  margin: 0 0 12px;
+}
+.help-article h2 {
+  clear: both;
+  color: var(--bold-color-heading);
+  font-family: var(--bold-font-ui);
+  font-weight: 600;
+}
+.help-article ul,
+.help-article ol {
+  margin: 0 0 14px;
+  padding-left: 22px;
+}
+.help-article ul ul,
+.help-article ol ul {
+  margin-bottom: 0;
+  list-style: circle;
+}
+.help-article .list-unstyled {
+  padding-left: 0;
+  list-style: none;
+}
+.help-article .list-unstyled > li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 6px;
+}
+.help-article .list-unstyled > li::before {
+  content: '';
+  position: absolute;
+  top: 0.8em;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  background: var(--bold-color-primary);
+}
+.help-article .list-unstyled ul {
+  list-style: circle;
+}
+.help-article .list-inline {
+  margin-left: -5px;
+  padding-left: 0;
+  list-style: none;
+}
+.help-article .list-inline > li {
+  display: inline-block;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+.help-article dl {
+  margin: 0 0 16px;
+}
+.help-article dt {
+  font-weight: 700;
+  color: var(--bold-color-heading);
+}
+.help-article dd {
+  margin: 0 0 8px;
+}
+.help-article .dl-horizontal dd::before,
+.help-article .dl-horizontal dd::after {
+  display: table;
+  content: ' ';
+}
+.help-article .dl-horizontal dd::after {
+  clear: both;
+}
+.help-article .dropcap {
+  float: left;
+  margin-right: 6px;
+  font-size: 3.1em;
+  line-height: 36px;
+  text-transform: uppercase;
+  color: var(--bold-color-primary);
+}
+.help-article .lead,
+.help-summary {
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.5;
+}
+.help-article mark {
+  padding: 0.1em 0.25em;
+  background-color: #fcf8e3;
+  color: #000000;
+}
+.help-article ins {
+  text-decoration: underline;
+  text-decoration-color: var(--bold-color-primary);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.help-article del {
+  color: var(--bold-color-legacy-muted);
+}
+.help-article abbr[title] {
+  border-bottom: 1px dotted #777777;
+  cursor: help;
+  text-decoration: none;
+}
+.help-article address {
+  margin-bottom: 16px;
+  font-style: normal;
+}
+.help-article small {
+  color: var(--bold-color-legacy-muted);
+}
+/* Cores contextuais de texto do Ubold, com os tons do Prospera. */
+.help-article .text-custom { color: var(--bold-color-custom); }
+.help-article .text-primary { color: var(--bold-color-primary); }
+.help-article .text-success { color: var(--bold-color-success); }
+.help-article .text-info { color: var(--bold-color-info); }
+.help-article .text-warning { color: #b45309; }
+.help-article .text-danger { color: var(--bold-color-danger); }
+.help-article .text-pink { color: var(--bold-color-pink); }
+.help-article .text-purple { color: var(--bold-color-purple); }
+.help-article .text-muted { color: var(--bold-color-legacy-muted); }
+/* Citações em bloco do Ubold como avisos: permissão, atenção e dica. */
+.help-article blockquote {
+  margin: 0 0 16px;
+  padding: 10px 16px;
+  border-left: 5px solid #eeeeee;
+  background: #f9fafb;
+  font-size: 15px;
+}
+.help-article blockquote p:last-child {
+  margin-bottom: 0;
+}
+.help-article .help-note--info { border-left-color: var(--bold-color-info); }
+.help-article .help-note--warning { border-left-color: var(--bold-color-warning); }
+.help-article .help-note--success { border-left-color: var(--bold-color-success); }
+@media (min-width: 768px) {
+  .help-article .dl-horizontal dt {
+    float: left;
+    clear: left;
+    width: 160px;
+    text-align: right;
+  }
+  .help-article .dl-horizontal dd {
+    margin-left: 180px;
+  }
 }
 @media (max-width: 480px) {
   .audit-changes th,

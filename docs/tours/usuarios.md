@@ -1,6 +1,6 @@
 # Tour de Usuários
 
-Artigo de referência em [Usuários](../ajuda/usuarios.md).
+Artigo de referência em [Usuários](../ajuda/usuarios.html).
 
 | Passo | Alvo | Orientação |
 | --- | --- | --- |

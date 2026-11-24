@@ -1,0 +1,130 @@
+<!--
+titulo: Fornecedores
+resumo: Consulte e mantenha a relação de fornecedor de cada empresa, sem duplicar o cadastro da pessoa.
+categoria: Cadastros
+palavras-chave: fornecedor, fornecedores, relação comercial, empresa, área de trabalho, CPF, CNPJ, vincular, ativar, inativar, pessoa
+-->
+
+<h2 id="pessoa-cliente-e-fornecedor">Pessoa, cliente e fornecedor</h2>
+
+<p>
+  <span class="dropcap text-primary">A</span> <strong>pessoa</strong> é o cadastro central da conta: tipo, nome ou
+  razão social, <abbr title="Cadastro de Pessoas Físicas">CPF</abbr> ou
+  <abbr title="Cadastro Nacional da Pessoa Jurídica">CNPJ</abbr>, inscrições, contatos e endereço são informados uma
+  única vez. <strong>Fornecedor</strong> é uma relação comercial entre essa pessoa e uma <strong>empresa</strong> da
+  conta. A mesma pessoa pode ser cliente de uma empresa, fornecedora de outra, as duas coisas na mesma empresa ou não
+  ter relação nenhuma. A relação não concede acesso ao sistema, e um usuário não é fornecedor só por ter acesso.
+</p>
+
+<p>
+  Na coluna <strong>Etiquetas</strong> da listagem, quando as etiquetas não cabem na largura disponível, elas passam em
+  ciclo, como um letreiro. Passe o mouse ou foque a linha para <ins>pausar</ins>. Ao ampliar a coluna ou a janela, as
+  etiquetas voltam a aparecer paradas.
+</p>
+
+<p>
+  Exemplo: João da Silva tem um único cadastro no Grupo Gartan. Na Gartan Roupas, ele é cliente
+  <span class="text-success">ativo</span> e fornecedor <span class="text-success">ativo</span>; na Gartan Express,
+  cliente <span class="text-success">ativo</span>; na Gartan 3, não tem relação. Cada uma dessas relações tem situação
+  e histórico próprios.
+</p>
+
+<h2 id="por-que-nao-repetir-a-pessoa-por-filial">Por que não repetir a pessoa por filial</h2>
+
+<p>
+  A relação pertence à empresa, e não ao estabelecimento. As filiais Guanambi, Janaúba e Jequié da Gartan Roupas
+  compartilham a mesma relação de João com a Gartan Roupas. Uma futura venda feita em Guanambi será uma operação
+  daquela unidade, ligada à empresa; o cadastro do fornecedor continua único.
+</p>
+
+<h2 id="consultar-na-area-de-trabalho">Consultar na área de trabalho</h2>
+
+<p>
+  Abra <strong>Fornecedores</strong> no menu. A tela considera as empresas das unidades marcadas no seletor da barra
+  superior. Com Guanambi e Janaúba (Gartan Roupas) e Jequié (Gartan Express), a lista mostra as relações das duas
+  empresas; duas unidades da mesma empresa não repetem a mesma relação. Com mais de uma empresa, a coluna e o filtro
+  <strong>Empresa</strong> aparecem. Busque por nome, e-mail, CPF ou CNPJ e filtre pela situação.
+</p>
+
+<p>
+  A lista considera as empresas em que seu cargo permite <strong>Listar fornecedores</strong>. Recarregar a página
+  mantém a seleção de unidades desta aba.
+</p>
+
+<h2 id="cadastrar">Cadastrar</h2>
+
+<p>
+  Na lista, clique em <strong>Cadastrar</strong> para abrir a página de cadastro. Quando houver mais de uma empresa
+  disponível, marque as empresas desejadas e salve uma vez. Cada empresa recebe seu próprio vínculo com o mesmo
+  cadastro compartilhado. Para uma Pessoa nova, informe o tipo, a identificação e os dados de endereço e contato que
+  você tiver. Você pode selecionar as etiquetas do módulo <strong>Fornecedores</strong>. Elas ficam no cadastro
+  comercial da empresa. A etiqueta <strong>Fornecedor</strong> aparece marcada e permanece fixa. Use
+  <strong class="text-success">Salvar</strong> para criar a Pessoa e registrar o cadastro de fornecedor na empresa.
+</p>
+
+<blockquote class="help-note help-note--info">
+  <p><strong class="text-info">Permissão:</strong>
+    Criar os dados compartilhados exige também a permissão <strong>Cadastrar pessoas</strong>.
+  </p>
+</blockquote>
+
+<p>
+  Se a Pessoa já estiver cadastrada, selecione <strong>Pessoa física</strong> para buscar por CPF ou <strong>Pessoa
+  jurídica</strong> para buscar por CNPJ. Ao preencher o documento completo, aguarde a busca automática ou clique na
+  lupa para buscar na hora. Se houver resultado, confira o aviso junto ao campo do documento. Se a busca não encontrar
+  uma ficha e você tiver permissão para cadastrar Pessoas, continue preenchendo o formulário. A ficha preenche os
+  dados centrais que você pode visualizar e indica o outro papel existente quando você tem acesso a ele na empresa.
+  <strong class="text-success">Salvar</strong> reutiliza a Pessoa e cadastra o papel na empresa escolhida. Você pode
+  completar ou corrigir os dados centrais conforme suas permissões de Pessoas. O ícone de informação ao lado de
+  <strong>Deseja utilizar outro cadastro?</strong> indica que essas alterações valem para toda a conta. O CPF ou CNPJ
+  usado para localizar o cadastro permanece fixo. Para pesquisar outro documento, use <strong>Descartar</strong>. Essa
+  ação limpa a ficha selecionada no formulário sem excluir o cadastro. Se o papel estiver
+  <span class="text-danger">inativo</span>, use <strong class="text-success">Ativar</strong> na listagem.
+</p>
+
+<h2 id="editar-ou-reativar">Editar ou reativar</h2>
+
+<p>
+  Na coluna <strong>Ações</strong>, escolha <strong>Editar fornecedor</strong> para abrir a ficha na empresa da linha.
+  Você pode atualizar as etiquetas comerciais e, com permissão em Pessoas, alterar os dados compartilhados liberados
+  no formulário. Use <strong class="text-success">Salvar</strong> para aplicar ou
+  <strong class="text-muted">Cancelar</strong> para voltar à lista. O campo <strong>Situação</strong> permite ativar
+  ou inativar o vínculo se seu cargo autorizar a operação. Quem pode editar a identificação compartilhada também pode
+  corrigir o CPF ou CNPJ. A correção vale para todos os vínculos da pessoa e o novo documento precisa ser válido e
+  único na conta. A empresa desta ficha identifica a relação cujas etiquetas você está editando. Para ajustar onde
+  vale o cadastro, marque ou desmarque empresas em <strong>Empresas do cadastro</strong>. Marcar cria ou reativa o
+  vínculo, e desmarcar <span class="text-danger">inativa</span> o vínculo naquela empresa. Cada alteração depende da
+  permissão correspondente e preserva o histórico. O tipo de pessoa pode ser corrigido por quem pode editar a
+  identificação. Informe um documento válido para o novo tipo ou limpe o campo se estiver sem documento.
+</p>
+
+<p>
+  Use <strong class="text-danger">Inativar</strong> ou <strong class="text-success">Ativar</strong> na coluna
+  <strong>Ações</strong> para mudar a situação do vínculo na empresa da linha, conforme seu cargo. A mudança vale
+  somente para esse papel nessa empresa.
+</p>
+
+<h2 id="permissoes">Permissões</h2>
+
+<p>
+  Cada ação tem permissão própria: <strong>Listar</strong>, <strong>Visualizar</strong>, <strong>Cadastrar</strong>,
+  <strong>Editar</strong>, <strong class="text-success">Ativar</strong> e <strong>Inativar fornecedores</strong>. Elas
+  valem por empresa: um cargo atribuído na Gartan Roupas não alcança a Gartan Express, e um cargo atribuído somente
+  num estabelecimento não alcança a relação comercial da empresa. Os dados centrais seguem as permissões de Pessoas:
+  quem atende pelo menos uma empresa da pessoa altera contatos e endereço; nome, CPF ou CNPJ e inscrições exigem
+  atender todas as empresas da pessoa ou a administração da conta.
+</p>
+
+<h2 id="historico">Histórico</h2>
+
+<p>
+  Cadastro, edição, ativação e inativação são registrados na Auditoria como <strong>Fornecedor</strong>, com a empresa
+  da relação, o autor e, na inspeção SaaS, o usuário representado. Salvar sem mudança não gera registro. CPF ou CNPJ
+  completo não entra no histórico.
+</p>
+
+<p>
+  Cada ficha abre pelo botão <strong>Visualizar cadastro</strong> da própria listagem e apresenta a etiqueta
+  <strong>Fornecedor</strong>. Para usar o mesmo CPF ou CNPJ também como <strong>Cliente</strong>, faça a busca pelo
+  documento no cadastro do outro módulo e vincule o registro encontrado. A situação de cada vínculo é independente.
+</p>

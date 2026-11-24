@@ -1,0 +1,116 @@
+<!--
+titulo: Cargos e permissões
+resumo: Defina as ações permitidas para cada cargo e atribua um cargo ao acesso da pessoa.
+categoria: Acesso e segurança
+palavras-chave: cargos, papéis, permissões, catálogo, acesso, equipe, usuário, administrador, visualizar, cadastrar, editar
+-->
+
+<h2 id="consultar-cargos">Consultar cargos</h2>
+
+<p>
+  <span class="dropcap text-primary">O</span> item <strong>Cargos</strong> aparece no menu conforme as permissões do
+  usuário. Quando o usuário pode apenas cadastrar, o item abre o formulário; após salvar, permanece numa tela
+  autorizada. Listar, visualizar, cadastrar e editar são autorizações separadas. No topo da lista, busque pelo nome do
+  cargo e filtre pela origem: <strong>Cargo inicial</strong> ou <strong>Personalizado</strong>. A lista se atualiza
+  automaticamente ao digitar; a lupa à direita e Enter também executam a busca. Use a ação de informação para abrir o
+  modal do cargo, com nome, origem, quantidade de permissões e ações atribuídas agrupadas por módulo. Cada etiqueta
+  mostra apenas a ação, como <strong>Listar</strong> na linha <strong>Auditoria</strong>.
+</p>
+
+<p>
+  As permissões são disponibilizadas automaticamente pelos módulos do sistema. Não existe uma tela ou cadastro de
+  permissões. A seleção das ações autorizadas acontece no formulário de cadastro e edição do cargo.
+</p>
+
+<h2 id="cadastrar-um-cargo">Cadastrar um cargo</h2>
+
+<p>
+  Em <strong>Cargos &gt; Cadastrar</strong>, informe o nome e marque cada ação permitida, agrupada por módulo. Por
+  exemplo, <strong>Listar: Clientes</strong> permite consultar a lista de clientes e <strong>Visualizar:
+  Clientes</strong> permite abrir a ficha da relação. As permissões de Pessoas que permanecem controlam os dados
+  compartilhados nos fluxos dos módulos. Salve em <strong class="text-success">Salvar</strong>.
+</p>
+
+<p>
+  O cargo vale somente na conta atual. Permissões não marcadas ficam bloqueadas. Você só pode conceder permissões que
+  já possui. O administrador inicial da conta é protegido para preservar o acesso administrativo. O cargo inicial
+  Usuário oferece acesso básico e pode ser editado, assim como cargos personalizados.
+</p>
+
+<h2 id="atribuir-um-cargo-a-pessoa">Atribuir um cargo à pessoa</h2>
+
+<p>
+  Em <strong>Pessoas</strong>, cadastre ou edite uma pessoa e selecione a etiqueta <strong>Usuário</strong>. Em
+  <strong>Papel na conta</strong>, escolha um dos cargos cadastrados na conta. Defina a forma de acesso e salve.
+</p>
+
+<blockquote class="help-note help-note--info">
+  <p><strong class="text-info">Permissão:</strong>
+    Criar acesso e atribuir cargo exigem suas próprias permissões, além da permissão de cadastrar ou editar a pessoa.
+  </p>
+</blockquote>
+
+<p>
+  Para um usuário existente, o campo mostra o cargo atual e permite trocá-lo quando autorizado. O último administrador
+  deve permanecer com o cargo de administração. Só é possível atribuir cargos cujas permissões você possui. As
+  alterações passam a valer nas próximas requisições, sem precisar sair e entrar novamente.
+</p>
+
+<h2 id="bloqueios">Bloqueios</h2>
+
+<p>
+  A permissão de editar uma pessoa não concede automaticamente permissão para editar seus dados de usuário ou atribuir
+  cargos.
+</p>
+
+<blockquote class="help-note help-note--warning">
+  <p><strong class="text-warning">Atenção:</strong>
+    A conta não pode usar cargos de outra conta nem permissões da plataforma SaaS.
+  </p>
+</blockquote>
+
+<p>
+  A inspeção <mark>somente leitura</mark> permite as consultas autorizadas e bloqueia gravações.
+</p>
+
+<h2 id="orientacao-na-tela">Orientação na tela</h2>
+
+<p>
+  Use <strong>Tutorial desta tela</strong> na barra superior. O tutorial apresenta o cadastro quando permitido, os
+  filtros, as colunas, as ações e a paginação. Ele abre opções e demonstra a largura das colunas no desktop,
+  restaurando as preferências ao sair. <strong>Ver todos os passos</strong> permite escolher um assunto. Esc fecha o
+  tutorial.
+</p>
+
+<h2 id="definir-a-abrangencia-de-um-cargo">Definir a abrangência de um cargo</h2>
+
+<p>
+  Em <strong>Abrangência</strong>, escolha <strong><ins>Toda a conta</ins></strong> ou <strong>Restrita a empresas ou
+  estabelecimentos selecionados</strong>. A disponibilidade indica onde o cargo pode ser usado. A atribuição em
+  <strong>Usuários</strong> concede o cargo a um vínculo no local escolhido. As permissões do cargo são avaliadas
+  sobre o recurso da ação e seguem o alcance do local da atribuição.
+</p>
+
+<p>
+  Ao restringir um cargo existente, selecione os locais e escolha <strong>Verificar impacto</strong>. Revise a lista e
+  confirme a remoção das atribuições que ficarem fora da abrangência antes de escolher
+  <strong class="text-success">Salvar</strong>. Se a lista mudar desde a conferência, faça a verificação novamente.
+  Cargos de sistema abrangem toda a conta.
+</p>
+
+<h2 id="orientacoes-nos-campos">Orientações nos campos</h2>
+
+<p>
+  As dicas de Disponibilidade e dos grupos de permissões explicam a abrangência do cargo e a seleção independente de
+  cada ação. Só é possível conceder permissões que o operador possui.
+</p>
+
+<blockquote class="help-note help-note--success">
+  <p><strong class="text-success">Dica:</strong>
+    Passe o mouse, use Tab para focar o ícone ou toque nele no celular.
+  </p>
+</blockquote>
+
+<p>
+  Esc fecha a dica sem alterar os dados do formulário.
+</p>

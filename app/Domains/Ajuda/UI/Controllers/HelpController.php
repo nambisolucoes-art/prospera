@@ -7,6 +7,7 @@ use App\Domains\Ajuda\Application\Queries\HelpCatalog;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -17,7 +18,7 @@ final class HelpController
         $search = HelpSearchData::fromInput($r->query());
         $terms = preg_split('/\s+/', Str::lower(Str::ascii($search)), -1, PREG_SPLIT_NO_EMPTY) ?: [];
         $articles = array_values(array_filter($catalog->articles($r->user()), function ($a) use ($terms) {
-            $text = Str::lower(Str::ascii(implode(' ', $a)));
+            $text = $this->searchable(implode(' ', [...Arr::except($a, ['body']), $a['body']]));
             foreach ($terms as $term) {
                 if (! str_contains($text, $term)) {
                     return false;
@@ -31,11 +32,12 @@ final class HelpController
             $result = array_intersect_key($article, array_flip(['slug', 'title', 'summary', 'category']));
             $result['anchor'] = '';
             if ($terms) {
-                preg_match_all('/^## ([^\r\n]+)\R(.*?)(?=^## |\z)/ms', $article['body'], $sections, PREG_SET_ORDER);
+                preg_match_all('/<h2([^>]*)>(.*?)<\/h2>(.*?)(?=<h2|\z)/s', $article['body'], $sections, PREG_SET_ORDER);
                 foreach ($sections as $section) {
-                    $text = Str::lower(Str::ascii($section[0]));
+                    $text = $this->searchable($section[2].' '.$section[3]);
                     if (count(array_filter($terms, fn ($term) => str_contains($text, $term))) === count($terms)) {
-                        $result['anchor'] = Str::slug($section[1]);
+                        $found = preg_match('/\bid="([^"]+)"/', $section[1], $id);
+                        $result['anchor'] = $found ? $id[1] : Str::slug(strip_tags($section[2]));
                         break;
                     }
                 }
@@ -53,5 +55,11 @@ final class HelpController
         abort_unless($article !== null, 404);
 
         return ApiPage::respond(['article' => $catalog->render($article, $r->user())]);
+    }
+
+    /** Texto em minúsculas e sem acentos nem marcação, para a busca. */
+    private function searchable(string $html): string
+    {
+        return Str::lower(Str::ascii(html_entity_decode(strip_tags($html))));
     }
 }

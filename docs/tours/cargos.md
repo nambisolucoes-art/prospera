@@ -1,6 +1,6 @@
 # Tours de Cargos
 
-Artigo: [Cargos e permissões](../ajuda/cargos-permissoes.md). Executor disponível na barra superior.
+Artigo: [Cargos e permissões](../ajuda/cargos-permissoes.html). Executor disponível na barra superior.
 
 | Tela / passo | Alvo | Orientação |
 | --- | --- | --- |

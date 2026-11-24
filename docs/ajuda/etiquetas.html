@@ -1,0 +1,156 @@
+<!--
+titulo: Etiquetas
+resumo: Organize os cadastros com etiquetas por módulo.
+categoria: Cadastros
+palavras-chave: etiquetas, tags, módulo, pessoas, usuário, especial, cor, cliente
+-->
+
+<h2 id="consultar-etiquetas">Consultar etiquetas</h2>
+
+<p>
+  <span class="dropcap text-primary">U</span>suários de contas <span class="text-success">ativas</span> com a
+  permissão de listar etiquetas podem abrir <strong>Etiquetas</strong>, inclusive quando o cargo foi atribuído só numa
+  empresa ou num estabelecimento: o catálogo pertence à conta e é lido por qualquer atribuição com a permissão.
+  Visualizar exige a própria permissão, com a mesma regra. Cadastrar, editar, ativar, inativar e excluir alteram o
+  catálogo da conta inteira e exigem a permissão correspondente atribuída em <strong><ins>Toda a conta</ins></strong>; nos demais
+  casos, a tela fica somente para consulta. A lista reúne as etiquetas da conta. No topo, busque pelo nome e filtre
+  por módulo e por situação (<strong>Ativas</strong> ou <strong>Inativas</strong>). A lista se atualiza
+  automaticamente ao digitar; a lupa à direita e Enter também executam a busca. Trocar um filtro preserva a busca e os
+  demais filtros. Cada etiqueta aparece em um marcador quadrado na sua cor; uma estrela amarela discreta indica
+  <strong>Especial</strong> ao passar o mouse ou receber foco. A estrela aparece somente nesta listagem, sem ser
+  repetida em seletores, pessoas ou modais. Os módulos disponíveis são <strong>Clientes</strong> e
+  <strong>Fornecedores</strong>. Etiquetas especiais automáticas mostram <strong>Sistema</strong> na coluna Módulo.
+  Registros convencionais anteriores permanecem preservados como <strong>Cadastro anterior</strong>, sem permitir
+  novas etiquetas nessa classificação.
+</p>
+
+<h2 id="cadastrar-e-editar">Cadastrar e editar</h2>
+
+<p>
+  Clique em <strong>Cadastrar</strong> para abrir o modal sobre a listagem. Informe nome, módulo e cor e use
+  <strong class="text-success">Salvar</strong>. A lista é atualizada ao salvar.
+  <strong class="text-muted">Cancelar</strong>, o botão de fechar ou Esc encerram o modal sem salvar. Erros de
+  validação aparecem no próprio formulário e mantêm os dados preenchidos. O campo <strong>Cor</strong> usa o
+  Colorpicker do Ubold: digite o hexadecimal ou clique na amostra à direita para abrir o seletor de tonalidade e
+  saturação. O nome deve ser único no módulo da conta. Use a ação <strong>Editar cadastro</strong> de uma etiqueta
+  convencional para abrir o mesmo modal com seus dados; a ação <strong>Visualizar cadastro</strong> abre o modal. Em
+  Clientes e Fornecedores, selecione a etiqueta no formulário do próprio módulo. A seleção fica na relação comercial
+  da empresa. Os marcadores selecionados e as opções do seletor usam a cor de cada etiqueta, assim como a listagem e a
+  visualização da pessoa. O texto recebe contraste claro ou escuro conforme a cor.
+</p>
+
+<blockquote class="help-note help-note--success">
+  <p><strong class="text-success">Dica:</strong>
+    Por exemplo, crie <strong>Contato comercial</strong> no módulo Clientes para organizar as relações da empresa.
+  </p>
+</blockquote>
+
+<p>
+  Etiquetas convencionais não criam os papéis das etiquetas especiais.
+</p>
+
+<p>
+  A visualização de uma etiqueta abre uma janela compacta com nome, cor e situação. Use o botão de fechar ou Esc para
+  voltar à listagem.
+</p>
+
+<h2 id="etiqueta-especial-usuario">Etiqueta especial Usuário</h2>
+
+<p>
+  A etiqueta <strong>Usuário</strong> é automática. Cadastre o acesso em <strong>Usuários</strong>, informe a forma de
+  acesso e escolha a primeira atribuição. Suspensão e reativação do vínculo também são gerenciadas em
+  <strong>Usuários</strong>. As etiquetas <strong>Cliente</strong> e <strong>Fornecedor</strong> aparecem conforme o
+  papel registrado em cada módulo comercial.
+</p>
+
+<h2 id="orientacao-na-tela">Orientação na tela</h2>
+
+<p>
+  Use <strong>Tutorial desta tela</strong> na barra superior. O tutorial apresenta o cadastro quando permitido, os
+  filtros, as colunas, as ações e a paginação. Ele abre opções e demonstra a largura das colunas no desktop,
+  restaurando as preferências ao sair. <strong>Ver todos os passos</strong> permite escolher um assunto. Esc fecha o
+  tutorial.
+</p>
+
+<p>
+  O tutorial é iniciado exclusivamente por <strong>Tutorial desta tela</strong>, na barra superior da listagem. Quando
+  necessário, ele abre o modal, explica os campos e as ações e fecha apenas a janela que ele próprio abriu. Não há
+  botão de tutorial dentro do modal. Acessos diretos aos endereços antigos de cadastro e edição abrem o formulário no
+  modal da listagem.
+</p>
+
+<blockquote class="help-note help-note--warning">
+  <p><strong class="text-warning">Atenção:</strong>
+    Sem permissão de listar, o formulário não revela os demais registros.
+  </p>
+</blockquote>
+
+<h2 id="se-a-tela-nao-abrir">Se a tela não abrir</h2>
+
+<p>
+  Após uma atualização, o sistema tenta reabrir a tela automaticamente uma vez. Se aparecer a mensagem de que não foi
+  possível carregar a tela, use <strong>Recarregar tela</strong> para tentar novamente. Essa ação abre a tela sem
+  reenviar o cadastro.
+</p>
+
+<h2 id="ativar-inativar-ou-excluir">Ativar, inativar ou excluir</h2>
+
+<p>
+  No formulário, escolha Situação: <span class="text-success">Ativa</span> ou <span class="text-danger">Inativa</span>
+  e salve.
+</p>
+
+<blockquote class="help-note help-note--info">
+  <p><strong class="text-info">Permissão:</strong>
+    Alterar a situação exige, além de editar, a permissão de Ativar ou Inativar etiquetas.
+  </p>
+</blockquote>
+
+<p>
+  Para cadastrar uma etiqueta já <span class="text-danger">inativa</span>, é necessária a permissão de Inativar.
+  Etiquetas <span class="text-danger">inativas</span> permanecem nos registros já vinculados, e ficam indisponíveis
+  para novas seleções. Reativar disponibiliza novamente a etiqueta para seleção.
+</p>
+
+<p>
+  A listagem e a visualização mostram a situação. A ação Excluir etiqueta usa o ícone de borracha e exige a permissão
+  de Excluir etiquetas. Confirme a exclusão na janela.
+</p>
+
+<blockquote class="help-note help-note--warning">
+  <p><strong class="text-warning">Atenção:</strong>
+    Uma etiqueta com registros vinculados não pode ser excluída: use Editar cadastro para inativar.
+  </p>
+</blockquote>
+
+<p>
+  O servidor verifica novamente os vínculos ao excluir. Etiquetas especiais não podem ser editadas, inativadas ou
+  excluídas.
+</p>
+
+<h2 id="etiqueta-especial-fornecedor">Etiqueta especial Fornecedor</h2>
+
+<p>
+  Fornecedor identifica um papel da mesma pessoa, sem repetir
+  <abbr title="Cadastro de Pessoas Físicas">CPF</abbr>/<abbr title="Cadastro Nacional da Pessoa Jurídica">CNPJ</abbr>,
+  contatos ou endereço e sem conceder acesso ao sistema. Sua definição é protegida, assim como Usuário. A etiqueta
+  Fornecedor é exibida pela relação comercial autorizada. No cadastro de fornecedor, ela aparece fixa junto das
+  etiquetas convencionais do módulo Fornecedores. Uma etiqueta comum com nome semelhante não é convertida
+  automaticamente. Consulte <a href="/ajuda/fornecedores">Fornecedores</a>.
+</p>
+
+<h2 id="etiqueta-especial-cliente">Etiqueta especial Cliente</h2>
+
+<p>
+  Cliente também é uma etiqueta especial protegida. A etiqueta Cliente é exibida pela relação comercial autorizada. No
+  cadastro de cliente, ela aparece fixa junto das etiquetas convencionais do módulo Clientes. A estrela permanece
+  exclusiva da listagem de Etiquetas. Consulte <a href="/ajuda/clientes">Clientes</a>.
+</p>
+
+<h2 id="orientacoes-nos-campos">Orientações nos campos</h2>
+
+<p>
+  As dicas de Módulo e Situação explicam onde a etiqueta pode ser utilizada e que inativar preserva vínculos
+  existentes, mas impede novas seleções. Passe o mouse, use Tab para focar o ícone ou toque nele no celular. Esc fecha
+  a dica sem alterar os dados do formulário.
+</p>

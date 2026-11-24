@@ -9,4 +9,4 @@ O tour é aberto em **Tutorial desta tela**. Os passos de título, trilha e aç�
 
 O tour aponta os controles e mantém a seleção e o padrão como estavam ao abrir.
 
-Artigo relacionado em [Área de trabalho e estabelecimentos](../ajuda/estabelecimento-atual.md).
+Artigo relacionado em [Área de trabalho e estabelecimentos](../ajuda/estabelecimento-atual.html).

@@ -1,6 +1,6 @@
 # Tour do formulário de Contas
 
-Artigo de referência em [Contas](../ajuda/contas.md).
+Artigo de referência em [Contas](../ajuda/contas.html).
 
 | Passo | Alvo | Orientação |
 | --- | --- | --- |

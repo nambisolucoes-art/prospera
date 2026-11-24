@@ -1,6 +1,6 @@
 # Tour de Perfil
 
-Página `/settings/profile`. Artigo de referência em [Perfil](../ajuda/perfil.md). O registro na barra superior depende da integração do módulo de tour.
+Página `/settings/profile`. Artigo de referência em [Perfil](../ajuda/perfil.html). O registro na barra superior depende da integração do módulo de tour.
 
 | Passo | Alvo previsto | Orientação |
 | --- | --- | --- |

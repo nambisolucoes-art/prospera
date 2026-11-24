@@ -1,6 +1,6 @@
 # Tour de Segurança
 
-Abra a aba **Segurança** para iniciar. O artigo de referência é [Segurança](../ajuda/seguranca.md).
+Abra a aba **Segurança** para iniciar. O artigo de referência é [Segurança](../ajuda/seguranca.html).
 
 | Passo | Alvo | Orientação |
 | --- | --- | --- |

@@ -1,6 +1,6 @@
 # Tour de inspeção de contas
 
-Artigo de referência em [Inspecionar uma conta](../ajuda/inspecao-de-contas.md).
+Artigo de referência em [Inspecionar uma conta](../ajuda/inspecao-de-contas.html).
 
 | Passo | Alvo | Orientação |
 | --- | --- | --- |

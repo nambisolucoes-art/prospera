@@ -1,6 +1,6 @@
 # Tour de Clientes
 
-Artigo: [Clientes](../ajuda/clientes.md). Tela: `/conta/estabelecimento/{codigo|todos}/clientes` (E07). Executor na barra superior, configurado em `resources/js/app/guidance.ts`. Nenhum executor ou atalho de tutorial no modal.
+Artigo: [Clientes](../ajuda/clientes.html). Tela: `/conta/estabelecimento/{codigo|todos}/clientes` (E07). Executor na barra superior, configurado em `resources/js/app/guidance.ts`. Nenhum executor ou atalho de tutorial no modal.
 
 | Ordem | Alvo | Título | Orientação |
 | --- | --- | --- | --- |
