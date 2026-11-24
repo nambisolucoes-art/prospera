@@ -13,7 +13,7 @@ export default defineConfig({
         },
     },
     plugins: [
-        laravel({ input: 'resources/js/main.tsx', refresh: true }),
+        laravel({ input: ['resources/js/main.tsx', 'resources/js/pages/Landing/Landing.tsx'], refresh: true }),
         react(),
     ],
     resolve: {

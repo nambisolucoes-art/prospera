@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/dashboard')->name('home');
+// Página de apresentação para todos; quem já entrou vê o atalho para o painel no lugar do login.
+Route::get('/', fn () => view('landing'))->name('home');
 Route::get('/api/localidades/municipios', fn () => response()->file(
     resource_path('data/municipios-ibge.json'),
     ['Content-Type' => 'application/json', 'Cache-Control' => 'public, max-age=86400'],

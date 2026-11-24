@@ -37,6 +37,10 @@ O banco é acessível pela rede interna do Compose pelo nome `postgres`. Para de
 
 O Octane inicia o FrankenPHP com [docker/Caddyfile](docker/Caddyfile) (`--caddyfile` no `CMD` do `Dockerfile` e em `docker/dev.sh`). O log de acesso mantém método, status, duração e rota, mas troca por `[REDACTED]` o segredo das URLs de convite, redefinição de senha, verificação e confirmação de e-mail, além do `Referer` e dos tokens CSRF. As respostas enviam `Referrer-Policy: no-referrer`. Ao criar uma rota que leve credencial temporária no caminho ou na query, acrescente o prefixo ao Caddyfile. Como o Caddyfile copia o do Octane, compare-o com `vendor/laravel/octane/src/Commands/stubs/Caddyfile` ao atualizar o pacote. Qualquer proxy à frente da aplicação precisa de regra equivalente. A prova está em `tests/Performance/e10-logs.sh`.
 
+### Página inicial
+
+A raiz `/` mostra a página de apresentação do Prospera ([resources/views/landing.blade.php](resources/views/landing.blade.php), com estilos e comportamento em `resources/js/pages/Landing/`). Quem já está autenticado vê "Ir para o painel" no lugar de "Entrar". A página separa o que já existe do que está em construção (lista `$roadmap` no Blade): ao entregar um módulo, mude o item para disponível. Os botões "Agende sua demonstração" ficam sem destino até que `LANDING_DEMO_URL` seja definida no `.env`.
+
 A raiz encaminha para o login ou para o painel correspondente ao usuário. O cadastro de contas é restrito à administração SaaS. Os exemplos do Bold ficam disponíveis às contas administrativas da plataforma em suas URLs `.html`.
 
 ## Estrutura do frontend
