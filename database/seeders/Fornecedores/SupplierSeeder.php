@@ -3,7 +3,9 @@
 namespace Database\Seeders\Fornecedores;
 
 use App\Domains\Pessoas\Application\Actions\RegisterCommercialRelationAction;
-use App\Domains\Pessoas\Application\Data\CommercialTagsData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialPersonChangesData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialTagsData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\RegisterCommercialRelationData;
 use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Domains\Pessoas\Domain\Models\Person;
@@ -34,12 +36,15 @@ final class SupplierSeeder extends Seeder
             );
 
             app(RegisterCommercialRelationAction::class)->execute(
-                CommercialRole::Supplier,
+                new RegisterCommercialRelationData(
+                    role: CommercialRole::Supplier,
+                    person: CreatePersonData::fromInput($person, $account->id),
+                    tags: CommercialTagsData::fromInput($this->tagIds('suppliers', $tags)),
+                    centralChanges: CommercialPersonChangesData::fromInput([], allowIdentificationChange: false),
+                    additionalCompanies: $additionalCodes,
+                ),
                 $account,
                 $this->companyByKey($company),
-                CreatePersonData::fromInput($person, $account->id),
-                CommercialTagsData::fromInput($this->tagIds('suppliers', $tags)),
-                additionalCompanies: $additionalCodes,
             );
         }
 
@@ -60,11 +65,15 @@ final class SupplierSeeder extends Seeder
             ->firstOrFail();
 
         app(RegisterCommercialRelationAction::class)->execute(
-            CommercialRole::Supplier,
+            new RegisterCommercialRelationData(
+                role: CommercialRole::Supplier,
+                person: $person->id,
+                tags: CommercialTagsData::fromInput($this->tagIds('suppliers', ['Entrega rápida'])),
+                centralChanges: CommercialPersonChangesData::fromInput([], allowIdentificationChange: false),
+                additionalCompanies: [],
+            ),
             $account,
             $this->companyByKey(SeedCatalog::WHOLESALE_ROOT),
-            $person->id,
-            CommercialTagsData::fromInput($this->tagIds('suppliers', ['Entrega rápida'])),
         );
     }
 

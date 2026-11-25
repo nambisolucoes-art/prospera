@@ -100,13 +100,10 @@ abstract class TestCase extends BaseTestCase
 
     protected function completeInitialSetup(User $user): User
     {
-        app(UpdatePasswordAction::class)->execute(
-            $user,
-            PasswordData::fromInput([
-                'password' => 'Synthetic-password-123!',
-                'password_confirmation' => 'Synthetic-password-123!',
-            ]),
-        );
+        app(UpdatePasswordAction::class)->execute(PasswordData::fromInput([
+            'password' => 'Synthetic-password-123!',
+            'password_confirmation' => 'Synthetic-password-123!',
+        ]), $user);
 
         return $user->fresh();
     }

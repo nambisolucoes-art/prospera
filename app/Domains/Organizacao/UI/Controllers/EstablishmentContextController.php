@@ -65,7 +65,7 @@ final class EstablishmentContextController
     {
         abort_if(AccountInspectionSession::current($request->session()) !== null, 403);
 
-        $save->execute($request->user(), WorkspaceSelectionData::fromInput($request->all()));
+        $save->execute(WorkspaceSelectionData::fromInput($request->all()), $request->user());
 
         return response()->noContent();
     }

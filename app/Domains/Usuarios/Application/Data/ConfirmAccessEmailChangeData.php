@@ -7,12 +7,13 @@ namespace App\Domains\Usuarios\Application\Data;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-final readonly class ChangeAccessEmailData
+/** Confirmação da troca do e-mail de acesso pelo link assinado enviado ao novo endereço. */
+final readonly class ConfirmAccessEmailChangeData
 {
-    private function __construct(public string $email) {}
+    public function __construct(public string $email, public string $revision) {}
 
     /** @param array<string,mixed> $input */
-    public static function fromInput(array $input, bool $confirmPassword = false): self
+    public static function fromInput(array $input): self
     {
         if (is_string($input['email'] ?? null)) {
             $input['email'] = Str::lower(trim($input['email']));
@@ -20,9 +21,8 @@ final readonly class ChangeAccessEmailData
 
         $values = Validator::validate($input, [
             'email' => ['required', 'string', 'email', 'max:255'],
-            ...($confirmPassword ? ['current_password' => ['required', 'current_password:web']] : []),
         ]);
 
-        return new self($values['email']);
+        return new self($values['email'], is_string($input['revision'] ?? null) ? $input['revision'] : '');
     }
 }

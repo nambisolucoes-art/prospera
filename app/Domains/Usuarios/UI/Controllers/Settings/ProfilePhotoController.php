@@ -24,7 +24,7 @@ final class ProfilePhotoController extends Controller
 {
     public function store(Request $request, ReplaceProfilePhotoAction $save): RedirectResponse
     {
-        $save->execute($request->user(), ProfilePhotoData::fromFile($request->file('photo')));
+        $save->execute(ProfilePhotoData::fromFile($request->file('photo')), $request->user());
 
         ApiPage::toast('Foto atualizada.');
 

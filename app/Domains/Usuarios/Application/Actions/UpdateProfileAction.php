@@ -9,7 +9,7 @@ use App\Models\User;
 
 final readonly class UpdateProfileAction
 {
-    public function execute(User $user, UpdateProfileData $data): void
+    public function execute(UpdateProfileData $data, User $user): void
     {
         $user->name = $data->name;
         $user->saveOrFail();

@@ -12,13 +12,13 @@ use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Organizacao\Application\Queries\Companies\ShowCompanyQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
+use App\Domains\Pessoas\Application\Actions\ChangeCommercialRelationStatusAction;
 use App\Domains\Pessoas\Application\Actions\RegisterCommercialRelationAction;
-use App\Domains\Pessoas\Application\Actions\SetCommercialRelationAction;
 use App\Domains\Pessoas\Application\Actions\UpdateCommercialRelationAction;
-use App\Domains\Pessoas\Application\Data\CommercialRelationFiltersData;
-use App\Domains\Pessoas\Application\Data\CommercialRelationLinkData;
-use App\Domains\Pessoas\Application\Data\CommercialTagsData;
-use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialRelationFiltersData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialRelationLinkData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\RegisterCommercialRelationData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\UpdateCommercialRelationData;
 use App\Domains\Pessoas\Application\Queries\CommercialRelations\CommercialRoleIsActiveQuery;
 use App\Domains\Pessoas\Application\Queries\CommercialRelations\FindCommercialRelationIdQuery;
 use App\Domains\Pessoas\Application\Queries\CommercialRelations\FindCommercialRelationPersonQuery;
@@ -398,40 +398,17 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         AccountContext $accountContext,
-        EffectivePermissions $permissions,
         ShowCompanyQuery $showCompany,
         RegisterCommercialRelationAction $register,
         string $role,
     ): Response {
         $commercialRole = CommercialRole::from($role);
         $company = $this->contextCompany($context, $showCompany);
-
-        abort_unless($commercialRole->allows($permissions, $request->user(), 'create', $company->id), 403);
-
         $account = $accountContext->requireAccount(404);
-        $tags = CommercialTagsData::fromInput($request->input('tag_ids'));
 
-        $centralChanges = [];
+        $data = RegisterCommercialRelationData::fromInput($request->all(), $commercialRole, $company, $account->id);
 
-        if ($request->has('person_id')) {
-            $person = CommercialRelationLinkData::personId($request->input('person_id'));
-            $centralChanges = $request->only([...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]);
-            if ($centralChanges !== []) {
-                abort_if($permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(), 403);
-            }
-        } else {
-            abort_if($permissions->nodesFor($request->user(), 'account.people.create')->isEmpty(), 403);
-
-            $person = CreatePersonData::fromInput(
-                $request->only([...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]),
-                $account->id,
-            );
-        }
-
-        $changes = CommercialRelationLinkData::companies($request->all(), $company->code);
-        abort_if($changes['remove'] !== [], 422);
-
-        $register->execute($commercialRole, $account, $company, $person, $tags, $centralChanges, $changes['add']);
+        $register->execute($data, $account, $company);
         ApiPage::toast($commercialRole->label().' cadastrado.');
 
         return response()->noContent();
@@ -441,7 +418,6 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         AccountContext $accountContext,
-        EffectivePermissions $permissions,
         ShowCompanyQuery $showCompany,
         UpdateCommercialRelationAction $update,
         int $relationId,
@@ -449,30 +425,10 @@ final class CommercialRelationController
     ): Response {
         $commercialRole = CommercialRole::from($role);
         $company = $this->contextCompany($context, $showCompany);
-        abort_unless($commercialRole->allows($permissions, $request->user(), 'update', $company->id), 403);
 
-        $centralChanges = $request->only([...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]);
-        if ($centralChanges !== []) {
-            abort_if($permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(), 403);
-        }
+        $data = UpdateCommercialRelationData::fromInput($request->all(), $commercialRole, $company, $relationId);
 
-        $tags = $request->has('tag_ids') || $request->boolean('edit_tags')
-            ? CommercialTagsData::fromInput($request->input('tag_ids'))
-            : null;
-
-        $changes = CommercialRelationLinkData::companies($request->all(), $company->code);
-
-        $update->execute(
-            $commercialRole,
-            $accountContext->requireAccount(404),
-            $company,
-            $relationId,
-            $tags,
-            $centralChanges,
-            CommercialRelationLinkData::optionalStatus($request->all()),
-            $changes['add'],
-            $changes['remove'],
-        );
+        $update->execute($data, $accountContext->requireAccount(404), $company);
         ApiPage::toast($commercialRole->label().' atualizado.');
 
         return response()->noContent();
@@ -482,53 +438,32 @@ final class CommercialRelationController
     public function activate(
         Request $request,
         OrganizationContext $context,
-        EffectivePermissions $permissions,
         ShowCompanyQuery $showCompany,
-        FindCommercialRelationIdQuery $findCommercialRelationId,
-        SetCommercialRelationAction $set,
+        ChangeCommercialRelationStatusAction $action,
         int $relationId,
         string $role,
     ): Response {
-        return $this->changeStatus($context, $showCompany, $findCommercialRelationId, $set, $role, $relationId, true, $request, $permissions);
+        $company = $this->contextCompany($context, $showCompany);
+
+        $action->execute(CommercialRole::from($role), $company, $relationId, true, $request->user());
+        ApiPage::toast('Relação ativada.');
+
+        return response()->noContent();
     }
 
     // O parâmetro da URL chega antes do papel, que é o padrão declarado na rota.
     public function deactivate(
         Request $request,
         OrganizationContext $context,
-        EffectivePermissions $permissions,
         ShowCompanyQuery $showCompany,
-        FindCommercialRelationIdQuery $findCommercialRelationId,
-        SetCommercialRelationAction $set,
+        ChangeCommercialRelationStatusAction $action,
         int $relationId,
         string $role,
     ): Response {
-        return $this->changeStatus($context, $showCompany, $findCommercialRelationId, $set, $role, $relationId, false, $request, $permissions);
-    }
-
-    private function changeStatus(
-        OrganizationContext $context,
-        ShowCompanyQuery $showCompany,
-        FindCommercialRelationIdQuery $findCommercialRelationId,
-        SetCommercialRelationAction $set,
-        string $role,
-        int $relationId,
-        bool $active,
-        Request $request,
-        EffectivePermissions $permissions,
-    ): Response {
-        $commercialRole = CommercialRole::from($role);
         $company = $this->contextCompany($context, $showCompany);
 
-        $action = $active ? 'activate' : 'deactivate';
-        abort_unless($commercialRole->allows($permissions, $request->user(), $action, $company->id), 403);
-
-        // Relação de outra empresa ou de outra conta responde 404, como um ID inexistente.
-        $personId = $findCommercialRelationId->execute($commercialRole, $company->account_id, $company->id, $relationId);
-        abort_if($personId === null, 404);
-
-        $set->execute($commercialRole, $company, $personId, active: $active, link: false);
-        ApiPage::toast($active ? 'Relação ativada.' : 'Relação inativada.');
+        $action->execute(CommercialRole::from($role), $company, $relationId, false, $request->user());
+        ApiPage::toast('Relação inativada.');
 
         return response()->noContent();
     }

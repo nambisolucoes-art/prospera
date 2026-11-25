@@ -16,6 +16,6 @@ final class ResetUserPassword implements ResetsUserPasswords
     /** @param array<string, mixed> $input */
     public function reset(User $user, #[\SensitiveParameter] array $input): void
     {
-        $this->update->execute($user, PasswordData::fromInput($input));
+        $this->update->execute(PasswordData::fromInput($input), $user);
     }
 }

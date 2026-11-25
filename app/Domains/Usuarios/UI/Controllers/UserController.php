@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Usuarios\UI\Controllers;
 
+use App\Domains\Acessos\Application\Actions\ChangeRoleAssignmentsAction;
 use App\Domains\Acessos\Application\Actions\CreateAccountInvitationAction;
-use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
 use App\Domains\Acessos\Application\Actions\SendMembershipAccessLinkAction;
 use App\Domains\Acessos\Application\Actions\SetMembershipStatusAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Application\Data\SaveRoleAssignmentsData;
+use App\Domains\Acessos\Application\Data\ChangeRoleAssignmentsData;
 use App\Domains\Acessos\Application\Queries\AssignmentNodeQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentOptionsQuery;
 use App\Domains\Acessos\Application\Queries\Invitations\ListPendingInvitationsQuery;
@@ -125,11 +125,11 @@ final class UserController
 
     public function saveAssignments(
         Request $request,
-        SaveRoleAssignmentsAction $save,
+        ChangeRoleAssignmentsAction $save,
         int $membershipId,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
-        $save->execute($accountId, $membershipId, SaveRoleAssignmentsData::fromInput($request->all()));
+        $save->execute(ChangeRoleAssignmentsData::fromInput($request->all()), $accountId, $membershipId);
         ApiPage::toast('Atribuições atualizadas.');
 
         return to_route('account.users.index');

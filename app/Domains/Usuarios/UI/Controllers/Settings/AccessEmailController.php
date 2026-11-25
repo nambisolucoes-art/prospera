@@ -4,33 +4,33 @@ declare(strict_types=1);
 
 namespace App\Domains\Usuarios\UI\Controllers\Settings;
 
-use App\Domains\Usuarios\Application\Actions\ChangeAccessEmailAction;
-use App\Domains\Usuarios\Application\Data\ChangeAccessEmailData;
+use App\Domains\Usuarios\Application\Actions\ConfirmAccessEmailChangeAction;
+use App\Domains\Usuarios\Application\Actions\RequestAccessEmailChangeAction;
+use App\Domains\Usuarios\Application\Data\ConfirmAccessEmailChangeData;
+use App\Domains\Usuarios\Application\Data\RequestAccessEmailChangeData;
 use App\Support\ApiPage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 final class AccessEmailController
 {
-    public function request(Request $request, ChangeAccessEmailAction $change): RedirectResponse
+    public function request(Request $request, RequestAccessEmailChangeAction $action): RedirectResponse
     {
-        $change->request($request->user(), ChangeAccessEmailData::fromInput($request->all(), confirmPassword: true));
+        $data = RequestAccessEmailChangeData::fromInput($request->all());
 
+        $action->execute($data, $request->user());
         ApiPage::toast('Enviamos um link de confirmação para o novo e-mail.');
 
         return to_route('profile.edit');
     }
 
-    public function confirm(Request $request, ChangeAccessEmailAction $change): RedirectResponse
+    public function confirm(Request $request, ConfirmAccessEmailChangeAction $action): RedirectResponse
     {
         abort_unless($request->integer('identity') === $request->user()->id, 403);
 
-        $updated = $change->confirm(
-            $request->user(),
-            ChangeAccessEmailData::fromInput($request->query()),
-            $request->string('revision')->toString(),
-            $request->session()->getId(),
-        );
+        $data = ConfirmAccessEmailChangeData::fromInput($request->query());
+
+        $updated = $action->execute($data, $request->user(), $request->session()->getId());
 
         if ($updated) {
             $request->user()->refresh();

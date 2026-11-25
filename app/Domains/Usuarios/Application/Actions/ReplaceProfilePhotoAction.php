@@ -14,7 +14,7 @@ use Throwable;
 
 final readonly class ReplaceProfilePhotoAction
 {
-    public function execute(User $user, ProfilePhotoData $data): void
+    public function execute(ProfilePhotoData $data, User $user): void
     {
         $source = @imagecreatefromstring($data->photo->getContent());
 

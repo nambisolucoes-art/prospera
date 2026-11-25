@@ -29,9 +29,9 @@ final readonly class StartAccountInspectionAction
     ) {}
 
     public function execute(
+        StartAccountInspectionData $data,
         User $administrator,
         Client $account,
-        StartAccountInspectionData $data,
         Session $session,
     ): void {
         if ($this->showInspectionAdministrator->execute($administrator->id) === null) {

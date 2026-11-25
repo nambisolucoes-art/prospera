@@ -42,7 +42,8 @@ final class EstablishmentController
         $nodes = $permissions->nodesFor($request->user(), 'account.establishments.list');
         abort_if($nodes->isEmpty(), 403);
         $options = $this->companyOptions($listCompanyOptions, $accountId, $filters->companyId, $nodes);
-        $list = $listEstablishments->execute($accountId, $filters, app(AccountContext::class)->path('estabelecimentos'), nodes: $nodes);
+        $path = app(AccountContext::class)->path('estabelecimentos');
+        $list = $listEstablishments->execute($accountId, $filters, $path, nodes: $nodes);
 
         return ApiPage::respond([
             'establishments' => $list->through(fn (Establishment $establishment) => [
@@ -197,7 +198,10 @@ final class EstablishmentController
         int $establishmentId,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
-        abort_if(app(EffectivePermissions::class)->nodesFor($request->user(), 'account.establishments.promote')->isEmpty(), 403);
+        $promotable = app(EffectivePermissions::class)->nodesFor($request->user(), 'account.establishments.promote');
+
+        abort_if($promotable->isEmpty(), 403);
+
         $establishment = $showEstablishment->execute($accountId, $establishmentId);
         $node = AccessNode::company($establishment->account_id, $establishment->company_id);
         abort_unless($request->user()->can('account.establishments.promote', $node), 404);

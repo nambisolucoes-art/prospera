@@ -27,7 +27,7 @@ use Throwable;
 final readonly class CreateAccountInvitationAction
 {
     public function __construct(
-        private SaveRoleAssignmentsAction $assignments,
+        private AssertRoleAssignableAction $assertAssignable,
         private AuditContext $audit,
         private EffectivePermissions $permissions,
     ) {}
@@ -44,7 +44,7 @@ final readonly class CreateAccountInvitationAction
             Client::whereKey($account->id)->lockForUpdate()->firstOrFail();
             $this->permissions->forget();
             Gate::authorize('account.users.create', $node);
-            $role = $this->assignments->assertAssignable($account->id, $roleId, $node);
+            $role = $this->assertAssignable->execute($account->id, $roleId, $node);
 
             $identity = User::whereRaw('lower(email) = ?', [mb_strtolower($email)])->first();
 

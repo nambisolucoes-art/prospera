@@ -6,55 +6,28 @@ namespace App\Domains\Acessos\Application\Actions;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Application\Data\SaveRoleAssignmentsData;
+use App\Domains\Acessos\Application\Data\ChangeRoleAssignmentsData;
 use App\Domains\Acessos\Application\Queries\AssignmentNodeQuery;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
-use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
-use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Support\Exceptions\ConflictingChange;
 use App\Support\Exceptions\OperationNotAllowed;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
-final readonly class SaveRoleAssignmentsAction
+final readonly class ChangeRoleAssignmentsAction
 {
     public function __construct(
         private AccountContext $accounts,
         private EffectivePermissions $permissions,
         private AssignmentNodeQuery $nodes,
+        private AssertRoleAssignableAction $assertAssignable,
         private AuditContext $audit,
     ) {}
 
-    public function assertAssignable(int $accountId, int $roleId, ?AccessNode $node = null): Role
-    {
-        $node ??= AccessNode::tenant($accountId);
-        if (! ($this->accounts->requireId() === $accountId && $node->accountId === $accountId)) {
-            throw new OperationNotAllowed;
-        }
-
-        Gate::authorize('account.users.assign-role', $node);
-
-        $role = Role::where('account_id', $accountId)->findOrFail($roleId);
-        if (! $role->isAvailableAt($node)) {
-            throw new OperationNotAllowed('O cargo não está disponível neste local.');
-        }
-
-        $operator = auth()->user();
-
-        foreach ($role->permissions()->pluck('slug') as $slug) {
-            if (! $this->permissions->canDelegate($operator, $slug, $node)) {
-                throw new OperationNotAllowed('Você não pode gerenciar um cargo com permissões que não possui neste local.');
-            }
-        }
-
-        return $role;
-    }
-
-    public function execute(int $accountId, int $membershipId, SaveRoleAssignmentsData $data): void
+    public function execute(ChangeRoleAssignmentsData $data, int $accountId, int $membershipId): void
     {
         if ($this->accounts->requireId() !== $accountId) {
             throw new OperationNotAllowed;
@@ -90,7 +63,7 @@ final readonly class SaveRoleAssignmentsAction
                     granting: true,
                 );
 
-                $role = $this->assertAssignable($accountId, (int) $grant['role_id'], $node);
+                $role = $this->assertAssignable->execute($accountId, (int) $grant['role_id'], $node);
                 $duplicate = $membership->assignments()
                     ->where('role_id', $role->id)
                     ->where('scope', $node->type)
@@ -115,7 +88,7 @@ final readonly class SaveRoleAssignmentsAction
                     granting: false,
                 );
 
-                $role = $this->assertAssignable($accountId, $assignment->role_id, $node);
+                $role = $this->assertAssignable->execute($accountId, $assignment->role_id, $node);
 
                 if ($role->system_key === 'administrator' && $membership->isLastActiveAdministrator()) {
                     throw ValidationException::withMessages(['role_id' => 'Mantenha ao menos um administrador da conta.']);

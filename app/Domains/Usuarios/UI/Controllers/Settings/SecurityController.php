@@ -59,7 +59,7 @@ class SecurityController extends Controller
     public function update(Request $request, UpdatePasswordAction $update): RedirectResponse
     {
         $data = PasswordData::fromInput($request->all(), confirmCurrent: true);
-        $update->execute($request->user(), $data);
+        $update->execute($data, $request->user());
 
         ApiPage::toast('Senha atualizada.');
 

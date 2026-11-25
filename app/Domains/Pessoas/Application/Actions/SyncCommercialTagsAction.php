@@ -7,14 +7,14 @@ namespace App\Domains\Pessoas\Application\Actions;
 use App\Domains\Clientes\Domain\Models\Customer;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
-use App\Domains\Pessoas\Application\Data\CommercialTagsData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialTagsData;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final readonly class SyncCommercialTagsAction
 {
-    public function execute(CommercialRole $role, Customer|Supplier $relation, CommercialTagsData $selection): void
+    public function execute(CommercialTagsData $selection, CommercialRole $role, Customer|Supplier $relation): void
     {
         $table = $role->table().'_tags';
         $scope = DB::table($table)

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Domains\Pessoas\Application\Data;
+namespace App\Domains\Pessoas\Application\Data\CommercialRelations;
 
 use Illuminate\Support\Facades\Validator;
 

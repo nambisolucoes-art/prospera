@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Usuarios\Application\Actions;
 
+use App\Domains\Acessos\Application\Actions\AssertRoleAssignableAction;
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
-use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
@@ -30,7 +30,7 @@ final readonly class CreateUserAction
 {
     public function __construct(
         private UserEmailExistsQuery $emailExists,
-        private SaveRoleAssignmentsAction $assignments,
+        private AssertRoleAssignableAction $assertAssignable,
         private DefaultRolesAction $defaultRoles,
         private RegisterAccountMembershipAction $registerMembership,
         private EffectivePermissions $permissions,
@@ -58,7 +58,7 @@ final readonly class CreateUserAction
                 Client::whereKey($node->accountId)->lockForUpdate()->firstOrFail();
                 $this->permissions->forget();
                 Gate::authorize('account.users.create', $node);
-                $assignedRole = $this->assignments->assertAssignable($node->accountId, $roleId, $node);
+                $assignedRole = $this->assertAssignable->execute($node->accountId, $roleId, $node);
             }
 
             if ($this->emailExists->execute($data->email)) {

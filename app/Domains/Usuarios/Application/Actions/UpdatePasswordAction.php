@@ -12,7 +12,7 @@ final readonly class UpdatePasswordAction
 {
     public function __construct(private EndOtherIdentitySessionsAction $sessions) {}
 
-    public function execute(User $user, #[\SensitiveParameter] PasswordData $data): void
+    public function execute(#[\SensitiveParameter] PasswordData $data, User $user): void
     {
         AuditLog::transaction(function () use ($user, $data): void {
             $user->forceFill(['password' => $data->password, 'password_setup_pending' => false]);

@@ -37,12 +37,7 @@ final class AccountInspectionController
 
     public function start(Request $request, Client $client, StartAccountInspectionAction $start): RedirectResponse
     {
-        $start->execute(
-            $request->user(),
-            $client,
-            StartAccountInspectionData::fromInput($request->all()),
-            $request->session(),
-        );
+        $start->execute(StartAccountInspectionData::fromInput($request->all()), $request->user(), $client, $request->session());
 
         return redirect('/contas/'.$client->code);
     }

@@ -7,7 +7,7 @@ namespace App\Domains\Acessos\Application\Data;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
-final readonly class SaveRoleAssignmentsData
+final readonly class ChangeRoleAssignmentsData
 {
     /**
      * @param  list<array{role_id:int,scope:string,company_id?:int|null,establishment_id?:int|null}>  $grants

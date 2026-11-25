@@ -2,9 +2,9 @@
 
 namespace Database\Seeders\Usuarios;
 
-use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
+use App\Domains\Acessos\Application\Actions\ChangeRoleAssignmentsAction;
 use App\Domains\Acessos\Application\Actions\SetMembershipStatusAction;
-use App\Domains\Acessos\Application\Data\SaveRoleAssignmentsData;
+use App\Domains\Acessos\Application\Data\ChangeRoleAssignmentsData;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
 use App\Domains\Usuarios\Application\Data\CreateUserData;
 use App\Domains\Usuarios\Domain\Enums\UserRole;
@@ -48,7 +48,7 @@ final class AccountUserSeeder extends Seeder
 
             if ($others !== []) {
                 $this->actAsAccountAdministrator();
-                app(SaveRoleAssignmentsAction::class)->execute($account->id, $membershipId, $this->grants($others));
+                app(ChangeRoleAssignmentsAction::class)->execute($this->grants($others), $account->id, $membershipId);
             }
 
             if (! $active) {
@@ -127,7 +127,7 @@ final class AccountUserSeeder extends Seeder
     }
 
     /** @param list<array{0: string, 1: string, 2: ?string, 3: ?string}> $grants */
-    private function grants(array $grants): SaveRoleAssignmentsData
+    private function grants(array $grants): ChangeRoleAssignmentsData
     {
         $input = [];
 
@@ -142,6 +142,6 @@ final class AccountUserSeeder extends Seeder
             ];
         }
 
-        return SaveRoleAssignmentsData::fromInput(['grants' => $input]);
+        return ChangeRoleAssignmentsData::fromInput(['grants' => $input]);
     }
 }

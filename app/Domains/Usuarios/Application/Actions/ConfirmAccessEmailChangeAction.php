@@ -5,57 +5,32 @@ declare(strict_types=1);
 namespace App\Domains\Usuarios\Application\Actions;
 
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Usuarios\Application\Data\ChangeAccessEmailData;
+use App\Domains\Usuarios\Application\Data\ConfirmAccessEmailChangeData;
 use App\Domains\Usuarios\Application\Queries\UserEmailExistsQuery;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Timebox;
 use Throwable;
 
-final readonly class ChangeAccessEmailAction
+/** Troca o e-mail de acesso depois da confirmação e encerra as outras sessões da identidade. */
+final readonly class ConfirmAccessEmailChangeAction
 {
     public function __construct(
         private UserEmailExistsQuery $emails,
         private EndOtherIdentitySessionsAction $sessions,
-        private Timebox $timebox,
     ) {}
 
-    public function request(User $user, ChangeAccessEmailData $data): void
-    {
-        $this->timebox->call(function () use ($user, $data): void {
-            if ($data->email === $user->email || $this->emails->execute($data->email)) {
-                return;
-            }
-
-            $link = URL::temporarySignedRoute('profile.email.confirm', now()->addMinutes(30), [
-                'identity' => $user->id,
-                'email' => $data->email,
-                'revision' => $user->emailChangeRevision(),
-            ]);
-
-            try {
-                Mail::raw('Confirme o novo e-mail de acesso ao Prospera neste link: '.$link, function (Message $message) use ($data): void {
-                    $message->to($data->email)->subject('Confirme seu novo e-mail de acesso');
-                });
-            } catch (Throwable $exception) {
-                report($exception);
-            }
-        }, 200_000);
-    }
-
-    public function confirm(User $user, ChangeAccessEmailData $data, string $revision, string $sessionId): bool
+    public function execute(ConfirmAccessEmailChangeData $data, User $user, string $sessionId): bool
     {
         try {
-            $previous = AuditLog::transaction(function () use ($user, $data, $revision, $sessionId): ?string {
+            $previous = AuditLog::transaction(function () use ($user, $data, $sessionId): ?string {
                 $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
                 if (
                     ! $lockedUser->access_enabled
-                    || ! hash_equals($lockedUser->emailChangeRevision(), $revision)
+                    || ! hash_equals($lockedUser->emailChangeRevision(), $data->revision)
                     || $this->emails->execute($data->email)
                 ) {
                     return null;

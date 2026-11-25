@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Pessoas\Application\Queries\CommercialRelations;
 
-use App\Domains\Pessoas\Application\Data\CommercialRelationFiltersData;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialRelationFiltersData;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Support\TaxDocument;
 use Illuminate\Pagination\LengthAwarePaginator;

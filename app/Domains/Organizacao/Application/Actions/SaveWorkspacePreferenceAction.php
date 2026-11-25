@@ -14,7 +14,7 @@ final readonly class SaveWorkspacePreferenceAction
 {
     public function __construct(private OrganizationContext $context) {}
 
-    public function execute(User $user, WorkspaceSelectionData $selection): void
+    public function execute(WorkspaceSelectionData $selection, User $user): void
     {
         $accountId = $this->context->accountId();
         $available = array_column($this->context->navigable($user), 'code');

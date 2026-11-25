@@ -10,10 +10,7 @@ use App\Domains\Organizacao\Application\Queries\Companies\LockActiveCompaniesByC
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Application\Actions\People\CreatePersonAction;
 use App\Domains\Pessoas\Application\Actions\People\UpdatePersonAction;
-use App\Domains\Pessoas\Application\Data\CommercialTagsData;
-use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
-use App\Domains\Pessoas\Application\Data\People\UpdatePersonData;
-use App\Domains\Pessoas\Domain\Enums\CommercialRole;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\RegisterCommercialRelationData;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Support\Exceptions\OperationNotAllowed;
@@ -29,53 +26,55 @@ final readonly class RegisterCommercialRelationAction
         private EffectivePermissions $permissions,
     ) {}
 
-    /**
-     * @param  array<string,mixed>  $centralChanges
-     * @param  list<string>  $additionalCompanies
-     */
-    public function execute(
-        CommercialRole $role,
-        Client $account,
-        Company $company,
-        int|CreatePersonData $person,
-        CommercialTagsData $selection,
-        array $centralChanges = [],
-        array $additionalCompanies = [],
-    ): void {
-        AuditLog::transaction(function () use (
-            $role, $account, $company, $person, $selection, $centralChanges, $additionalCompanies,
-        ): void {
+    public function execute(RegisterCommercialRelationData $data, Client $account, Company $company): void
+    {
+        AuditLog::transaction(function () use ($data, $account, $company): void {
+            $role = $data->role;
+
             Client::whereKey($account->id)->lockForUpdate()->firstOrFail();
 
-            $targets = $this->lockActiveCompaniesByCode->execute($account->id, [$company->code, ...$additionalCompanies]);
+            $targets = $this->lockActiveCompaniesByCode->execute(
+                $account->id,
+                [$company->code, ...$data->additionalCompanies],
+            );
+
             foreach ($targets as $target) {
                 if (! $role->allows($this->permissions, auth()->user(), 'create', $target->id)) {
                     throw new OperationNotAllowed;
                 }
             }
 
-            if (is_int($person)) {
-                if ($centralChanges !== []) {
-                    $existing = Person::where('account_id', $account->id)->lockForUpdate()->findOrFail($person);
-                    $changes = UpdatePersonData::forCommercialReuse($centralChanges, $existing);
+            if (is_int($data->person)) {
+                if (! $data->centralChanges->isEmpty()) {
+                    if ($this->permissions->nodesFor(auth()->user(), 'account.people.view')->isEmpty()) {
+                        throw new OperationNotAllowed;
+                    }
+                    $existing = Person::where('account_id', $account->id)->lockForUpdate()->findOrFail($data->person);
+                    $changes = $data->centralChanges->validatedFor($existing);
                     $this->updatePerson->execute($changes, $existing, $account);
                 }
 
-                $personId = $person;
+                $personId = $data->person;
             } else {
-                $personId = $this->createPerson->execute($person, $account)->id;
+                $personId = $this->createPerson->execute($data->person, $account)->id;
             }
 
             foreach ($targets as $target) {
                 $created = $this->set->execute(
-                    $role, $target, $personId, active: true, link: $additionalCompanies === [] ? true : null,
+                    $role,
+                    $target,
+                    $personId,
+                    active: true,
+                    link: $data->additionalCompanies === [] ? true : null,
                 );
-                if ($created && $selection->ids !== []) {
+
+                if ($created && $data->tags->ids !== []) {
                     $relation = $role->model()::where('account_id', $account->id)
                         ->where('company_id', $target->id)
                         ->where('person_id', $personId)
                         ->firstOrFail();
-                    $this->syncTags->execute($role, $relation, $selection);
+
+                    $this->syncTags->execute($data->tags, $role, $relation);
                 }
             }
         });
