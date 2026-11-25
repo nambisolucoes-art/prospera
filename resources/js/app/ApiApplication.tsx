@@ -30,7 +30,7 @@ const screens = import.meta.glob<{ default: ComponentType }>([
   './account/{auth,settings}/*.tsx',
   './saas/{clients,account-form,home,users,user-form,tags,roles,role-form,audit,help}.tsx',
   './saas/{organization,companies,company-form,establishments,establishment-form,establishment-home}.tsx',
-  './saas/{departments,job-titles}.tsx',
+  './saas/{departments,job-titles,employees,employee-form}.tsx',
   './saas/{commercial-relations,commercial-registration}.tsx',
   './saas/{account-select,invitation}.tsx',
 ]);
@@ -49,6 +49,8 @@ const routes: Array<[RegExp, string]> = [
   [/^\/conta\/estabelecimentos$/, 'saas/establishments'],
   [/^\/conta\/departamentos$/, 'saas/departments'],
   [/^\/conta\/funcoes$/, 'saas/job-titles'],
+  [/^\/conta\/colaboradores$/, 'saas/employees'],
+  [/^\/conta\/colaboradores\/(?:cadastrar|\d+\/editar)$/, 'saas/employee-form'],
   [/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}$/, 'saas/establishment-home'],
   [/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}\/(?:clientes|fornecedores)$/, 'saas/commercial-relations'],
   [/^\/conta\/estabelecimento\/[a-z0-9][a-z0-9-]{1,39}\/(?:clientes|fornecedores)\/(?:cadastrar|[a-z0-9][a-z0-9-]{1,39}\/\d+\/editar)$/, 'saas/commercial-registration'],

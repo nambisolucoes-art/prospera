@@ -1585,7 +1585,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 | S01 | Verificação das hipóteses e fechamento das decisões | **Concluída em 24/11/2026**, com impedimentos registrados (H4 depende do site público; H5 depende de infraestrutura do responsável) | Seção 26 |
 | S02 | Contrato institucional | **Concluída em 24/11/2026**, com DA2-19 a DA2-23 a ratificar | Seção 27 e [`institucional.md`](../convencoes/institucional.md) |
 | S03 | Departamentos e funções | **Implementada em 24/11/2026, em revisão (sem commit)** | Seção 28 |
-| S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | Pendente | |
+| S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | **Tecnicamente concluída em 25/11/2026** (commit local `feat: colaboradores como papel de Pessoa por empresa (S04)`) | Seção 29 |
 | S05 | Lotações e histórico | Pendente | |
 | S06 | Perfil institucional e herança | Pendente | |
 | S07 | Horários e exceções | Pendente | |
@@ -1859,3 +1859,66 @@ Tour: abertura, passos do cadastro com a janela aberta pela demonstração, ence
 ### 28.8 Classificação
 
 **S03: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.
+
+## 29. Registro da S04: Colaborador como papel de Pessoa
+
+Executada em 25/11/2026 sobre a branch `feat/pagina-inicial` (base `9e01157`), versionada em commit local, sem merge, push ou deploy. A S05 não foi iniciada.
+
+### 29.1 Contrato aplicado (DA2-24 estendida)
+
+| Ponto | Contrato |
+| --- | --- |
+| Rotas | `/contas/{conta}/colaboradores` (lista), `/cadastrar`, `/{pessoa}/visualizar`, `/{pessoa}/editar`, `POST /pessoa` (busca por documento), `PATCH /{pessoa}`, `POST /{pessoa}/vinculos`, `PATCH /{pessoa}/vinculos/{vinculo}`. Sem empresa na URL e sem tela de escolha. Substitui `/empresa/{empresa}/colaboradores` do plano original |
+| Listagem | Uma linha por Pessoa, sobre `people` com `whereIn` nos vínculos do descritor de `account.employees.list`. Busca, filtros (situação do vínculo, empresa, acesso), contagem e paginação no SQL. Os vínculos exibidos vêm de uma segunda consulta por página, também restrita ao descritor. Vínculos fora do acesso não entram em filtro, contagem nem resposta |
+| Cadastro | Pessoa existente (`person_id`, descoberta por CPF ou CNPJ completo na conta) ou nova (`CreatePersonAction`), mais empresas escolhidas. Uma só empresa autorizada dispensa a escolha. Um vínculo por empresa numa única transação com a conta travada; empresa fora do descritor ou inativa responde 404; duplicidade em qualquer empresa recusa tudo (422), inclusive a pessoa nova |
+| Ficha | Dados centrais (Pessoas, mesma autoridade de `UpdatePersonAction`), etiquetas derivadas, um formulário por vínculo (situação e contatos profissionais, independentes), vínculo a outras empresas e indicador de acesso somente leitura |
+| Modelo | `employees (id, account_id, company_id, person_id, active, work_email, work_phone, work_whatsapp)`, único `(company_id, person_id)` e `(id, company_id)`, FKs compostas `(company_id, account_id)` e `(person_id, account_id)`. Sem CPF, nome, endereço, e-mail pessoal ou login |
+| Etiqueta | `employee` em `DerivedRole` (registro único de papéis derivados, sem ampliar `CommercialRole`). `Tag::employeeTag`, provisionada em contas novas (`RegisterAccountMembershipAction`) e nas existentes pela migration (idempotente por `system_key`). `PersonCommercialRelationsQuery` inclui `employees`. `ListDerivedPersonTagsQuery` só devolve o papel se houver relação ativa em empresa coberta por `account.employees.view` |
+| Usuário | Indicador `has_access` via `account_memberships.person_id`, presente na resposta (chave, filtro e contador) somente com `account.users.list`. Sem a permissão a chave não existe e o filtro é ignorado. Cadastrar, editar e inativar nunca criam nem alteram login ou permissões |
+| Permissões | `account.employees.{list,view,create,update,activate,deactivate}`, alvo `company`. Atribuição só de estabelecimento recebe 403 |
+| Auditoria | `Employee` auditável (tipo `employee`), um evento por empresa com `company_id`, sem documento. Inspeção SaaS somente leitura bloqueia escritas |
+
+### 29.2 Arquivos
+
+- **Backend:** migration `2026_11_25_000001_create_employees.php`; `Employee`; Data (`CreateEmployeeData`, `NewEmployeeLink`, `UpdateEmployeeData`, `ListEmployeesData`); DTOs; Actions (`CreateEmployeeAction`, `UpdateEmployeeAction`, `UpdateEmployeePersonAction`); Queries (`ListEmployeesQuery`, `ListEmployeeLinksQuery`, `ShowEmployeePersonQuery`, `ShowEmployeeLinkQuery`, `FindEmployeePersonQuery`, `PersonHasAccountAccessQuery`); `EmployeeController`; `DerivedRole`; `ListDerivedPersonTagsQuery`; ajustes em `Tag`, `Person`, `RegisterAccountMembershipAction`, `EffectivePermissions`, `HelpCatalog`, `EnforceAccountInspection`, `PersonCommercialRelationsQuery`, `config/permissions.php`, `config/audit.php`, `routes/account.php`.
+- **Frontend:** `employees.tsx`, `employee-form.tsx`, `Employees.css`, `ApiApplication.tsx`, `SaasLayout.tsx`, `accountNavigation.ts` (grupo Institucional), `guidance.ts` (tours da lista, do cadastro e da ficha), `PageHeader.css` (título de palavras longas em telas estreitas).
+- **Ajuda e tour:** `docs/ajuda/colaboradores.html`, `docs/tours/colaboradores.md`, `docs/ajuda/etiquetas.html`, `docs/tours/etiquetas.md`.
+- **Testes:** `tests/Feature/EmployeeDirectoryTest.php` (19 cenários); `PeopleDirectoryTest` ajustado (uma etiqueta especial a mais no catálogo).
+
+### 29.3 Verificações
+
+| Verificação | Resultado |
+| --- | --- |
+| Suíte completa (SQLite em memória, imagem da aplicação) | 344 testes, verdes |
+| Pint, PHPStan, `tsc --noEmit`, testes de frontend (20), `check:architecture` | Verdes |
+| `permissions:sync`, `audit:check`, `organization:check` | 100 permissões, 16 modelos auditados, nenhuma violação |
+| PostgreSQL 18 descartável | `migrate:fresh`, `rollback --step=1`, nova aplicação e restrições em `pg_constraint`; etiqueta criada para conta existente, removida na `down()` e recriada; 4 processos concorrentes cadastrando a mesma pessoa novamente: 1 pessoa, 1 vínculo, 3 recusas de validação |
+| Navegador (Chromium, laboratório isolado) | 1440, 390 e 320 px: administrador, operador de uma empresa (Roupas), leitor sem pessoas e usuários, outra conta. Lista com uma linha por pessoa, sem rolagem horizontal, cadastro em duas empresas, reaproveitamento por CPF, inativação de um vínculo sem afetar o outro, tours (lista 14 passos, cadastro 5, ficha 7) restaurando o estado |
+
+### 29.4 Defeitos encontrados e correções
+
+| Defeito | Correção |
+| --- | --- |
+| Busca por documento chamava `@/colaboradores/pessoa` sem resolver o prefixo (rota inexistente) | `useContextUrl` |
+| Situação do vínculo não mudava (campo controlado sem estado) | Componente `LinkForm` com estado |
+| Notas de seção em vermelho e título "COLABORADORE S" em 320 px | `FormHelp` e ajuste do `PageHeader` (título prioritário e caminho abaixo em até 360 px) |
+| Empresas truncadas na lista compacta | Empresas sob o nome no modo compacto |
+
+### 29.4.1 Fechamento técnico
+
+| Verificação | Resultado |
+| --- | --- |
+| Permissões sobre Pessoas | Dados centrais exigem `account.people.update` pela autoridade de `UpdatePersonAction`, além de `account.employees.update` na ficha. Teste de envio forjado: só colaboradores recebe 403 sem alterar nome, CPF nem contato; só pessoas também recebe 403; as duas juntas passam. Vínculo editável sem tocar em Pessoa; formulário sem edição central habilitada quando falta permissão |
+| Etiqueta derivada | Dois vínculos ativos, inativar um (permanece), inativar o último (some, sem `person_tag`), reativar (volta), vínculo em empresa sem acesso (não revelado). Clientes e Fornecedores intactos |
+| `organization:check` | A advertência "Conta #1: sem empresa" vinha de uma conta criada só pelo ensaio da migration. Com massa consistente: nenhuma violação. Comando não alterado |
+| Efeito colateral intencional | `PersonCommercialRelationsQuery` agora inclui `employees` nas empresas relacionadas, logo o vínculo de colaborador também conta na regra de cobertura da edição de identificação de Cliente e Fornecedor (plano 26.2) |
+
+### 29.5 Pendências reais
+
+- Filtros por estabelecimento, departamento e função, coluna Unidades, `todos` e lotações permanecem na S05.
+- O seed de desenvolvimento não concede as novas permissões a cargos existentes (só ao Administrador integral).
+- Concorrência medida só no PostgreSQL do laboratório, fora da suíte, conforme a convenção.
+
+### 29.6 Classificação
+
+**S04: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.

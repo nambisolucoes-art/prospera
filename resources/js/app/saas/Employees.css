@@ -1,0 +1,49 @@
+.employees__companies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.employees__link {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid var(--bold-color-border, #e5e7eb);
+}
+
+.employees__link-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.employees__access {
+  margin: 0;
+}
+
+.employees__directory {
+  container-type: inline-size;
+}
+
+.employees__compact-companies {
+  display: none;
+}
+
+@container (max-width: 600px) {
+  .employees__directory .business-list__table td[data-column='name'] .business-list__cell {
+    display: block;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .employees__compact-companies {
+    display: block;
+    color: var(--bold-color-text-muted);
+    font-size: 12px;
+  }
+}

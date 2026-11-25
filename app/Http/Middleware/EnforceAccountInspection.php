@@ -77,10 +77,11 @@ final readonly class EnforceAccountInspection
             return $next($request);
         }
 
-        // As duas buscas usam POST para manter o documento fora da URL e somente consultam dados.
+        // As buscas usam POST para manter o documento fora da URL e somente consultam dados.
         if ($request->routeIs(
             'account.company.customers.find-person',
             'account.company.suppliers.find-person',
+            'account.employees.find-person',
         )) {
             return $next($request);
         }

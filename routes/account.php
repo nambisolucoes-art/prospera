@@ -6,6 +6,7 @@ use App\Domains\Acessos\UI\Controllers\AccountSelectionController;
 use App\Domains\Ajuda\UI\Controllers\HelpController;
 use App\Domains\Auditoria\UI\Controllers\AuditController;
 use App\Domains\Colaboradores\UI\Controllers\DepartmentController;
+use App\Domains\Colaboradores\UI\Controllers\EmployeeController;
 use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
 use App\Domains\Etiquetas\UI\Controllers\TagController;
 use App\Domains\Organizacao\Domain\ValueObjects\OrganizationCode;
@@ -286,6 +287,41 @@ Route::middleware(['auth', 'verified', 'account'])
                 ->whereNumber('itemId')
                 ->name($name.'.update');
         }
+
+        // S04: colaboradores de todas as empresas do acesso, numa só tela, com uma linha por pessoa. Cada operação
+        // confere a permissão sobre a empresa do vínculo ou sobre as empresas escolhidas no cadastro.
+        Route::get('colaboradores', [EmployeeController::class, 'index'])
+            ->name('employees.index');
+
+        Route::get('colaboradores/cadastrar', [EmployeeController::class, 'create'])
+            ->name('employees.create');
+
+        Route::post('colaboradores/pessoa', [EmployeeController::class, 'findPerson'])
+            ->name('employees.find-person');
+
+        Route::post('colaboradores', [EmployeeController::class, 'store'])
+            ->name('employees.store');
+
+        Route::get('colaboradores/{personId}/visualizar', [EmployeeController::class, 'show'])
+            ->whereNumber('personId')
+            ->name('employees.view');
+
+        Route::get('colaboradores/{personId}/editar', [EmployeeController::class, 'edit'])
+            ->whereNumber('personId')
+            ->name('employees.edit');
+
+        Route::patch('colaboradores/{personId}', [EmployeeController::class, 'updatePerson'])
+            ->whereNumber('personId')
+            ->name('employees.update-person');
+
+        Route::post('colaboradores/{personId}/vinculos', [EmployeeController::class, 'addLinks'])
+            ->whereNumber('personId')
+            ->name('employees.add-links');
+
+        Route::patch('colaboradores/{personId}/vinculos/{employeeId}', [EmployeeController::class, 'updateLink'])
+            ->whereNumber('personId')
+            ->whereNumber('employeeId')
+            ->name('employees.update-link');
 
         Route::prefix('estabelecimento/{estabelecimento}')
             ->where(['estabelecimento' => OrganizationCode::ROUTE_PATTERN])

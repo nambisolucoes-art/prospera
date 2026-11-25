@@ -162,6 +162,37 @@ export function tourFor(
         table: 'Cada linha é a relação de uma pessoa com uma empresa. Use Visualizar cadastro para abrir a ficha, Editar para alterar os dados e Ativar ou Inativar para mudar a situação da relação, conforme seu cargo.',
       }),
     ];
+  } else if (path === '/conta/colaboradores') {
+    title = 'Colaboradores';
+    help = 'colaboradores';
+    steps = [
+      at(
+        'employees-register',
+        'Cadastrar',
+        'Busque a pessoa pelo CPF ou CNPJ completo para reaproveitar o cadastro, ou informe uma pessoa nova. Marque as empresas em que ela é colaboradora.',
+      ),
+      ...businessListTourSteps({
+        filters: 'Busque por nome, e-mail, CPF ou CNPJ e filtre pela situação do vínculo, pela empresa (quando você alcança mais de uma) e, se o seu cargo lista usuários, pelo acesso à conta.',
+        table: 'Cada linha é uma pessoa, com todas as empresas em que ela é colaboradora e que o seu acesso alcança. Colaborador não é usuário: ser colaborador não concede acesso nem permissões. Use Visualizar cadastro para consultar e Editar para abrir a ficha e administrar cada vínculo.',
+      }),
+    ];
+  } else if (/^\/conta\/colaboradores\/(cadastrar|\d+\/editar)$/.test(path)) {
+    const editing = path.endsWith('/editar');
+    title = editing ? 'Ficha do colaborador' : 'Cadastro de colaborador';
+    help = 'colaboradores';
+    steps = form(editing
+      ? [
+        at('person-identity', 'Dados centrais da pessoa', 'Identidade, documento e contatos valem para todas as empresas e para os demais papéis da pessoa, como cliente e fornecedor. Os campos aparecem conforme suas permissões.'),
+        at('employee-tags', 'Etiquetas', 'As etiquetas são derivadas dos vínculos e dos outros papéis da pessoa. Não podem ser atribuídas nem removidas aqui.'),
+        at('employee-links', 'Vínculos empresariais', 'Cada empresa tem o próprio vínculo, com situação e contatos profissionais independentes. Salvar um vínculo não altera os outros.'),
+        at('employee-add-link', 'Vincular a outra empresa', 'Marque as empresas em que você pode cadastrar e que ainda não têm vínculo da pessoa.'),
+        at('employee-access', 'Acesso ao Prospera', 'Indicador somente leitura, visível a quem lista usuários. Colaborador e usuário são conceitos distintos.'),
+      ]
+      : [
+        at('employee-companies', 'Empresas', 'Marque uma ou mais empresas. Cada uma recebe um vínculo de colaborador independente, gravado numa única operação. Com uma só empresa autorizada, este passo não aparece.'),
+        at('person-identity', 'Pessoa', 'Informe o CPF ou CNPJ completo e aguarde a busca (ou use a lupa). Se a pessoa já existe na conta, ela é reaproveitada sem duplicar o documento.'),
+        at('employee-work-contacts', 'Contatos profissionais', 'Opcionais e próprios de cada empresa. Não alteram os contatos centrais da pessoa.'),
+      ]);
   } else if (/^\/conta\/(departamentos|funcoes)$/.test(path)) {
     const departments = path.endsWith('/departamentos');
     const config = departments ? departmentsConfig : jobTitlesConfig;

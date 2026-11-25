@@ -8,6 +8,7 @@ use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Clientes\Domain\Models\Customer;
+use App\Domains\Colaboradores\Domain\Models\Employee;
 use App\Domains\Etiquetas\Domain\Concerns\NamesAuditedTags;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
@@ -21,7 +22,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Validation\ValidationException;
 
-/** @property string|null $document */
+/**
+ * @property string|null $document
+ * @property string $person_type
+ */
 #[Fillable([
     'name',
     'email',
@@ -196,6 +200,12 @@ class Person extends Model implements Auditable
     public function suppliers(): HasMany
     {
         return $this->hasMany(Supplier::class);
+    }
+
+    /** @return HasMany<Employee, $this> */
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
     }
 
     /** @return HasOneThrough<User, AccountMembership, $this> */

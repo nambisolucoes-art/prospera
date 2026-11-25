@@ -58,6 +58,7 @@ final readonly class RegisterAccountMembershipAction
 
             Tag::supplierTag($node->accountId);
             Tag::customerTag($node->accountId);
+            Tag::employeeTag($node->accountId);
             $tag = Tag::userTag($node->accountId);
             $before = $person->tags()->orderBy('tags.id')->pluck('tags.id')->all();
             $person->tags()->syncWithoutDetaching([$tag->id]);

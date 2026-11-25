@@ -283,7 +283,7 @@ class PeopleDirectoryTest extends TestCase
             ->assertOk()
             ->assertJsonPath('formOpen', true)
             ->assertJsonPath('canList', true)
-            ->assertJsonCount(3, 'tags.data');
+            ->assertJsonCount(4, 'tags.data');
 
         $this->postJson('/conta/etiquetas', [
             'name' => 'Etiqueta colorida',
@@ -529,6 +529,6 @@ class PeopleDirectoryTest extends TestCase
             ->assertOk()
             ->assertJsonPath('filters.status', '')
             ->assertJsonPath('filters.module', '')
-            ->assertJsonCount(5, 'tags.data');
+            ->assertJsonCount(6, 'tags.data');
     }
 }

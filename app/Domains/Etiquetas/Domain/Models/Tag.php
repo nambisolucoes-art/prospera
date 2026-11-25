@@ -92,6 +92,11 @@ class Tag extends Model implements Auditable
         return self::specialTag($accountId, 'customer', 'Cliente', '#23b7e5');
     }
 
+    public static function employeeTag(int $accountId): self
+    {
+        return self::specialTag($accountId, 'employee', 'Colaborador', '#1abc9c');
+    }
+
     private static function specialTag(int $accountId, string $key, string $label, string $color): self
     {
         $existing = self::where('account_id', $accountId)

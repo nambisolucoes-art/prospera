@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Pessoas\Application\Queries;
 
+use App\Domains\Pessoas\Domain\Enums\DerivedRole;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -11,26 +12,25 @@ use Illuminate\Support\Facades\DB;
  */
 final class PersonCommercialRelationsQuery
 {
-    /** @return list<int> */
+    /**
+     * Empresas com relação ativa da pessoa em qualquer papel derivado: Colaborador, Cliente ou Fornecedor.
+     *
+     * @return list<int>
+     */
     public function activeCompanyIds(int $accountId, int $personId): array
     {
-        $customers = DB::table('customers')
-            ->where('account_id', $accountId)
-            ->where('person_id', $personId)
-            ->where('active', true)
-            ->select('company_id');
+        $union = null;
 
-        $suppliers = DB::table('suppliers')
-            ->where('account_id', $accountId)
-            ->where('person_id', $personId)
-            ->where('active', true)
-            ->select('company_id');
+        foreach (DerivedRole::cases() as $role) {
+            $roleCompanies = DB::table($role->table())
+                ->where('account_id', $accountId)
+                ->where('person_id', $personId)
+                ->where('active', true)
+                ->select('company_id');
 
-        $ids = $customers->union($suppliers)
-            ->pluck('company_id')
-            ->map(fn ($id): int => (int) $id)
-            ->all();
+            $union = $union === null ? $roleCompanies : $union->union($roleCompanies);
+        }
 
-        return array_values($ids);
+        return array_values($union->pluck('company_id')->map(fn ($id): int => (int) $id)->all());
     }
 }

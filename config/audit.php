@@ -24,6 +24,7 @@ return [
         'tag' => 'Etiqueta',
         'department' => 'Departamento',
         'job-title' => 'Função',
+        'employee' => 'Colaborador',
         'permission-catalog' => 'Catálogo de permissões',
     ],
     'events' => [
@@ -72,7 +73,12 @@ return [
                 'customers' => 'Clientes',
                 'suppliers' => 'Fornecedores',
             ],
-            'system_key' => ['user' => 'Usuário', 'supplier' => 'Fornecedor', 'customer' => 'Cliente'],
+            'system_key' => [
+                'user' => 'Usuário',
+                'supplier' => 'Fornecedor',
+                'customer' => 'Cliente',
+                'employee' => 'Colaborador',
+            ],
         ],
         'role' => ['system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário']],
         'account-invitation' => [

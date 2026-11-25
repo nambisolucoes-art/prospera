@@ -52,6 +52,9 @@
 @media (max-width: 480px) {
   .pageHeader__title { padding-left: 10px; font-size: 17px; line-height: 20px; }
 
+  /* O título tem prioridade: palavras longas como Colaboradores não quebram no meio. */
+  .pageHeader--right { grid-template-columns: minmax(0, 1fr) fit-content(40%); }
+
   /* As ações ocupam a própria linha para não estreitar o título no celular. */
   .pageHeader--right .pageHeader__actions { grid-column: 1 / -1; }
 }
@@ -66,3 +69,11 @@
 .pageHeader__breadcrumb .pageBreadcrumb.breadcrumb { margin: 0; padding: 0; }
 .pageHeader--right .pageHeader__subtitle { grid-area: 2 / 1; }
 .pageHeader__actions { grid-area: 2 / 2; justify-self: end; }
+
+/* Em telas muito estreitas o caminho de navegação desce para a própria linha, abaixo do título. */
+@media (max-width: 360px) {
+  .pageHeader--right { grid-template-columns: minmax(0, 1fr); }
+  .pageHeader--right .pageHeader__breadcrumb { grid-area: 2 / 1; justify-self: start; text-align: start; }
+  .pageHeader--right .pageHeader__subtitle { grid-area: 3 / 1; }
+  .pageHeader--right .pageHeader__actions { grid-area: 3 / 1; justify-self: start; }
+}

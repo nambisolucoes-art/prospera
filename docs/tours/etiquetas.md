@@ -22,3 +22,5 @@ A visualização da etiqueta usa o tamanho padrão do Modal (600 px no desktop),
 Validação do ajuste de largura: Chromium em 1440, 390 e 320 px, visualização carregada com nome, badge e situação, fechamento por Esc e botão e retorno de foco à ação da tabela. Sem rolagem horizontal. Visualização de Cargos preservada em 900 px. Arquitetura e TypeScript aprovados; Docker reconstruído e saudável.
 
 O filtro e o seletor **Módulo** incluem somente Clientes e Fornecedores. No cadastro novo, Clientes é o padrão. Registros anteriores preservam sua classificação como Cadastro anterior; podem ser inativados sem remover seus vínculos. Os alvos e a ordem do tour permanecem válidos. Etiquetas comerciais convencionais são oferecidas no formulário do próprio papel.
+
+A etiqueta especial Colaborador (S04) aparece na listagem como Sistema, somente leitura, sem editar nem excluir. Os alvos e a ordem do tour permanecem válidos.

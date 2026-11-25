@@ -77,6 +77,7 @@ export function accountNavigation(
   ];
   // Módulos de empresa (S03): uma só tela por módulo, com as empresas que o acesso alcança.
   const institutional: SidebarEntry[] = [
+    ...entry(permissions, 'employees', { key: 'employees', label: 'Colaboradores', href: '@/colaboradores', iconClass: 'ti-notepad' }, '@/colaboradores/cadastrar'),
     ...entry(permissions, 'departments', { key: 'departments', label: 'Departamentos', href: '@/departamentos', iconClass: 'ti-layout-accordion-list' }),
     ...entry(permissions, 'job-titles', { key: 'job-titles', label: 'Funções', href: '@/funcoes', iconClass: 'ti-bookmark-alt' }),
   ];
