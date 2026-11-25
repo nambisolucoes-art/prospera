@@ -1,0 +1,98 @@
+<!--
+titulo: Departamentos e Funções
+resumo: Cadastre os departamentos e as funções profissionais de cada empresa e controle a situação de cada um.
+categoria: Institucional
+palavras-chave: departamento, departamentos, função, funções, função profissional, setor, área, equipe, colaborador, empresa, institucional, cadastrar, editar, ativar, inativar, situação, cargo
+-->
+
+<h2 id="departamento-funcao-e-cargo">Departamento, função e cargo</h2>
+
+<p>
+  <span class="dropcap text-primary">O</span> menu <strong>Institucional</strong> reúne os cadastros que descrevem a
+  organização interna de cada <strong>empresa</strong>. O <strong>departamento</strong> é uma área da empresa, como
+  Financeiro ou Atendimento, e nunca é uma filial. A <strong>função</strong> é a atividade profissional que alguém
+  exerce, como Gerente comercial. Os dois pertencem a uma única empresa: a Empresa A e a Empresa B podem ter um
+  departamento com o mesmo nome, e cada uma o administra sozinha.
+</p>
+
+<blockquote class="help-note help-note--warning">
+  <strong class="text-warning">Atenção:</strong> <mark>função não é cargo</mark>. O <strong>Cargo</strong> é o papel de
+  acesso, que reúne permissões e é atribuído a usuários em <strong>Cargos</strong> e em <strong>Usuários</strong>.
+  Cadastrar ou alterar uma função não concede nem retira nenhum acesso.
+</blockquote>
+
+<h2 id="abrir-a-tela">Abrir a tela</h2>
+
+<ol>
+  <li>No menu, abra <strong>Institucional</strong> e escolha <strong>Departamentos</strong> ou <strong>Funções</strong>.</li>
+  <li>
+    A lista é uma só e traz os registros de todas as empresas que o seu acesso alcança. Quem tem acesso a toda a conta
+    vê todas as empresas. Quem recebeu o cargo em uma empresa vê só os registros dela. Não há uma etapa para escolher a
+    empresa antes.
+  </li>
+  <li>A coluna <strong>Empresa</strong> mostra onde cada registro vale. Com mais de uma empresa, o filtro <strong>Empresa</strong> restringe a lista.</li>
+</ol>
+
+<blockquote class="help-note help-note--info">
+  <strong class="text-info">Permissão:</strong> o menu aparece para quem tem <strong>Listar: Departamentos</strong> ou
+  <strong>Listar: Funções</strong>. Cada ação tem a sua própria permissão: listar, visualizar, cadastrar, editar, ativar
+  e inativar. Elas valem para a empresa em que o cargo foi atribuído ou para toda a conta. Uma atribuição só de
+  estabelecimento não abre estes cadastros.
+</blockquote>
+
+<h2 id="cadastrar-e-editar">Cadastrar e editar</h2>
+
+<dl class="dl-horizontal">
+  <dt>Cadastrar</dt>
+  <dd>
+    Abre a janela com as <strong>Empresas</strong>, o <strong>Nome</strong> e a <strong>Situação</strong>. Marque as
+    empresas em que o registro vale: o sistema cria um registro em cada uma, e cada empresa o administra sozinha. Só
+    aparecem as empresas em que o seu cargo permite cadastrar. Com uma única empresa, a escolha não é pedida.
+    Se o nome já existir em alguma das empresas marcadas, nada é gravado e a mensagem indica quais.
+  </dd>
+  <dt>Editar</dt>
+  <dd>Abre a mesma janela com os dados atuais. A empresa aparece só para consulta: um registro não muda de empresa. Quem tem a permissão de editar altera o nome.</dd>
+  <dt>Visualizar cadastro</dt>
+  <dd>Mostra o nome, a empresa, a situação e as datas de cadastro e de última alteração, sem permitir alterações.</dd>
+</dl>
+
+<ul class="list-unstyled">
+  <li>O nome tem até 100 caracteres. Espaços no início, no fim e repetidos são ajustados ao salvar.</li>
+  <li>
+    <mark>O nome é único em cada empresa</mark>, sem diferenciar maiúsculas, minúsculas nem acentos: Gerência e
+    GERENCIA são o mesmo nome. Se já existir, o campo mostra a mensagem e nada é gravado.
+  </li>
+  <li>O mesmo nome pode existir em outra empresa da conta, e um departamento e uma função podem ter o mesmo nome.</li>
+</ul>
+
+<h2 id="ativar-e-inativar">Ativar e inativar</h2>
+
+<p>
+  A <strong>Situação</strong> é alterada na janela de edição. <strong class="text-danger">Inativo</strong> mantém o
+  registro e o histórico, e não pode ser escolhido em novas lotações. <strong class="text-success">Ativo</strong> volta a
+  ficar disponível. Ativar e inativar têm permissões próprias: quem só edita o nome não consegue mudar a situação, e a
+  situação não aparece como opção para quem não pode alterá-la. Cadastrar já como inativo também exige a permissão de
+  inativar.
+</p>
+
+<blockquote class="help-note help-note--success">
+  <strong class="text-success">Dica:</strong> não existe exclusão. Para deixar de usar um departamento ou uma função,
+  <ins>inative o cadastro</ins>. O histórico de quem alterou, quando e o que mudou fica em <strong>Auditoria</strong>,
+  na empresa em que a alteração ocorreu.
+</blockquote>
+
+<h2 id="buscar-e-filtrar">Buscar e filtrar</h2>
+
+<p>
+  Use a busca por nome, que ignora acentos e maiúsculas, e o filtro <strong>Situação</strong> (Ativos ou Inativos). A
+  lista se atualiza automaticamente. Use <strong>Colunas</strong> para ajustar o que aparece e a paginação para ver mais
+  registros. Quando não há nenhum cadastro, a tela explica como começar com <strong>Cadastrar</strong>.
+</p>
+
+<h2 id="bloqueios">Bloqueios comuns</h2>
+
+<ul class="list-unstyled">
+  <li><strong>Empresa inativa:</strong> ela não aparece para novos cadastros. Reative a empresa em Organização antes de usar estes cadastros.</li>
+  <li><strong>Acesso negado ao menu ou à tela:</strong> peça a um administrador o cargo com a permissão de listar neste módulo na empresa.</li>
+  <li><strong>Inspeção somente leitura:</strong> a plataforma consulta, mas não grava. Use o modo de edição quando for autorizado.</li>
+</ul>

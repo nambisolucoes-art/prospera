@@ -66,6 +66,33 @@ final class OrganizationContextQuery
     }
 
     /**
+     * Empresas ativas cobertas pelo descritor da permissão, para os módulos de empresa.
+     *
+     * @return list<NavigableCompany>
+     */
+    public function companies(int $accountId, AuthorizedNodes $nodes): array
+    {
+        if ($nodes->tenant === false && $nodes->companies === []) {
+            return [];
+        }
+
+        $rows = DB::table('companies')
+            ->where('account_id', $accountId)
+            ->where('active', true)
+            ->when(! $nodes->tenant, fn (Builder $query) => $query->whereIn('id', $nodes->companies))
+            ->orderByRaw('coalesce(trade_name, name)')
+            ->orderBy('id')
+            ->get(['id', 'code', 'name', 'trade_name', 'active']);
+
+        return array_values($rows->map(fn (stdClass $row) => new NavigableCompany(
+            id: (int) $row->id,
+            code: (string) $row->code,
+            name: (string) ($row->trade_name ?: $row->name),
+            active: (bool) $row->active,
+        ))->all());
+    }
+
+    /**
      * @param  list<string>  $codes
      * @return list<int>
      */

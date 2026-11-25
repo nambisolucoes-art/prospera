@@ -22,6 +22,12 @@ final readonly class AuthorizedNodes
         return ! $this->tenant && $this->companies === [] && $this->establishments === [];
     }
 
+    /** Há alguma empresa alcançada, direta ou pela conta. Atribuições só de estabelecimento não contam. */
+    public function reachesCompanies(): bool
+    {
+        return $this->tenant || $this->companies !== [];
+    }
+
     // União de descritores, por exemplo das empresas em que alguma ação comercial é permitida.
     public function with(self $other): self
     {

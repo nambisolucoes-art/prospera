@@ -1,5 +1,7 @@
 import { screenPath } from '@/utils/organizationContext';
 import { tagListFormTourSteps } from '@/app/saas/tagTours';
+import { catalogListFormTourSteps } from '@/app/saas/catalogTours';
+import { departmentsConfig, jobTitlesConfig } from '@/app/saas/CompanyCatalog.types';
 import { pageHeaderTourSteps } from '@/components/PageHeader/PageHeaderTour';
 import { businessListTourSteps } from '@/components/BusinessList/BusinessListTour';
 import { auditDetailTourSteps } from '@/app/saas/auditTours';
@@ -159,6 +161,22 @@ export function tourFor(
         filters: 'Busque por nome, e-mail, CPF ou CNPJ e filtre pela situação e, com várias empresas, pela empresa.',
         table: 'Cada linha é a relação de uma pessoa com uma empresa. Use Visualizar cadastro para abrir a ficha, Editar para alterar os dados e Ativar ou Inativar para mudar a situação da relação, conforme seu cargo.',
       }),
+    ];
+  } else if (/^\/conta\/(departamentos|funcoes)$/.test(path)) {
+    const departments = path.endsWith('/departamentos');
+    const config = departments ? departmentsConfig : jobTitlesConfig;
+    title = config.title;
+    help = 'departamentos-funcoes';
+    steps = [
+      ...businessListTourSteps({
+        filters: departments
+          ? 'Busque pelo nome do departamento, sem se preocupar com acentos ou maiúsculas, e filtre pela empresa (quando você alcança mais de uma) e pela situação. A lista se atualiza automaticamente.'
+          : 'Busque pelo nome da função, sem se preocupar com acentos ou maiúsculas, e filtre pela empresa (quando você alcança mais de uma) e pela situação. A lista se atualiza automaticamente.',
+        table: departments
+          ? 'Cada linha é um departamento de uma empresa, mostrada na coluna Empresa. A lista traz as empresas que o seu acesso alcança. Use Visualizar cadastro para consultar e Editar para alterar o nome ou a situação, conforme o seu cargo. Departamentos não são excluídos: inative os que não usa mais.'
+          : 'Cada linha é uma função de uma empresa, mostrada na coluna Empresa. A lista traz as empresas que o seu acesso alcança. Função é a atividade profissional, diferente do Cargo, que é o papel de acesso. Use Visualizar cadastro para consultar e Editar para alterar o nome ou a situação. Funções não são excluídas: inative as que não usa mais.',
+      }),
+      ...catalogListFormTourSteps(config),
     ];
   } else if (path === '/conta/organizacao') {
     title = 'Organização';

@@ -22,6 +22,8 @@ return [
         'role-assignment' => 'Atribuição de cargo',
         'role-availability' => 'Abrangência do cargo',
         'tag' => 'Etiqueta',
+        'department' => 'Departamento',
+        'job-title' => 'Função',
         'permission-catalog' => 'Catálogo de permissões',
     ],
     'events' => [

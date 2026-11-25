@@ -75,6 +75,11 @@ export function accountNavigation(
     // Cargos passa ao grupo Controle de acesso na E05, junto com Usuários.
     ...entry(permissions, 'roles', { key: 'roles', label: 'Cargos', href: '@/cargos', iconClass: 'ti-id-badge' }, '@/cargos/cadastrar'),
   ];
+  // Módulos de empresa (S03): uma só tela por módulo, com as empresas que o acesso alcança.
+  const institutional: SidebarEntry[] = [
+    ...entry(permissions, 'departments', { key: 'departments', label: 'Departamentos', href: '@/departamentos', iconClass: 'ti-layout-accordion-list' }),
+    ...entry(permissions, 'job-titles', { key: 'job-titles', label: 'Funções', href: '@/funcoes', iconClass: 'ti-bookmark-alt' }),
+  ];
   const organization: SidebarEntry[] = [
     'account.account-data.update',
     'account.companies.list',
@@ -87,6 +92,7 @@ export function accountNavigation(
     ...(permissions.includes('account.dashboard.view') ? accountEntries : []),
     ...(records.length ? [{ key: 'records', title: 'Cadastros' }, ...records] : []),
     ...organization,
+    ...(institutional.length ? [{ key: 'institutional', title: 'Institucional' }, ...institutional] : []),
     ...entry(permissions, 'users', { key: 'users', label: 'Usuários', href: '@/usuarios', iconClass: 'ti-user' }, '@/usuarios/cadastrar'),
     ...shared,
   ];

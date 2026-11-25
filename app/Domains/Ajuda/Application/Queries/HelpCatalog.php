@@ -79,6 +79,8 @@ final class HelpCatalog
             'clientes' => ! $user->is_saas_admin && $can('account.customers'),
             'fornecedores' => ! $user->is_saas_admin && $can('account.suppliers'),
             'etiquetas' => ! $user->is_saas_admin && $can('account.tags'),
+            'departamentos-funcoes' => ! $user->is_saas_admin
+                && ($can('account.departments') || $can('account.job-titles')),
             'cargos-permissoes' => ! $user->is_saas_admin && $can('account.roles'),
             'perfil' => $user->can('self.profile.view'),
             'seguranca' => $user->can('self.security.view'),

@@ -5,6 +5,8 @@ use App\Domains\Acessos\UI\Controllers\AccountInvitationController;
 use App\Domains\Acessos\UI\Controllers\AccountSelectionController;
 use App\Domains\Ajuda\UI\Controllers\HelpController;
 use App\Domains\Auditoria\UI\Controllers\AuditController;
+use App\Domains\Colaboradores\UI\Controllers\DepartmentController;
+use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
 use App\Domains\Organizacao\Domain\DTOs\OrganizationCode;
 use App\Domains\Organizacao\UI\Controllers\CompanyController;
 use App\Domains\Organizacao\UI\Controllers\EstablishmentContextController;
@@ -263,6 +265,27 @@ Route::middleware(['auth', 'verified', 'account'])
 
         Route::put('area-de-trabalho/padrao', [EstablishmentContextController::class, 'saveDefault'])
             ->name('workspace.default');
+
+        // S03: departamentos e funções na mesma tela para todas as empresas do acesso. A autorização de cada
+        // operação é conferida no servidor sobre a empresa do registro ou as empresas escolhidas no cadastro.
+        foreach ([
+            'departamentos' => [DepartmentController::class, 'departments'],
+            'funcoes' => [JobTitleController::class, 'job-titles'],
+        ] as $segment => [$controller, $name]) {
+            Route::get($segment, [$controller, 'index'])
+                ->name($name.'.index');
+
+            Route::get($segment.'/{itemId}/visualizar', [$controller, 'show'])
+                ->whereNumber('itemId')
+                ->name($name.'.view');
+
+            Route::post($segment, [$controller, 'store'])
+                ->name($name.'.store');
+
+            Route::patch($segment.'/{itemId}', [$controller, 'update'])
+                ->whereNumber('itemId')
+                ->name($name.'.update');
+        }
 
         Route::prefix('estabelecimento/{estabelecimento}')
             ->where(['estabelecimento' => OrganizationCode::ROUTE_PATTERN])

@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da frente Institucional, Equipe e Sites White Label |
-| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). S03 a S15 não foram iniciadas. Nenhum código, migration, rota, tela, dado, dependência ou infraestrutura foi alterado |
+| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **A S03 foi implementada e aguarda revisão, sem commit (seção 28).** S04 a S15 não foram iniciadas |
 | Base de código auditada | Branch `feat/pagina-inicial`, commit `33fd8df`, árvore de trabalho limpa |
 | Data da auditoria | 24/11/2026 |
 | Antecessor | Briefing `prospera_plano_institucional_white_label.md` (fora do repositório) e a análise aprovada na sessão de 24/11/2026 |
@@ -998,8 +998,8 @@ Todas as telas usam `BusinessList`, `BusinessForm`, `BusinessListSearch`, `Selec
 
 | Tela | Rota (rascunho) | Permissão | Etapa |
 | --- | --- | --- | --- |
-| Departamentos (lista e modal) | `/contas/{conta}/empresa/{empresa}/departamentos` | `account.departments.*` | S03 |
-| Funções (lista e modal; "Função" no singular, nunca "Cargo") | `/contas/{conta}/empresa/{empresa}/funcoes` | `account.job-titles.*` | S03 |
+| Departamentos (lista e modal) | `/contas/{conta}/departamentos` (tela única, empresas pelo acesso, DA2-24) | `account.departments.*` | S03 |
+| Funções (lista e modal; "Função" no singular, nunca "Cargo") | `/contas/{conta}/funcoes` (tela única, empresas pelo acesso, DA2-24) | `account.job-titles.*` | S03 |
 | Colaboradores, lista por empresa (S04) | `/contas/{conta}/empresa/{empresa}/colaboradores` | `account.employees.list` | S04 |
 | Colaboradores, lista por unidade e consolidado `todos` (S05) | `/contas/{conta}/estabelecimento/{estabelecimento}/colaboradores` | `account.employees.list` (alvo `establishment`) | S05 |
 | Ficha do colaborador (dados centrais, relação, contatos profissionais, lotações, acesso somente leitura) | `.../colaboradores/{id}/editar` | `account.employees.view` e `update`; lotações com `assign` | S04 (sem lotações), S05 |
@@ -1584,7 +1584,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 | --- | --- | --- | --- |
 | S01 | Verificação das hipóteses e fechamento das decisões | **Concluída em 24/11/2026**, com impedimentos registrados (H4 depende do site público; H5 depende de infraestrutura do responsável) | Seção 26 |
 | S02 | Contrato institucional | **Concluída em 24/11/2026**, com DA2-19 a DA2-23 a ratificar | Seção 27 e [`institucional.md`](../convencoes/institucional.md) |
-| S03 | Departamentos e funções | Pendente | |
+| S03 | Departamentos e funções | **Implementada em 24/11/2026, em revisão (sem commit)** | Seção 28 |
 | S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | Pendente | |
 | S05 | Lotações e histórico | Pendente | |
 | S06 | Perfil institucional e herança | Pendente | |
@@ -1781,3 +1781,81 @@ Feita antes do commit da S02, sem reabrir o planejamento. Corrigiu apenas o que 
 | Mídia | Critérios de segurança e desempenho explícitos (seção 13.1): barreiras antes de decodificar, estimativa de memória, duração, atomicidade, concorrência, corpus de medição e recusa de arquivo que excede o ambiente sem erro fatal. **Mudança de regra:** se o síncrono reprovar, a própria S08 (ou S13) incorpora o fluxo assíncrono e o laboratório de worker, em vez de parar e adiar |
 | Cache e vigência | **Defeitos demonstrados:** TTL pela "próxima meia-noite" não dizia como tratar horário de verão nem conferia a validade na leitura, e cabeçalhos HTTP poderiam manter cópias vencidas em navegador e borda. Corrigido em 09.7, item 6: `valid_until` no início do próximo dia civil do fuso, conferido na leitura, sem `stale-*`, HTML com `no-cache` e `ETag`, foto de pessoa sem `immutable`, teste de virada de data com relógio congelado |
 | Plano 001 e convenções | Reconferidos: `people (id, account_id)`, `establishments (id, company_id)` e `account.users.list` existem; `account.audit.*` admite os três nós. Nenhuma contradição nova com o plano 001. A ampliação de Pessoas e contatos para Colaborador foi **aprovada** pelo responsável |
+
+## 28. Registro da S03: Departamentos e Funções
+
+Executada em 24/11/2026 sobre a branch `feat/pagina-inicial` (HEAD `b5f2849`), sem commit, merge, push ou deploy. A S04 e a S05 não foram iniciadas.
+
+### 28.1 Decisão aplicada: DA2-24, uma tela por módulo e a empresa vem do acesso
+
+A primeira versão da S03 abria cada tela dentro de uma empresa (`/empresa/{empresa}/departamentos`) e pedia a escolha da empresa antes de listar. A revisão do produto corrigiu: **a tela é a mesma para todas as empresas e mostra o que o acesso alcança.**
+
+| Ponto | Contrato aplicado |
+| --- | --- |
+| Rota | `/contas/{conta}/departamentos` e `/contas/{conta}/funcoes`, sem empresa na URL e sem tela de escolha. Removidos a entrada `/empresa`, `CompanyContextController` e `CompanyDestinationData` |
+| Listagem | O descritor da permissão `list` (`AuthorizedNodes`) restringe a consulta no SQL: acesso à conta lista todas as empresas; cargo numa empresa lista só ela. Coluna e filtro **Empresa** só aparecem com mais de uma empresa (padrão de Clientes). Filtro `company` por código, resolvido por subconsulta na conta |
+| Cadastro | Seleção de **Empresas** (caixas de marcação) com as empresas em que `create` se aplica. Um registro por empresa marcada, numa única transação. Com uma só empresa autorizada, o seletor não aparece e o servidor a assume. Empresa fora do descritor ou inativa responde **404** e nada é gravado |
+| Edição | A empresa do registro é fixa (somente leitura). O corpo não move registro entre empresas |
+| Autorização | Controller obtém o descritor e responde 403 sem empresa alcançada (`AuthorizedNodes::reachesCompanies`, atribuição só de estabelecimento não abre o módulo). Ficha e edição buscam o registro dentro do descritor: fora dele, 404. A Action confere `create` ou `update` e `activate` ou `deactivate` sobre o nó de **cada** empresa |
+| Unicidade | `(company_id, normalized_name)` no banco. A validação cobre todas as empresas marcadas e a mensagem cita as empresas em conflito. Recusa o cadastro inteiro |
+
+O plano da S04 prevê `/empresa/{empresa}/colaboradores`. **Recomendação, a ratificar antes da S04:** adotar o mesmo contrato (tela única, empresa pelo acesso e no cadastro). Nada da S04 foi alterado.
+
+### 28.2 Arquivos
+
+- **Migration:** `database/migrations/2026_11_24_000001_create_departments_and_job_titles.php` (aditiva, `down()` remove as duas tabelas; FKs `(company_id, account_id)` para `companies`, `account_id` para `clients`, únicos `(id, company_id)` e `(company_id, normalized_name)`).
+- **Domínio `app/Domains/Colaboradores`:** Models `Department` e `JobTitle` (`Auditable`, `register` e `revise`, relação `company`), `CatalogItemDTO`, Data (`SaveDepartmentData`, `SaveJobTitleData`, `CatalogFiltersData`, `CatalogCompaniesData`), Queries (`DepartmentDirectoryQuery`, `JobTitleDirectoryQuery`), Actions (`SaveDepartmentAction`, `SaveJobTitleAction`), Controllers.
+- **Suporte e contratos:** `App\Support\NormalizedName`, `AuthorizedNodes::reachesCompanies`, `OrganizationContextQuery::companies`, `config/permissions.php` (12 ações, alvo `company`), `config/audit.php`, `EffectivePermissions` (visibilidade), `HelpCatalog`, `routes/account.php`.
+- **Frontend:** `departments.tsx`, `job-titles.tsx`, `CompanyCatalog.tsx`, `CatalogEditorModal.tsx`, `CatalogPreview.tsx`, `CompanyCatalog.types.ts`, `catalogTours.ts`, `accountNavigation.ts` (grupo **Institucional**), `SaasLayout.tsx`, `ApiApplication.tsx`, `guidance.ts`.
+- **Ajuda e tour:** `docs/ajuda/departamentos-funcoes.html`, `docs/tours/departamentos-funcoes.md`.
+- **Testes:** `tests/Feature/CompanyCatalogTest.php`.
+
+### 28.3 Contratos preservados
+
+Função independente de Cargo e do RBAC (teste de papéis, atribuições e concessões intactos); sem exclusão física (DELETE responde 405); sem job; `normalized_name` fora da auditoria por derivação; eventos gravam `company_id` e `account_id`; inspeção SaaS somente leitura bloqueia escritas e, em edição, preserva o autor real e o representado; o descritor do representado vale (a outra empresa continua fechada).
+
+### 28.4 Testes e resultados
+
+| Verificação | Resultado |
+| --- | --- |
+| `CompanyCatalogTest` (20 cenários, 16 deles nos dois cadastros, 36 casos) | 36 aprovados, 397 asserções |
+| Suíte completa (SQLite em memória, imagem da aplicação com o código montado) | 325 aprovados, 4362 asserções |
+| Pint, PHPStan (`--memory-limit=1G`), `tsc --noEmit`, testes de frontend (20), `check-architecture` | Verdes |
+| `permissions:sync`, `audit:check`, `organization:check` | 94 permissões descobertas, 15 modelos auditados, nenhuma violação |
+| Migration em PostgreSQL 18 descartável (`prospera_s03_tmp`, removido ao fim) | `migrate:fresh`, `rollback --step=1` (tabelas removidas) e novo `up`: sem erro; restrições conferidas em `pg_constraint`; banco oficial intocado |
+
+Cobertura dos 12 itens obrigatórios: 1 a 3 (criação, normalização, mesmo nome em empresas diferentes, cadastro múltiplo), 4 (404 entre empresas e contas), 5 e 6 (ação a ação, ativar e inativar), 7 (auditoria contextual e leitor de outra empresa), 8 (inspeção), 9 (Cargos intactos), 10 (PostgreSQL), 11 (suíte completa), 12 (ajuda e tour, abaixo).
+
+### 28.5 Evidências visuais
+
+Laboratório isolado (projeto `prospera-s03`, porta 8010, banco próprio com o cenário Grupo Horizonte), Chromium real, removido ao fim. Usuários: `ana.ribeiro` (conta inteira) e `bruno.carvalho` (empresa Supermercados, com permissões de departamentos concedidas só no laboratório).
+
+| Largura | Verificado |
+| --- | --- |
+| 1440 px | Lista vazia, cadastro com Empresas, erro de empresa obrigatória, cadastro em duas empresas (toast "Departamentos salvos."), nome duplicado citando a empresa, busca sem resultado, edição com empresa fixa, ficha, tour completo (16 passos), sem rolagem horizontal |
+| 390 px | Mesmo fluxo, lista compacta, Funções vazia com filtros, tour (13 passos), sem rolagem horizontal |
+| 320 px | Mesmo fluxo, mensagens de validação no modal, tour em folha inferior, sem rolagem horizontal |
+| Acesso restrito (1440) | Bruno vê só os registros da empresa dele, sem filtro nem coluna de empresa, sem seletor no cadastro, grava na empresa dele; Funções oculta no menu |
+
+Tour: abertura, passos do cadastro com a janela aberta pela demonstração, encerramento sem janela residual (0 diálogos) e sem gravar dados. Console sem erros além dos 422 esperados das validações.
+
+### 28.6 Defeitos encontrados e correções
+
+| Defeito | Correção |
+| --- | --- |
+| Modelo inicial com empresa na URL e tela de escolha, contra a intenção do produto | DA2-24: tela única, listagem pelo acesso e seleção de empresas no cadastro (seção 28.1) |
+| Atribuição só de estabelecimento abria a tela (200 vazio) | `AuthorizedNodes::reachesCompanies` e 403 |
+| Coluna Empresa truncada e Situação cortada em 390 px | Coluna fora do modo compacto e só com mais de uma empresa, como em Clientes |
+| Toast "Função salvo." (concordância) | "Função salva." |
+
+### 28.7 Pendências reais e observações
+
+- **Integração de ajuda e tour:** o conteúdo está versionado em `docs/ajuda/` e `docs/tours/` e integrado à Central de Ajuda e a `guidance.ts` existentes. Nenhuma integração externa pendente.
+- **Mensagem de 403:** uma pessoa sem a permissão que abre a URL direta recebe "Conta indisponível", texto genérico já existente para qualquer 403 dentro da conta. Não alterado nesta etapa.
+- **Passo "Empresas" do tour:** o popover cobre parte da lista de empresas no destaque. A informação permanece legível, igual aos demais passos do cadastro.
+- **Seed:** os cargos do cenário de desenvolvimento não recebem as novas permissões (só o Administrador integral). Concedê-las é decisão do operador pela tela de Cargos.
+- **Execução dos testes:** o PHP do host não tem o driver SQLite; usou-se a imagem da aplicação com o código montado.
+
+### 28.8 Classificação
+
+**S03: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.

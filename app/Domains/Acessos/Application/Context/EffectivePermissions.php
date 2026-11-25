@@ -115,6 +115,18 @@ final class EffectivePermissions
             'account.suppliers.update',
             'account.suppliers.activate',
             'account.suppliers.deactivate',
+            'account.departments.list',
+            'account.departments.view',
+            'account.departments.create',
+            'account.departments.update',
+            'account.departments.activate',
+            'account.departments.deactivate',
+            'account.job-titles.list',
+            'account.job-titles.view',
+            'account.job-titles.create',
+            'account.job-titles.update',
+            'account.job-titles.activate',
+            'account.job-titles.deactivate',
         ] as $ability) {
             $nodes = $this->nodesFor($user, $ability);
 
