@@ -13,5 +13,8 @@ final readonly class CreateEmployeeAssignmentDTO
         public string $startsOn,
         public ?string $endsOn,
         public bool $isPrimary,
+        public string $contactMode,
+        /** @var array{email: string|null, phone: string|null, whatsapp: string|null} */
+        public array $workContacts,
     ) {}
 }

@@ -64,16 +64,23 @@ final readonly class EndEmployeeAssignmentAction
                 ]);
             }
 
+            $remaining = $this->remaining->execute($locked->employee_id, $locked->id, $data->endsOn);
+
             // Só entram como candidatas as lotações que quem encerra pode gerenciar: o escopo da unidade não revela as
-            // lotações de outras unidades, e a empresa define a principal delas depois, se for o caso.
-            $others = $this->remaining->execute($locked->employee_id, $locked->id, $data->endsOn)
-                ->filter(fn (EmployeeAssignment $other) => Gate::allows('account.employees.assign', AccessNode::establishment(
-                    $other->account_id,
-                    $other->company_id,
-                    $other->establishment_id,
-                )));
+            // lotações de outras unidades, e nenhuma delas é alterada de forma indireta.
+            $others = $remaining->filter(fn (EmployeeAssignment $other) => Gate::allows(
+                'account.employees.assign',
+                AccessNode::establishment($other->account_id, $other->company_id, $other->establishment_id),
+            ));
 
             $endsPrimary = $locked->is_primary;
+
+            if ($endsPrimary && $remaining->isNotEmpty() && $others->isEmpty()) {
+                throw ValidationException::withMessages([
+                    'new_primary_id' => 'O colaborador tem outra lotação vigente fora do seu alcance. Quem gerencia a empresa '
+                        .'precisa encerrar a principal e indicar a nova.',
+                ]);
+            }
 
             if ($endsPrimary && $others->isNotEmpty() && $data->newPrimaryId === null) {
                 throw ValidationException::withMessages([

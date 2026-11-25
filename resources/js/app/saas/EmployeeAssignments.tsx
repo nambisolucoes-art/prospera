@@ -8,6 +8,7 @@ import FormField from '@/components/FormField/FormField';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import Label from '@/components/Label/Label';
 import Modal from '@/components/Modal/Modal';
+import WorkContactFields from './WorkContactFields';
 import './Employees.css';
 
 export type AssignmentRow = {
@@ -21,6 +22,9 @@ export type AssignmentRow = {
   starts_on: string;
   ends_on: string | null;
   is_primary: boolean;
+  contact_mode: 'inherit' | 'override';
+  contacts: { email: string | null; phone: string | null; whatsapp: string | null };
+  effective_contacts: { email: string | null; phone: string | null; whatsapp: string | null; source: 'inherit' | 'override' | 'none' };
   status: 'current' | 'future' | 'ended';
   can_manage: boolean;
 };
@@ -40,6 +44,15 @@ const statusVariant = { current: 'success', future: 'info', ended: 'default' } a
 export function formatDate(date: string) {
   const [year, month, day] = date.split('-');
   return `${day}/${month}/${year}`;
+}
+
+// Origem do contato profissional exibido: herdado do vínculo, personalizado na lotação ou sem contato local.
+function contactSummary(assignment: AssignmentRow) {
+  const { source, email, phone, whatsapp } = assignment.effective_contacts;
+  const values = [email, phone, whatsapp].filter(Boolean).join(' · ');
+  if (source === 'none') return 'Contatos: sem contato nesta unidade (intencional)';
+  if (source === 'override') return `Contatos personalizados: ${values}`;
+  return values ? `Contatos herdados do vínculo: ${values}` : 'Contatos herdados do vínculo: não informados';
 }
 
 const titles: Record<Mode, string> = {
@@ -111,6 +124,9 @@ export default function EmployeeAssignments({ personId, link, today, writable }:
                     {' · '}
                     {assignment.department_name ?? 'Sem departamento'}
                   </div>
+                  <div className="employees__assignment-contacts" data-source={assignment.effective_contacts.source}>
+                    {contactSummary(assignment)}
+                  </div>
                   <div className="employees__assignment-period">
                     {formatDate(assignment.starts_on)} a {assignment.ends_on ? formatDate(assignment.ends_on) : 'sem data final'}
                   </div>
@@ -181,12 +197,32 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
   const [department, setDepartment] = useState(String(assignment?.department_id ?? ''));
   const [jobTitle, setJobTitle] = useState(String(assignment?.job_title_id ?? ''));
   const [heir, setHeir] = useState('');
+  const initialContacts = !assignment || assignment.contact_mode === 'inherit'
+    ? 'inherit'
+    : (assignment.effective_contacts.source === 'none' ? 'none' : 'custom');
+  const [contactChoice, setContactChoice] = useState(initialContacts);
   const action = mode === 'create'
     ? base
     : `${base}/${assignment?.id}${{ edit: '', change: '/trocar', end: '/encerrar', primary: '/principal' }[mode]}`;
   const method = mode === 'create' || mode === 'change' ? 'post' : 'patch';
   const candidates = siblings.filter((item) => item.id !== assignment?.id && item.status !== 'ended' && item.can_manage);
   const needsHeir = mode === 'end' && assignment?.is_primary && candidates.length > 0;
+  // Contatos profissionais da lotação: herdar do vínculo, personalizar ou ausência intencional de contato local.
+  const contactFields = (errors: Record<string, string | undefined>, processing: boolean) => (
+    <>
+      <input type="hidden" name="contact_mode" value={contactChoice === 'inherit' ? 'inherit' : 'override'} />
+      <Select label="Contatos profissionais" value={contactChoice} onChange={setContactChoice}
+        error={errors.contact_mode}
+        info="Herdar acompanha os contatos do vínculo. Personalizar vale só para esta unidade, e sem contato não herda nada."
+        options={[{ value: 'inherit', label: 'Herdar do vínculo' }, { value: 'custom', label: 'Personalizar nesta unidade' },
+          { value: 'none', label: 'Sem contato nesta unidade' }]} />
+      {contactChoice === 'custom' && (
+        <WorkContactFields names={{ email: 'work_email', phone: 'work_phone', whatsapp: 'work_whatsapp' }}
+          values={assignment?.contact_mode === 'override' ? assignment.contacts : undefined}
+          errors={{ email: errors.work_email, phone: errors.work_phone, whatsapp: errors.work_whatsapp }} disabled={processing} />
+      )}
+    </>
+  );
   const catalogs = (
     <>
       <Select label="Função" name="job_title_id" value={jobTitle} onChange={setJobTitle}
@@ -219,6 +255,7 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
                     <ChoiceControl type="checkbox" tone="primary" id="assignment-primary" name="is_primary" value="1"
                       label="Lotação principal do colaborador" />
                   </FormField>
+                  {contactFields(errors, processing)}
                 </>
               )}
               {mode === 'edit' && assignment && (
@@ -231,6 +268,7 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
                       error={errors.starts_on} />
                     <Field label="Fim" name="ends_on" type="date" defaultValue={assignment.ends_on ?? ''} error={errors.ends_on} />
                   </BusinessFormRow>
+                  {contactFields(errors, processing)}
                   <FormHelp className="business-form__control-start">
                     Corrige o próprio período, sem criar histórico novo. Para registrar uma mudança ao longo do tempo,
                     use Alterar função ou departamento.
@@ -249,6 +287,9 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
                 <>
                   <Field label="Último dia" name="ends_on" type="date" defaultValue={today > assignment.starts_on ? today : assignment.starts_on}
                     required error={errors.ends_on} info="A lotação vale até o fim deste dia." />
+                  {!needsHeir && errors.new_primary_id && (
+                    <p className="formField__error" role="alert">{errors.new_primary_id}</p>
+                  )}
                   {needsHeir && (
                     <Select label="Nova principal" name="new_primary_id" value={heir} onChange={setHeir} required
                       error={errors.new_primary_id}
@@ -256,6 +297,9 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
                         ...candidates.map((item) => ({ value: String(item.id), label: `${item.establishment_name} (${formatDate(item.starts_on)})` }))]} />
                   )}
                 </>
+              )}
+              {mode === 'primary' && errors.is_primary && (
+                <p className="formField__error" role="alert">{errors.is_primary}</p>
               )}
               {mode === 'primary' && assignment && (
                 <FormHelp className="business-form__control-start">

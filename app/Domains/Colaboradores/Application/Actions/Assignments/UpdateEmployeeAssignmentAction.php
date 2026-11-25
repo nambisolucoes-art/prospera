@@ -59,6 +59,12 @@ final readonly class UpdateEmployeeAssignmentAction
                 jobTitleId: $data->jobTitleId,
                 startsOn: $data->startsOn,
                 endsOn: $data->endsOn,
+                contactMode: $data->contacts->mode ?? $locked->contact_mode,
+                workContacts: $data->contacts->contacts ?? [
+                    'email' => $locked->work_contacts['email'] ?? null,
+                    'phone' => $locked->work_contacts['phone'] ?? null,
+                    'whatsapp' => $locked->work_contacts['whatsapp'] ?? null,
+                ],
             );
 
             $locked->revise($assignmentDTO);

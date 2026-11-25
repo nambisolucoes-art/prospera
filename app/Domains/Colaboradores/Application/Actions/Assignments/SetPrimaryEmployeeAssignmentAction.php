@@ -54,13 +54,23 @@ final readonly class SetPrimaryEmployeeAssignmentAction
                 ->lockForUpdate()
                 ->get();
 
+            // Nenhuma escrita antes de conferir tudo: a marca de uma unidade fora do alcance nunca é retirada em silêncio.
             foreach ($previous as $other) {
-                Gate::authorize('account.employees.assign', AccessNode::establishment(
+                $allowed = Gate::allows('account.employees.assign', AccessNode::establishment(
                     $other->account_id,
                     $other->company_id,
                     $other->establishment_id,
                 ));
 
+                if (! $allowed) {
+                    throw ValidationException::withMessages([
+                        'is_primary' => 'Este período coincide com a principal de outra unidade fora do seu alcance. '
+                            .'Quem gerencia a empresa precisa transferir a principal.',
+                    ]);
+                }
+            }
+
+            foreach ($previous as $other) {
                 $other->forceFill(['is_primary' => false])->saveOrFail();
             }
 

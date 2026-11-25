@@ -385,6 +385,14 @@ final class EmployeeController
                         'starts_on' => substr((string) $assignment->starts_on, 0, 10),
                         'ends_on' => $assignment->ends_on === null ? null : substr((string) $assignment->ends_on, 0, 10),
                         'is_primary' => $assignment->is_primary,
+                        'contact_mode' => $assignment->contact_mode,
+                        'contacts' => [
+                            'email' => $assignment->work_contacts['email'] ?? null,
+                            'phone' => $assignment->work_contacts['phone'] ?? null,
+                            'whatsapp' => $assignment->work_contacts['whatsapp'] ?? null,
+                        ],
+                        // O contato efetivo da lotação aparece mesmo ao gestor de unidade, que não recebe os dados da relação.
+                        'effective_contacts' => $assignment->effectiveContacts($link),
                         'status' => $assignment->statusOn($today),
                         'can_manage' => $assignable->tenant
                             || in_array($assignment->company_id, $assignable->companies, true)

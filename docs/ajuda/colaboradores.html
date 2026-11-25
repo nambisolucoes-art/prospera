@@ -95,11 +95,20 @@ palavras-chave: colaborador, colaboradores, funcionário, equipe, pessoa, víncu
     A lotação de referência do colaborador. Só uma vale por período. <strong>Tornar principal</strong> transfere a
     marca, e encerrar a principal enquanto houver outra lotação exige indicar a nova principal.
   </dd>
+  <dt>Contatos profissionais da lotação</dt>
+  <dd>
+    Cada lotação pode <strong>Herdar do vínculo</strong> (acompanha os contatos padrão da empresa, inclusive quando eles
+    mudam), <strong>Personalizar nesta unidade</strong> (telefone, WhatsApp e e-mail próprios da unidade, que a mudança
+    do contato padrão não sobrescreve) ou <strong>Sem contato nesta unidade</strong> (ausência intencional, que não
+    herda nada). A lista mostra a origem de cada contato. Os contatos pessoais da Pessoa nunca são usados como
+    contato profissional, e nada é publicado por causa deles.
+  </dd>
   <dt>Alterar função ou departamento</dt>
   <dd>
     Preserva o histórico: o período atual termina no dia anterior e outro começa na data escolhida. Se o período atual
     começa nessa mesma data, a mudança é uma correção dele. <strong>Corrigir lotação</strong> altera datas, função e
-    departamento do próprio período, sem criar histórico novo.
+    departamento do próprio período, sem criar histórico novo. Alterar função ou departamento mantém os contatos da
+    lotação no novo período.
   </dd>
   <dt>Encerrar</dt>
   <dd>Define o último dia de vigência. Expirar a data final não gera ação nem evento: a lotação deixa de ser vigente sozinha.</dd>

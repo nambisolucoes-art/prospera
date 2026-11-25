@@ -64,6 +64,17 @@ final readonly class ListInstitutionalViolationsQuery
             $violations[] = "Lotação {$id} termina antes de começar.";
         }
 
+        $incoherent = DB::table('employee_assignments')
+            ->where(fn ($query) => $query
+                ->whereNotIn('contact_mode', ['inherit', 'override'])
+                ->orWhere(fn ($mode) => $mode->where('contact_mode', 'inherit')->whereNotNull('work_contacts'))
+                ->orWhere(fn ($mode) => $mode->where('contact_mode', 'override')->whereNull('work_contacts')))
+            ->pluck('id');
+
+        foreach ($incoherent as $id) {
+            $violations[] = "Lotação {$id} tem modo de contato incoerente com os contatos gravados.";
+        }
+
         $crossCompany = DB::table('employee_assignments as a')
             ->join('employees as e', 'e.id', '=', 'a.employee_id')
             ->join('establishments as s', 's.id', '=', 'a.establishment_id')

@@ -15,6 +15,8 @@ final readonly class UpdateEmployeeAssignmentData
         public ?int $jobTitleId,
         public string $startsOn,
         public ?string $endsOn,
+        /** Nulo mantém os contatos atuais da lotação: corrigir datas nunca apaga a personalização. */
+        public ?AssignmentContactsData $contacts,
     ) {}
 
     /**
@@ -49,7 +51,13 @@ final readonly class UpdateEmployeeAssignmentData
             throw ValidationException::withMessages($errors);
         }
 
-        return new self($departmentId, $jobTitleId, $values['starts_on'], $values['ends_on'] ?? null);
+        return new self(
+            $departmentId,
+            $jobTitleId,
+            $values['starts_on'],
+            $values['ends_on'] ?? null,
+            array_key_exists('contact_mode', $input) ? AssignmentContactsData::fromInput($input) : null,
+        );
     }
 
     /** @return array<string,list<string>> */

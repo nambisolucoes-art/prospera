@@ -28,10 +28,12 @@ use Illuminate\Support\Facades\DB;
  * @property string $starts_on
  * @property string|null $ends_on
  * @property bool $is_primary
+ * @property string $contact_mode
+ * @property array{email?: string|null, phone?: string|null, whatsapp?: string|null}|null $work_contacts
  */
 #[Fillable([
     'account_id', 'company_id', 'employee_id', 'establishment_id', 'department_id', 'job_title_id',
-    'starts_on', 'ends_on', 'is_primary',
+    'starts_on', 'ends_on', 'is_primary', 'contact_mode', 'work_contacts',
 ])]
 class EmployeeAssignment extends Model implements Auditable
 {
@@ -43,13 +45,17 @@ class EmployeeAssignment extends Model implements Auditable
 
     public const ENDED = 'ended';
 
+    public const INHERIT = 'inherit';
+
+    public const OVERRIDE = 'override';
+
     protected $table = 'employee_assignments';
 
-    protected $attributes = ['is_primary' => false];
+    protected $attributes = ['is_primary' => false, 'contact_mode' => self::INHERIT];
 
     protected function casts(): array
     {
-        return ['is_primary' => 'boolean'];
+        return ['is_primary' => 'boolean', 'work_contacts' => 'array'];
     }
 
     public static function register(
@@ -68,6 +74,8 @@ class EmployeeAssignment extends Model implements Auditable
             'starts_on' => $data->startsOn,
             'ends_on' => $data->endsOn,
             'is_primary' => $data->isPrimary,
+            'contact_mode' => $data->contactMode,
+            'work_contacts' => self::contactsFor($data->contactMode, $data->workContacts),
         ]);
     }
 
@@ -78,7 +86,62 @@ class EmployeeAssignment extends Model implements Auditable
             'job_title_id' => $data->jobTitleId,
             'starts_on' => $data->startsOn,
             'ends_on' => $data->endsOn,
+            'contact_mode' => $data->contactMode,
+            'work_contacts' => self::contactsFor($data->contactMode, $data->workContacts),
         ]);
+    }
+
+    /**
+     * Herdar não guarda valor. Personalizar guarda o objeto, que pode ser vazio (ausência intencional de contato local).
+     *
+     * @param  array{email: string|null, phone: string|null, whatsapp: string|null}  $contacts
+     * @return array{email: string|null, phone: string|null, whatsapp: string|null}|null
+     */
+    private static function contactsFor(string $mode, array $contacts): ?array
+    {
+        if ($mode === self::INHERIT) {
+            return null;
+        }
+
+        return [
+            'email' => self::clean($contacts['email'] ?? null),
+            'phone' => self::clean($contacts['phone'] ?? null),
+            'whatsapp' => self::clean($contacts['whatsapp'] ?? null),
+        ];
+    }
+
+    private static function clean(?string $value): ?string
+    {
+        $value = $value === null ? null : trim($value);
+
+        return $value === '' ? null : $value;
+    }
+
+    /**
+     * Contato profissional efetivo da lotação: o próprio, se personalizado (mesmo vazio), senão o da relação.
+     * `source` informa de onde veio. Nunca lê dado de Pessoa.
+     *
+     * @return array{email: string|null, phone: string|null, whatsapp: string|null, source: string}
+     */
+    public function effectiveContacts(Employee $employee): array
+    {
+        if ($this->contact_mode === self::INHERIT) {
+            return [
+                'email' => $employee->work_email,
+                'phone' => $employee->work_phone,
+                'whatsapp' => $employee->work_whatsapp,
+                'source' => self::INHERIT,
+            ];
+        }
+
+        $own = $this->work_contacts ?? [];
+        $values = [
+            'email' => $own['email'] ?? null,
+            'phone' => $own['phone'] ?? null,
+            'whatsapp' => $own['whatsapp'] ?? null,
+        ];
+
+        return [...$values, 'source' => array_filter($values) === [] ? 'none' : self::OVERRIDE];
     }
 
     /** Vigente, futura ou encerrada na data de calendário informada. */
@@ -139,6 +202,8 @@ class EmployeeAssignment extends Model implements Auditable
             'starts_on' => 'Início',
             'ends_on' => 'Fim',
             'is_primary' => 'Lotação principal',
+            'contact_mode' => 'Contatos profissionais',
+            'work_contacts' => 'Contatos profissionais da lotação',
         ];
     }
 }

@@ -1971,7 +1971,7 @@ Executada em 26/11/2026 sobre a branch `feat/pagina-inicial` (HEAD `46009bc`), s
 
 ### 30.5 Pendências reais
 
-- Contatos profissionais por lotação (`contact_mode`) e perfil público: S06 e S09.
+- Perfil público e publicação dos contatos: S09 (os contatos por lotação foram concluídos no complemento da seção 31).
 - Filtro de perfil público: S09. Auditoria exibe identificadores de unidade, departamento e função como números, como já ocorre com `person_id`.
 - O seed de desenvolvimento não concede `account.employees.assign` a cargos existentes (só ao Administrador integral).
 - Concorrência medida em PostgreSQL de laboratório, fora da suíte, conforme a convenção.
@@ -1979,3 +1979,51 @@ Executada em 26/11/2026 sobre a branch `feat/pagina-inicial` (HEAD `46009bc`), s
 ### 30.6 Classificação
 
 **S05: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.
+
+## 31. Complemento da S05: contatos profissionais por lotação e autoridade da principal
+
+Executado em 26/11/2026 sobre a branch `feat/pagina-inicial` (HEAD `c8a272e`), sem commit, merge, push ou deploy. A S06 não foi iniciada.
+
+### 31.1 Auditoria do contrato
+
+O contrato (seções 10.2 e 10.6, DA2-18 e convenção) previa `contact_mode` e `work_contacts` na lotação, com a semântica de vazio intencional da seção 09.2, e a S05 os havia adiado. O modelo existente (`EmployeeAssignment`) não tinha os campos, então a migration aditiva era necessária. Conferido contra DA2-24 (tela única) e DA2-18 (gestor de unidade): o contato efetivo da lotação aparece ao gestor da unidade, os campos da relação não.
+
+### 31.2 Contrato aplicado
+
+| Ponto | Contrato |
+| --- | --- |
+| Persistência | Migration `2026_11_26_000002`: `contact_mode` (padrão `inherit`) e `work_contacts` JSON. CHECK de coerência no PostgreSQL. Lotações existentes passam a `inherit`, sem perda |
+| Herança | `inherit` usa `employees.work_*` e acompanha a mudança. `override` guarda o objeto, inclusive vazio (ausência intencional). `effectiveContacts()` informa a origem (`inherit`, `override`, `none`) e nunca lê Pessoa |
+| Validação | `AssignmentContactsData` reutiliza `ContactInput::normalize` e as mesmas regras e mensagens dos contatos do vínculo |
+| Edição | Criar, corrigir e (por correção) alterar contatos exigem `account.employees.assign` sobre a unidade. Corrigir sem `contact_mode` preserva a personalização. A troca de função leva os contatos ao período novo. Mudar o contato padrão do vínculo não toca lotações personalizadas |
+| Principal | Transferir a marca só ocorre se todas as principais sobrepostas estão no alcance (422 antes de qualquer escrita). Encerrar a principal só indica herdeira entre as lotações gerenciáveis, e é recusado, com explicação, quando as demais estão fora do alcance |
+| Interface | Cada lotação mostra "herdados do vínculo", "personalizados" ou "sem contato nesta unidade (intencional)". Os modais de adicionar e corrigir escolhem entre herdar, personalizar e sem contato. Os erros de principal aparecem no modal. Sem controle de publicação |
+
+### 31.3 Verificações
+
+| Verificação | Resultado |
+| --- | --- |
+| Suíte completa (SQLite) | 366 testes, 5010 asserções, verdes |
+| Pint, PHPStan, `tsc`, frontend (20), `check:architecture` | Verdes |
+| `permissions:sync`, `audit:check`, `organization:check`, `institutional:check` | Sem violações (o `institutional:check` agora detecta modo de contato incoerente) |
+| PostgreSQL 18 descartável | Migration sobre lotações existentes (viraram `inherit`), rollback e reaplicação; o CHECK recusou `override` sem valor e `inherit` com valor |
+| Concorrência (4 processos, `s05-race-contacts.sh`) | 4 edições simultâneas de contato: estado final coerente (`override` com um valor). 4 transferências simultâneas da principal: exatamente 1 principal. As corridas da S05 foram repetidas, com o mesmo resultado |
+| Navegador | 1440, 390 e 320 px: herdar, personalizar, sem contato, mudança do contato padrão sem sobrescrever a personalização, gestor de unidade com o contato efetivo e a recusa explicada ao encerrar a principal, tour restaurado, sem rolagem horizontal |
+
+### 31.4 Defeitos encontrados e correções
+
+| Defeito | Correção |
+| --- | --- |
+| Gestor de unidade podia encerrar a principal enquanto outra lotação seguia vigente em unidade oculta, deixando o colaborador sem principal sem aviso (introduzido na S05) | Recusa com explicação quando só há lotações fora do alcance |
+| Tornar principal falhava com 403 genérico ao esbarrar numa principal oculta e a verificação ocorria durante as escritas | Verificação completa antes de escrever e 422 explicativo |
+| O erro de herdeira e de principal não aparecia no modal quando o campo não era renderizado | Mensagem exibida no modal |
+| Corrigir datas sem contatos apagaria a personalização se o modo viesse por padrão | `contact_mode` ausente mantém os contatos |
+
+### 31.5 Relação com a S09 e pendências
+
+A S09 lerá o contato efetivo da lotação aplicável (seção 10.6), com `show_work_email` e `show_work_phone`, sem copiar valor para o perfil. Pendências: perfil e publicação (S09); a auditoria continua mostrando unidade, departamento e função como identificadores numéricos.
+
+### 31.6 Classificação
+
+**Complemento da S05: implementado e verificado, em revisão.** Sem commit.
+

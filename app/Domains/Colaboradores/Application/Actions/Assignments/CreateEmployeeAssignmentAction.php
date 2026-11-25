@@ -75,6 +75,8 @@ final readonly class CreateEmployeeAssignmentAction
                 startsOn: $data->startsOn,
                 endsOn: $data->endsOn,
                 isPrimary: $data->isPrimary,
+                contactMode: $data->contacts->mode,
+                workContacts: $data->contacts->contacts,
             );
 
             $assignment = EmployeeAssignment::register($assignmentDTO, $locked->account_id, $locked->company_id, $locked->id);

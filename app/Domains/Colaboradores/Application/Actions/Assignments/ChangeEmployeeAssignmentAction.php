@@ -71,6 +71,7 @@ final readonly class ChangeEmployeeAssignmentAction
                     jobTitleId: $data->jobTitleId,
                     startsOn: $startsOn,
                     endsOn: $endsOn,
+                    contacts: null,
                 );
 
                 return $this->correct->execute($correction, $locked);
@@ -95,6 +96,12 @@ final readonly class ChangeEmployeeAssignmentAction
                     startsOn: $data->effectiveOn,
                     endsOn: $endsOn,
                     isPrimary: $locked->is_primary,
+                    contactMode: $locked->contact_mode,
+                    workContacts: [
+                        'email' => $locked->work_contacts['email'] ?? null,
+                        'phone' => $locked->work_contacts['phone'] ?? null,
+                        'whatsapp' => $locked->work_contacts['whatsapp'] ?? null,
+                    ],
                 ),
                 $locked->account_id,
                 $locked->company_id,

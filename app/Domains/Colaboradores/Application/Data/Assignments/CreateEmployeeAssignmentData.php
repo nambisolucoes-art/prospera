@@ -18,6 +18,7 @@ final readonly class CreateEmployeeAssignmentData
         public string $startsOn,
         public ?string $endsOn,
         public bool $isPrimary,
+        public AssignmentContactsData $contacts,
     ) {}
 
     /**
@@ -65,6 +66,7 @@ final readonly class CreateEmployeeAssignmentData
             startsOn: $values['starts_on'],
             endsOn: $values['ends_on'] ?? null,
             isPrimary: (bool) ($values['is_primary'] ?? false),
+            contacts: AssignmentContactsData::fromInput($input),
         );
     }
 

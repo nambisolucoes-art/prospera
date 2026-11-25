@@ -420,8 +420,16 @@ class EmployeeAssignmentTest extends TestCase
         $this->assertNull($caetiteAssignment->fresh()->ends_on);
 
         // Mas gerencia a própria unidade e não alcança a empresa inteira.
+        // Encerrar a principal com lotação vigente só em unidade que ele não vê é recusado, sem alterar nada.
         $own = EmployeeAssignment::where('establishment_id', $this->guanambi->id)->sole();
-        $this->patchJson($this->url(null, '/'.$own->id.'/encerrar'), ['ends_on' => '2026-12-31'])->assertNoContent();
+        $this->patchJson($this->url(null, '/'.$own->id.'/encerrar'), ['ends_on' => '2026-12-31'])
+            ->assertUnprocessable()->assertJsonValidationErrors('new_primary_id');
+        $this->assertNull($own->fresh()->ends_on);
+        $this->assertNull($caetiteAssignment->fresh()->ends_on);
+        $this->patchJson($this->url(null, '/'.$own->id), [
+            'starts_on' => '2026-01-01', 'ends_on' => '2026-12-31', 'job_title_id' => $this->gerente->id,
+            'department_id' => $this->financeiro->id,
+        ])->assertNoContent();
         $this->patchJson('/conta/colaboradores/'.$this->maria->id.'/vinculos/'.$this->link->id, ['active' => '0'])
             ->assertForbidden();
         $this->postJson('/conta/colaboradores', [
@@ -588,5 +596,216 @@ class EmployeeAssignmentTest extends TestCase
         $this->assertSame('active', $membership->fresh()->status);
         $this->assertSame(2, Employee::count());
         $this->assertSame('Maria Souza', $this->maria->fresh()->name);
+    }
+
+    private function managerWithAssign(Establishment $unit): User
+    {
+        return $this->managerOf($unit, ['account.employees.list', 'account.employees.view', 'account.employees.assign']);
+    }
+
+    public function test_work_contacts_inherit_override_or_stay_empty_on_purpose_and_default_changes_do_not_overwrite(): void
+    {
+        $this->link->forceFill([
+            'work_email' => 'padrao@roupas.test', 'work_phone' => '7133330000', 'work_whatsapp' => null,
+        ])->saveQuietly();
+        $this->maria->forceFill(['email' => 'pessoal@example.test', 'phone' => '71999990000'])->saveQuietly();
+
+        // Sem personalização, a lotação herda os contatos do vínculo, nunca os da Pessoa.
+        $inherit = $this->assign($this->guanambi, '2026-01-01');
+        $this->assertSame('inherit', $inherit->contact_mode);
+        $this->assertNull($inherit->work_contacts);
+        $effective = $inherit->fresh()->effectiveContacts($this->link->fresh());
+        $this->assertSame('padrao@roupas.test', $effective['email']);
+        $this->assertSame('inherit', $effective['source']);
+
+        $custom = $this->assign($this->caetite, '2026-01-01', null, [
+            'contact_mode' => 'override', 'work_email' => 'Caetite@Roupas.test', 'work_phone' => '(77) 3333-1111',
+        ]);
+        $this->assertSame('override', $custom->contact_mode);
+        $this->assertSame('caetite@roupas.test', $custom->work_contacts['email']);
+        $this->assertSame('7733331111', $custom->work_contacts['phone']);
+
+        // Ausência intencional: personalizado e vazio, sem herdar nada.
+        $none = $this->assign($this->sede, '2026-01-01', null, ['contact_mode' => 'override']);
+        $this->assertSame(['email' => null, 'phone' => null, 'whatsapp' => null], $none->work_contacts);
+        $this->assertSame('none', $none->fresh()->effectiveContacts($this->link->fresh())['source']);
+        $this->assertNull($none->fresh()->effectiveContacts($this->link->fresh())['email']);
+
+        // Mudar o contato padrão acompanha só quem herda.
+        $this->patchJson('/conta/colaboradores/'.$this->maria->id.'/vinculos/'.$this->link->id, [
+            'work_email' => 'novo@roupas.test',
+        ])->assertNoContent();
+        $link = $this->link->fresh();
+        $this->assertSame('novo@roupas.test', $inherit->fresh()->effectiveContacts($link)['email']);
+        $this->assertSame('caetite@roupas.test', $custom->fresh()->effectiveContacts($link)['email']);
+        $this->assertNull($none->fresh()->effectiveContacts($link)['email']);
+        $this->assertSame('pessoal@example.test', $this->maria->fresh()->email);
+
+        // A ficha mostra a origem de cada contato.
+        $form = $this->getJson('/conta/colaboradores/'.$this->maria->id.'/editar')->assertOk();
+        $rows = collect(collect($form->json('links'))->firstWhere('company_code', $this->roupas->code)['assignments'])
+            ->keyBy('establishment_code');
+        $this->assertSame('inherit', $rows[$this->guanambi->code]['effective_contacts']['source']);
+        $this->assertSame('override', $rows[$this->caetite->code]['effective_contacts']['source']);
+        $this->assertSame('none', $rows[$this->sede->code]['effective_contacts']['source']);
+    }
+
+    public function test_work_contacts_are_validated_preserved_by_corrections_and_follow_a_role_change(): void
+    {
+        $this->postJson($this->url(), $this->body($this->guanambi, '2026-01-01', null, [
+            'contact_mode' => 'override', 'work_email' => 'invalido',
+        ]))->assertUnprocessable()->assertJsonValidationErrors('work_email');
+        $this->postJson($this->url(), $this->body($this->guanambi, '2026-01-01', null, ['contact_mode' => 'outro']))
+            ->assertUnprocessable()->assertJsonValidationErrors('contact_mode');
+        $this->assertSame(0, EmployeeAssignment::count());
+
+        $a = $this->assign($this->guanambi, '2026-01-01', null, [
+            'contact_mode' => 'override', 'work_email' => 'gua@roupas.test',
+        ]);
+
+        // Corrigir datas sem informar contatos nunca apaga a personalização.
+        $this->patchJson($this->url(null, '/'.$a->id), ['starts_on' => '2026-01-02', 'job_title_id' => $this->gerente->id])
+            ->assertNoContent();
+        $this->assertSame('gua@roupas.test', $a->fresh()->work_contacts['email']);
+
+        // Informar o modo volta a herdar e apaga o valor guardado.
+        $this->patchJson($this->url(null, '/'.$a->id), ['starts_on' => '2026-01-02', 'contact_mode' => 'inherit'])
+            ->assertNoContent();
+        $this->assertSame('inherit', $a->fresh()->contact_mode);
+        $this->assertNull($a->fresh()->work_contacts);
+
+        // A troca de função leva os contatos da lotação para o período novo.
+        $this->patchJson($this->url(null, '/'.$a->id), [
+            'starts_on' => '2026-01-02', 'contact_mode' => 'override', 'work_phone' => '77999990000',
+        ])->assertNoContent();
+        $this->postJson($this->url(null, '/'.$a->id.'/trocar'), [
+            'effective_on' => '2026-06-01', 'job_title_id' => $this->analista->id,
+        ])->assertNoContent();
+        $new = EmployeeAssignment::where('starts_on', '2026-06-01')->sole();
+        $this->assertSame('override', $new->contact_mode);
+        $this->assertSame('77999990000', $new->work_contacts['phone']);
+
+        // Auditoria da alteração de contatos, com a unidade.
+        $event = AuditRecord::where('entity_type', 'employee-assignment')->where('entity_id', $a->id)
+            ->where('event', 'updated')->get()->first(fn ($record) => str_contains(json_encode($record->toArray()), 'work_contacts'));
+        $this->assertNotNull($event);
+        $this->assertSame($this->guanambi->id, $event->establishment_id);
+    }
+
+    public function test_a_unit_manager_edits_only_the_contacts_of_the_own_unit_and_sees_the_effective_inherited_value(): void
+    {
+        $this->link->forceFill(['work_email' => 'padrao@roupas.test'])->saveQuietly();
+        $own = $this->assign($this->guanambi, '2026-01-01');
+        $other = $this->assign($this->caetite, '2026-01-01', null, ['contact_mode' => 'override', 'work_phone' => '77111112222']);
+
+        $this->actingAs($this->managerWithAssign($this->guanambi));
+
+        $form = $this->getJson('/conta/colaboradores/'.$this->maria->id.'/editar')->assertOk();
+        $form->assertJsonPath('links.0.work_email', null)
+            ->assertJsonPath('links.0.assignments.0.effective_contacts.email', 'padrao@roupas.test')
+            ->assertJsonPath('links.0.assignments.0.effective_contacts.source', 'inherit');
+        $this->assertStringNotContainsString('77111112222', $form->getContent());
+
+        $this->patchJson($this->url(null, '/'.$own->id), [
+            'starts_on' => '2026-01-01', 'contact_mode' => 'override', 'work_email' => 'gua@roupas.test',
+        ])->assertNoContent();
+        $this->assertSame('gua@roupas.test', $own->fresh()->work_contacts['email']);
+
+        // A lotação de outra unidade não existe para ele e nada nela muda.
+        $this->patchJson($this->url(null, '/'.$other->id), [
+            'starts_on' => '2026-01-01', 'contact_mode' => 'inherit',
+        ])->assertNotFound();
+        $this->assertSame('override', $other->fresh()->contact_mode);
+
+        // Sem a permissão de gerenciar lotações, nem a própria unidade pode ser editada.
+        $viewer = $this->managerOf($this->guanambi, ['account.employees.list', 'account.employees.view']);
+        $this->actingAs($viewer)->patchJson($this->url(null, '/'.$own->id), [
+            'starts_on' => '2026-01-01', 'contact_mode' => 'inherit',
+        ])->assertForbidden();
+        $this->assertSame('override', $own->fresh()->contact_mode);
+    }
+
+    public function test_the_primary_is_never_moved_or_ended_through_a_unit_the_manager_cannot_reach(): void
+    {
+        $hidden = $this->assign($this->caetite, '2026-01-01', null, ['is_primary' => true]);
+        $own = $this->assign($this->guanambi, '2026-02-01', '2026-06-30');
+
+        $manager = $this->managerWithAssign($this->guanambi);
+        $this->actingAs($manager);
+
+        // Tornar principal esbarra na principal de Caetité: recusado, e a marca oculta segue intacta.
+        $this->patchJson($this->url(null, '/'.$own->id.'/principal'))
+            ->assertUnprocessable()->assertJsonValidationErrors('is_primary');
+        $this->assertTrue($hidden->fresh()->is_primary);
+        $this->assertFalse($own->fresh()->is_primary);
+        $this->assertSame(1, EmployeeAssignment::where('is_primary', true)->count());
+
+        // Criar já como principal também é recusado.
+        $this->postJson($this->url(), $this->body($this->guanambi, '2026-09-01', '2026-10-31', ['is_primary' => true]))
+            ->assertUnprocessable()->assertJsonValidationErrors('is_primary');
+
+        // O gerente da empresa transfere: é a autoridade que alcança as duas unidades.
+        $role = $this->role($this->gartan, 'Gestor da Roupas', [
+            'account.employees.list', 'account.employees.view', 'account.employees.assign',
+        ]);
+        $company = $this->operator($this->gartan, [[$role, AccessNode::company($this->gartan->id, $this->roupas->id)]]);
+        $this->actingAs($company)->patchJson($this->url(null, '/'.$own->id.'/principal'))->assertNoContent();
+        $this->assertFalse($hidden->fresh()->is_primary);
+        $this->assertTrue($own->fresh()->is_primary);
+        $this->assertSame(1, EmployeeAssignment::where('is_primary', true)->count());
+
+        // Com a principal na unidade dele e outra lotação só na unidade oculta, encerrar é recusado.
+        $this->actingAs($manager)->patchJson($this->url(null, '/'.$own->id.'/encerrar'), ['ends_on' => '2026-06-15'])
+            ->assertUnprocessable()->assertJsonValidationErrors('new_primary_id');
+        $this->assertSame('2026-06-30', substr($own->fresh()->ends_on, 0, 10));
+        $this->assertNull($hidden->fresh()->ends_on);
+        $this->assertTrue($own->fresh()->is_primary);
+        $this->assertSame(0, DB::table('employee_assignments')->where('is_primary', true)
+            ->whereNull('ends_on')->where('id', '!=', $own->id)->count());
+    }
+
+    public function test_a_unit_manager_can_end_the_primary_when_the_heir_is_inside_the_reach(): void
+    {
+        $this->assign($this->caetite, '2026-01-01');
+        $a = $this->assign($this->guanambi, '2026-01-01', null, ['is_primary' => true]);
+        $b = $this->assign($this->sede, '2026-01-01');
+
+        $manager = $this->managerOf($this->guanambi, ['account.employees.list', 'account.employees.view', 'account.employees.assign']);
+        $role = $this->role($this->gartan, 'Gestor duas unidades', [
+            'account.employees.list', 'account.employees.view', 'account.employees.assign',
+        ]);
+        $two = $this->operator($this->gartan, [
+            [$role, AccessNode::establishment($this->gartan->id, $this->roupas->id, $this->guanambi->id)],
+            [$role, AccessNode::establishment($this->gartan->id, $this->roupas->id, $this->sede->id)],
+        ]);
+
+        $hiddenAssignment = EmployeeAssignment::where('establishment_id', $this->caetite->id)->sole();
+
+        // Escolher a lotação oculta como herdeira é recusado, e nada muda.
+        $this->actingAs($manager)->patchJson($this->url(null, '/'.$a->id.'/encerrar'), [
+            'ends_on' => '2026-12-31', 'new_primary_id' => $hiddenAssignment->id,
+        ])->assertUnprocessable();
+        $this->assertNull($a->fresh()->ends_on);
+        $this->assertTrue($a->fresh()->is_primary);
+
+        // Com a herdeira dentro do alcance, a transferência acontece e a unidade oculta não muda.
+        $this->actingAs($two)->patchJson($this->url(null, '/'.$a->id.'/encerrar'), [
+            'ends_on' => '2026-12-31', 'new_primary_id' => $b->id,
+        ])->assertNoContent();
+        $this->assertTrue($b->fresh()->is_primary);
+        $this->assertFalse($a->fresh()->is_primary);
+        $this->assertFalse($hiddenAssignment->fresh()->is_primary);
+        $this->assertNull($hiddenAssignment->fresh()->ends_on);
+    }
+
+    public function test_institutional_check_reports_incoherent_contact_modes(): void
+    {
+        $a = $this->assign($this->guanambi, '2026-01-01');
+        $this->assertSame(0, Artisan::call('institutional:check'));
+
+        DB::table('employee_assignments')->where('id', $a->id)->update(['work_contacts' => json_encode(['email' => 'x@x.test'])]);
+
+        $this->assertSame(1, Artisan::call('institutional:check'));
+        $this->assertStringContainsString('modo de contato incoerente', Artisan::output());
     }
 }
