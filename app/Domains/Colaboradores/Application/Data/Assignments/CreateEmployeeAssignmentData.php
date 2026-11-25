@@ -1,0 +1,97 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domains\Colaboradores\Application\Data\Assignments;
+
+use App\Support\Exceptions\ResourceNotAvailable;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
+
+/** Nova lotação: unidade, função, departamento, período e se é a principal. */
+final readonly class CreateEmployeeAssignmentData
+{
+    public function __construct(
+        public int $establishmentId,
+        public ?int $departmentId,
+        public ?int $jobTitleId,
+        public string $startsOn,
+        public ?string $endsOn,
+        public bool $isPrimary,
+    ) {}
+
+    /**
+     * @param  array<string,mixed>  $input
+     *
+     * @throws ResourceNotAvailable
+     * @throws ValidationException
+     */
+    public static function fromInput(array $input, AssignmentOptions $options): self
+    {
+        foreach (['ends_on', 'department_id', 'job_title_id'] as $field) {
+            if (($input[$field] ?? null) === '') {
+                $input[$field] = null;
+            }
+        }
+
+        $values = Validator::validate($input, self::rules(), self::messages());
+
+        // Unidade fora do escopo ou de outra empresa responde como inexistente.
+        if (! isset($options->establishmentIds[$values['establishment']])) {
+            throw new ResourceNotAvailable;
+        }
+
+        $departmentId = isset($values['department_id']) ? (int) $values['department_id'] : null;
+        $jobTitleId = isset($values['job_title_id']) ? (int) $values['job_title_id'] : null;
+
+        $errors = [];
+
+        if ($departmentId !== null && ! $options->hasDepartment($departmentId)) {
+            $errors['department_id'] = 'Escolha um departamento ativo desta empresa.';
+        }
+
+        if ($jobTitleId !== null && ! $options->hasJobTitle($jobTitleId)) {
+            $errors['job_title_id'] = 'Escolha uma função ativa desta empresa.';
+        }
+
+        if ($errors !== []) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        return new self(
+            establishmentId: $options->establishmentIds[$values['establishment']],
+            departmentId: $departmentId,
+            jobTitleId: $jobTitleId,
+            startsOn: $values['starts_on'],
+            endsOn: $values['ends_on'] ?? null,
+            isPrimary: (bool) ($values['is_primary'] ?? false),
+        );
+    }
+
+    /** @return array<string,list<string>> */
+    public static function rules(): array
+    {
+        return [
+            'establishment' => ['required', 'string', 'max:40'],
+            'department_id' => ['nullable', 'integer', 'min:1'],
+            'job_title_id' => ['nullable', 'integer', 'min:1'],
+            'starts_on' => ['required', 'date_format:Y-m-d'],
+            'ends_on' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:starts_on'],
+            'is_primary' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /** @return array<string,string> */
+    public static function messages(): array
+    {
+        return [
+            'establishment.required' => 'Escolha o estabelecimento.',
+            'starts_on.required' => 'Informe a data de início.',
+            'starts_on.date_format' => 'Informe uma data de início válida.',
+            'ends_on.date_format' => 'Informe uma data final válida.',
+            'ends_on.after_or_equal' => 'A data final não pode ser anterior ao início.',
+            'department_id.integer' => 'Escolha um departamento válido.',
+            'job_title_id.integer' => 'Escolha uma função válida.',
+        ];
+    }
+}

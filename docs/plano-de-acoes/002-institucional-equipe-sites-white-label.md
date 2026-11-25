@@ -1586,7 +1586,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 | S02 | Contrato institucional | **Concluída em 24/11/2026**, com DA2-19 a DA2-23 a ratificar | Seção 27 e [`institucional.md`](../convencoes/institucional.md) |
 | S03 | Departamentos e funções | **Implementada em 24/11/2026, em revisão (sem commit)** | Seção 28 |
 | S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | **Tecnicamente concluída em 25/11/2026** (commit local `feat: colaboradores como papel de Pessoa por empresa (S04)`) | Seção 29 |
-| S05 | Lotações e histórico | Pendente | |
+| S05 | Lotações e histórico | **Implementada em 26/11/2026, em revisão (sem commit)** | Seção 30 |
 | S06 | Perfil institucional e herança | Pendente | |
 | S07 | Horários e exceções | Pendente | |
 | S08 | Biblioteca de mídia | Pendente | |
@@ -1922,3 +1922,60 @@ Executada em 25/11/2026 sobre a branch `feat/pagina-inicial` (base `9e01157`), v
 ### 29.6 Classificação
 
 **S04: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.
+
+## 30. Registro da S05: Lotações e histórico
+
+Executada em 26/11/2026 sobre a branch `feat/pagina-inicial` (HEAD `46009bc`), sem commit, merge, push ou deploy. A S06 não foi iniciada.
+
+### 30.1 Contrato aplicado
+
+| Ponto | Contrato |
+| --- | --- |
+| Tabela | `employee_assignments` conforme a seção 10.2, **sem** `contact_mode` e `work_contacts` (contatos por lotação ficam para a S06 e a S09, aditivos). FKs compostas de colaborador, unidade, departamento e função na mesma empresa; CHECK de período; índice parcial único da principal sem fim; índices `(employee_id, establishment_id)` e `(establishment_id, ends_on)` |
+| Vigência | Datas `Y-m-d` inclusivas; `ends_on` nulo é sem data final e não significa que já começou (futura, vigente e encerrada por cálculo, sem job). "Hoje" no fuso de negócio configurável |
+| Regras | Sem sobreposição no mesmo colaborador e unidade (inclusive futuras); retroativo aceito se não sobrepõe; troca em D encerra em D - 1 e abre em D, e no mesmo dia do início vira correção; encerrar a principal exige a nova principal; inativar encerra em `hoje` as já iniciadas e vigentes, mantém as futuras (inertes) e o histórico; reativar não reabre e a nova lotação é explícita; criar lotação exige vínculo ativo; unidade, departamento ou função fora da empresa ou inativos são recusados |
+| Concorrência | `AuditLog::transaction()` com trava da empresa e do colaborador antes de verificar sobreposição e principal; `institutional:check` cobre o que depende de várias linhas |
+| Permissões | `account.employees.assign` (alvos empresa e estabelecimento). `list` e `view` também admitem estabelecimento (DA2-18). Atribuição só de estabelecimento abre o módulo apenas para vínculos com lotação nela; criar, editar e inativar seguem só na empresa |
+| Escopo | `EmployeeScope` em todas as leituras (lista, ficha, vínculo, etiqueta derivada). Opções dos filtros e de lotação limitadas ao escopo, sem revelar outras unidades |
+| Auditoria | `EmployeeAssignment` auditável (tipo `employee-assignment`), eventos com `company_id` e `establishment_id`, mesma operação lógica na troca e na inativação |
+| Interface | Listagem: coluna Unidades (letreiro), filtros de estabelecimento, departamento, função e situação da lotação, mesma lotação nos filtros combinados. Ficha: seção Lotações por vínculo (vigentes, futuras e histórico), modais de adicionar, corrigir, alterar função ou departamento, encerrar e tornar principal. Gestor de unidade vê só a própria unidade |
+
+### 30.2 Arquivos
+
+- **Backend:** migration `2026_11_26_000001_create_employee_assignments`; `EmployeeAssignment`, DTOs, Data (`CreateEmployeeAssignmentData`, `UpdateEmployeeAssignmentData`, `ChangeEmployeeAssignmentData`, `EndEmployeeAssignmentData`, `AssignmentOptions`); Actions de lotação; Queries (`AssignmentOverlapExistsQuery`, `OverlappingPrimaryIdsQuery`, `ListRemainingAssignmentsQuery`, `ListOpenAssignmentsQuery`, `ListAssignmentOptionsQuery`, `ListEmployeeAssignmentsQuery`, `ShowEmployeeAssignmentQuery`, `ListEmployeeFilterOptionsQuery`, `EmployeeScope`, `ListInstitutionalViolationsQuery`); `EmployeeAssignmentController`; `CheckInstitutionalCommand`; `BusinessDate`; ajustes em `EmployeeController`, `ListEmployeesData`, `ListEmployeesQuery`, `UpdateEmployeeAction`, `DerivedRole`, `ListDerivedPersonTagsQuery`, `EffectivePermissions`, `config/permissions.php`, `config/audit.php`, `config/prospera.php` e `routes/account.php`.
+- **Frontend:** `EmployeeAssignments.tsx`, `employees.tsx`, `employee-form.tsx`, `Employees.css`, `guidance.ts`.
+- **Ajuda e tour:** `docs/ajuda/colaboradores.html`, `docs/tours/colaboradores.md`, `docs/convencoes/institucional.md`.
+- **Testes e laboratório:** `tests/Feature/EmployeeAssignmentTest.php` (15 cenários), ajuste de `EmployeeDirectoryTest` e `tests/Performance/s05-race.php` e `.sh`.
+
+### 30.3 Verificações
+
+| Verificação | Resultado |
+| --- | --- |
+| Suíte completa (SQLite em memória) | 360 testes, 4882 asserções, verdes |
+| Pint, PHPStan, `tsc`, frontend (20), `check:architecture` | Verdes |
+| `permissions:sync`, `audit:check`, `organization:check`, `institutional:check` | 101 permissões, 17 modelos, nenhuma violação |
+| PostgreSQL 18 descartável | `migrate:fresh`, `rollback --step=1` e reaplicação; FK composta e CHECK recusam, em SQL direto, unidade de outra empresa e período invertido |
+| Concorrência (4 processos reais, `s05-race.sh`) | Mesma unidade com períodos sobrepostos: 1 gravada e 3 recusadas. Unidades diferentes, todas principais: 1 gravada. Períodos adjacentes: 4 gravadas |
+| Plano da listagem (5004 vínculos, 6667 lotações) | Filtro de unidade e vigência com 3,8 ms de execução. O índice `(establishment_id, ends_on)` é usado, o que o justifica |
+| Navegador (Chromium, laboratório isolado) | 1440, 390 e 320 px: administrador, gestora da empresa, gestor da unidade Guanambi; lista, filtros combinados, ficha, modais, validações de sobreposição e de datas, troca de função com histórico, inativação e reativação, tours (ficha com 10 passos) restaurando o estado e sem rolagem horizontal |
+
+### 30.4 Defeitos encontrados e correções
+
+| Defeito | Correção |
+| --- | --- |
+| `ALTER TABLE ADD CONSTRAINT` não existe no SQLite | CHECK no SQL de criação da tabela, como em `establishments` |
+| Gestor de unidade não conseguia encerrar a principal porque a regra exigia indicar a principal de uma unidade que ele não vê | Candidatas à nova principal limitadas às lotações que o operador pode gerenciar |
+| Passos "Adicionar lotação" e "Histórico" do tour ausentes (o botão não repassa `data-tour`) | Botões envolvidos em elementos com `data-tour` |
+| Nota da seção centralizada e lista sem ordem útil | Nota alinhada e ordem vigentes, futuras e encerradas |
+| `EmployeeDirectoryTest` afirmava 403 para atribuição de unidade | Contrato novo: abre o módulo só para quem tem lotação na unidade |
+
+### 30.5 Pendências reais
+
+- Contatos profissionais por lotação (`contact_mode`) e perfil público: S06 e S09.
+- Filtro de perfil público: S09. Auditoria exibe identificadores de unidade, departamento e função como números, como já ocorre com `person_id`.
+- O seed de desenvolvimento não concede `account.employees.assign` a cargos existentes (só ao Administrador integral).
+- Concorrência medida em PostgreSQL de laboratório, fora da suíte, conforme a convenção.
+
+### 30.6 Classificação
+
+**S05: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.

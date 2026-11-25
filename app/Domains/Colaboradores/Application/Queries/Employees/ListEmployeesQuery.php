@@ -8,6 +8,8 @@ use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Colaboradores\Application\Data\Employees\ListEmployeesData;
 use App\Domains\Colaboradores\Domain\Models\Employee;
 use App\Domains\Pessoas\Domain\Models\Person;
+use App\Support\BusinessDate;
+use App\Support\NormalizedName;
 use App\Support\TaxDocument;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -42,7 +44,9 @@ final readonly class ListEmployeesQuery
                     ->select('id'),
             ));
 
-        $nodes->apply($links, 'employees.company_id', null);
+        EmployeeScope::apply($links, $nodes);
+
+        $this->filterByAssignment($links, $accountId, $nodes, $filters);
 
         $needle = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters->search).'%';
         $document = TaxDocument::normalize($filters->search);
@@ -80,5 +84,71 @@ final readonly class ListEmployeesQuery
             ->paginate($filters->pageSize)
             ->withPath($path)
             ->withQueryString();
+    }
+
+    /**
+     * Os filtros de unidade, departamento, função e situação da lotação valem para a MESMA lotação, dentro das
+     * unidades que o descritor alcança. A situação "sem lotação" é a ausência de lotação visível.
+     *
+     * @param  Builder<Employee>  $links
+     */
+    private function filterByAssignment(Builder $links, int $accountId, AuthorizedNodes $nodes, ListEmployeesData $filters): void
+    {
+        $today = BusinessDate::today();
+
+        $assignments = DB::table('employee_assignments as a')
+            ->whereColumn('a.employee_id', 'employees.id')
+            ->where('a.account_id', $accountId)
+            ->select(DB::raw('1'));
+
+        if (! $nodes->tenant) {
+            $assignments->where(fn ($scope) => $scope
+                ->whereIn('a.company_id', $nodes->companies)
+                ->orWhereIn('a.establishment_id', $nodes->establishments));
+        }
+
+        if ($filters->assignment === 'none') {
+            $links->whereNotExists($assignments);
+
+            return;
+        }
+
+        $narrowed = $filters->establishment !== '' || $filters->department !== '' || $filters->jobTitle !== ''
+            || $filters->assignment !== '';
+
+        if (! $narrowed) {
+            return;
+        }
+
+        if ($filters->establishment !== '') {
+            $assignments->whereIn('a.establishment_id', DB::table('establishments')
+                ->where('account_id', $accountId)
+                ->where('code', $filters->establishment)
+                ->select('id'));
+        }
+
+        if ($filters->department !== '') {
+            $assignments->whereIn('a.department_id', DB::table('departments')
+                ->where('account_id', $accountId)
+                ->where('normalized_name', NormalizedName::key($filters->department))
+                ->select('id'));
+        }
+
+        if ($filters->jobTitle !== '') {
+            $assignments->whereIn('a.job_title_id', DB::table('job_titles')
+                ->where('account_id', $accountId)
+                ->where('normalized_name', NormalizedName::key($filters->jobTitle))
+                ->select('id'));
+        }
+
+        match ($filters->assignment) {
+            'current' => $assignments->where('a.starts_on', '<=', $today)
+                ->where(fn ($period) => $period->whereNull('a.ends_on')->orWhere('a.ends_on', '>=', $today)),
+            'future' => $assignments->where('a.starts_on', '>', $today),
+            'ended' => $assignments->where('a.ends_on', '<', $today),
+            default => null,
+        };
+
+        $links->whereExists($assignments);
     }
 }

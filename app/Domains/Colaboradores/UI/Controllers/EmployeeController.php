@@ -13,7 +13,10 @@ use App\Domains\Colaboradores\Application\Actions\Employees\UpdateEmployeePerson
 use App\Domains\Colaboradores\Application\Data\Employees\CreateEmployeeData;
 use App\Domains\Colaboradores\Application\Data\Employees\ListEmployeesData;
 use App\Domains\Colaboradores\Application\Data\Employees\UpdateEmployeeData;
+use App\Domains\Colaboradores\Application\Queries\Assignments\ListAssignmentOptionsQuery;
+use App\Domains\Colaboradores\Application\Queries\Assignments\ListEmployeeAssignmentsQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\FindEmployeePersonQuery;
+use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeFilterOptionsQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeLinksQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeesQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeTagIdsQuery;
@@ -21,6 +24,7 @@ use App\Domains\Colaboradores\Application\Queries\Employees\PersonHasAccountAcce
 use App\Domains\Colaboradores\Application\Queries\Employees\ShowEmployeeLinkQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ShowEmployeePersonQuery;
 use App\Domains\Colaboradores\Domain\Models\Employee;
+use App\Domains\Colaboradores\Domain\Models\EmployeeAssignment;
 use App\Domains\Etiquetas\Application\Queries\Tags\ListSelectableTagsQuery;
 use App\Domains\Organizacao\Application\Queries\Context\ListNavigableCompaniesQuery;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
@@ -32,10 +36,12 @@ use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Support\ApiPage;
+use App\Support\BusinessDate;
 use App\Support\TaxDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 /**
@@ -52,12 +58,14 @@ final class EmployeeController
         ListNavigableCompaniesQuery $listNavigableCompanies,
         ListEmployeesQuery $listEmployees,
         ListEmployeeLinksQuery $listLinks,
+        ListEmployeeAssignmentsQuery $listAssignments,
+        ListEmployeeFilterOptionsQuery $filterOptions,
     ): JsonResponse|View {
         $user = $request->user();
         $accountId = $account->requireId();
 
         $nodes = $permissions->nodesFor($user, 'account.employees.list');
-        abort_unless($nodes->reachesCompanies(), 403);
+        abort_if($nodes->isEmpty(), 403);
 
         $canViewPeople = ! $permissions->nodesFor($user, 'account.people.view')->isEmpty();
         $canSeeAccess = ! $permissions->nodesFor($user, 'account.users.list')->isEmpty();
@@ -68,7 +76,13 @@ final class EmployeeController
         $page = $listEmployees->execute($accountId, $nodes, $filters, $canViewPeople, $canSeeAccess, $path);
 
         $pageIds = array_values($page->getCollection()->pluck('id')->map(fn ($id) => (int) $id)->all());
-        $links = $listLinks->execute($accountId, $nodes, $pageIds)->groupBy('person_id');
+        $linkRows = $listLinks->execute($accountId, $nodes, $pageIds);
+        $links = $linkRows->groupBy('person_id');
+        $assignments = $listAssignments
+            ->execute($accountId, $nodes, array_values($linkRows->pluck('id')->map(fn ($id) => (int) $id)->all()))
+            ->groupBy('employee_id');
+        $today = BusinessDate::today();
+        $assignable = $permissions->nodesFor($user, 'account.employees.assign');
 
         $viewable = $permissions->nodesFor($user, 'account.employees.view');
         $updatable = $permissions->nodesFor($user, 'account.employees.update');
@@ -79,6 +93,9 @@ final class EmployeeController
         return ApiPage::respond([
             'employees' => $page->through(function (Person $person) use (
                 $links,
+                $assignments,
+                $assignable,
+                $today,
                 $viewable,
                 $updatable,
                 $activatable,
@@ -101,11 +118,24 @@ final class EmployeeController
                     ])->values()->all(),
                     'links_count' => $own->count(),
                     'active_count' => $own->where('active', true)->count(),
-                    'can_view' => $own->contains(fn (Employee $link) => $this->covers($viewable, $link->company_id)),
-                    'can_edit' => $own->contains(fn (Employee $link) => $this->covers($viewable, $link->company_id)
+                    'units' => $own->flatMap(fn (Employee $link) => $assignments->get($link->id, collect())
+                        ->map(fn (EmployeeAssignment $assignment) => [
+                            'status' => $assignment->statusOn($today),
+                            'name' => (string) $assignment->getAttribute('establishment_name'),
+                            'job_title' => $assignment->getAttribute('job_title_name'),
+                            'primary' => $assignment->is_primary,
+                        ])
+                        ->filter(fn (array $unit) => $unit['status'] !== EmployeeAssignment::ENDED))
+                        ->values()->all(),
+                    'assignments_count' => $own->sum(fn (Employee $link) => $assignments->get($link->id, collect())->count()),
+                    'can_view' => ! $viewable->isEmpty() && $own->contains(
+                        fn (Employee $link) => $this->sees($viewable, $link, $assignments->get($link->id, collect())),
+                    ),
+                    'can_edit' => $own->contains(fn (Employee $link) => ($this->covers($viewable, $link->company_id)
                         && ($this->covers($updatable, $link->company_id)
                             || $this->covers($activatable, $link->company_id)
-                            || $this->covers($deactivatable, $link->company_id))),
+                            || $this->covers($deactivatable, $link->company_id)))
+                        || $this->sees($assignable, $link, $assignments->get($link->id, collect()))),
                 ];
 
                 // O indicador só existe na resposta de quem lista usuários: sem a chave, sem diferença visível.
@@ -116,6 +146,7 @@ final class EmployeeController
                 return $row;
             }),
             'filters' => $filters->toArray(),
+            'filterOptions' => $filterOptions->execute($accountId, $nodes),
             'companies' => $this->options($listNavigableCompanies->execute($accountId, $nodes)),
             'canCreate' => $creatable->reachesCompanies(),
             'canSeeAccess' => $canSeeAccess,
@@ -206,7 +237,7 @@ final class EmployeeController
         $accountId = $account->requireId();
 
         $nodes = $permissions->nodesFor($user, 'account.employees.view');
-        abort_unless($nodes->reachesCompanies(), 403);
+        abort_if($nodes->isEmpty(), 403);
 
         $person = $showPerson->execute($accountId, $nodes, $personId);
         abort_if($person === null, 404);
@@ -234,13 +265,15 @@ final class EmployeeController
         PersonAccessQuery $personAccess,
         ListEmployeeTagIdsQuery $linkTagIds,
         ListSelectableTagsQuery $selectableTags,
+        ListEmployeeAssignmentsQuery $listAssignments,
+        ListAssignmentOptionsQuery $assignmentOptions,
         int $personId,
     ): JsonResponse|View {
         $user = $request->user();
         $accountId = $account->requireId();
 
         $viewable = $permissions->nodesFor($user, 'account.employees.view');
-        abort_unless($viewable->reachesCompanies(), 403);
+        abort_if($viewable->isEmpty(), 403);
 
         $person = $showPerson->execute($accountId, $viewable, $personId);
         abort_if($person === null, 404);
@@ -251,6 +284,11 @@ final class EmployeeController
         $creatable = $permissions->nodesFor($user, 'account.employees.create');
 
         $links = $listLinks->execute($accountId, $viewable, [$person->id]);
+        $assignable = $permissions->nodesFor($user, 'account.employees.assign');
+        $today = BusinessDate::today();
+        $assignments = $listAssignments
+            ->execute($accountId, $viewable, array_values($links->pluck('id')->map(fn ($id) => (int) $id)->all()))
+            ->groupBy('employee_id');
 
         $canViewPeople = ! $permissions->nodesFor($user, 'account.people.view')->isEmpty();
         $authority = $personAccess->authority($user, $person);
@@ -293,21 +331,67 @@ final class EmployeeController
                 'can_edit_contacts' => $canEditCentral && $authority->contacts,
                 'tags' => $derivedTags->execute($accountId, [$person->id], $user)[$person->id] ?? [],
             ],
-            'links' => $links->map(fn (Employee $link) => [
-                'id' => $link->id,
-                'company_code' => (string) $link->getAttribute('company_code'),
-                'company_name' => (string) $link->getAttribute('company_name'),
-                'company_active' => (bool) $link->getAttribute('company_active'),
-                'active' => $link->active,
-                'work_email' => $link->work_email,
-                'work_phone' => $link->work_phone,
-                'work_whatsapp' => $link->work_whatsapp,
-                'tag_ids' => $tagIds[$link->id] ?? [],
-                'can_update' => $this->covers($updatable, $link->company_id),
-                'can_change_status' => $link->active
-                    ? $this->covers($deactivatable, $link->company_id)
-                    : $this->covers($activatable, $link->company_id),
-            ])->values()->all(),
+            'today' => $today,
+            'links' => $links->map(function (Employee $link) use (
+                $viewable,
+                $updatable,
+                $activatable,
+                $deactivatable,
+                $assignable,
+                $assignments,
+                $assignmentOptions,
+                $accountId,
+                $tagIds,
+                $today,
+            ) {
+                // Quem alcança só a unidade vê a lotação dela, sem os dados da relação (DA2-18).
+                $full = $this->covers($viewable, $link->company_id);
+                $own = $assignments->get($link->id, collect());
+                $manageable = $this->sees($assignable, $link, $own);
+                $options = $manageable
+                    ? $assignmentOptions->execute(
+                        $accountId,
+                        $link->company_id,
+                        $assignable,
+                        array_values(array_filter($own->pluck('department_id')->map(fn ($id) => $id === null ? null : (int) $id)->all())),
+                        array_values(array_filter($own->pluck('job_title_id')->map(fn ($id) => $id === null ? null : (int) $id)->all())),
+                    )
+                    : null;
+
+                return [
+                    'id' => $link->id,
+                    'scope' => $full ? 'company' : 'unit',
+                    'company_code' => (string) $link->getAttribute('company_code'),
+                    'company_name' => (string) $link->getAttribute('company_name'),
+                    'company_active' => (bool) $link->getAttribute('company_active'),
+                    'active' => $link->active,
+                    'work_email' => $full ? $link->work_email : null,
+                    'work_phone' => $full ? $link->work_phone : null,
+                    'work_whatsapp' => $full ? $link->work_whatsapp : null,
+                    'tag_ids' => $full ? ($tagIds[$link->id] ?? []) : [],
+                    'can_update' => $full && $this->covers($updatable, $link->company_id),
+                    'can_change_status' => $full && ($link->active
+                        ? $this->covers($deactivatable, $link->company_id)
+                        : $this->covers($activatable, $link->company_id)),
+                    'assignment_options' => $options?->toArray(),
+                    'assignments' => $own->map(fn (EmployeeAssignment $assignment) => [
+                        'id' => $assignment->id,
+                        'establishment_code' => (string) $assignment->getAttribute('establishment_code'),
+                        'establishment_name' => (string) $assignment->getAttribute('establishment_name'),
+                        'department_id' => $assignment->department_id,
+                        'department_name' => $assignment->getAttribute('department_name'),
+                        'job_title_id' => $assignment->job_title_id,
+                        'job_title_name' => $assignment->getAttribute('job_title_name'),
+                        'starts_on' => substr((string) $assignment->starts_on, 0, 10),
+                        'ends_on' => $assignment->ends_on === null ? null : substr((string) $assignment->ends_on, 0, 10),
+                        'is_primary' => $assignment->is_primary,
+                        'status' => $assignment->statusOn($today),
+                        'can_manage' => $assignable->tenant
+                            || in_array($assignment->company_id, $assignable->companies, true)
+                            || in_array($assignment->establishment_id, $assignable->establishments, true),
+                    ])->values()->all(),
+                ];
+            })->values()->all(),
             'linkable' => $this->options($linkable),
             'access' => $canSeeAccess ? $hasAccess->execute($accountId, $person->id) : null,
             'canSeeAccess' => $canSeeAccess,
@@ -388,6 +472,21 @@ final class EmployeeController
         ApiPage::toast('Vínculo salvo.');
 
         return response()->noContent();
+    }
+
+    /**
+     * O operador enxerga o vínculo pela empresa ou por uma lotação numa unidade que o descritor alcança.
+     *
+     * @param  Collection<int, EmployeeAssignment>  $assignments
+     */
+    private function sees(AuthorizedNodes $nodes, Employee $link, Collection $assignments): bool
+    {
+        return $this->covers($nodes, $link->company_id)
+            || $assignments->contains(fn (EmployeeAssignment $assignment) => in_array(
+                $assignment->establishment_id,
+                $nodes->establishments,
+                true,
+            ));
     }
 
     private function covers(AuthorizedNodes $nodes, int $companyId): bool

@@ -56,7 +56,12 @@ enum DerivedRole: string
             self::Supplier => $permissions->nodesFor($user, 'account.suppliers.view'),
         };
 
-        // Atribuição de estabelecimento não cobre a relação da empresa.
+        // Cliente e Fornecedor: atribuição de estabelecimento não cobre a relação da empresa. Colaborador: a unidade
+        // cobre o vínculo que tem lotação nela (DA2-18), e a consulta aplica esse escopo.
+        if ($this === self::Employee) {
+            return $nodes;
+        }
+
         return new AuthorizedNodes(tenant: $nodes->tenant, companies: $nodes->companies);
     }
 }

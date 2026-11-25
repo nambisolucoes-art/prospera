@@ -50,6 +50,7 @@ return [
         'password' => 'Alterar senha',
         'delete' => 'Excluir',
         'promote' => 'Promover a principal',
+        'assign' => 'Gerenciar lotações',
     ],
 
     /*
@@ -80,11 +81,12 @@ return [
         'account.departments.update' => ['company'],
         'account.departments.view' => ['company'],
         'account.employees.activate' => ['company'],
+        'account.employees.assign' => ['company', 'establishment'],
         'account.employees.create' => ['company'],
         'account.employees.deactivate' => ['company'],
-        'account.employees.list' => ['company'],
+        'account.employees.list' => ['company', 'establishment'],
         'account.employees.update' => ['company'],
-        'account.employees.view' => ['company'],
+        'account.employees.view' => ['company', 'establishment'],
         'account.establishments.activate' => ['company'],
         'account.establishments.create' => ['company'],
         'account.establishments.deactivate' => ['company'],

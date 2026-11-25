@@ -46,7 +46,7 @@ final readonly class ListEmployeeLinksQuery
             ])
             ->selectRaw('coalesce(companies.trade_name, companies.name) as company_name');
 
-        $nodes->apply($query, 'employees.company_id', null);
+        EmployeeScope::apply($query, $nodes);
 
         return $query
             ->orderBy('company_name')

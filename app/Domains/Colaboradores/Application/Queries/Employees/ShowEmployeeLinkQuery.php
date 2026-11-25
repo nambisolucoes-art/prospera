@@ -17,7 +17,7 @@ final readonly class ShowEmployeeLinkQuery
             ->where('employees.person_id', $personId)
             ->whereKey($employeeId);
 
-        $nodes->apply($query, 'employees.company_id', null);
+        EmployeeScope::apply($query, $nodes);
 
         return $query->first();
     }

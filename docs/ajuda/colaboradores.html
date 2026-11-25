@@ -74,6 +74,53 @@ palavras-chave: colaborador, colaboradores, funcionário, equipe, pessoa, víncu
   <dd>Indicador somente leitura de que a pessoa possui acesso à conta. Só aparece para quem pode listar usuários.</dd>
 </dl>
 
+<h2 id="lotacoes">Lotações</h2>
+
+<p>
+  A <strong>lotação</strong> é o período em que o colaborador atua em um <strong>estabelecimento</strong>, com a
+  <strong>função</strong> e o <strong>departamento</strong> daquele período. O estabelecimento é a unidade, o
+  departamento é a área da empresa e a função é a atividade profissional (diferente do Cargo, que é o acesso). Um
+  colaborador pode ter lotações em várias unidades da mesma empresa, cada uma com função e departamento próprios.
+</p>
+
+<dl class="dl-horizontal">
+  <dt>Vigência</dt>
+  <dd>
+    O <strong>Início</strong> é o primeiro dia e o <strong>Fim</strong> é o último, ambos inclusivos. Sem data final
+    significa sem data definida, e uma lotação futura só vale a partir do início. Na mesma unidade, os períodos não
+    podem se sobrepor: o dia seguinte ao último dia de uma lotação já pode iniciar outra.
+  </dd>
+  <dt>Principal</dt>
+  <dd>
+    A lotação de referência do colaborador. Só uma vale por período. <strong>Tornar principal</strong> transfere a
+    marca, e encerrar a principal enquanto houver outra lotação exige indicar a nova principal.
+  </dd>
+  <dt>Alterar função ou departamento</dt>
+  <dd>
+    Preserva o histórico: o período atual termina no dia anterior e outro começa na data escolhida. Se o período atual
+    começa nessa mesma data, a mudança é uma correção dele. <strong>Corrigir lotação</strong> altera datas, função e
+    departamento do próprio período, sem criar histórico novo.
+  </dd>
+  <dt>Encerrar</dt>
+  <dd>Define o último dia de vigência. Expirar a data final não gera ação nem evento: a lotação deixa de ser vigente sozinha.</dd>
+  <dt>Histórico</dt>
+  <dd><strong>Histórico</strong> mostra as lotações encerradas com função, departamento e datas preservados. A auditoria registra quem alterou e quando.</dd>
+</dl>
+
+<blockquote class="help-note help-note--info">
+  <strong class="text-info">Permissão:</strong> gerenciar lotações exige <strong>Gerenciar lotações</strong>, atribuída à
+  empresa ou a uma unidade. Quem tem acesso só a uma unidade vê e gerencia apenas as lotações dela e não vê as demais
+  unidades, nem os dados do vínculo na empresa. Departamentos e funções inativos não podem ser escolhidos em lotações novas.
+</blockquote>
+
+<h2 id="inativar-e-lotacoes">Inativar e reativar com lotações</h2>
+
+<p>
+  Inativar o vínculo encerra, no dia da operação, as lotações já iniciadas e vigentes. As futuras permanecem sem efeito
+  enquanto o vínculo estiver inativo, e o histórico não é apagado. Reativar não reabre períodos antigos: cadastre uma
+  lotação nova. Nada disso altera o login, os cargos ou os cadastros de Cliente e Fornecedor da pessoa.
+</p>
+
 <h2 id="ativar-e-inativar">Ativar e inativar</h2>
 
 <p>
@@ -92,8 +139,9 @@ palavras-chave: colaborador, colaboradores, funcionário, equipe, pessoa, víncu
 <p>
   Busque por nome e, se o seu cargo visualiza pessoas, por e-mail, CPF ou CNPJ completo. Filtre pela
   <strong>Situação do vínculo</strong>, pela <strong>Empresa</strong> (quando você alcança mais de uma) e, para quem
-  lista usuários, pelo <strong>Acesso à conta</strong>. Filtros por estabelecimento, departamento ou função chegam com
-  as lotações.
+  lista usuários, pelo <strong>Acesso à conta</strong>. Os filtros de <strong>Estabelecimento</strong>, <strong>Departamento</strong>, <strong>Função</strong> e
+  <strong>Situação da lotação</strong> valem para a mesma lotação: uma pessoa com função A na unidade X e função B na
+  unidade Y só aparece em X com A. A coluna <strong>Unidades</strong> mostra as lotações vigentes ou futuras e a principal.
 </p>
 
 <h2 id="bloqueios">Bloqueios comuns</h2>

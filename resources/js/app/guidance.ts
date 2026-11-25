@@ -172,8 +172,8 @@ export function tourFor(
         'Busque a pessoa pelo CPF ou CNPJ completo para reaproveitar o cadastro, ou informe uma pessoa nova. Marque as empresas em que ela é colaboradora.',
       ),
       ...businessListTourSteps({
-        filters: 'Busque por nome, e-mail, CPF ou CNPJ e filtre pela situação do vínculo, pela empresa (quando você alcança mais de uma) e, se o seu cargo lista usuários, pelo acesso à conta.',
-        table: 'Cada linha é uma pessoa, com todas as empresas em que ela é colaboradora e que o seu acesso alcança. Colaborador não é usuário: ser colaborador não concede acesso nem permissões. Use Visualizar cadastro para consultar e Editar para abrir a ficha e administrar cada vínculo.',
+        filters: 'Busque por nome, e-mail, CPF ou CNPJ e filtre pela situação do vínculo, pela empresa (quando você alcança mais de uma), por estabelecimento, departamento, função e situação da lotação. Os filtros de lotação valem para a mesma lotação: unidade e função combinadas só encontram quem tem as duas na mesma lotação. Quem lista usuários também filtra pelo acesso à conta.',
+        table: 'Cada linha é uma pessoa, com as empresas em que ela é colaboradora e as unidades das lotações vigentes ou futuras (principal indicada), dentro do que o seu acesso alcança. Colaborador não é usuário: ser colaborador não concede acesso nem permissões. Use Visualizar cadastro para consultar e Editar para abrir a ficha e administrar cada vínculo.',
       }),
     ];
   } else if (/^\/conta\/colaboradores\/(cadastrar|\d+\/editar)$/.test(path)) {
@@ -185,6 +185,9 @@ export function tourFor(
         at('person-identity', 'Dados centrais da pessoa', 'Identidade, documento e contatos valem para todas as empresas e para os demais papéis da pessoa, como cliente e fornecedor. Os campos aparecem conforme suas permissões.'),
         at('employee-tags', 'Etiquetas', 'As etiquetas são derivadas dos vínculos e dos outros papéis da pessoa. Não podem ser atribuídas nem removidas aqui.'),
         at('employee-links', 'Vínculos empresariais', 'Cada empresa tem o próprio vínculo, com situação e contatos profissionais independentes. Salvar um vínculo não altera os outros.'),
+        at('employee-assignments', 'Lotações', 'Lotação é o período em que o colaborador atua em um estabelecimento, com a função e o departamento daquele período. Estabelecimento é a unidade, departamento é a área da empresa e função é a atividade profissional. A principal é a lotação de referência: só pode haver uma por período. Vigência vai do primeiro ao último dia, inclusive, e sem data final significa sem data definida.'),
+        at('employee-assignment-add', 'Adicionar lotação', 'Escolha a unidade, a função, o departamento e o início. Períodos da mesma unidade não podem se sobrepor. Para mudar a função ao longo do tempo, use Alterar função ou departamento na lotação: o período antigo termina no dia anterior e o novo começa na data escolhida.'),
+        at('employee-assignment-history', 'Histórico', 'Mostra as lotações encerradas, com função, departamento e datas preservados. Encerrar uma lotação define o último dia de vigência. Inativar o vínculo encerra as vigentes, e reativar não as reabre: cadastre uma nova lotação.'),
         at('employee-add-link', 'Vincular a outra empresa', 'Marque as empresas em que você pode cadastrar e que ainda não têm vínculo da pessoa.'),
         at('employee-access', 'Acesso ao Prospera', 'Indicador somente leitura, visível a quem lista usuários. Colaborador e usuário são conceitos distintos.'),
       ]

@@ -300,7 +300,7 @@ class EmployeeDirectoryTest extends TestCase
         $this->assertTrue($link->fresh()->active);
     }
 
-    public function test_a_unit_assignment_does_not_open_the_module(): void
+    public function test_a_unit_assignment_only_reaches_employees_lotted_in_that_unit(): void
     {
         $unit = $this->roupas->primaryEstablishment()->sole();
         $role = $this->role($this->gartan, 'Gerente de unidade', ['account.employees.list', 'account.employees.view']);
@@ -309,8 +309,11 @@ class EmployeeDirectoryTest extends TestCase
         $this->actingAs($this->owner);
         $this->register([$this->roupas])->assertNoContent();
 
-        $this->actingAs($manager)->getJson('/conta/colaboradores')->assertForbidden();
-        $this->getJson('/conta/colaboradores/'.$this->maria()->id.'/editar')->assertForbidden();
+        // Desde a S05 a unidade abre o módulo, mas só mostra quem tem lotação nela (nenhuma, neste caso).
+        $this->actingAs($manager)->getJson('/conta/colaboradores')->assertOk()->assertJsonPath('employees.total', 0);
+        $this->getJson('/conta/colaboradores/'.$this->maria()->id.'/editar')->assertNotFound();
+        $this->getJson('/conta/colaboradores/'.$this->maria()->id.'/visualizar')->assertNotFound();
+        $this->getJson('/conta/colaboradores/cadastrar')->assertForbidden();
     }
 
     public function test_access_to_other_accounts_and_hidden_links_is_refused(): void

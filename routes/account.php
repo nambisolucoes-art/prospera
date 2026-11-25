@@ -6,6 +6,7 @@ use App\Domains\Acessos\UI\Controllers\AccountSelectionController;
 use App\Domains\Ajuda\UI\Controllers\HelpController;
 use App\Domains\Auditoria\UI\Controllers\AuditController;
 use App\Domains\Colaboradores\UI\Controllers\DepartmentController;
+use App\Domains\Colaboradores\UI\Controllers\EmployeeAssignmentController;
 use App\Domains\Colaboradores\UI\Controllers\EmployeeController;
 use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
 use App\Domains\Etiquetas\UI\Controllers\TagController;
@@ -322,6 +323,24 @@ Route::middleware(['auth', 'verified', 'account'])
             ->whereNumber('personId')
             ->whereNumber('employeeId')
             ->name('employees.update-link');
+
+        // S05: lotações do vínculo. A unidade vem do corpo e é validada no servidor contra o escopo de `assign`.
+        $assignmentUrl = 'colaboradores/{personId}/vinculos/{employeeId}/lotacoes';
+
+        Route::post($assignmentUrl, [EmployeeAssignmentController::class, 'store'])
+            ->whereNumber(['personId', 'employeeId'])
+            ->name('employees.assignments.store');
+
+        foreach ([
+            ['patch', '', 'update', 'update'],
+            ['post', '/trocar', 'change', 'change'],
+            ['patch', '/encerrar', 'end', 'end'],
+            ['patch', '/principal', 'primary', 'primary'],
+        ] as [$method, $suffix, $action, $name]) {
+            Route::$method($assignmentUrl.'/{assignmentId}'.$suffix, [EmployeeAssignmentController::class, $action])
+                ->whereNumber(['personId', 'employeeId', 'assignmentId'])
+                ->name('employees.assignments.'.$name);
+        }
 
         Route::prefix('estabelecimento/{estabelecimento}')
             ->where(['estabelecimento' => OrganizationCode::ROUTE_PATTERN])

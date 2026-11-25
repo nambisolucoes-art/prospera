@@ -23,7 +23,12 @@ A tela é única para a conta: uma linha por Pessoa, com os vínculos das empres
 | Ficha | `person-identity` | Dados centrais da pessoa | Valem para todas as empresas e papéis. |
 | Ficha | `employee-tags` | Etiquetas | Derivadas, somente leitura. |
 | Ficha | `employee-links` | Vínculos empresariais | Situação e contatos de cada empresa, independentes. |
+| Ficha | `employee-assignments` | Lotações | O que é lotação, diferença entre estabelecimento, departamento e função, principal e vigência. |
+| Ficha | `employee-assignment-add` | Adicionar lotação | Unidade, função, departamento e início; sem sobreposição na mesma unidade; troca ao longo do tempo. |
+| Ficha | `employee-assignment-history` | Histórico | Lotações encerradas preservadas; encerrar; inativar e reativar. |
 | Ficha | `employee-add-link` | Vincular a outra empresa | Cria vínculos novos sem alterar os existentes. |
 | Ficha | `employee-access` | Acesso ao Prospera | Indicador somente leitura, só para quem lista usuários. |
+
+Na listagem, os filtros de estabelecimento, departamento, função e situação da lotação ficam depois do filtro de empresa. O tour não abre os modais de lotação nem grava dados.
 
 Os passos cujo alvo não existe na tela (por permissão ou por haver uma só empresa) são ignorados. O tour não grava dados e não abre modais. Revisar alvos e ordem quando a posição dos controles mudar.

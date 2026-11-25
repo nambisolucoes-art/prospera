@@ -14,6 +14,10 @@ final readonly class ListEmployeesData
         public ?bool $active,
         public string $company,
         public ?bool $access,
+        public string $establishment,
+        public string $department,
+        public string $jobTitle,
+        public string $assignment,
         public int $pageSize,
     ) {}
 
@@ -43,11 +47,17 @@ final readonly class ListEmployeesData
                     default => null,
                 }
             : null,
+            establishment: is_string($input['establishment'] ?? null) ? mb_substr($input['establishment'], 0, 40) : '',
+            department: is_string($input['department'] ?? null) ? mb_substr(trim($input['department']), 0, 100) : '',
+            jobTitle: is_string($input['job_title'] ?? null) ? mb_substr(trim($input['job_title']), 0, 100) : '',
+            assignment: in_array($input['assignment'] ?? null, ['current', 'future', 'ended', 'none'], true)
+                ? $input['assignment']
+                : '',
             pageSize: PageSize::fromInput($input['per_page'] ?? null),
         );
     }
 
-    /** @return array{search: string, status: string, company: string, access: string} */
+    /** @return array{search: string, status: string, company: string, access: string, establishment: string, department: string, job_title: string, assignment: string} */
     public function toArray(): array
     {
         return [
@@ -63,6 +73,10 @@ final readonly class ListEmployeesData
                 false => 'no',
                 null => '',
             },
+            'establishment' => $this->establishment,
+            'department' => $this->department,
+            'job_title' => $this->jobTitle,
+            'assignment' => $this->assignment,
         ];
     }
 }

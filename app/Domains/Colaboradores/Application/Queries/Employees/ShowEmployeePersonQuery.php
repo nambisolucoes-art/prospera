@@ -21,7 +21,7 @@ final readonly class ShowEmployeePersonQuery
             ->where('employees.account_id', $accountId)
             ->where('employees.person_id', $personId);
 
-        $nodes->apply($links, 'employees.company_id', null);
+        EmployeeScope::apply($links, $nodes);
 
         return Person::query()
             ->where('people.account_id', $accountId)

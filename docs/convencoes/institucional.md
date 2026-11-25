@@ -53,6 +53,15 @@ Na interface, a atividade profissional é **Função** (menu "Funções"). O ter
 6. A Action abre `AuditLog::transaction()` e trava a linha de `employees` (`lockForUpdate()`) antes de verificar sobreposição e principal. `institutional:check` detecta o que depende de várias linhas.
 7. **Expirar não é evento.** Quando `ends_on` passa, a lotação deixa de ser vigente por cálculo: sem escrita, sem auditoria, sem job. A elegibilidade é calculada na leitura e a resposta tem validade limitada (seção Cache).
 
+## Lotações na prática (S05)
+
+- **Tabela.** `employee_assignments` guarda conta, empresa, colaborador, estabelecimento, departamento e função opcionais, `starts_on`, `ends_on` e `is_primary`. FKs compostas `(employee_id, company_id)`, `(establishment_id, company_id)`, `(department_id, company_id)` e `(job_title_id, company_id)`, CHECK `ends_on >= starts_on` e índice parcial único da principal sem data final por colaborador. Os contatos profissionais por lotação (`contact_mode`, `work_contacts`) não entram na S05: ficam para a etapa que os publica (S06 e S09), de forma aditiva.
+- **Actions.** `CreateEmployeeAssignmentAction`, `UpdateEmployeeAssignmentAction` (correção), `ChangeEmployeeAssignmentAction` (encerra em D - 1 e abre em D, ou corrige se o período começa em D), `EndEmployeeAssignmentAction`, `SetPrimaryEmployeeAssignmentAction` e `EndEmployeeAssignmentsOnInactivationAction`. Todas abrem `AuditLog::transaction()`, travam a linha do colaborador e conferem `account.employees.assign` sobre a unidade da lotação. A regra de sobreposição e de principal vive em `GuardEmployeeAssignmentPeriodAction`.
+- **Principal.** A marca pertence ao período. Transferir remove a marca das principais que se sobrepõem. Encerrar a principal com outra lotação que continue valendo exige a nova principal, considerando só as lotações que o operador pode gerenciar (o escopo da unidade não revela as demais).
+- **Hoje.** `BusinessDate::today()` usa `prospera.business_timezone` (padrão `America/Sao_Paulo`) até a S07.
+- **Escopo.** `EmployeeScope` aplica o descritor aos vínculos: a empresa mostra todos, a unidade mostra os vínculos com lotação, vigente ou histórica, nela. Na ficha, o gestor de unidade não recebe os dados do vínculo nem as lotações de outras unidades.
+- **Verificação.** `institutional:check` detecta sobreposição, principais sobrepostas ou duplicadas, período invertido, mistura de conta, empresa, unidade, departamento ou função e lotação vigente com o vínculo inativo.
+
 ## Função e departamento
 
 - `departments` e `job_titles` pertencem à empresa, com nome único por empresa, ativos ou inativos, sem exclusão. Inativos não são escolhidos em lotações novas e permanecem nas antigas.
@@ -61,8 +70,8 @@ Na interface, a atividade profissional é **Função** (menu "Funções"). O ter
 
 ## Visão por empresa e estabelecimento
 
-- **S04:** listagem **por empresa**, com filtros de situação, presença de acesso e busca por nome ou documento. Sem filtro por unidade, departamento ou função, sem coluna Unidades, sem `todos` e sem acesso de gestor de unidade, porque ainda não existe lotação.
-- **S05:** coluna Unidades agregada sem N+1, consolidado `todos` (somente leitura) e filtros por unidade, departamento, função, vigência e perfil público. A pessoa com duas lotações aparece **uma vez**.
+- **S04:** listagem numa tela única por conta, uma linha por Pessoa, com filtros de situação, empresa, presença de acesso e busca por nome ou documento.
+- **S05 (implementada):** coluna Unidades agregada sem N+1 e filtros por estabelecimento, departamento, função e situação da lotação (vigente, futura, encerrada, sem lotação). Os filtros combinados valem para a **mesma lotação** (um único `EXISTS` sobre `employee_assignments`, dentro do escopo). As opções dos filtros saem só das lotações visíveis ao operador. A pessoa com várias lotações aparece **uma vez**. O consolidado `todos` já é a própria tela única (DA2-24) e o filtro de perfil público entra com o perfil (S09).
 - **Gestor de unidade (alvo `establishment` para `list`, `view`, `assign` e `select-team`, DA2-18 e PD2-16):** o recurso avaliado é a lotação. Ele vê o nome, as lotações **da própria unidade** (vigentes e históricas) e o contato efetivo dela. Não vê lotações de outras unidades, dados da relação que a lotação não herde, perfil público nem dados centrais além do que Pessoas já concede.
 - `create`, `update`, `activate`, `deactivate`, `edit-profile`, `publish-profile` e `consent` admitem só `company`.
 - **Equipe da unidade (PD2-16).** O perfil público é corporativo e compartilhado, e o gestor de unidade não o altera. Com `account.employees.select-team` ele escolhe e ordena, na seção `team_display` da unidade, quem aparece na equipe da unidade, **só entre colaboradores já elegíveis** (perfil publicado pela empresa, lotação vigente na unidade, consentimento válido para foto). Usa a função e o contato profissional **da respectiva lotação**, e o contato só aparece se a empresa ligou `show_work_*`. Não altera dados centrais, não liga flags, não publica perfil nem registra consentimento, e nenhuma tela da unidade lê `people.*`. `team_display` guarda referências, não é editável por `account.institutional.update` e é editorial (rascunho e publicação).

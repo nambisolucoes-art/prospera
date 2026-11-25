@@ -6,6 +6,7 @@ namespace App\Domains\Colaboradores\Application\Actions\Employees;
 
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Colaboradores\Application\Actions\Assignments\EndEmployeeAssignmentsOnInactivationAction;
 use App\Domains\Colaboradores\Application\Data\Employees\UpdateEmployeeData;
 use App\Domains\Colaboradores\Domain\DTOs\Employees\UpdateEmployeeDTO;
 use App\Domains\Colaboradores\Domain\Models\Employee;
@@ -19,11 +20,15 @@ use Illuminate\Support\Facades\Gate;
  * Altera os contatos profissionais e a situação de um único vínculo, sem tocar nos outros vínculos da pessoa.
  *
  * Cada mudança confere a própria permissão: contatos exigem editar, e a situação exige ativar ou inativar.
- * Inativar o vínculo não remove o acesso à conta nem as permissões da pessoa.
+ * Inativar o vínculo encerra as lotações vigentes (histórico preservado), mas não remove o acesso à conta nem
+ * as permissões da pessoa.
  */
 final readonly class UpdateEmployeeAction
 {
-    public function __construct(private SyncCommercialTagsAction $syncTags) {}
+    public function __construct(
+        private SyncCommercialTagsAction $syncTags,
+        private EndEmployeeAssignmentsOnInactivationAction $endAssignments,
+    ) {}
 
     /**
      * @throws AuthorizationException
@@ -66,6 +71,7 @@ final readonly class UpdateEmployeeAction
                     Gate::authorize('account.employees.activate', $node);
                 } else {
                     Gate::authorize('account.employees.deactivate', $node);
+                    $this->endAssignments->execute($lockedEmployee);
                 }
             }
 

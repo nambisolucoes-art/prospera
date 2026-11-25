@@ -90,6 +90,9 @@ final class EffectivePermissions
 
         foreach ([
             'account.audit.list',
+            'account.employees.list',
+            'account.employees.view',
+            'account.employees.assign',
             'account.companies.list',
             'account.establishments.list',
             'account.users.list',
@@ -121,8 +124,6 @@ final class EffectivePermissions
             'account.suppliers.update',
             'account.suppliers.activate',
             'account.suppliers.deactivate',
-            'account.employees.list',
-            'account.employees.view',
             'account.employees.create',
             'account.employees.update',
             'account.employees.activate',

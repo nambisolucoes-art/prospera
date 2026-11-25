@@ -17,6 +17,7 @@ import { AddressFields, LookupButton, MaskedField } from './ClientFormFields';
 import type { PersonRow } from './Directory.types';
 import PersonContactFields from './PersonContactFields';
 import PersonIdentityFields from './PersonIdentityFields';
+import EmployeeAssignments, { type AssignmentOptions, type AssignmentRow } from './EmployeeAssignments';
 import SaasLayout from './SaasLayout';
 import './Directory.css';
 import './Employees.css';
@@ -33,6 +34,9 @@ type Link = {
   work_phone: string | null;
   work_whatsapp: string | null;
   tag_ids: number[];
+  scope: 'company' | 'unit';
+  assignments: AssignmentRow[];
+  assignment_options: AssignmentOptions | null;
   can_update: boolean;
   can_change_status: boolean;
 };
@@ -50,6 +54,7 @@ type Props = {
     tags: Tag[];
   };
   links?: Link[];
+  today?: string;
   linkable?: CompanyOption[];
   access?: boolean | null;
   canSeeAccess?: boolean;
@@ -380,7 +385,7 @@ function LinkForm({ link, personId, writable, tags }: { link: Link; personId: nu
   );
 }
 
-function Edit({ person, links = [], linkable = [], access, canSeeAccess = false, registrationTags = [] }: Props) {
+function Edit({ person, links = [], linkable = [], access, canSeeAccess = false, registrationTags = [], today = '' }: Props) {
   const { auth } = useApiPage<SessionProps>().props;
   const writable = auth.inspection_mode !== 'read-only';
   const [selected, setSelected] = useState<string[]>([]);
@@ -423,7 +428,14 @@ function Edit({ person, links = [], linkable = [], access, canSeeAccess = false,
       </CardBox>
 
       <div data-tour="employee-links">
-        {links.map((link) => <LinkForm key={link.id} link={link} personId={person.id} writable={writable} tags={registrationTags} />)}
+        {links.map((link) => (
+          <div key={link.id}>
+            {link.scope === 'company' && (
+              <LinkForm link={link} personId={person.id} writable={writable} tags={registrationTags} />
+            )}
+            <EmployeeAssignments personId={person.id} link={link} today={today} writable={writable} />
+          </div>
+        ))}
       </div>
 
       {writable && linkable.length > 0 && (

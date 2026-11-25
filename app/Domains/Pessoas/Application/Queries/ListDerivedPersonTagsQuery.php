@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Pessoas\Application\Queries;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
+use App\Domains\Colaboradores\Application\Queries\Employees\EmployeeScope;
+use App\Domains\Colaboradores\Domain\Models\Employee;
 use App\Domains\Pessoas\Domain\Enums\DerivedRole;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -45,13 +47,24 @@ final readonly class ListDerivedPersonTagsQuery
                 continue;
             }
 
-            $related = DB::table($role->table())
-                ->where('account_id', $accountId)
-                ->where('active', true)
-                ->whereIntegerInRaw('person_id', $personIds)
-                ->when(! $nodes->tenant, fn ($query) => $query->whereIntegerInRaw('company_id', $nodes->companies))
-                ->distinct()
-                ->pluck('person_id');
+            if ($role === DerivedRole::Employee) {
+                $query = Employee::query()
+                    ->where('employees.account_id', $accountId)
+                    ->where('employees.active', true)
+                    ->whereIntegerInRaw('employees.person_id', $personIds);
+
+                EmployeeScope::apply($query, $nodes);
+
+                $related = $query->distinct()->pluck('employees.person_id');
+            } else {
+                $related = DB::table($role->table())
+                    ->where('account_id', $accountId)
+                    ->where('active', true)
+                    ->whereIntegerInRaw('person_id', $personIds)
+                    ->when(! $nodes->tenant, fn ($query) => $query->whereIntegerInRaw('company_id', $nodes->companies))
+                    ->distinct()
+                    ->pluck('person_id');
+            }
 
             $definition = $definitions->get($role->value);
 

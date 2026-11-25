@@ -25,6 +25,7 @@ return [
         'department' => 'Departamento',
         'job-title' => 'Função',
         'employee' => 'Colaborador',
+        'employee-assignment' => 'Lotação',
         'permission-catalog' => 'Catálogo de permissões',
     ],
     'events' => [
