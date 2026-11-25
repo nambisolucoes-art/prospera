@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Pessoas\Domain\DTOs;
 
 final readonly class PersonDTO

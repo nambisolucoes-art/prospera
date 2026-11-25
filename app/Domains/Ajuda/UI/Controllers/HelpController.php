@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Ajuda\UI\Controllers;
 
 use App\Domains\Ajuda\Application\Data\HelpSearchData;

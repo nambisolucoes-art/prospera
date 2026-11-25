@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Acessos\Domain\DTOs;
 
 use Illuminate\Database\Eloquent\Builder;

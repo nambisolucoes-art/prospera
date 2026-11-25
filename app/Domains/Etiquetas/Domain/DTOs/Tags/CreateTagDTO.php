@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Domains\Etiquetas\Domain\DTOs;
+declare(strict_types=1);
 
-final readonly class TagDTO
+namespace App\Domains\Etiquetas\Domain\DTOs\Tags;
+
+final readonly class CreateTagDTO
 {
     public function __construct(
         public string $name,

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Organizacao\Application\Queries;
 
 use App\Domains\Organizacao\Domain\DTOs\OrganizationCode;

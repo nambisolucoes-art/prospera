@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Plataforma\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;

@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Colaboradores\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Colaboradores\Application\Actions\SaveDepartmentAction;
-use App\Domains\Colaboradores\Application\Data\CatalogCompaniesData;
-use App\Domains\Colaboradores\Application\Data\CatalogFiltersData;
-use App\Domains\Colaboradores\Application\Data\SaveDepartmentData;
-use App\Domains\Colaboradores\Application\Queries\DepartmentDirectoryQuery;
+use App\Domains\Colaboradores\Application\Actions\Departments\CreateDepartmentAction;
+use App\Domains\Colaboradores\Application\Actions\Departments\UpdateDepartmentAction;
+use App\Domains\Colaboradores\Application\Data\Departments\CreateDepartmentData;
+use App\Domains\Colaboradores\Application\Data\Departments\ListDepartmentsData;
+use App\Domains\Colaboradores\Application\Data\Departments\UpdateDepartmentData;
+use App\Domains\Colaboradores\Application\Queries\Departments\ListDepartmentsQuery;
+use App\Domains\Colaboradores\Application\Queries\Departments\ShowDepartmentQuery;
 use App\Domains\Colaboradores\Domain\Models\Department;
 use App\Domains\Organizacao\Application\Queries\OrganizationContextQuery;
 use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
@@ -29,16 +33,16 @@ final class DepartmentController
         AccountContext $account,
         EffectivePermissions $permissions,
         OrganizationContextQuery $units,
-        DepartmentDirectoryQuery $items,
+        ListDepartmentsQuery $query,
     ): JsonResponse|View {
         $accountId = $account->requireId();
 
         $nodes = $permissions->nodesFor($request->user(), 'account.departments.list');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $filters = CatalogFiltersData::fromInput($request->query());
+        $filters = ListDepartmentsData::fromInput($request->query());
 
-        $list = $items->list($accountId, $nodes, $filters, $account->path('departamentos'));
+        $list = $query->execute($accountId, $nodes, $filters, $account->path('departamentos'));
 
         $creatable = $units->companies($accountId, $permissions->nodesFor($request->user(), 'account.departments.create'));
 
@@ -61,13 +65,13 @@ final class DepartmentController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        DepartmentDirectoryQuery $items,
+        ShowDepartmentQuery $query,
         int $itemId,
     ): JsonResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.departments.view');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $item = $items->find($account->requireId(), $nodes, $itemId);
+        $item = $query->execute($account->requireId(), $nodes, $itemId);
         abort_if($item === null, 404);
 
         return response()->json([
@@ -85,7 +89,7 @@ final class DepartmentController
         AccountContext $account,
         EffectivePermissions $permissions,
         OrganizationContextQuery $units,
-        SaveDepartmentAction $save,
+        CreateDepartmentAction $action,
     ): RedirectResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.departments.create');
         abort_unless($nodes->reachesCompanies(), 403);
@@ -93,15 +97,10 @@ final class DepartmentController
         $allowed = $units->companies($account->requireId(), $nodes);
         abort_if($allowed === [], 403);
 
-        $selected = CatalogCompaniesData::fromInput(
-            $request->all(),
-            $allowed,
-            fn () => SaveDepartmentData::fromInput($request->all(), [], null),
-        );
-        $data = SaveDepartmentData::fromInput($request->all(), $selected->ids(), null);
+        $data = CreateDepartmentData::fromInput($request->all(), $allowed);
 
-        $save->execute($account->requireId(), $selected->ids(), null, $data);
-        ApiPage::toast(count($selected->ids()) > 1 ? 'Departamentos salvos.' : 'Departamento salvo.');
+        $action->execute($data, $account->requireId());
+        ApiPage::toast(count($data->companies) > 1 ? 'Departamentos salvos.' : 'Departamento salvo.');
 
         return redirect($account->path('departamentos'));
     }
@@ -110,19 +109,19 @@ final class DepartmentController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        DepartmentDirectoryQuery $items,
-        SaveDepartmentAction $save,
+        ShowDepartmentQuery $query,
+        UpdateDepartmentAction $action,
         int $itemId,
     ): RedirectResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.departments.update');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $item = $items->find($account->requireId(), $nodes, $itemId);
+        $item = $query->execute($account->requireId(), $nodes, $itemId);
         abort_if($item === null, 404);
 
-        $data = SaveDepartmentData::fromInput($request->all(), [$item->company_id], $item->id);
+        $data = UpdateDepartmentData::fromInput($request->all(), $item->company_id, $item->id);
 
-        $save->execute($account->requireId(), [$item->company_id], $item, $data);
+        $action->execute($data, $item);
         ApiPage::toast('Departamento salvo.');
 
         return redirect($account->path('departamentos'));

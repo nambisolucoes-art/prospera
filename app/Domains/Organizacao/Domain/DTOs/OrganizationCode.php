@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Organizacao\Domain\DTOs;
 
 use Illuminate\Support\Str;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Auditoria\Domain\Models;
 
 use App\Domains\Auditoria\Application\Actions\AuditContext;

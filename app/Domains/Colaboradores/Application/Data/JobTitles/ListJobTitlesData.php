@@ -1,35 +1,37 @@
 <?php
 
-namespace App\Domains\Colaboradores\Application\Data;
+declare(strict_types=1);
+
+namespace App\Domains\Colaboradores\Application\Data\JobTitles;
 
 use App\Support\NormalizedName;
 use App\Support\PageSize;
 
-/** Filtros da listagem de departamentos e de funções. */
-final readonly class CatalogFiltersData
+/** Filtros da listagem de funções. */
+final readonly class ListJobTitlesData
 {
-    private function __construct(
+    public function __construct(
         public string $search,
         public ?bool $active,
         public string $company,
         public int $pageSize,
     ) {}
 
-    /** @param array<string, mixed> $input */
+    /** @param array<string,mixed> $input */
     public static function fromInput(array $input): self
     {
         $search = $input['search'] ?? null;
-        $status = $input['status'] ?? null;
+        $company = $input['company'] ?? null;
 
         return new self(
-            is_string($search) ? mb_substr(NormalizedName::display($search), 0, 100) : '',
-            match ($status) {
+            search: is_string($search) ? mb_substr(NormalizedName::display($search), 0, 100) : '',
+            active: match ($input['status'] ?? null) {
                 'active' => true,
                 'inactive' => false,
                 default => null,
             },
-            is_string($input['company'] ?? null) ? mb_substr($input['company'], 0, 40) : '',
-            PageSize::fromInput($input['per_page'] ?? null),
+            company: is_string($company) ? mb_substr($company, 0, 40) : '',
+            pageSize: PageSize::fromInput($input['per_page'] ?? null),
         );
     }
 

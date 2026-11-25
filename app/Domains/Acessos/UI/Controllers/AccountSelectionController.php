@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Acessos\UI\Controllers;
 
 use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;

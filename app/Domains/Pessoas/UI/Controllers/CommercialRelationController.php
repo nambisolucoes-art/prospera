@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Pessoas\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
+use App\Domains\Etiquetas\Application\Queries\Tags\ListSelectableTagsQuery;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
@@ -17,7 +20,6 @@ use App\Domains\Pessoas\Application\Data\CommercialRelationLinkData;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
 use App\Domains\Pessoas\Application\Data\SavePersonData;
 use App\Domains\Pessoas\Application\Queries\CommercialRelationDirectoryQuery;
-use App\Domains\Pessoas\Application\Queries\PeopleDirectoryQuery;
 use App\Domains\Pessoas\Application\Queries\PersonAccessQuery;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Domains\Pessoas\Domain\Models\Person;
@@ -163,7 +165,7 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         EffectivePermissions $permissions,
-        PeopleDirectoryQuery $people,
+        ListSelectableTagsQuery $selectableTags,
         string $role,
     ): JsonResponse|View {
         $inspection = AccountInspectionSession::current($request->session());
@@ -189,7 +191,7 @@ final class CommercialRelationController
                 'name' => $company->name,
             ], $companies)),
             'canCreatePeople' => ! $permissions->nodesFor($user, 'account.people.create')->isEmpty(),
-            'registrationTags' => $this->registrationTags($people, $context->accountId(), $commercialRole),
+            'registrationTags' => $this->registrationTags($selectableTags, $context->accountId(), $commercialRole),
             'roleTagColor' => $commercialRole->tagColor(),
         ]);
     }
@@ -199,7 +201,7 @@ final class CommercialRelationController
         OrganizationContext $context,
         EffectivePermissions $permissions,
         CommercialRelationDirectoryQuery $relations,
-        PeopleDirectoryQuery $people,
+        ListSelectableTagsQuery $selectableTags,
         PersonAccessQuery $access,
         string $companyCode,
         int $relationId,
@@ -258,7 +260,7 @@ final class CommercialRelationController
             'companies' => [['code' => $company->code, 'name' => $company->name]],
             'companyOptions' => $options,
             'canCreatePeople' => false,
-            'registrationTags' => $this->registrationTags($people, $accountId, $commercialRole, $tagIds),
+            'registrationTags' => $this->registrationTags($selectableTags, $accountId, $commercialRole, $tagIds),
             'roleTagColor' => $commercialRole->tagColor(),
             'editing' => [
                 'id' => $relationId,
@@ -285,16 +287,12 @@ final class CommercialRelationController
      * @return Collection<int, Tag>
      */
     private function registrationTags(
-        PeopleDirectoryQuery $people,
+        ListSelectableTagsQuery $selectableTags,
         int $accountId,
         CommercialRole $role,
         array $selected = [],
     ): Collection {
-        return $people->tags($accountId)
-            ->where('module', $role->table())
-            ->whereNull('system_key')
-            ->where(fn ($query) => $query->where('active', true)->orWhereIn('id', $selected))
-            ->get(['id', 'name', 'color']);
+        return $selectableTags->execute($accountId, $role->table(), $selected);
     }
 
     /** @return array<int, NavigableCompany> */

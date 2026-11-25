@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Plataforma\Infrastructure\Session;
 
 use App\Domains\Plataforma\Domain\DTOs\AccountInspectionDTO;

@@ -8,7 +8,8 @@ use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
-use App\Domains\Colaboradores\Domain\DTOs\CatalogItemDTO;
+use App\Domains\Colaboradores\Domain\DTOs\Departments\CreateDepartmentDTO;
+use App\Domains\Colaboradores\Domain\DTOs\JobTitles\CreateJobTitleDTO;
 use App\Domains\Colaboradores\Domain\Models\Department;
 use App\Domains\Colaboradores\Domain\Models\JobTitle;
 use App\Domains\Organizacao\Domain\Models\Company;
@@ -437,7 +438,7 @@ class CompanyCatalogTest extends TestCase
 
         for ($i = 0; $i < 30; $i++) {
             $model::register(
-                new CatalogItemDTO("Item $i", true),
+                $model === Department::class ? new CreateDepartmentDTO("Item $i", true) : new CreateJobTitleDTO("Item $i", true),
                 $this->gartan->id,
                 $i % 2 === 0 ? $this->roupas->id : $this->express->id,
             )->saveOrFail();

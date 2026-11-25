@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Pessoas\Application\Actions;
 
 use App\Domains\Clientes\Domain\Models\Customer;

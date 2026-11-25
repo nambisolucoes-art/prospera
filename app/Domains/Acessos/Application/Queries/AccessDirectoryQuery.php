@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Acessos\Application\Queries;
 
 use App\Domains\Acessos\Application\Data\RoleFiltersData;

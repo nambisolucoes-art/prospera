@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Etiquetas\Domain\Concerns;
 
 use App\Domains\Etiquetas\Domain\Models\Tag;

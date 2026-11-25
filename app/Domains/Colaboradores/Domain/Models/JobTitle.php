@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Colaboradores\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Colaboradores\Domain\DTOs\CatalogItemDTO;
+use App\Domains\Colaboradores\Domain\DTOs\JobTitles\CreateJobTitleDTO;
+use App\Domains\Colaboradores\Domain\DTOs\JobTitles\UpdateJobTitleDTO;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Support\NormalizedName;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -66,15 +69,18 @@ class JobTitle extends Model implements Auditable
         return ['normalized_name' => 'Derivado do nome, sem informação própria.'];
     }
 
-    public static function register(CatalogItemDTO $data, int $accountId, int $companyId): self
+    public static function register(CreateJobTitleDTO $data, int $accountId, int $companyId): self
     {
-        $item = new self(['account_id' => $accountId, 'company_id' => $companyId]);
-        $item->revise($data);
-
-        return $item;
+        return new self([
+            'account_id' => $accountId,
+            'company_id' => $companyId,
+            'name' => NormalizedName::display($data->name),
+            'normalized_name' => NormalizedName::key($data->name),
+            'active' => $data->active,
+        ]);
     }
 
-    public function revise(CatalogItemDTO $data): void
+    public function revise(UpdateJobTitleDTO $data): void
     {
         $this->fill([
             'name' => NormalizedName::display($data->name),

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Pessoas\Domain\Enums;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;

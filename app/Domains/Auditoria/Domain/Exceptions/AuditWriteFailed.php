@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Auditoria\Domain\Exceptions;
 
 // Falha na gravação obrigatória do histórico, sem o SQL e os valores alterados que a exceção do banco levaria ao log.

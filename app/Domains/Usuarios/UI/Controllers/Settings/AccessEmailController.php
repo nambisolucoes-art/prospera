@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Usuarios\UI\Controllers\Settings;
 
 use App\Domains\Usuarios\Application\Actions\ChangeAccessEmailAction;

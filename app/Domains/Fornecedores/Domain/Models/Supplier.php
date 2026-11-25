@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Fornecedores\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;

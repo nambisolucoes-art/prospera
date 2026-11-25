@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Auditoria\Application\Queries;
 
 use App\Domains\Acessos\Domain\DTOs\AccessNode;

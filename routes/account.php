@@ -7,13 +7,13 @@ use App\Domains\Ajuda\UI\Controllers\HelpController;
 use App\Domains\Auditoria\UI\Controllers\AuditController;
 use App\Domains\Colaboradores\UI\Controllers\DepartmentController;
 use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
+use App\Domains\Etiquetas\UI\Controllers\TagController;
 use App\Domains\Organizacao\Domain\DTOs\OrganizationCode;
 use App\Domains\Organizacao\UI\Controllers\CompanyController;
 use App\Domains\Organizacao\UI\Controllers\EstablishmentContextController;
 use App\Domains\Organizacao\UI\Controllers\EstablishmentController;
 use App\Domains\Organizacao\UI\Controllers\OrganizationController;
 use App\Domains\Pessoas\UI\Controllers\CommercialRelationController;
-use App\Domains\Pessoas\UI\Controllers\DirectoryController;
 use App\Domains\Plataforma\Domain\DTOs\AccountCode;
 use App\Domains\Plataforma\UI\Controllers\AccountInspectionController;
 use App\Domains\Plataforma\UI\Controllers\ClientController;
@@ -136,35 +136,35 @@ Route::middleware(['auth', 'verified', 'account'])
         });
 
         Route::name('directory.')->group(function () {
-            $directory = DirectoryController::class;
+            $tags = TagController::class;
 
             // Listar e visualizar valem para qualquer atribuição com a permissão (8.2.1): conferido no controller.
-            Route::get('etiquetas', [$directory, 'tags'])
+            Route::get('etiquetas', [$tags, 'index'])
                 ->name('tags.index');
 
-            Route::get('etiquetas/cadastrar', [$directory, 'tagForm'])
+            Route::get('etiquetas/cadastrar', [$tags, 'form'])
                 ->name('tags.create')
                 ->middleware('can:account.tags.create');
 
-            Route::get('etiquetas/{tagId}/visualizar', [$directory, 'previewTag'])
+            Route::get('etiquetas/{tagId}/visualizar', [$tags, 'preview'])
                 ->whereNumber('tagId')
                 ->name('tags.view');
 
-            Route::get('etiquetas/{tagId}/editar', [$directory, 'tagForm'])
+            Route::get('etiquetas/{tagId}/editar', [$tags, 'form'])
                 ->whereNumber('tagId')
                 ->name('tags.edit')
                 ->middleware('can:account.tags.update');
 
-            Route::post('etiquetas', [$directory, 'saveTag'])
+            Route::post('etiquetas', [$tags, 'store'])
                 ->name('tags.store')
                 ->middleware('can:account.tags.create');
 
-            Route::delete('etiquetas/{tagId}', [$directory, 'deleteTag'])
+            Route::delete('etiquetas/{tagId}', [$tags, 'destroy'])
                 ->whereNumber('tagId')
                 ->name('tags.destroy')
                 ->middleware('can:account.tags.delete');
 
-            Route::patch('etiquetas/{tagId}', [$directory, 'saveTag'])
+            Route::patch('etiquetas/{tagId}', [$tags, 'update'])
                 ->whereNumber('tagId')
                 ->name('tags.update')
                 ->middleware('can:account.tags.update');

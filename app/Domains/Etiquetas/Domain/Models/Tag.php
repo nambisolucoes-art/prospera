@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Etiquetas\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Etiquetas\Domain\DTOs\TagDTO;
+use App\Domains\Etiquetas\Domain\DTOs\Tags\CreateTagDTO;
+use App\Domains\Etiquetas\Domain\DTOs\Tags\UpdateTagDTO;
 use App\Domains\Pessoas\Domain\Models\Person;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -58,18 +61,21 @@ class Tag extends Model implements Auditable
         ];
     }
 
-    public static function register(TagDTO $data, int $accountId): self
+    public static function register(CreateTagDTO $data, int $accountId): self
     {
-        $tag = new self(['account_id' => $accountId]);
-        $tag->revise($data);
-
-        return $tag;
+        return new self([
+            'account_id' => $accountId,
+            'name' => trim($data->name),
+            'module' => $data->module,
+            'color' => $data->color,
+            'active' => $data->active,
+        ]);
     }
 
-    public function revise(TagDTO $data): void
+    public function revise(UpdateTagDTO $data): void
     {
         $this->fill([
-            'name' => $data->name,
+            'name' => trim($data->name),
             'module' => $data->module,
             'color' => $data->color,
             'active' => $data->active,

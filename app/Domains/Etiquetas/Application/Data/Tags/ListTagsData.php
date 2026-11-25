@@ -1,13 +1,15 @@
 <?php
 
-namespace App\Domains\Etiquetas\Application\Data;
+declare(strict_types=1);
+
+namespace App\Domains\Etiquetas\Application\Data\Tags;
 
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Support\PageSize;
 
-final readonly class TagFiltersData
+final readonly class ListTagsData
 {
-    private function __construct(
+    public function __construct(
         public string $search,
         public string $module,
         public ?bool $active,

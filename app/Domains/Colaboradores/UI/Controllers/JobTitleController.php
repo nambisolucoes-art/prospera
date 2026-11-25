@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Colaboradores\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Colaboradores\Application\Actions\SaveJobTitleAction;
-use App\Domains\Colaboradores\Application\Data\CatalogCompaniesData;
-use App\Domains\Colaboradores\Application\Data\CatalogFiltersData;
-use App\Domains\Colaboradores\Application\Data\SaveJobTitleData;
-use App\Domains\Colaboradores\Application\Queries\JobTitleDirectoryQuery;
+use App\Domains\Colaboradores\Application\Actions\JobTitles\CreateJobTitleAction;
+use App\Domains\Colaboradores\Application\Actions\JobTitles\UpdateJobTitleAction;
+use App\Domains\Colaboradores\Application\Data\JobTitles\CreateJobTitleData;
+use App\Domains\Colaboradores\Application\Data\JobTitles\ListJobTitlesData;
+use App\Domains\Colaboradores\Application\Data\JobTitles\UpdateJobTitleData;
+use App\Domains\Colaboradores\Application\Queries\JobTitles\ListJobTitlesQuery;
+use App\Domains\Colaboradores\Application\Queries\JobTitles\ShowJobTitleQuery;
 use App\Domains\Colaboradores\Domain\Models\JobTitle;
 use App\Domains\Organizacao\Application\Queries\OrganizationContextQuery;
 use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
@@ -29,16 +33,16 @@ final class JobTitleController
         AccountContext $account,
         EffectivePermissions $permissions,
         OrganizationContextQuery $units,
-        JobTitleDirectoryQuery $items,
+        ListJobTitlesQuery $query,
     ): JsonResponse|View {
         $accountId = $account->requireId();
 
         $nodes = $permissions->nodesFor($request->user(), 'account.job-titles.list');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $filters = CatalogFiltersData::fromInput($request->query());
+        $filters = ListJobTitlesData::fromInput($request->query());
 
-        $list = $items->list($accountId, $nodes, $filters, $account->path('funcoes'));
+        $list = $query->execute($accountId, $nodes, $filters, $account->path('funcoes'));
 
         $creatable = $units->companies($accountId, $permissions->nodesFor($request->user(), 'account.job-titles.create'));
 
@@ -61,13 +65,13 @@ final class JobTitleController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        JobTitleDirectoryQuery $items,
+        ShowJobTitleQuery $query,
         int $itemId,
     ): JsonResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.job-titles.view');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $item = $items->find($account->requireId(), $nodes, $itemId);
+        $item = $query->execute($account->requireId(), $nodes, $itemId);
         abort_if($item === null, 404);
 
         return response()->json([
@@ -85,7 +89,7 @@ final class JobTitleController
         AccountContext $account,
         EffectivePermissions $permissions,
         OrganizationContextQuery $units,
-        SaveJobTitleAction $save,
+        CreateJobTitleAction $action,
     ): RedirectResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.job-titles.create');
         abort_unless($nodes->reachesCompanies(), 403);
@@ -93,15 +97,10 @@ final class JobTitleController
         $allowed = $units->companies($account->requireId(), $nodes);
         abort_if($allowed === [], 403);
 
-        $selected = CatalogCompaniesData::fromInput(
-            $request->all(),
-            $allowed,
-            fn () => SaveJobTitleData::fromInput($request->all(), [], null),
-        );
-        $data = SaveJobTitleData::fromInput($request->all(), $selected->ids(), null);
+        $data = CreateJobTitleData::fromInput($request->all(), $allowed);
 
-        $save->execute($account->requireId(), $selected->ids(), null, $data);
-        ApiPage::toast(count($selected->ids()) > 1 ? 'Funções salvas.' : 'Função salva.');
+        $action->execute($data, $account->requireId());
+        ApiPage::toast(count($data->companies) > 1 ? 'Funções salvas.' : 'Função salva.');
 
         return redirect($account->path('funcoes'));
     }
@@ -110,19 +109,19 @@ final class JobTitleController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        JobTitleDirectoryQuery $items,
-        SaveJobTitleAction $save,
+        ShowJobTitleQuery $query,
+        UpdateJobTitleAction $action,
         int $itemId,
     ): RedirectResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.job-titles.update');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $item = $items->find($account->requireId(), $nodes, $itemId);
+        $item = $query->execute($account->requireId(), $nodes, $itemId);
         abort_if($item === null, 404);
 
-        $data = SaveJobTitleData::fromInput($request->all(), [$item->company_id], $item->id);
+        $data = UpdateJobTitleData::fromInput($request->all(), $item->company_id, $item->id);
 
-        $save->execute($account->requireId(), [$item->company_id], $item, $data);
+        $action->execute($data, $item);
         ApiPage::toast('Função salva.');
 
         return redirect($account->path('funcoes'));

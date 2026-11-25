@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Ajuda\Application\Queries;
 
 use App\Domains\Acessos\Application\Context\AccountContext;

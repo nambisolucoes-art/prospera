@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domains\Pessoas\Application\Data;
 
 use App\Domains\Pessoas\Domain\Models\Person;
