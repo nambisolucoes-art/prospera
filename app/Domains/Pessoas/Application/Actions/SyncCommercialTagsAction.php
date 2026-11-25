@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace App\Domains\Pessoas\Application\Actions;
 
 use App\Domains\Clientes\Domain\Models\Customer;
+use App\Domains\Colaboradores\Domain\Models\Employee;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
 use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialTagsData;
-use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 final readonly class SyncCommercialTagsAction
 {
-    public function execute(CommercialTagsData $selection, CommercialRole $role, Customer|Supplier $relation): void
+    public function execute(CommercialTagsData $selection, string $module, Customer|Supplier|Employee $relation): void
     {
-        $table = $role->table().'_tags';
+        $table = $module.'_tags';
         $scope = DB::table($table)
             ->where('account_id', $relation->account_id)
             ->where('company_id', $relation->company_id)
@@ -33,7 +33,7 @@ final readonly class SyncCommercialTagsAction
         $added = array_diff($after, $before);
         $removed = array_diff($before, $after);
         $valid = Tag::where('account_id', $relation->account_id)
-            ->where('module', $role->table())
+            ->where('module', $module)
             ->whereNull('system_key')
             ->where('active', true)
             ->whereIn('id', $added)

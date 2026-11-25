@@ -191,6 +191,7 @@ export function tourFor(
       : [
         at('employee-companies', 'Empresas', 'Marque uma ou mais empresas. Cada uma recebe um vínculo de colaborador independente, gravado numa única operação. Com uma só empresa autorizada, este passo não aparece.'),
         at('person-identity', 'Pessoa', 'Informe o CPF ou CNPJ completo e aguarde a busca (ou use a lupa). Se a pessoa já existe na conta, ela é reaproveitada sem duplicar o documento.'),
+        at('employee-tags', 'Etiquetas', 'A etiqueta Colaborador vem fixa e é derivada do vínculo. Escolha também as etiquetas do módulo Colaboradores, que valem para todos os vínculos criados.'),
         at('employee-work-contacts', 'Contatos profissionais', 'Opcionais e próprios de cada empresa. Não alteram os contatos centrais da pessoa.'),
       ]);
   } else if (/^\/conta\/(departamentos|funcoes)$/.test(path)) {

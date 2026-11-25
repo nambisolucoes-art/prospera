@@ -19,15 +19,16 @@ class Tag extends Model implements Auditable
 {
     use AuditsChanges;
 
-    public const MODULES = ['people', 'customers', 'suppliers'];
+    public const MODULES = ['people', 'customers', 'suppliers', 'employees'];
 
-    public const COMMERCIAL_MODULES = ['customers', 'suppliers'];
+    public const COMMERCIAL_MODULES = ['customers', 'suppliers', 'employees'];
 
     public function isAssigned(): bool
     {
         return $this->people()->exists()
             || DB::table('customers_tags')->where('tag_id', $this->id)->exists()
-            || DB::table('suppliers_tags')->where('tag_id', $this->id)->exists();
+            || DB::table('suppliers_tags')->where('tag_id', $this->id)->exists()
+            || DB::table('employees_tags')->where('tag_id', $this->id)->exists();
     }
 
     protected $attributes = ['active' => true];

@@ -72,6 +72,7 @@ return [
                 'people' => 'Cadastro anterior',
                 'customers' => 'Clientes',
                 'suppliers' => 'Fornecedores',
+                'employees' => 'Colaboradores',
             ],
             'system_key' => [
                 'user' => 'Usuário',

@@ -6,6 +6,7 @@ namespace App\Domains\Colaboradores\Application\Data\Employees;
 
 use App\Domains\Colaboradores\Domain\Exceptions\CompanyNotAvailable;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialTagsData;
 use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Support\ContactInput;
@@ -22,6 +23,7 @@ final readonly class CreateEmployeeData
     public function __construct(
         public int|CreatePersonData $person,
         public array $links,
+        public CommercialTagsData $tags,
     ) {}
 
     /**
@@ -75,7 +77,7 @@ final readonly class CreateEmployeeData
             $person = CreatePersonData::fromInput($fields, $accountId);
         }
 
-        return new self(person: $person, links: $links);
+        return new self(person: $person, links: $links, tags: CommercialTagsData::fromInput($input['tag_ids'] ?? null));
     }
 
     /** @return array<string,list<string>> */

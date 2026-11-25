@@ -18,6 +18,7 @@ A tela é única para a conta: uma linha por Pessoa, com os vínculos das empres
 | --- | --- | --- | --- |
 | Cadastro | `employee-companies` | Empresas | Cada empresa marcada recebe um vínculo independente, numa única operação. Passo ausente com uma só empresa. |
 | Cadastro | `person-identity` | Pessoa | Busca pelo documento completo para reaproveitar a pessoa sem duplicar. |
+| Cadastro | `employee-tags` | Etiquetas | Etiqueta Colaborador fixa, derivada do vínculo, mais as etiquetas convencionais do módulo. |
 | Cadastro | `employee-work-contacts` | Contatos profissionais | Próprios de cada empresa, sem alterar os contatos centrais. |
 | Ficha | `person-identity` | Dados centrais da pessoa | Valem para todas as empresas e papéis. |
 | Ficha | `employee-tags` | Etiquetas | Derivadas, somente leitura. |

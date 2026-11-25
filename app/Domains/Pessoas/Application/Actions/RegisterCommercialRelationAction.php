@@ -74,7 +74,7 @@ final readonly class RegisterCommercialRelationAction
                         ->where('person_id', $personId)
                         ->firstOrFail();
 
-                    $this->syncTags->execute($data->tags, $role, $relation);
+                    $this->syncTags->execute($data->tags, $role->table(), $relation);
                 }
             }
         });

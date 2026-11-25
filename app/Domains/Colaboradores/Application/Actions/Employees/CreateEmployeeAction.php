@@ -13,6 +13,7 @@ use App\Domains\Colaboradores\Domain\Models\Employee;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Organizacao\Application\Queries\Companies\LockActiveCompaniesByCodeQuery;
 use App\Domains\Pessoas\Application\Actions\People\CreatePersonAction;
+use App\Domains\Pessoas\Application\Actions\SyncCommercialTagsAction;
 use App\Domains\Pessoas\Domain\Exceptions\PersonChangeNotAllowed;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -32,6 +33,7 @@ final readonly class CreateEmployeeAction
 {
     public function __construct(
         private CreatePersonAction $createPerson,
+        private SyncCommercialTagsAction $syncTags,
         private LockActiveCompaniesByCodeQuery $lockActiveCompanies,
     ) {}
 
@@ -99,6 +101,8 @@ final readonly class CreateEmployeeAction
                         'companies' => 'Esta pessoa já é colaboradora em '.$link->company->name.'.',
                     ]);
                 }
+
+                $this->syncTags->execute($data->tags, 'employees', $employee);
 
                 $employees[] = $employee;
             }

@@ -23,7 +23,8 @@ final readonly class ListTagsQuery
             ->select('tags.*')
             ->selectRaw(
                 '(exists (select 1 from customers_tags where tag_id = tags.id) '
-                .'or exists (select 1 from suppliers_tags where tag_id = tags.id)) as commercial_assigned',
+                .'or exists (select 1 from suppliers_tags where tag_id = tags.id) '
+                .'or exists (select 1 from employees_tags where tag_id = tags.id)) as commercial_assigned',
             )
             ->withCount('people')
             ->when(! $canList, fn (Builder $query) => $query->whereRaw('1 = 0'))

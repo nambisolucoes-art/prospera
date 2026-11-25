@@ -10,6 +10,7 @@ use App\Domains\Colaboradores\Application\Data\Employees\UpdateEmployeeData;
 use App\Domains\Colaboradores\Domain\DTOs\Employees\UpdateEmployeeDTO;
 use App\Domains\Colaboradores\Domain\Models\Employee;
 use App\Domains\Organizacao\Domain\Models\Company;
+use App\Domains\Pessoas\Application\Actions\SyncCommercialTagsAction;
 use App\Support\Exceptions\ResourceNotAvailable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Gate;
  */
 final readonly class UpdateEmployeeAction
 {
+    public function __construct(private SyncCommercialTagsAction $syncTags) {}
+
     /**
      * @throws AuthorizationException
      * @throws ResourceNotAvailable
@@ -64,6 +67,11 @@ final readonly class UpdateEmployeeAction
                 } else {
                     Gate::authorize('account.employees.deactivate', $node);
                 }
+            }
+
+            if ($data->tags !== null) {
+                Gate::authorize('account.employees.update', $node);
+                $this->syncTags->execute($data->tags, 'employees', $lockedEmployee);
             }
 
             if (! $lockedEmployee->isDirty()) {

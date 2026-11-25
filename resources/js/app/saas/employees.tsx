@@ -4,6 +4,7 @@ import BusinessListSearch from '@/components/BusinessList/BusinessListSearch';
 import { useBusinessListFilters } from '@/components/BusinessList/useBusinessListFilters';
 import Button from '@/components/Button/Button';
 import Label from '@/components/Label/Label';
+import TagMarquee from '@/components/TagMarquee/TagMarquee';
 import SelectControl from '@/components/SelectControl/SelectControl';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
@@ -134,15 +135,13 @@ export default function Employees({ employees, filters, companies, canCreate, ca
               label: 'Empresas',
               width: 280,
               render: (row) => (
-                <ul className="employees__companies">
+                <TagMarquee>
                   {row.links.map((link) => (
-                    <li key={link.id}>
-                      <Label variant={link.active ? 'success' : 'danger'}>
-                        {link.company_name}{link.active ? '' : ' (inativo)'}
-                      </Label>
-                    </li>
+                    <Label key={link.id} variant={link.active ? 'success' : 'danger'}>
+                      {link.company_name}{link.active ? '' : ' (inativo)'}
+                    </Label>
                   ))}
-                </ul>
+                </TagMarquee>
               ),
             },
             {

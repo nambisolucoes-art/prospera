@@ -1,12 +1,3 @@
-.employees__companies {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
 .employees__link {
   display: grid;
   gap: 8px;

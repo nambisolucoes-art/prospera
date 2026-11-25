@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import BusinessForm, { BusinessFormActions, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
+import BusinessForm, { BusinessFormActions, BusinessFormRow, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select, type Errors } from '@/components/BusinessForm/BusinessFormFields';
 import TaxDocumentField from '@/components/BusinessForm/TaxDocumentField';
 import Button from '@/components/Button/Button';
@@ -7,7 +7,7 @@ import CardBox from '@/components/CardBox/CardBox';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import Label from '@/components/Label/Label';
 import SelectChecklist from '@/components/SelectControl/SelectChecklist';
-import TagLabel from '@/components/TagLabel/TagLabel';
+import TagSelect from '@/components/TagSelect/TagSelect';
 import { useApiPage } from '@/hooks/useApiPage';
 import { useContextUrl } from '@/hooks/useContextUrl';
 import type { SessionProps } from '@/types/Session.types';
@@ -32,6 +32,7 @@ type Link = {
   work_email: string | null;
   work_phone: string | null;
   work_whatsapp: string | null;
+  tag_ids: number[];
   can_update: boolean;
   can_change_status: boolean;
 };
@@ -39,6 +40,7 @@ type Tag = { id: number; name: string; color: string };
 type Props = {
   companies?: CompanyOption[];
   canCreatePeople?: boolean;
+  registrationTags?: Tag[];
   person?: {
     id: number;
     name: string;
@@ -52,6 +54,40 @@ type Props = {
   access?: boolean | null;
   canSeeAccess?: boolean;
 };
+
+const EMPLOYEE_TAG_COLOR = '#1abc9c';
+
+// Contatos profissionais no mesmo padrão dos contatos da Pessoa: ícones, telefone e WhatsApp lado a lado.
+function WorkContactFields({ names, values, errors, disabled }: {
+  names: { email: string; phone: string; whatsapp: string };
+  values?: { email: string | null; phone: string | null; whatsapp: string | null };
+  errors: { email?: string; phone?: string; whatsapp?: string };
+  disabled: boolean;
+}) {
+  return (
+    <>
+      <BusinessFormRow>
+        <MaskedField mask="phone" label="Telefone profissional" name={names.phone} type="tel" leadingIcon="fa fa-phone"
+          defaultValue={values?.phone ?? ''} error={errors.phone} disabled={disabled} />
+        <MaskedField mask="phone" label="WhatsApp profissional" name={names.whatsapp} type="tel"
+          leadingIcon="fa fa-whatsapp" defaultValue={values?.whatsapp ?? ''} error={errors.whatsapp} disabled={disabled} />
+      </BusinessFormRow>
+      <Field label="E-mail profissional" name={names.email} type="email" trailingIcon="fa fa-envelope-o"
+        defaultValue={values?.email ?? ''} error={errors.email} disabled={disabled} />
+    </>
+  );
+}
+
+// Etiquetas derivadas, fixas e somente leitura, como a etiqueta do papel em Clientes e Fornecedores.
+function DerivedTags({ tags }: { tags: Tag[] }) {
+  const options = tags.map((tag) => ({ ...tag, locked: true, displayOnly: true }));
+
+  return (
+    <BusinessFormSection title="Etiquetas" tourTarget="employee-tags">
+      <TagSelect options={options} selected={options.map((tag) => tag.id)} onChange={() => undefined} />
+    </BusinessFormSection>
+  );
+}
 
 const DOCUMENT_LOOKUP_DELAY = 1200;
 
@@ -72,12 +108,18 @@ function WorkContacts({ companies, errors, disabled }: { companies: CompanyOptio
       {companies.map((company) => (
         <div key={company.code} className="employees__link">
           {several && <h3 className="employees__link-title">{company.name}</h3>}
-          <Field label="E-mail profissional" type="email" name={`work[${company.code}][email]`}
-            error={errors[`work.${company.code}.email`]} disabled={disabled} />
-          <MaskedField mask="phone" label="Telefone profissional" type="tel" name={`work[${company.code}][phone]`}
-            error={errors[`work.${company.code}.phone`]} disabled={disabled} />
-          <MaskedField mask="phone" label="WhatsApp profissional" type="tel" name={`work[${company.code}][whatsapp]`}
-            error={errors[`work.${company.code}.whatsapp`]} disabled={disabled} />
+          <WorkContactFields
+            names={{
+              email: `work[${company.code}][email]`,
+              phone: `work[${company.code}][phone]`,
+              whatsapp: `work[${company.code}][whatsapp]`,
+            }}
+            errors={{
+              email: errors[`work.${company.code}.email`],
+              phone: errors[`work.${company.code}.phone`],
+              whatsapp: errors[`work.${company.code}.whatsapp`],
+            }}
+            disabled={disabled} />
         </div>
       ))}
     </BusinessFormSection>
@@ -127,7 +169,8 @@ export default function EmployeeForm(props: Props) {
   return props.person ? <Edit key={props.person.id} {...props} /> : <Register {...props} />;
 }
 
-function Register({ companies = [], canCreatePeople = false }: Props) {
+function Register({ companies = [], canCreatePeople = false, registrationTags = [] }: Props) {
+  const [tagIds, setTagIds] = useState<number[]>([]);
   const contextUrl = useContextUrl();
   const [selected, setSelected] = useState<string[]>(() => (companies.length === 1 ? [companies[0].code] : []));
   const [document, setDocument] = useState('');
@@ -268,6 +311,15 @@ function Register({ companies = [], canCreatePeople = false }: Props) {
                     action={searchButton(document, documentType)} />
                 </BusinessFormSection>
               )}
+              <BusinessFormSection title="Etiquetas" tourTarget="employee-tags">
+                <TagSelect
+                  options={[{ id: 0, name: 'Colaborador', color: EMPLOYEE_TAG_COLOR, locked: true, displayOnly: true },
+                    ...registrationTags]}
+                  selected={[0, ...tagIds]}
+                  onChange={(ids) => setTagIds(ids.filter((id) => id !== 0))}
+                  disabled={processing}
+                  error={Object.entries(errors).find(([key]) => key === 'tag_ids' || key.startsWith('tag_ids.'))?.[1]} />
+              </BusinessFormSection>
               <WorkContacts companies={chosen} errors={errors} disabled={processing} />
               <BusinessFormActions processing={processing} cancelHref="@/colaboradores"
                 submitDisabled={searching || selected.length === 0 || (!found && !canCreatePeople)} />
@@ -279,7 +331,8 @@ function Register({ companies = [], canCreatePeople = false }: Props) {
   );
 }
 
-function LinkForm({ link, personId, writable }: { link: Link; personId: number; writable: boolean }) {
+function LinkForm({ link, personId, writable, tags }: { link: Link; personId: number; writable: boolean; tags: Tag[] }) {
+  const [tagIds, setTagIds] = useState(link.tag_ids);
   const [status, setStatus] = useState(link.active ? '1' : '0');
   const editable = writable && link.company_active;
 
@@ -288,7 +341,8 @@ function LinkForm({ link, personId, writable }: { link: Link; personId: number; 
       <BusinessForm action={`@/colaboradores/${personId}/vinculos/${link.id}`} method="patch"
         className="business-form--wide-labels">
         {({ errors, processing }) => {
-          const disabled = !editable || !link.can_update || processing;
+          const readOnly = !editable || !link.can_update;
+          const disabled = readOnly || processing;
 
           return (
             <>
@@ -304,12 +358,16 @@ function LinkForm({ link, personId, writable }: { link: Link; personId: number; 
                 ) : (
                   <Field label="Situação" value={link.active ? 'Ativo' : 'Inativo'} readOnly />
                 )}
-                <Field label="E-mail profissional" type="email" name="work_email"
-                  defaultValue={link.work_email ?? ''} error={errors.work_email} disabled={disabled} />
-                <MaskedField mask="phone" label="Telefone profissional" type="tel" name="work_phone"
-                  defaultValue={link.work_phone ?? ''} error={errors.work_phone} disabled={disabled} />
-                <MaskedField mask="phone" label="WhatsApp profissional" type="tel" name="work_whatsapp"
-                  defaultValue={link.work_whatsapp ?? ''} error={errors.work_whatsapp} disabled={disabled} />
+                {!readOnly && <input type="hidden" name="edit_tags" value="1" />}
+                <TagSelect
+                  options={readOnly ? tags.map((tag) => ({ ...tag, locked: true, displayOnly: true })) : tags}
+                  selected={tagIds} onChange={setTagIds} disabled={processing}
+                  error={Object.entries(errors).find(([key]) => key === 'tag_ids' || key.startsWith('tag_ids.'))?.[1]} />
+                <WorkContactFields
+                  names={{ email: 'work_email', phone: 'work_phone', whatsapp: 'work_whatsapp' }}
+                  values={{ email: link.work_email, phone: link.work_phone, whatsapp: link.work_whatsapp }}
+                  errors={{ email: errors.work_email, phone: errors.work_phone, whatsapp: errors.work_whatsapp }}
+                  disabled={disabled} />
               </BusinessFormSection>
               {editable && (link.can_update || link.can_change_status) && (
                 <BusinessFormActions processing={processing} cancelHref="@/colaboradores" />
@@ -322,7 +380,7 @@ function LinkForm({ link, personId, writable }: { link: Link; personId: number; 
   );
 }
 
-function Edit({ person, links = [], linkable = [], access, canSeeAccess = false }: Props) {
+function Edit({ person, links = [], linkable = [], access, canSeeAccess = false, registrationTags = [] }: Props) {
   const { auth } = useApiPage<SessionProps>().props;
   const writable = auth.inspection_mode !== 'read-only';
   const [selected, setSelected] = useState<string[]>([]);
@@ -357,16 +415,7 @@ function Edit({ person, links = [], linkable = [], access, canSeeAccess = false 
                   <Field label="Nome" value={person.name} readOnly />
                 </BusinessFormSection>
               )}
-              <BusinessFormSection title="Etiquetas" tourTarget="employee-tags">
-                <FormHelp className="business-form__control-start">
-                  Derivadas dos vínculos e dos demais papéis da pessoa. Não são editadas aqui.
-                </FormHelp>
-                <div className="directory-tags">
-                  {person.tags.length
-                    ? person.tags.map((tag) => <TagLabel key={tag.id} name={tag.name} color={tag.color} />)
-                    : 'Não informado'}
-                </div>
-              </BusinessFormSection>
+              <DerivedTags tags={person.tags} />
               {canEditCentral && <BusinessFormActions processing={processing} cancelHref="@/colaboradores" />}
             </>
           )}
@@ -374,7 +423,7 @@ function Edit({ person, links = [], linkable = [], access, canSeeAccess = false 
       </CardBox>
 
       <div data-tour="employee-links">
-        {links.map((link) => <LinkForm key={link.id} link={link} personId={person.id} writable={writable} />)}
+        {links.map((link) => <LinkForm key={link.id} link={link} personId={person.id} writable={writable} tags={registrationTags} />)}
       </div>
 
       {writable && linkable.length > 0 && (

@@ -16,10 +16,12 @@ use App\Domains\Colaboradores\Application\Data\Employees\UpdateEmployeeData;
 use App\Domains\Colaboradores\Application\Queries\Employees\FindEmployeePersonQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeLinksQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeesQuery;
+use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeTagIdsQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\PersonHasAccountAccessQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ShowEmployeeLinkQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ShowEmployeePersonQuery;
 use App\Domains\Colaboradores\Domain\Models\Employee;
+use App\Domains\Etiquetas\Application\Queries\Tags\ListSelectableTagsQuery;
 use App\Domains\Organizacao\Application\Queries\Context\ListNavigableCompaniesQuery;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialPersonChangesData;
@@ -126,6 +128,7 @@ final class EmployeeController
         AccountContext $account,
         EffectivePermissions $permissions,
         ListNavigableCompaniesQuery $listNavigableCompanies,
+        ListSelectableTagsQuery $selectableTags,
     ): JsonResponse|View {
         abort_if(AccountInspectionSession::current($request->session())?->mode === AccountInspectionMode::ReadOnly, 403);
 
@@ -138,6 +141,7 @@ final class EmployeeController
         return ApiPage::respond([
             'companies' => $this->options($companies),
             'canCreatePeople' => ! $permissions->nodesFor($request->user(), 'account.people.create')->isEmpty(),
+            'registrationTags' => $selectableTags->execute($account->requireId(), 'employees'),
         ]);
     }
 
@@ -228,6 +232,8 @@ final class EmployeeController
         PersonHasAccountAccessQuery $hasAccess,
         ListDerivedPersonTagsQuery $derivedTags,
         PersonAccessQuery $personAccess,
+        ListEmployeeTagIdsQuery $linkTagIds,
+        ListSelectableTagsQuery $selectableTags,
         int $personId,
     ): JsonResponse|View {
         $user = $request->user();
@@ -273,7 +279,10 @@ final class EmployeeController
 
         $canSeeAccess = ! $permissions->nodesFor($user, 'account.users.list')->isEmpty();
 
+        $tagIds = $linkTagIds->execute($accountId, array_values($links->pluck('id')->map(fn ($id) => (int) $id)->all()));
+
         return ApiPage::respond([
+            'registrationTags' => $selectableTags->execute($accountId, 'employees', array_merge([], ...array_values($tagIds))),
             'person' => [
                 'id' => $person->id,
                 'name' => $person->name,
@@ -293,6 +302,7 @@ final class EmployeeController
                 'work_email' => $link->work_email,
                 'work_phone' => $link->work_phone,
                 'work_whatsapp' => $link->work_whatsapp,
+                'tag_ids' => $tagIds[$link->id] ?? [],
                 'can_update' => $this->covers($updatable, $link->company_id),
                 'can_change_status' => $link->active
                     ? $this->covers($deactivatable, $link->company_id)

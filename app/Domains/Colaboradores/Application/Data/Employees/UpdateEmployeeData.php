@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Colaboradores\Application\Data\Employees;
 
+use App\Domains\Pessoas\Application\Data\CommercialRelations\CommercialTagsData;
 use App\Support\ContactInput;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -17,6 +18,7 @@ final readonly class UpdateEmployeeData
         public ?string $workEmail,
         public ?string $workPhone,
         public ?string $workWhatsapp,
+        public ?CommercialTagsData $tags,
     ) {}
 
     /**
@@ -29,6 +31,8 @@ final readonly class UpdateEmployeeData
         $editsContacts = array_key_exists('work_email', $input)
             || array_key_exists('work_phone', $input)
             || array_key_exists('work_whatsapp', $input);
+
+        $editsTags = array_key_exists('tag_ids', $input) || filter_var($input['edit_tags'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
         $contacts = ContactInput::normalize([
             'email' => $input['work_email'] ?? null,
@@ -53,6 +57,7 @@ final readonly class UpdateEmployeeData
             workEmail: $values['work_email'] ?? null,
             workPhone: $values['work_phone'] ?? null,
             workWhatsapp: $values['work_whatsapp'] ?? null,
+            tags: $editsTags ? CommercialTagsData::fromInput($input['tag_ids'] ?? null) : null,
         );
     }
 

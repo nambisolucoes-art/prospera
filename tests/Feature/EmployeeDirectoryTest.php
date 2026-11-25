@@ -564,4 +564,48 @@ class EmployeeDirectoryTest extends TestCase
         $this->assertSame(0, DB::table('person_tag')->where('person_id', $person->id)->count());
         $this->assertSame(0, $person->customers()->count() + $person->suppliers()->count());
     }
+
+    public function test_conventional_tags_of_the_employees_module_belong_to_each_link(): void
+    {
+        $this->actingAs($this->owner);
+        $this->postJson('/conta/etiquetas', ['name' => 'Equipe de loja', 'module' => 'employees', 'color' => '#336699'])
+            ->assertSuccessful();
+        $this->postJson('/conta/etiquetas', ['name' => 'Cliente VIP', 'module' => 'customers', 'color' => '#336699'])
+            ->assertSuccessful();
+        $store = Tag::where('name', 'Equipe de loja')->sole();
+        $customerTag = Tag::where('name', 'Cliente VIP')->sole();
+        $this->assertSame('employees', $store->module);
+
+        // Etiqueta de outro módulo é recusada e nada é gravado.
+        $this->register([$this->roupas], ['tag_ids' => [$customerTag->id]])->assertUnprocessable()
+            ->assertJsonValidationErrors('tag_ids');
+        $this->assertSame(0, Employee::count());
+
+        $this->register([$this->roupas, $this->express], ['tag_ids' => [$store->id]])->assertNoContent();
+        $this->assertSame(2, DB::table('employees_tags')->where('tag_id', $store->id)->count());
+
+        // A seleção pertence ao vínculo: limpar numa empresa não altera a outra.
+        $person = $this->maria();
+        $roupas = Employee::where('company_id', $this->roupas->id)->sole();
+        $this->patchJson('/conta/colaboradores/'.$person->id.'/vinculos/'.$roupas->id, ['edit_tags' => '1'])
+            ->assertNoContent();
+        $this->assertSame(0, DB::table('employees_tags')->where('relation_id', $roupas->id)->count());
+        $this->assertSame(1, DB::table('employees_tags')->where('tag_id', $store->id)->count());
+
+        $form = $this->getJson('/conta/colaboradores/'.$person->id.'/editar')->assertOk();
+        $this->assertSame([[$store->id], []], collect($form->json('links'))->sortByDesc(
+            fn ($link) => count($link['tag_ids']),
+        )->pluck('tag_ids')->values()->all());
+        $form->assertJsonCount(1, 'registrationTags');
+
+        // Editar etiquetas exige editar colaboradores, e a etiqueta em uso não pode ser excluída.
+        $viewer = $this->operatorOn($this->express, ['list', 'view', 'deactivate']);
+        $express = Employee::where('company_id', $this->express->id)->sole();
+        $this->actingAs($viewer)->patchJson('/conta/colaboradores/'.$person->id.'/vinculos/'.$express->id, ['edit_tags' => '1'])
+            ->assertForbidden();
+        $this->assertSame(1, DB::table('employees_tags')->where('relation_id', $express->id)->count());
+
+        $this->actingAs($this->owner)->deleteJson('/conta/etiquetas/'.$store->id)->assertStatus(422);
+        $this->assertSame(0, DB::table('person_tag')->where('tag_id', $store->id)->count());
+    }
 }

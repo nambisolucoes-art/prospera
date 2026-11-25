@@ -88,7 +88,7 @@ final readonly class UpdateCommercialRelationAction
             }
 
             if ($data->tags !== null) {
-                $this->syncTags->execute($data->tags, $role, $relation);
+                $this->syncTags->execute($data->tags, $role->table(), $relation);
             }
         });
     }
