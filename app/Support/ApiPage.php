@@ -8,7 +8,7 @@ use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableEstablishment;
-use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
+use App\Domains\Plataforma\Application\Queries\Memberships\CountSelectableAccountsQuery;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -39,7 +39,7 @@ final class ApiPage
                 // A troca de conta só aparece com mais de uma conta disponível e nunca durante a inspeção.
                 'accounts' => $user === null || $user->is_saas_admin || $inspection !== null
                     ? 0
-                    : app(AccountMembershipsQuery::class)->selectableCount($user->id),
+                    : app(CountSelectableAccountsQuery::class)->execute($user->id),
                 'user' => $user ? [
                     ...$user->only(['id', 'name', 'email', 'email_verified_at', 'is_saas_admin']),
                     'photo_url' => $user->profile_photo

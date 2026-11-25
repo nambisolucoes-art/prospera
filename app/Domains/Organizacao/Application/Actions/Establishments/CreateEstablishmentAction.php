@@ -7,7 +7,7 @@ namespace App\Domains\Organizacao\Application\Actions\Establishments;
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
-use App\Domains\Organizacao\Application\Queries\AvailableOrganizationCodeQuery;
+use App\Domains\Organizacao\Application\Queries\Codes\AvailableEstablishmentCodeQuery;
 use App\Domains\Organizacao\Domain\DTOs\Establishments\CreateEstablishmentDTO;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
@@ -20,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 
 final readonly class CreateEstablishmentAction
 {
-    public function __construct(private AvailableOrganizationCodeQuery $codes) {}
+    public function __construct(private AvailableEstablishmentCodeQuery $availableEstablishmentCode) {}
 
     /**
      * @throws AuthorizationException
@@ -70,7 +70,7 @@ final readonly class CreateEstablishmentAction
                 additionalEmails: $data->additionalEmails,
             );
 
-            $code = $data->code ?? $this->codes->forEstablishment(
+            $code = $data->code ?? $this->availableEstablishmentCode->execute(
                 $lockedCompany->account_id,
                 $lockedCompany->code.' '.$data->name,
             );

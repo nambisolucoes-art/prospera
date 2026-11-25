@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Context;
 
-use App\Domains\Acessos\Application\Queries\EffectivePermissionSlugsQuery;
-use App\Domains\Acessos\Application\Queries\MembershipAccessQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\ListIdentitySelfSlugsQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\ListMembershipRoleAssignmentsQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\ListRolesPermissionSlugsQuery;
+use App\Domains\Acessos\Application\Queries\Permissions\ListGlobalPermissionSlugsQuery;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
@@ -24,8 +26,10 @@ final class EffectivePermissions
 
     public function __construct(
         private readonly AccountContext $accounts,
-        private readonly EffectivePermissionSlugsQuery $global,
-        private readonly MembershipAccessQuery $memberships,
+        private readonly ListGlobalPermissionSlugsQuery $listGlobalPermissionSlugs,
+        private readonly ListIdentitySelfSlugsQuery $listIdentitySelfSlugs,
+        private readonly ListMembershipRoleAssignmentsQuery $listMembershipRoleAssignments,
+        private readonly ListRolesPermissionSlugsQuery $listRolesPermissionSlugs,
     ) {}
 
     public function allows(User $user, string $ability, ?AccessNode $node = null): bool
@@ -174,7 +178,7 @@ final class EffectivePermissions
         $key = $this->keyFor($user);
 
         return $this->permissions[$key] ??= match (true) {
-            $user->is_saas_admin => array_fill_keys($this->global->globalSlugs(['platform', 'self']), new AuthorizedNodes(true)),
+            $user->is_saas_admin => array_fill_keys($this->listGlobalPermissionSlugs->execute(['platform', 'self']), new AuthorizedNodes(true)),
             $accountId === null => array_fill_keys($this->identitySlugs($user->id), new AuthorizedNodes(true)),
             default => $this->resolveMembership($key, $user->id, $accountId),
         };
@@ -188,18 +192,18 @@ final class EffectivePermissions
      */
     private function identitySlugs(int $userId): array
     {
-        return $this->memberships->identitySelfSlugs($userId) ?? array_values($this->global->globalSlugs(['self']));
+        return $this->listIdentitySelfSlugs->execute($userId) ?? array_values($this->listGlobalPermissionSlugs->execute(['self']));
     }
 
     /** @return array<string, AuthorizedNodes> */
     private function resolveMembership(string $key, int $userId, int $accountId): array
     {
-        $assignments = $this->memberships->assignments($userId, $accountId);
+        $assignments = $this->listMembershipRoleAssignments->execute($userId, $accountId);
         $roles = array_values($assignments
             ->map(fn (RoleAssignment $assignment): int => $assignment->role_id)
             ->unique()
             ->all());
-        $permissions = $this->memberships->permissions($roles, $accountId);
+        $permissions = $this->listRolesPermissionSlugs->execute($roles, $accountId);
         $coverage = [];
         $navigable = ['tenant' => false, 'companies' => [], 'establishments' => []];
 

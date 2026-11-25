@@ -11,16 +11,20 @@ use App\Domains\Acessos\Application\Actions\SetMembershipStatusAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Data\SaveRoleAssignmentsData;
-use App\Domains\Acessos\Application\Queries\AccountInvitationsQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentNodeQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentOptionsQuery;
-use App\Domains\Acessos\Application\Queries\MembershipDirectoryQuery;
+use App\Domains\Acessos\Application\Queries\Invitations\ListPendingInvitationsQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\ListMembershipAssignmentsQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\ListVisibleMembershipsQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\PageMembershipsQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\ShowAssignmentQuery;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
-use App\Domains\Pessoas\Application\Queries\PeopleDirectoryQuery;
+use App\Domains\Pessoas\Application\Queries\People\ListAccessCandidatesQuery;
+use App\Domains\Pessoas\Application\Queries\People\ListPeopleWithoutAccessQuery;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
 use App\Domains\Usuarios\Application\Actions\SendUserInvitationAction;
 use App\Domains\Usuarios\Application\Data\ProvisionUserData;
-use App\Domains\Usuarios\Application\Queries\UserDirectoryQuery;
+use App\Domains\Usuarios\Application\Queries\Users\ListUsersQuery;
 use App\Domains\Usuarios\Domain\Enums\PasswordSetup;
 use App\Domains\Usuarios\Domain\Exceptions\IdentityCreationUnavailable;
 use App\Models\User;
@@ -33,13 +37,13 @@ use Illuminate\View\View;
 
 final class UserController
 {
-    public function index(Request $request, UserDirectoryQuery $directory): JsonResponse|View
+    public function index(Request $request, ListUsersQuery $listUsers): JsonResponse|View
     {
         $pageSize = PageSize::fromInput($request->query('per_page'));
 
         return ApiPage::respond([
             'tenant' => false,
-            'users' => $directory->list(null, $pageSize)->through(fn (User $user): array => [
+            'users' => $listUsers->execute(null, $pageSize)->through(fn (User $user): array => [
                 ...$user->only(['id', 'name', 'email']),
                 'photo_url' => $user->profile_photo ? route(
                     'saas.users.photo',
@@ -52,9 +56,10 @@ final class UserController
 
     public function tenantIndex(
         Request $request,
-        MembershipDirectoryQuery $directory,
+        PageMembershipsQuery $pageMemberships,
+        ShowAssignmentQuery $showAssignment,
         EffectivePermissions $permissions,
-        AccountInvitationsQuery $invitations,
+        ListPendingInvitationsQuery $listPendingInvitations,
     ): JsonResponse|View {
         $user = $request->user();
         $accountId = app(AccountContext::class)->requireId();
@@ -65,15 +70,15 @@ final class UserController
         $assign = $permissions->nodesFor($user, 'account.users.assign-role');
         $search = mb_substr(trim($request->string('search')->toString()), 0, 100);
         $pageSize = PageSize::fromInput($request->query('per_page'));
-        $memberships = $directory->list($accountId, $nodes, $pageSize, $search);
+        $memberships = $pageMemberships->execute($accountId, $nodes, $pageSize, $search);
 
         $canRevokeInvitations = $request->user()->can('account.users.revoke-invitation');
 
         return ApiPage::respond([
             'tenant' => true,
             'search' => $search,
-            'invitations' => $invitations->pending($accountId, $nodes, $canRevokeInvitations),
-            'users' => $memberships->through(function (AccountMembership $membership) use ($view, $assign, $directory): array {
+            'invitations' => $listPendingInvitations->execute($accountId, $nodes, $canRevokeInvitations),
+            'users' => $memberships->through(function (AccountMembership $membership) use ($view, $assign, $showAssignment): array {
                 $canView = $view->tenant || $membership->assignments
                     ->contains(fn ($assignment) => $view->covers($assignment->node()));
 
@@ -88,7 +93,7 @@ final class UserController
                             ['userId' => $membership->user_id, 'version' => $membership->identity->profile_photo],
                             absolute: false,
                         ) : null,
-                    'assignments' => $membership->assignments->map($directory->assignment(...)),
+                    'assignments' => $membership->assignments->map($showAssignment->execute(...)),
                     'can_view' => $canView,
                     'can_assign' => $assign->tenant || $membership->assignments
                         ->contains(fn ($assignment) => $assign->covers($assignment->node())),
@@ -99,7 +104,8 @@ final class UserController
 
     public function assignments(
         Request $request,
-        MembershipDirectoryQuery $directory,
+        ListVisibleMembershipsQuery $listVisibleMemberships,
+        ListMembershipAssignmentsQuery $listMembershipAssignments,
         AssignmentOptionsQuery $options,
         EffectivePermissions $permissions,
         int $membershipId,
@@ -109,10 +115,10 @@ final class UserController
         $nodes = $permissions->nodesFor($user, 'account.users.assign-role');
         abort_if($nodes->isEmpty(), 403);
 
-        $membership = $directory->visible($accountId, $nodes)->findOrFail($membershipId);
+        $membership = $listVisibleMemberships->execute($accountId, $nodes)->findOrFail($membershipId);
 
         return response()->json([
-            'assignments' => $directory->assignmentRows($membership, $nodes, $user),
+            'assignments' => $listMembershipAssignments->execute($membership, $nodes, $user),
             'options' => $options->forOperator($user, $accountId),
         ]);
     }
@@ -165,8 +171,11 @@ final class UserController
         return to_route('account.users.index');
     }
 
-    public function create(Request $request, AssignmentOptionsQuery $options, EffectivePermissions $permissions): JsonResponse|View
-    {
+    public function create(
+        Request $request,
+        AssignmentOptionsQuery $options,
+        EffectivePermissions $permissions,
+    ): JsonResponse|View {
         if (! $request->routeIs('account.users.*')) {
             return ApiPage::respond(['tenant' => false]);
         }
@@ -186,7 +195,7 @@ final class UserController
         Request $request,
         AssignmentOptionsQuery $options,
         EffectivePermissions $permissions,
-        PeopleDirectoryQuery $people,
+        ListAccessCandidatesQuery $listAccessCandidates,
     ): JsonResponse {
         $accountId = app(AccountContext::class)->requireId();
         abort_if($permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(), 403);
@@ -194,7 +203,7 @@ final class UserController
 
         $input = $request->query('q');
         $search = is_string($input) ? mb_substr(trim($input), 0, 100) : '';
-        $candidates = $search !== '' ? $people->candidatesForAccess($accountId, $search) : [];
+        $candidates = $search !== '' ? $listAccessCandidates->execute($accountId, $search) : [];
 
         return response()->json(['people' => $candidates], headers: ['Cache-Control' => 'private, no-store']);
     }
@@ -206,7 +215,7 @@ final class UserController
         CreateAccountInvitationAction $inviteExisting,
         AssignmentNodeQuery $nodes,
         EffectivePermissions $permissions,
-        PeopleDirectoryQuery $people,
+        ListPeopleWithoutAccessQuery $listPeopleWithoutAccess,
     ): RedirectResponse {
         $tenant = $request->routeIs('account.users.*');
         $account = $tenant ? app(AccountContext::class)->requireAccount(404) : null;
@@ -219,7 +228,7 @@ final class UserController
 
         if ($personId !== null && $account !== null) {
             abort_if($permissions->nodesFor($request->user(), 'account.people.view')->isEmpty(), 403);
-            $person = $people->withoutAccess($account->id)->findOrFail($personId);
+            $person = $listPeopleWithoutAccess->execute($account->id)->findOrFail($personId);
             $input['name'] = $person->name;
             $input['email'] ??= $person->email;
         }

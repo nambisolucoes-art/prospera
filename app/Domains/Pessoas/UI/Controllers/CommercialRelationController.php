@@ -9,7 +9,7 @@ use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Etiquetas\Application\Queries\Tags\ListSelectableTagsQuery;
 use App\Domains\Etiquetas\Domain\Models\Tag;
-use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\ShowCompanyQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Domains\Pessoas\Application\Actions\RegisterCommercialRelationAction;
@@ -19,7 +19,14 @@ use App\Domains\Pessoas\Application\Data\CommercialRelationFiltersData;
 use App\Domains\Pessoas\Application\Data\CommercialRelationLinkData;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
 use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
-use App\Domains\Pessoas\Application\Queries\CommercialRelationDirectoryQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\CommercialRoleIsActiveQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\FindCommercialRelationIdQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\FindCommercialRelationPersonQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\ListCommercialRelationCompaniesQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\ListCommercialRelationsQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\ListCommercialRelationTagsQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\ShowCentralPersonQuery;
+use App\Domains\Pessoas\Application\Queries\CommercialRelations\ShowCommercialRelationQuery;
 use App\Domains\Pessoas\Application\Queries\PersonAccessQuery;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Domains\Pessoas\Domain\Models\Person;
@@ -48,7 +55,8 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         EffectivePermissions $permissions,
-        CommercialRelationDirectoryQuery $relations,
+        ListCommercialRelationsQuery $listCommercialRelations,
+        ListCommercialRelationTagsQuery $listCommercialRelationTags,
         string $role,
     ): JsonResponse|View {
         $commercialRole = CommercialRole::from($role);
@@ -72,7 +80,7 @@ final class CommercialRelationController
             $companyIds = array_keys($chosen);
         }
 
-        $page = $relations->list(
+        $page = $listCommercialRelations->execute(
             $commercialRole,
             $context->accountId(),
             $companyIds,
@@ -80,7 +88,7 @@ final class CommercialRelationController
             $request->url(),
         );
 
-        $pageTags = $relations->tagsForPage(
+        $pageTags = $listCommercialRelationTags->execute(
             $commercialRole,
             $context->accountId(),
             $page->getCollection()->pluck('id')->map(fn ($id) => (int) $id)->all(),
@@ -128,7 +136,9 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         EffectivePermissions $permissions,
-        CommercialRelationDirectoryQuery $relations,
+        FindCommercialRelationIdQuery $findCommercialRelationId,
+        ShowCentralPersonQuery $showCentralPerson,
+        ListCommercialRelationTagsQuery $listCommercialRelationTags,
         int $relationId,
         string $role,
     ): JsonResponse {
@@ -138,9 +148,9 @@ final class CommercialRelationController
         abort_unless($commercialRole->allows($permissions, $request->user(), 'view', $company->id), 403);
 
         $accountId = $context->accountId();
-        $personId = $relations->relation($commercialRole, $accountId, $company->id, $relationId);
+        $personId = $findCommercialRelationId->execute($commercialRole, $accountId, $company->id, $relationId);
         abort_if($personId === null, 404);
-        $person = $relations->centralPerson($accountId, $personId);
+        $person = $showCentralPerson->execute($accountId, $personId);
         $canViewCentral = ! $permissions->nodesFor($request->user(), 'account.people.view')->isEmpty();
 
         return response()->json([
@@ -149,7 +159,7 @@ final class CommercialRelationController
                 : ['name', 'person_type']),
             'tags' => [
                 $this->roleTag($commercialRole),
-                ...$relations->tagsForPage($commercialRole, $accountId, [$relationId])
+                ...$listCommercialRelationTags->execute($commercialRole, $accountId, [$relationId])
                     ->get($relationId, collect())->all(),
             ],
         ], headers: ['Cache-Control' => 'private, no-store']);
@@ -200,7 +210,10 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         EffectivePermissions $permissions,
-        CommercialRelationDirectoryQuery $relations,
+        ShowCommercialRelationQuery $showCommercialRelation,
+        ShowCentralPersonQuery $showCentralPerson,
+        ListCommercialRelationTagsQuery $listCommercialRelationTags,
+        ListCommercialRelationCompaniesQuery $listCommercialRelationCompanies,
         ListSelectableTagsQuery $selectableTags,
         PersonAccessQuery $access,
         string $companyCode,
@@ -217,13 +230,13 @@ final class CommercialRelationController
         abort_unless($commercialRole->allows($permissions, $user, 'update', $company->id), 403);
 
         $accountId = $context->accountId();
-        $relation = $relations->relationDetails($commercialRole, $accountId, $company->id, $relationId);
+        $relation = $showCommercialRelation->execute($commercialRole, $accountId, $company->id, $relationId);
         abort_if($relation === null, 404);
 
-        $person = $relations->centralPerson($accountId, $relation['person_id']);
+        $person = $showCentralPerson->execute($accountId, $relation['person_id']);
         $canView = ! $permissions->nodesFor($user, 'account.people.view')->isEmpty();
         $authority = $access->authority($user, $person);
-        $tagIds = array_values($relations->tagsForPage($commercialRole, $accountId, [$relationId])
+        $tagIds = array_values($listCommercialRelationTags->execute($commercialRole, $accountId, [$relationId])
             ->get($relationId, collect())->pluck('id')->map(fn ($id): int => (int) $id)->all());
 
         $available = [];
@@ -237,7 +250,7 @@ final class CommercialRelationController
         }
 
         $available[$company->id] = $company;
-        $statuses = $relations->companyStatuses($commercialRole, $accountId, $person->id, array_keys($available));
+        $statuses = $listCommercialRelationCompanies->execute($commercialRole, $accountId, $person->id, array_keys($available));
         $options = [];
 
         foreach ($available as $id => $candidate) {
@@ -326,7 +339,9 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         EffectivePermissions $permissions,
-        CommercialRelationDirectoryQuery $relations,
+        FindCommercialRelationPersonQuery $findCommercialRelationPerson,
+        CommercialRoleIsActiveQuery $commercialRoleIsActive,
+        ShowCentralPersonQuery $showCentralPerson,
         PersonAccessQuery $access,
         string $role,
     ): JsonResponse {
@@ -340,7 +355,7 @@ final class CommercialRelationController
         $headers = ['Cache-Control' => 'private, no-store'];
 
         try {
-            $person = $relations->findByDocument(
+            $person = $findCommercialRelationPerson->execute(
                 $commercialRole,
                 $accountId,
                 $company->id,
@@ -361,12 +376,12 @@ final class CommercialRelationController
         if ($person !== null) {
             $opposite = $commercialRole === CommercialRole::Customer ? CommercialRole::Supplier : CommercialRole::Customer;
             if ($opposite->allows($permissions, $request->user(), 'view', $company->id)
-                && $relations->hasActiveRole($opposite, $accountId, $company->id, $person['id'])) {
+                && $commercialRoleIsActive->execute($opposite, $accountId, $company->id, $person['id'])) {
                 $person['other_role'] = $opposite->label();
             }
 
             if (! $permissions->nodesFor($request->user(), 'account.people.view')->isEmpty()) {
-                $central = $relations->centralPerson($accountId, $person['id']);
+                $central = $showCentralPerson->execute($accountId, $person['id']);
                 $authority = $access->authority($request->user(), $central);
                 $person['central'] = $central->only([
                     'id', ...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS,
@@ -384,12 +399,12 @@ final class CommercialRelationController
         OrganizationContext $context,
         AccountContext $accountContext,
         EffectivePermissions $permissions,
-        CompanyDirectoryQuery $companies,
+        ShowCompanyQuery $showCompany,
         RegisterCommercialRelationAction $register,
         string $role,
     ): Response {
         $commercialRole = CommercialRole::from($role);
-        $company = $this->contextCompany($context, $companies);
+        $company = $this->contextCompany($context, $showCompany);
 
         abort_unless($commercialRole->allows($permissions, $request->user(), 'create', $company->id), 403);
 
@@ -427,13 +442,13 @@ final class CommercialRelationController
         OrganizationContext $context,
         AccountContext $accountContext,
         EffectivePermissions $permissions,
-        CompanyDirectoryQuery $companies,
+        ShowCompanyQuery $showCompany,
         UpdateCommercialRelationAction $update,
         int $relationId,
         string $role,
     ): Response {
         $commercialRole = CommercialRole::from($role);
-        $company = $this->contextCompany($context, $companies);
+        $company = $this->contextCompany($context, $showCompany);
         abort_unless($commercialRole->allows($permissions, $request->user(), 'update', $company->id), 403);
 
         $centralChanges = $request->only([...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]);
@@ -468,13 +483,13 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         EffectivePermissions $permissions,
-        CompanyDirectoryQuery $companies,
-        CommercialRelationDirectoryQuery $relations,
+        ShowCompanyQuery $showCompany,
+        FindCommercialRelationIdQuery $findCommercialRelationId,
         SetCommercialRelationAction $set,
         int $relationId,
         string $role,
     ): Response {
-        return $this->changeStatus($context, $companies, $relations, $set, $role, $relationId, true, $request, $permissions);
+        return $this->changeStatus($context, $showCompany, $findCommercialRelationId, $set, $role, $relationId, true, $request, $permissions);
     }
 
     // O parâmetro da URL chega antes do papel, que é o padrão declarado na rota.
@@ -482,19 +497,19 @@ final class CommercialRelationController
         Request $request,
         OrganizationContext $context,
         EffectivePermissions $permissions,
-        CompanyDirectoryQuery $companies,
-        CommercialRelationDirectoryQuery $relations,
+        ShowCompanyQuery $showCompany,
+        FindCommercialRelationIdQuery $findCommercialRelationId,
         SetCommercialRelationAction $set,
         int $relationId,
         string $role,
     ): Response {
-        return $this->changeStatus($context, $companies, $relations, $set, $role, $relationId, false, $request, $permissions);
+        return $this->changeStatus($context, $showCompany, $findCommercialRelationId, $set, $role, $relationId, false, $request, $permissions);
     }
 
     private function changeStatus(
         OrganizationContext $context,
-        CompanyDirectoryQuery $companies,
-        CommercialRelationDirectoryQuery $relations,
+        ShowCompanyQuery $showCompany,
+        FindCommercialRelationIdQuery $findCommercialRelationId,
         SetCommercialRelationAction $set,
         string $role,
         int $relationId,
@@ -503,13 +518,13 @@ final class CommercialRelationController
         EffectivePermissions $permissions,
     ): Response {
         $commercialRole = CommercialRole::from($role);
-        $company = $this->contextCompany($context, $companies);
+        $company = $this->contextCompany($context, $showCompany);
 
         $action = $active ? 'activate' : 'deactivate';
         abort_unless($commercialRole->allows($permissions, $request->user(), $action, $company->id), 403);
 
         // Relação de outra empresa ou de outra conta responde 404, como um ID inexistente.
-        $personId = $relations->relation($commercialRole, $company->account_id, $company->id, $relationId);
+        $personId = $findCommercialRelationId->execute($commercialRole, $company->account_id, $company->id, $relationId);
         abort_if($personId === null, 404);
 
         $set->execute($commercialRole, $company, $personId, active: $active, link: false);
@@ -518,12 +533,12 @@ final class CommercialRelationController
         return response()->noContent();
     }
 
-    private function contextCompany(OrganizationContext $context, CompanyDirectoryQuery $companies): Company
+    private function contextCompany(OrganizationContext $context, ShowCompanyQuery $showCompany): Company
     {
         $company = $context->company();
         abort_if($company === null, 404);
 
-        return $companies->find($context->accountId(), $company->id);
+        return $showCompany->execute($context->accountId(), $company->id);
     }
 
     private function documentLabel(?string $personType, ?string $document): string

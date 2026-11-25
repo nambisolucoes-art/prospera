@@ -7,7 +7,11 @@ namespace App\Domains\Acessos\Application\Context;
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
-use App\Domains\Organizacao\Application\Queries\OrganizationContextQuery;
+use App\Domains\Organizacao\Application\Queries\Context\ListAuthorizedEstablishmentIdsQuery;
+use App\Domains\Organizacao\Application\Queries\Context\ListNavigableEstablishmentsQuery;
+use App\Domains\Organizacao\Application\Queries\Context\ListPreferredWorkspaceCodesQuery;
+use App\Domains\Organizacao\Application\Queries\Context\ShowNavigableCompanyQuery;
+use App\Domains\Organizacao\Application\Queries\Context\ShowNavigableEstablishmentQuery;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableEstablishment;
 use App\Models\User;
@@ -41,7 +45,11 @@ final class OrganizationContext
         private readonly AccountContext $accounts,
         private readonly EffectivePermissions $permissions,
         private readonly AuditContext $audit,
-        private readonly OrganizationContextQuery $units,
+        private readonly ShowNavigableCompanyQuery $showNavigableCompany,
+        private readonly ShowNavigableEstablishmentQuery $showNavigableEstablishment,
+        private readonly ListPreferredWorkspaceCodesQuery $listPreferredWorkspaceCodes,
+        private readonly ListAuthorizedEstablishmentIdsQuery $listAuthorizedEstablishmentIds,
+        private readonly ListNavigableEstablishmentsQuery $listNavigableEstablishments,
     ) {}
 
     public function enterCompany(User $user, string $code, bool $history, bool $reading): void
@@ -49,7 +57,7 @@ final class OrganizationContext
         $accountId = $this->accounts->requireId();
 
         // Código desconhecido, de outro tenant ou sem atribuição que o cubra responde igual.
-        $company = $this->units->company($accountId, $code);
+        $company = $this->showNavigableCompany->execute($accountId, $code);
         abort_if($company === null, 404);
 
         $node = AccessNode::company($accountId, $company->id);
@@ -66,7 +74,7 @@ final class OrganizationContext
     {
         $accountId = $this->accounts->requireId();
 
-        $establishment = $this->units->establishment($accountId, $code);
+        $establishment = $this->showNavigableEstablishment->execute($accountId, $code);
         abort_if($establishment === null, 404);
 
         $node = AccessNode::establishment($accountId, $establishment->company->id, $establishment->id);
@@ -102,7 +110,7 @@ final class OrganizationContext
             return $available;
         }
 
-        $preferred = $this->units->preferredCodes($this->accountId(), $user->id);
+        $preferred = $this->listPreferredWorkspaceCodes->execute($this->accountId(), $user->id);
 
         return array_values(array_intersect($available, $preferred)) ?: [$available[0]];
     }
@@ -193,7 +201,7 @@ final class OrganizationContext
     public function scopeFor(User $user, string $ability): AuthorizedNodes
     {
         if ($this->mode === 'consolidated') {
-            $permitted = $this->units->authorizedIds(
+            $permitted = $this->listAuthorizedEstablishmentIds->execute(
                 $this->accountId(),
                 $this->permissions->nodesFor($user, $ability),
                 $this->selectedCodes,
@@ -232,7 +240,7 @@ final class OrganizationContext
 
         $key = $user->id.':'.$accountId;
 
-        return $this->navigable[$key] ??= $this->units->navigable(
+        return $this->navigable[$key] ??= $this->listNavigableEstablishments->execute(
             $accountId,
             $this->permissions->navigableNodes($user),
         );

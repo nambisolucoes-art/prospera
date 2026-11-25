@@ -12,9 +12,12 @@ use App\Domains\Acessos\Application\Data\Roles\CreateRoleData;
 use App\Domains\Acessos\Application\Data\Roles\ListRolesData;
 use App\Domains\Acessos\Application\Data\Roles\RoleAvailabilityData;
 use App\Domains\Acessos\Application\Data\Roles\UpdateRoleData;
-use App\Domains\Acessos\Application\Queries\AccessDirectoryQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentOptionsQuery;
-use App\Domains\Acessos\Application\Queries\RoleAvailabilityQuery;
+use App\Domains\Acessos\Application\Queries\Roles\ListPermissionsQuery;
+use App\Domains\Acessos\Application\Queries\Roles\ListRoleAvailabilityOptionsQuery;
+use App\Domains\Acessos\Application\Queries\Roles\ListRolesQuery;
+use App\Domains\Acessos\Application\Queries\Roles\ListUncoveredAssignmentsQuery;
+use App\Domains\Acessos\Application\Queries\Roles\PageRolesQuery;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +29,7 @@ final class AccessController
 {
     public function roles(
         Request $request,
-        AccessDirectoryQuery $directory,
+        PageRolesQuery $pageRoles,
         AssignmentOptionsQuery $options,
         EffectivePermissions $permissions,
     ): JsonResponse|View {
@@ -43,30 +46,34 @@ final class AccessController
         ));
 
         return ApiPage::respond([
-            'roles' => $directory->roleList($accountId, $filters, $ids, $nodes),
+            'roles' => $pageRoles->execute($accountId, $filters, $ids, $nodes),
             'filters' => $filters->toArray(),
         ]);
     }
 
-    public function roleForm(AccessDirectoryQuery $directory, RoleAvailabilityQuery $availability, ?int $roleId = null): JsonResponse|View
-    {
+    public function roleForm(
+        ListRolesQuery $listRoles,
+        ListPermissionsQuery $listPermissions,
+        ListRoleAvailabilityOptionsQuery $listRoleAvailabilityOptions,
+        ?int $roleId = null,
+    ): JsonResponse|View {
         $accountId = app(AccountContext::class)->requireId();
 
         $role = $roleId
-            ? $directory->roles($accountId)->with(['permissions', 'availabilityNodes'])->findOrFail($roleId)
+            ? $listRoles->execute($accountId)->with(['permissions', 'availabilityNodes'])->findOrFail($roleId)
             : null;
 
         return ApiPage::respond([
             'role' => $role,
-            'permissions' => $directory->permissions($accountId)->get(),
+            'permissions' => $listPermissions->execute($accountId)->get(),
             'modules' => config('permissions.modules'),
-            'organization' => $availability->options($accountId),
+            'organization' => $listRoleAvailabilityOptions->execute($accountId),
         ]);
     }
 
     public function rolePreview(
         Request $request,
-        AccessDirectoryQuery $directory,
+        ListRolesQuery $listRoles,
         AssignmentOptionsQuery $options,
         EffectivePermissions $permissions,
         int $roleId,
@@ -75,7 +82,7 @@ final class AccessController
         $user = $request->user();
         $nodes = $permissions->nodesFor($user, 'account.roles.view');
         abort_if($nodes->isEmpty(), 403);
-        $query = $directory->roles($accountId)->with('permissions');
+        $query = $listRoles->execute($accountId)->with('permissions');
 
         if (! $nodes->tenant) {
             $query->whereKey($this->roleIds($options->forOperator($user, $accountId, catalogAbility: 'account.roles.view')));
@@ -95,15 +102,15 @@ final class AccessController
 
     public function roleImpact(
         Request $request,
-        AccessDirectoryQuery $directory,
-        RoleAvailabilityQuery $availability,
+        ListRolesQuery $listRoles,
+        ListUncoveredAssignmentsQuery $listUncoveredAssignments,
         int $roleId,
     ): JsonResponse {
         $accountId = app(AccountContext::class)->requireId();
-        $role = $directory->roles($accountId)->findOrFail($roleId);
+        $role = $listRoles->execute($accountId)->findOrFail($roleId);
         $proposed = RoleAvailabilityData::fromInput($request->query(), $accountId);
 
-        $rows = $availability->uncovered($role, $proposed)
+        $rows = $listUncoveredAssignments->execute($role, $proposed)
             ->join('account_memberships as m', 'm.id', '=', 'role_assignments.membership_id')
             ->join('people', 'people.id', '=', 'm.person_id')
             ->orderBy('people.name')
@@ -133,12 +140,12 @@ final class AccessController
 
     public function updateRole(
         Request $request,
-        AccessDirectoryQuery $directory,
+        ListRolesQuery $listRoles,
         UpdateRoleAction $action,
         int $roleId,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
-        $role = $directory->roles($accountId)->findOrFail($roleId);
+        $role = $listRoles->execute($accountId)->findOrFail($roleId);
 
         $data = UpdateRoleData::fromInput($request->all(), $role);
 

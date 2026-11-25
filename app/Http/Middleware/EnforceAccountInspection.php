@@ -7,7 +7,7 @@ namespace App\Http\Middleware;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
+use App\Domains\Plataforma\Application\Queries\Inspections\ShowInspectionAdministratorQuery;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
@@ -19,7 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 final readonly class EnforceAccountInspection
 {
-    public function __construct(private AccountInspectionUsersQuery $users) {}
+    public function __construct(private ShowInspectionAdministratorQuery $showInspectionAdministrator) {}
 
     /** @param Closure(Request): Response $next */
     public function handle(Request $request, Closure $next): Response
@@ -31,7 +31,7 @@ final readonly class EnforceAccountInspection
 
         $user = $request->user();
         if (
-            $this->users->administrator($inspection->administratorId) === null
+            $this->showInspectionAdministrator->execute($inspection->administratorId) === null
             || $user === null
             || $user->id !== $inspection->userId
             || ! $user->access_enabled

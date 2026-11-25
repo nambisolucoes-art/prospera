@@ -7,7 +7,7 @@ namespace App\Domains\Plataforma\Application\Actions\Accounts;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
 use App\Domains\Plataforma\Application\Data\Accounts\CreateAccountData;
-use App\Domains\Plataforma\Application\Queries\AccountCodesQuery;
+use App\Domains\Plataforma\Application\Queries\Accounts\AccountCodeExistsQuery;
 use App\Domains\Plataforma\Domain\DTOs\Accounts\CreateAccountDTO;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
@@ -25,7 +25,7 @@ final readonly class CreateAccountAction
         private CreateUserAction $createUser,
         private SendUserInvitationAction $invite,
         private CreateCompanyAction $createCompany,
-        private AccountCodesQuery $codes,
+        private AccountCodeExistsQuery $accountCodeExists,
     ) {}
 
     /** @throws ValidationException */
@@ -55,7 +55,7 @@ final readonly class CreateAccountAction
                     break;
                 } catch (UniqueConstraintViolationException) {
                     $attempts++;
-                    $codeTaken = $this->codes->exists((string) $account->code);
+                    $codeTaken = $this->accountCodeExists->execute((string) $account->code);
 
                     if ($codeTaken && $attempts >= 5) {
                         throw ValidationException::withMessages([

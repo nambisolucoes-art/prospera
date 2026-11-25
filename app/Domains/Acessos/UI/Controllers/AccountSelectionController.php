@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\UI\Controllers;
 
-use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
+use App\Domains\Plataforma\Application\Queries\Memberships\ListAccountMembershipsQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Support\ApiPage;
@@ -21,8 +21,10 @@ final class AccountSelectionController
 {
     private const DESTINATION = '/^[a-z0-9][a-z0-9\/-]{0,200}$/';
 
-    public function index(Request $request, AccountMembershipsQuery $memberships): JsonResponse|View|RedirectResponse
-    {
+    public function index(
+        Request $request,
+        ListAccountMembershipsQuery $listAccountMemberships,
+    ): JsonResponse|View|RedirectResponse {
         $user = $request->user();
 
         if ($user->is_saas_admin) {
@@ -36,7 +38,7 @@ final class AccountSelectionController
         }
 
         $destination = $this->destination($request->query('destino'));
-        $accounts = collect($memberships->forIdentity($user->id));
+        $accounts = collect($listAccountMemberships->execute($user->id));
         $available = $accounts->where('status', 'active')->values();
 
         // Com uma conta disponível, a entrada é direta e a URL passa a mostrar a conta.
@@ -57,8 +59,11 @@ final class AccountSelectionController
      * Endereços /conta/... anteriores à E09, só em GET e HEAD. Sem ambiguidade, mantém o caminho na conta;
      * com várias contas, leva à seleção. Escritas nesses endereços não são aceitas.
      */
-    public function legacy(Request $request, AccountMembershipsQuery $memberships, ?string $caminho = null): RedirectResponse
-    {
+    public function legacy(
+        Request $request,
+        ListAccountMembershipsQuery $listAccountMemberships,
+        ?string $caminho = null,
+    ): RedirectResponse {
         $user = $request->user();
         abort_if($user->is_saas_admin, 404);
 
@@ -66,7 +71,7 @@ final class AccountSelectionController
         $code = $this->inspectedCode($request);
 
         if ($code === null) {
-            $available = collect($memberships->forIdentity($user->id))->where('status', 'active')->values();
+            $available = collect($listAccountMemberships->execute($user->id))->where('status', 'active')->values();
             $code = $available->count() === 1 ? $available->first()['code'] : null;
         }
 

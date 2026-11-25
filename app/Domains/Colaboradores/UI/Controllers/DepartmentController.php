@@ -14,7 +14,7 @@ use App\Domains\Colaboradores\Application\Data\Departments\UpdateDepartmentData;
 use App\Domains\Colaboradores\Application\Queries\Departments\ListDepartmentsQuery;
 use App\Domains\Colaboradores\Application\Queries\Departments\ShowDepartmentQuery;
 use App\Domains\Colaboradores\Domain\Models\Department;
-use App\Domains\Organizacao\Application\Queries\OrganizationContextQuery;
+use App\Domains\Organizacao\Application\Queries\Context\ListNavigableCompaniesQuery;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +32,7 @@ final class DepartmentController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        OrganizationContextQuery $units,
+        ListNavigableCompaniesQuery $listNavigableCompanies,
         ListDepartmentsQuery $query,
     ): JsonResponse|View {
         $accountId = $account->requireId();
@@ -44,7 +44,7 @@ final class DepartmentController
 
         $list = $query->execute($accountId, $nodes, $filters, $account->path('departamentos'));
 
-        $creatable = $units->companies($accountId, $permissions->nodesFor($request->user(), 'account.departments.create'));
+        $creatable = $listNavigableCompanies->execute($accountId, $permissions->nodesFor($request->user(), 'account.departments.create'));
 
         return ApiPage::respond([
             'departments' => $list->through(fn (Department $item) => [
@@ -56,7 +56,7 @@ final class DepartmentController
                 'updated_at' => $item->updated_at?->toIso8601String(),
             ]),
             'filters' => $filters->toArray(),
-            'companies' => $this->options($units->companies($accountId, $nodes)),
+            'companies' => $this->options($listNavigableCompanies->execute($accountId, $nodes)),
             'creatable' => $this->options($creatable),
         ]);
     }
@@ -88,13 +88,13 @@ final class DepartmentController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        OrganizationContextQuery $units,
+        ListNavigableCompaniesQuery $listNavigableCompanies,
         CreateDepartmentAction $action,
     ): RedirectResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.departments.create');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $allowed = $units->companies($account->requireId(), $nodes);
+        $allowed = $listNavigableCompanies->execute($account->requireId(), $nodes);
         abort_if($allowed === [], 403);
 
         $data = CreateDepartmentData::fromInput($request->all(), $allowed);

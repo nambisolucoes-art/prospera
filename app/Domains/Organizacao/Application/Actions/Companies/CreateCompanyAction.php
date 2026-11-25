@@ -6,7 +6,8 @@ namespace App\Domains\Organizacao\Application\Actions\Companies;
 
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
-use App\Domains\Organizacao\Application\Queries\AvailableOrganizationCodeQuery;
+use App\Domains\Organizacao\Application\Queries\Codes\AvailableCompanyCodeQuery;
+use App\Domains\Organizacao\Application\Queries\Codes\AvailableEstablishmentCodeQuery;
 use App\Domains\Organizacao\Domain\DTOs\Companies\CreateCompanyDTO;
 use App\Domains\Organizacao\Domain\DTOs\Establishments\CreateEstablishmentDTO;
 use App\Domains\Organizacao\Domain\Models\Company;
@@ -20,7 +21,10 @@ use Illuminate\Validation\ValidationException;
  */
 final readonly class CreateCompanyAction
 {
-    public function __construct(private AvailableOrganizationCodeQuery $codes) {}
+    public function __construct(
+        private AvailableCompanyCodeQuery $availableCompanyCode,
+        private AvailableEstablishmentCodeQuery $availableEstablishmentCode,
+    ) {}
 
     /** @throws ValidationException */
     public function execute(CreateCompanyData $data, int $accountId): Company
@@ -43,7 +47,7 @@ final readonly class CreateCompanyAction
             );
 
             $companyCode = $data->code
-                ?? $this->codes->forCompany($accountId, $data->tradeName ?? $data->name);
+                ?? $this->availableCompanyCode->execute($accountId, $data->tradeName ?? $data->name);
 
             $company = Company::register($companyDTO, $accountId, $companyCode);
 
@@ -73,7 +77,7 @@ final readonly class CreateCompanyAction
                 additionalEmails: $primary->additionalEmails,
             );
 
-            $primaryCode = $this->codes->forEstablishment(
+            $primaryCode = $this->availableEstablishmentCode->execute(
                 $accountId,
                 $companyCode.' '.($primary->address['city'] ?? ''),
             );

@@ -6,7 +6,7 @@ namespace App\Domains\Acessos\Application\Actions\Roles;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Data\Roles\UpdateRoleData;
-use App\Domains\Acessos\Application\Queries\RoleAvailabilityQuery;
+use App\Domains\Acessos\Application\Queries\Roles\ListUncoveredAssignmentsQuery;
 use App\Domains\Acessos\Domain\DTOs\Roles\UpdateRoleDTO;
 use App\Domains\Acessos\Domain\Exceptions\RoleChangeNotAllowed;
 use App\Domains\Acessos\Domain\Models\Permission;
@@ -22,7 +22,7 @@ final readonly class UpdateRoleAction
 {
     public function __construct(
         private SyncRoleAvailabilityAction $syncAvailability,
-        private RoleAvailabilityQuery $availability,
+        private ListUncoveredAssignmentsQuery $listUncoveredAssignments,
         private EffectivePermissions $permissions,
     ) {}
 
@@ -61,7 +61,7 @@ final readonly class UpdateRoleAction
                 throw ValidationException::withMessages(['availability' => 'Cargos de sistema abrangem toda a conta.']);
             }
 
-            $affected = $this->availability->uncovered($lockedRole, $data->availability)->orderBy('id')->get();
+            $affected = $this->listUncoveredAssignments->execute($lockedRole, $data->availability)->orderBy('id')->get();
 
             if ($affected->modelKeys() !== $data->availability->confirmedRevocations) {
                 throw ValidationException::withMessages([

@@ -6,7 +6,7 @@ namespace App\Domains\Pessoas\Application\Actions;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\LockActiveCompaniesByCodeQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Application\Actions\People\UpdatePersonAction;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
@@ -23,7 +23,7 @@ final readonly class UpdateCommercialRelationAction
         private UpdatePersonAction $updatePerson,
         private SyncCommercialTagsAction $syncTags,
         private SetCommercialRelationAction $set,
-        private CompanyDirectoryQuery $companies,
+        private LockActiveCompaniesByCodeQuery $lockActiveCompaniesByCode,
         private EffectivePermissions $permissions,
     ) {}
 
@@ -69,7 +69,7 @@ final readonly class UpdateCommercialRelationAction
                 $this->set->execute($role, $lockedCompany, $relation->person_id, active: $active, link: false);
             }
 
-            $targets = $this->companies->lockActiveCodes($account->id, [...$addCompanies, ...$removeCompanies]);
+            $targets = $this->lockActiveCompaniesByCode->execute($account->id, [...$addCompanies, ...$removeCompanies]);
             foreach ($targets as $target) {
                 $selected = in_array($target->code, $addCompanies, true);
                 $user = auth()->user();

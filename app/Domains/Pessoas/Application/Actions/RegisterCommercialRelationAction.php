@@ -6,7 +6,7 @@ namespace App\Domains\Pessoas\Application\Actions;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\LockActiveCompaniesByCodeQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Application\Actions\People\CreatePersonAction;
 use App\Domains\Pessoas\Application\Actions\People\UpdatePersonAction;
@@ -25,7 +25,7 @@ final readonly class RegisterCommercialRelationAction
         private UpdatePersonAction $updatePerson,
         private SetCommercialRelationAction $set,
         private SyncCommercialTagsAction $syncTags,
-        private CompanyDirectoryQuery $companies,
+        private LockActiveCompaniesByCodeQuery $lockActiveCompaniesByCode,
         private EffectivePermissions $permissions,
     ) {}
 
@@ -47,7 +47,7 @@ final readonly class RegisterCommercialRelationAction
         ): void {
             Client::whereKey($account->id)->lockForUpdate()->firstOrFail();
 
-            $targets = $this->companies->lockActiveCodes($account->id, [$company->code, ...$additionalCompanies]);
+            $targets = $this->lockActiveCompaniesByCode->execute($account->id, [$company->code, ...$additionalCompanies]);
             foreach ($targets as $target) {
                 if (! $role->allows($this->permissions, auth()->user(), 'create', $target->id)) {
                     throw new OperationNotAllowed;

@@ -6,12 +6,12 @@ namespace App\Domains\Usuarios\UI\Controllers\Settings;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Application\Queries\MembershipDirectoryQuery;
-use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
+use App\Domains\Acessos\Application\Queries\Memberships\ListVisibleMembershipsQuery;
+use App\Domains\Plataforma\Application\Queries\Inspections\ShowInspectableUserQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Actions\ReplaceProfilePhotoAction;
 use App\Domains\Usuarios\Application\Data\ProfilePhotoData;
-use App\Domains\Usuarios\Application\Queries\UserDirectoryQuery;
+use App\Domains\Usuarios\Application\Queries\Users\ShowUserWithPhotoQuery;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\ApiPage;
@@ -41,8 +41,8 @@ final class ProfilePhotoController extends Controller
 
     public function showDirectory(
         Request $request,
-        UserDirectoryQuery $directory,
-        MembershipDirectoryQuery $memberships,
+        ShowUserWithPhotoQuery $showUserWithPhoto,
+        ListVisibleMembershipsQuery $listVisibleMemberships,
         EffectivePermissions $permissions,
         string $userId,
         string $version,
@@ -51,11 +51,11 @@ final class ProfilePhotoController extends Controller
             $accountId = app(AccountContext::class)->requireId();
             $nodes = $permissions->nodesFor($request->user(), 'account.users.view');
             abort_if($nodes->isEmpty(), 403);
-            $membership = $memberships->visible($accountId, $nodes)->where('user_id', $userId)->firstOrFail();
+            $membership = $listVisibleMemberships->execute($accountId, $nodes)->where('user_id', $userId)->firstOrFail();
             $user = $membership->identity()->firstOrFail();
             abort_unless($user->profile_photo === $version, 404);
         } else {
-            $user = $directory->findWithPhoto(null, (int) $userId, $version);
+            $user = $showUserWithPhoto->execute(null, (int) $userId, $version);
         }
 
         return $this->image($user, $version);
@@ -63,12 +63,12 @@ final class ProfilePhotoController extends Controller
 
     public function showInspection(
         Client $client,
-        AccountInspectionUsersQuery $users,
+        ShowInspectableUserQuery $showInspectableUser,
         string $userId,
         string $version,
     ): StreamedResponse {
         abort_unless($client->active, 404);
-        $user = $users->find($client, (int) $userId);
+        $user = $showInspectableUser->execute($client, (int) $userId);
         abort_unless($user !== null && $user->profile_photo === $version, 404);
 
         return $this->image($user, $version);

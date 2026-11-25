@@ -8,7 +8,8 @@ use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Application\Data\StartAccountInspectionData;
-use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
+use App\Domains\Plataforma\Application\Queries\Inspections\ShowInspectableUserQuery;
+use App\Domains\Plataforma\Application\Queries\Inspections\ShowInspectionAdministratorQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Domain\ValueObjects\AccountInspection;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
@@ -22,7 +23,10 @@ use Illuminate\Validation\ValidationException;
 
 final readonly class StartAccountInspectionAction
 {
-    public function __construct(private AccountInspectionUsersQuery $users) {}
+    public function __construct(
+        private ShowInspectionAdministratorQuery $showInspectionAdministrator,
+        private ShowInspectableUserQuery $showInspectableUser,
+    ) {}
 
     public function execute(
         User $administrator,
@@ -30,14 +34,14 @@ final readonly class StartAccountInspectionAction
         StartAccountInspectionData $data,
         Session $session,
     ): void {
-        if ($this->users->administrator($administrator->id) === null) {
+        if ($this->showInspectionAdministrator->execute($administrator->id) === null) {
             throw new OperationNotAllowed;
         }
         if (AccountInspectionSession::current($session) !== null) {
             throw new OperationNotAllowed;
         }
 
-        $target = $account->active ? $this->users->find($account, $data->userId) : null;
+        $target = $account->active ? $this->showInspectableUser->execute($account, $data->userId) : null;
 
         if ($target === null) {
             throw ValidationException::withMessages([

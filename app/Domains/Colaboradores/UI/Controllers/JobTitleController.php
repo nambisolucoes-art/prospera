@@ -14,7 +14,7 @@ use App\Domains\Colaboradores\Application\Data\JobTitles\UpdateJobTitleData;
 use App\Domains\Colaboradores\Application\Queries\JobTitles\ListJobTitlesQuery;
 use App\Domains\Colaboradores\Application\Queries\JobTitles\ShowJobTitleQuery;
 use App\Domains\Colaboradores\Domain\Models\JobTitle;
-use App\Domains\Organizacao\Application\Queries\OrganizationContextQuery;
+use App\Domains\Organizacao\Application\Queries\Context\ListNavigableCompaniesQuery;
 use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +32,7 @@ final class JobTitleController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        OrganizationContextQuery $units,
+        ListNavigableCompaniesQuery $listNavigableCompanies,
         ListJobTitlesQuery $query,
     ): JsonResponse|View {
         $accountId = $account->requireId();
@@ -44,7 +44,7 @@ final class JobTitleController
 
         $list = $query->execute($accountId, $nodes, $filters, $account->path('funcoes'));
 
-        $creatable = $units->companies($accountId, $permissions->nodesFor($request->user(), 'account.job-titles.create'));
+        $creatable = $listNavigableCompanies->execute($accountId, $permissions->nodesFor($request->user(), 'account.job-titles.create'));
 
         return ApiPage::respond([
             'job_titles' => $list->through(fn (JobTitle $item) => [
@@ -56,7 +56,7 @@ final class JobTitleController
                 'updated_at' => $item->updated_at?->toIso8601String(),
             ]),
             'filters' => $filters->toArray(),
-            'companies' => $this->options($units->companies($accountId, $nodes)),
+            'companies' => $this->options($listNavigableCompanies->execute($accountId, $nodes)),
             'creatable' => $this->options($creatable),
         ]);
     }
@@ -88,13 +88,13 @@ final class JobTitleController
         Request $request,
         AccountContext $account,
         EffectivePermissions $permissions,
-        OrganizationContextQuery $units,
+        ListNavigableCompaniesQuery $listNavigableCompanies,
         CreateJobTitleAction $action,
     ): RedirectResponse {
         $nodes = $permissions->nodesFor($request->user(), 'account.job-titles.create');
         abort_unless($nodes->reachesCompanies(), 403);
 
-        $allowed = $units->companies($account->requireId(), $nodes);
+        $allowed = $listNavigableCompanies->execute($account->requireId(), $nodes);
         abort_if($allowed === [], 403);
 
         $data = CreateJobTitleData::fromInput($request->all(), $allowed);

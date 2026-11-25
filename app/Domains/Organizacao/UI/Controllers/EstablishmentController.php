@@ -14,8 +14,11 @@ use App\Domains\Organizacao\Application\Actions\Establishments\UpdateEstablishme
 use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use App\Domains\Organizacao\Application\Data\Establishments\ListEstablishmentsData;
 use App\Domains\Organizacao\Application\Data\Establishments\UpdateEstablishmentData;
-use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
-use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\ListCompanyOptionsQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\ShowCompanyQuery;
+use App\Domains\Organizacao\Application\Queries\Establishments\ListEstablishmentsQuery;
+use App\Domains\Organizacao\Application\Queries\Establishments\ListHeadquartersQuery;
+use App\Domains\Organizacao\Application\Queries\Establishments\ShowEstablishmentQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Support\ApiPage;
@@ -30,16 +33,16 @@ final class EstablishmentController
 {
     public function index(
         Request $request,
-        EstablishmentDirectoryQuery $establishments,
-        CompanyDirectoryQuery $companies,
+        ListEstablishmentsQuery $listEstablishments,
+        ListCompanyOptionsQuery $listCompanyOptions,
         EffectivePermissions $permissions,
     ): JsonResponse|View {
         $accountId = app(AccountContext::class)->requireId();
         $filters = ListEstablishmentsData::fromInput($request->query());
         $nodes = $permissions->nodesFor($request->user(), 'account.establishments.list');
         abort_if($nodes->isEmpty(), 403);
-        $options = $this->companyOptions($companies, $accountId, $filters->companyId, $nodes);
-        $list = $establishments->list($accountId, $filters, app(AccountContext::class)->path('estabelecimentos'), nodes: $nodes);
+        $options = $this->companyOptions($listCompanyOptions, $accountId, $filters->companyId, $nodes);
+        $list = $listEstablishments->execute($accountId, $filters, app(AccountContext::class)->path('estabelecimentos'), nodes: $nodes);
 
         return ApiPage::respond([
             'establishments' => $list->through(fn (Establishment $establishment) => [
@@ -53,13 +56,14 @@ final class EstablishmentController
 
     public function form(
         Request $request,
-        EstablishmentDirectoryQuery $establishments,
-        CompanyDirectoryQuery $companies,
+        ShowEstablishmentQuery $showEstablishment,
+        ListHeadquartersQuery $listHeadquarters,
+        ListCompanyOptionsQuery $listCompanyOptions,
         EffectivePermissions $permissions,
         ?int $establishmentId = null,
     ): JsonResponse|View {
         $accountId = app(AccountContext::class)->requireId();
-        $establishment = $establishmentId === null ? null : $establishments->find($accountId, $establishmentId);
+        $establishment = $establishmentId === null ? null : $showEstablishment->execute($accountId, $establishmentId);
         $nodes = $permissions->nodesFor($request->user(), 'account.establishments.create');
 
         if ($establishment !== null) {
@@ -71,7 +75,7 @@ final class EstablishmentController
         $selectedCompany = $establishment === null ? ($request->integer('empresa') ?: null) : null;
 
         $companyOptions = $establishment === null
-            ? $this->companyOptions($companies, $accountId, $selectedCompany, $nodes)
+            ? $this->companyOptions($listCompanyOptions, $accountId, $selectedCompany, $nodes)
             : [];
 
         $companyIds = $establishment === null
@@ -79,7 +83,7 @@ final class EstablishmentController
             : [$establishment->company_id];
 
         // A matriz aparece só para quem pode ver estabelecimentos no nó dela.
-        $headquarters = $establishments->headquarters(
+        $headquarters = $listHeadquarters->execute(
             $accountId,
             $companyIds,
             $permissions->nodesFor($request->user(), 'account.establishments.view'),
@@ -105,9 +109,12 @@ final class EstablishmentController
         ]);
     }
 
-    public function preview(Request $request, EstablishmentDirectoryQuery $establishments, int $establishmentId): JsonResponse
-    {
-        $establishment = $establishments->find(app(AccountContext::class)->requireId(), $establishmentId);
+    public function preview(
+        Request $request,
+        ShowEstablishmentQuery $showEstablishment,
+        int $establishmentId,
+    ): JsonResponse {
+        $establishment = $showEstablishment->execute(app(AccountContext::class)->requireId(), $establishmentId);
 
         abort_unless($request->user()->can('account.establishments.view', $this->node($establishment)), 404);
 
@@ -119,7 +126,7 @@ final class EstablishmentController
 
     public function store(
         Request $request,
-        CompanyDirectoryQuery $companies,
+        ShowCompanyQuery $showCompany,
         CreateEstablishmentAction $action,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
@@ -134,7 +141,7 @@ final class EstablishmentController
             403,
         );
 
-        $company = $companies->find($accountId, $companyId);
+        $company = $showCompany->execute($accountId, $companyId);
 
         abort_unless(
             $request->user()->can('account.establishments.create', AccessNode::company($accountId, $company->id)),
@@ -151,14 +158,14 @@ final class EstablishmentController
 
     public function update(
         Request $request,
-        EstablishmentDirectoryQuery $establishments,
+        ShowEstablishmentQuery $showEstablishment,
         UpdateEstablishmentAction $action,
         int $establishmentId,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
 
         // A empresa proprietária é fixa: a edição nunca move a unidade para outra pessoa jurídica.
-        $establishment = $establishments->find($accountId, $establishmentId);
+        $establishment = $showEstablishment->execute($accountId, $establishmentId);
 
         abort_unless($request->user()->can('account.establishments.update', $this->node($establishment)), 404);
 
@@ -185,13 +192,13 @@ final class EstablishmentController
 
     public function promote(
         Request $request,
-        EstablishmentDirectoryQuery $establishments,
+        ShowEstablishmentQuery $showEstablishment,
         PromotePrimaryEstablishmentAction $promote,
         int $establishmentId,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
         abort_if(app(EffectivePermissions::class)->nodesFor($request->user(), 'account.establishments.promote')->isEmpty(), 403);
-        $establishment = $establishments->find($accountId, $establishmentId);
+        $establishment = $showEstablishment->execute($accountId, $establishmentId);
         $node = AccessNode::company($establishment->account_id, $establishment->company_id);
         abort_unless($request->user()->can('account.establishments.promote', $node), 404);
         $promote->execute($establishment);
@@ -263,12 +270,12 @@ final class EstablishmentController
 
     /** @return array<int, array<string,mixed>> */
     private function companyOptions(
-        CompanyDirectoryQuery $companies,
+        ListCompanyOptionsQuery $listCompanyOptions,
         int $accountId,
         ?int $referencedCompanyId,
         AuthorizedNodes $nodes,
     ): array {
-        $options = $companies->options($accountId, $nodes);
+        $options = $listCompanyOptions->execute($accountId, $nodes);
 
         if ($referencedCompanyId !== null) {
             abort_unless($options->contains($referencedCompanyId), 404);

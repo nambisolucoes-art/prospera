@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Context;
 
-use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
+use App\Domains\Plataforma\Application\Queries\Memberships\ShowAccountMembershipByCodeQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Domain\ValueObjects\AccountInspection;
 use App\Models\User;
@@ -23,7 +23,7 @@ final class AccountContext
 
     private ?int $membershipId = null;
 
-    public function __construct(private readonly AccountMembershipsQuery $memberships) {}
+    public function __construct(private readonly ShowAccountMembershipByCodeQuery $showAccountMembershipByCode) {}
 
     /**
      * Código inexistente ou sem vínculo responde 404, sem revelar a conta. O vínculo suspenso e a conta
@@ -35,7 +35,7 @@ final class AccountContext
 
         abort_if($user->is_saas_admin || ! $user->access_enabled, 404);
 
-        $found = $this->memberships->forCode($user->id, $code);
+        $found = $this->showAccountMembershipByCode->execute($user->id, $code);
         abort_if($found === null, 404);
 
         [$account, $membershipId, $status] = $found;

@@ -7,7 +7,7 @@ namespace App\Domains\Plataforma\UI\Controllers;
 use App\Domains\Plataforma\Application\Actions\EndAccountInspectionAction;
 use App\Domains\Plataforma\Application\Actions\StartAccountInspectionAction;
 use App\Domains\Plataforma\Application\Data\StartAccountInspectionData;
-use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
+use App\Domains\Plataforma\Application\Queries\Inspections\ListInspectableUsersQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -16,11 +16,11 @@ use Illuminate\Http\Request;
 
 final class AccountInspectionController
 {
-    public function options(Client $client, AccountInspectionUsersQuery $users): JsonResponse
+    public function options(Client $client, ListInspectableUsersQuery $listInspectableUsers): JsonResponse
     {
         abort_unless($client->active, 404);
 
-        $options = $users->list($client)->map(function (User $user) use ($client): array {
+        $options = $listInspectableUsers->execute($client)->map(function (User $user) use ($client): array {
             $assignments = $user->memberships->firstOrFail()->assignments;
 
             return [

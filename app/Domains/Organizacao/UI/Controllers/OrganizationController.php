@@ -9,8 +9,10 @@ use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Organizacao\Application\Data\Companies\ListCompaniesData;
 use App\Domains\Organizacao\Application\Data\Establishments\ListEstablishmentsData;
-use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
-use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\ListCompaniesQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\ListCompanyOptionsQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\ShowCompanyQuery;
+use App\Domains\Organizacao\Application\Queries\Establishments\ListEstablishmentsQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Models\User;
@@ -24,18 +26,20 @@ final class OrganizationController
     public function __invoke(
         Request $request,
         AccountContext $context,
-        CompanyDirectoryQuery $companies,
-        EstablishmentDirectoryQuery $establishments,
+        ListCompaniesQuery $listCompanies,
+        ShowCompanyQuery $showCompany,
+        ListCompanyOptionsQuery $listCompanyOptions,
+        ListEstablishmentsQuery $listEstablishments,
         EffectivePermissions $permissions,
     ): JsonResponse|View {
         $user = $request->user();
         $companyNodes = $permissions->nodesFor($user, 'account.companies.list');
         $unitNodes = $permissions->nodesFor($user, 'account.establishments.list');
-        $listCompanies = ! $companyNodes->isEmpty();
-        $listUnits = ! $unitNodes->isEmpty();
+        $canListCompanies = ! $companyNodes->isEmpty();
+        $canListUnits = ! $unitNodes->isEmpty();
 
         abort_unless(
-            $listCompanies || $listUnits || $user->can('account.account-data.update')
+            $canListCompanies || $canListUnits || $user->can('account.account-data.update')
                 || $user->can('account.companies.create'),
             403,
         );
@@ -43,34 +47,34 @@ final class OrganizationController
         $account = $context->requireAccount();
         $path = $context->path('organizacao');
         $requestedCompany = $request->integer('empresa') ?: null;
-        $companyPage = $listCompanies
-            ? $companies->list($account->id, ListCompaniesData::fromInput([]), $path, $companyNodes)
+        $companyPage = $canListCompanies
+            ? $listCompanies->execute($account->id, ListCompaniesData::fromInput([]), $path, $companyNodes)
             : null;
 
         $expanded = null;
         $focusedCompany = null;
 
-        if ($listCompanies && $requestedCompany !== null) {
+        if ($canListCompanies && $requestedCompany !== null) {
             abort_unless($companyNodes->covers(AccessNode::company($account->id, $requestedCompany)), 404);
             $listedCompany = $companyPage?->getCollection()->find($requestedCompany);
             $focusedCompany = $listedCompany === null
-                ? $companies->find($account->id, $requestedCompany)
+                ? $showCompany->execute($account->id, $requestedCompany)
                 : null;
 
             $expanded = $requestedCompany;
-        } elseif ($listUnits && $requestedCompany !== null) {
-            $allowed = $companies->options($account->id, $unitNodes);
+        } elseif ($canListUnits && $requestedCompany !== null) {
+            $allowed = $listCompanyOptions->execute($account->id, $unitNodes);
             abort_unless($allowed->contains($requestedCompany), 404);
             $expanded = $requestedCompany;
-        } elseif ($listUnits && (
+        } elseif ($canListUnits && (
             $request->query('nivel') === 'estabelecimentos'
             || ($companyPage?->total() === 1 && ! $request->boolean('recolhida'))
         )) {
             $expanded = $companyPage?->first()?->id;
         }
 
-        $unitPage = $listUnits && (! $listCompanies || $expanded !== null)
-            ? $establishments->list(
+        $unitPage = $canListUnits && (! $canListCompanies || $expanded !== null)
+            ? $listEstablishments->execute(
                 $account->id,
                 ListEstablishmentsData::fromInput(['company' => $expanded]),
                 $path,

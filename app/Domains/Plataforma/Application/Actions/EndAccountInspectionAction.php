@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Plataforma\Application\Actions;
 
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
+use App\Domains\Plataforma\Application\Queries\Inspections\ShowInspectionAdministratorQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 
 final readonly class EndAccountInspectionAction
 {
-    public function __construct(private AccountInspectionUsersQuery $users) {}
+    public function __construct(private ShowInspectionAdministratorQuery $showInspectionAdministrator) {}
 
     public function execute(User $inspectedUser, Session $session): bool
     {
@@ -36,7 +36,7 @@ final readonly class EndAccountInspectionAction
             ['ending' => ['label' => 'Encerramento', 'before' => null, 'after' => 'Solicitado pelo administrador']],
         );
 
-        $administrator = $this->users->administrator($inspection->administratorId);
+        $administrator = $this->showInspectionAdministrator->execute($inspection->administratorId);
 
         $session->invalidate();
         $session->regenerateToken();

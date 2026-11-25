@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Domains\Organizacao\Application\Queries\OrganizationViolationsQuery;
+use App\Domains\Organizacao\Application\Queries\Violations\ListOrganizationViolationsQuery;
+use App\Domains\Organizacao\Application\Queries\Violations\ListPendingOrganizationsQuery;
 use Illuminate\Console\Command;
 
 final class CheckOrganizationCommand extends Command
@@ -13,11 +14,13 @@ final class CheckOrganizationCommand extends Command
 
     protected $description = 'Verifica, sem alterar dados, os invariantes de empresas e estabelecimentos';
 
-    public function handle(OrganizationViolationsQuery $query): int
-    {
-        $violations = $query->violations();
+    public function handle(
+        ListOrganizationViolationsQuery $listOrganizationViolations,
+        ListPendingOrganizationsQuery $listPendingOrganizations,
+    ): int {
+        $violations = $listOrganizationViolations->execute();
 
-        foreach ($query->pending() as $pending) {
+        foreach ($listPendingOrganizations->execute() as $pending) {
             $this->warn('Pendência: '.$pending);
         }
 

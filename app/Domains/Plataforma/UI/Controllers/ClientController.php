@@ -6,8 +6,8 @@ namespace App\Domains\Plataforma\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
-use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
+use App\Domains\Organizacao\Application\Queries\Companies\ListCompanyOptionsQuery;
+use App\Domains\Organizacao\Application\Queries\Establishments\CountEstablishmentsQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Plataforma\Application\Actions\Accounts\CreateAccountAction;
 use App\Domains\Plataforma\Application\Actions\Accounts\UpdateAccountAction;
@@ -16,7 +16,8 @@ use App\Domains\Plataforma\Application\Data\Accounts\CreateAccountData;
 use App\Domains\Plataforma\Application\Data\Accounts\ListAccountsData;
 use App\Domains\Plataforma\Application\Data\Accounts\UpdateAccountData;
 use App\Domains\Plataforma\Application\Data\Accounts\UpdateAccountProfileData;
-use App\Domains\Plataforma\Application\Queries\AccountDirectoryQuery;
+use App\Domains\Plataforma\Application\Queries\Accounts\ListAccountsQuery;
+use App\Domains\Plataforma\Application\Queries\Accounts\ShowAccountAdministratorQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Support\ApiPage;
@@ -29,7 +30,7 @@ use Illuminate\View\View;
 
 final class ClientController
 {
-    public function index(Request $request, AccountDirectoryQuery $directory): JsonResponse|View|RedirectResponse
+    public function index(Request $request, ListAccountsQuery $listAccounts): JsonResponse|View|RedirectResponse
     {
         // Identidades de conta passam pela seleção, que entra direto quando há uma só conta disponível.
         if (! $request->user()->can('access-saas')) {
@@ -44,7 +45,7 @@ final class ClientController
         $filters = ListAccountsData::fromInput($request->query());
 
         return ApiPage::respond([
-            'accounts' => $directory->list($filters),
+            'accounts' => $listAccounts->execute($filters),
             'search' => $filters->search,
         ]);
     }
@@ -64,7 +65,7 @@ final class ClientController
         return to_route('saas.accounts.edit', $client);
     }
 
-    public function preview(Client $client, AccountDirectoryQuery $directory): JsonResponse
+    public function preview(Client $client, ShowAccountAdministratorQuery $showAccountAdministrator): JsonResponse
     {
         $details = Arr::only($client->details ?? [], [
             'trade_name',
@@ -79,14 +80,14 @@ final class ClientController
         return response()->json([
             ...$client->only(['id', 'name', 'document', 'person_type', 'active', 'plan', 'email']),
             'details' => $details,
-            'administrator' => $directory->administrator($client->id),
+            'administrator' => $showAccountAdministrator->execute($client->id),
         ]);
     }
 
     public function accountDashboard(
         Request $request,
-        CompanyDirectoryQuery $companies,
-        EstablishmentDirectoryQuery $establishments,
+        ListCompanyOptionsQuery $listCompanyOptions,
+        CountEstablishmentsQuery $countEstablishments,
     ): JsonResponse|View|RedirectResponse {
         if (! $request->user()->can('account.dashboard.view')) {
             // Sem acesso ao Início, a pessoa vai para a primeira tela que pode abrir.
@@ -126,11 +127,11 @@ final class ClientController
         }
 
         $companyList = $request->user()->can('account.companies.list')
-            ? $companies->options($account->id)
+            ? $listCompanyOptions->execute($account->id)
             : null;
 
         $establishmentCount = $request->user()->can('account.establishments.list')
-            ? $establishments->count($account->id)
+            ? $countEstablishments->execute($account->id)
             : null;
 
         return ApiPage::respond([

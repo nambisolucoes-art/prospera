@@ -11,7 +11,7 @@ use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
 use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
-use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
+use App\Domains\Plataforma\Application\Queries\Memberships\ListAccountMembershipsQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Domain\ValueObjects\AccountCode;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
@@ -146,8 +146,8 @@ final class MultipleAccountsTest extends TestCase
             }
 
             DB::enableQueryLog();
-            $rows = app(AccountMembershipsQuery::class)
-                ->forIdentity($user->id);
+            $rows = app(ListAccountMembershipsQuery::class)
+                ->execute($user->id);
             $queries = DB::getQueryLog();
             DB::disableQueryLog();
             DB::flushQueryLog();

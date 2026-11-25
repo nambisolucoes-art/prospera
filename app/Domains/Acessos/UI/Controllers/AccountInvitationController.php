@@ -7,7 +7,7 @@ namespace App\Domains\Acessos\UI\Controllers;
 use App\Domains\Acessos\Application\Actions\AcceptAccountInvitationAction;
 use App\Domains\Acessos\Application\Actions\RevokeAccountInvitationAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
-use App\Domains\Acessos\Application\Queries\AccountInvitationsQuery;
+use App\Domains\Acessos\Application\Queries\Invitations\ShowInvitationByTokenQuery;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,10 +17,13 @@ use Illuminate\View\View;
 final class AccountInvitationController
 {
     /** Só a identidade convidada vê a conta do convite; para as demais, o convite é indisponível. */
-    public function show(Request $request, AccountInvitationsQuery $invitations, string $token): JsonResponse|View
-    {
+    public function show(
+        Request $request,
+        ShowInvitationByTokenQuery $showInvitationByToken,
+        string $token,
+    ): JsonResponse|View {
         $user = $request->user();
-        $invitation = $invitations->forToken($token);
+        $invitation = $showInvitationByToken->execute($token);
 
         $available = $invitation !== null
             && $invitation->isUsable()

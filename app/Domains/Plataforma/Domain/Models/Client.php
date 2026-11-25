@@ -7,7 +7,7 @@ namespace App\Domains\Plataforma\Domain\Models;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Plataforma\Application\Queries\AccountCodesQuery;
+use App\Domains\Plataforma\Application\Queries\Accounts\ListAccountCodesStartingWithQuery;
 use App\Domains\Plataforma\Domain\DTOs\Accounts\CreateAccountDTO;
 use App\Domains\Plataforma\Domain\DTOs\Accounts\UpdateAccountDTO;
 use App\Domains\Plataforma\Domain\ValueObjects\AccountCode;
@@ -65,7 +65,7 @@ class Client extends Model implements Auditable
 
             $tradeName = $account->details['trade_name'] ?? null;
             $base = AccountCode::suggestFrom(filled($tradeName) ? (string) $tradeName : (string) $account->name);
-            $account->code = AccountCode::firstAvailable($base, app(AccountCodesQuery::class)->startingWith($base));
+            $account->code = AccountCode::firstAvailable($base, app(ListAccountCodesStartingWithQuery::class)->execute($base));
         });
 
         static::updating(function (Client $account): void {
