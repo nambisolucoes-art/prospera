@@ -5,19 +5,19 @@ namespace Tests\Feature;
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
-use App\Domains\Organizacao\Domain\DTOs\OrganizationCode;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
+use App\Domains\Organizacao\Domain\ValueObjects\OrganizationCode;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
@@ -862,24 +862,24 @@ final class OrganizationContextTest extends TestCase
 
     private function company(Client $account, string $name, string $root): Company
     {
-        $data = SaveCompanyData::fromInput([
+        $data = CreateCompanyData::fromInput([
             'name' => $name,
             'person_type' => 'company',
             'document' => $root,
-        ], $account->id, null);
+        ], $account->id);
 
-        return app(CreateCompanyAction::class)->execute($account->id, $data);
+        return app(CreateCompanyAction::class)->execute($data, $account->id);
     }
 
     private function unit(Company $company, string $name): Establishment
     {
-        $data = SaveEstablishmentData::fromInput([
+        $data = CreateEstablishmentData::fromInput([
             'name' => $name,
             'classification' => 'unregistered',
             'address' => ['city' => 'Guanambi', 'state' => 'BA'],
-        ], $company, null);
+        ], $company);
 
-        return app(SaveEstablishmentAction::class)->execute($company, null, $data);
+        return app(CreateEstablishmentAction::class)->execute($data, $company);
     }
 
     private function role(Client $account, string $name, array $slugs): Role

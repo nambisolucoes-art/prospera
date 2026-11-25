@@ -1,7 +1,7 @@
 <?php
 
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
@@ -23,10 +23,7 @@ return new class extends Migration
             ->get();
 
         foreach ($accounts as $account) {
-            app(CreateCompanyAction::class)->execute(
-                $account->id,
-                SaveCompanyData::forProvisioning($account, contractorIsCompany: false),
-            );
+            app(CreateCompanyAction::class)->execute(CreateCompanyData::forProvisioning($account, contractorIsCompany: false), $account->id);
         }
     }
 

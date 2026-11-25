@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\UI\Controllers;
 
-use App\Domains\Acessos\Application\Actions\SaveRoleAction;
+use App\Domains\Acessos\Application\Actions\Roles\CreateRoleAction;
+use App\Domains\Acessos\Application\Actions\Roles\UpdateRoleAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Application\Data\RoleAvailabilityData;
-use App\Domains\Acessos\Application\Data\RoleFiltersData;
-use App\Domains\Acessos\Application\Data\SaveRoleData;
+use App\Domains\Acessos\Application\Data\Roles\CreateRoleData;
+use App\Domains\Acessos\Application\Data\Roles\ListRolesData;
+use App\Domains\Acessos\Application\Data\Roles\RoleAvailabilityData;
+use App\Domains\Acessos\Application\Data\Roles\UpdateRoleData;
 use App\Domains\Acessos\Application\Queries\AccessDirectoryQuery;
 use App\Domains\Acessos\Application\Queries\AssignmentOptionsQuery;
 use App\Domains\Acessos\Application\Queries\RoleAvailabilityQuery;
@@ -28,7 +30,7 @@ final class AccessController
         AssignmentOptionsQuery $options,
         EffectivePermissions $permissions,
     ): JsonResponse|View {
-        $filters = RoleFiltersData::fromInput($request->query());
+        $filters = ListRolesData::fromInput($request->query());
         $accountId = app(AccountContext::class)->requireId();
         $user = $request->user();
         $nodes = $permissions->nodesFor($user, 'account.roles.list');
@@ -117,23 +119,37 @@ final class AccessController
         return response()->json(['assignments' => $rows]);
     }
 
-    public function saveRole(
-        Request $request,
-        AccessDirectoryQuery $directory,
-        SaveRoleAction $save,
-        ?int $roleId = null,
-    ): RedirectResponse {
+    public function storeRole(Request $request, CreateRoleAction $action): RedirectResponse
+    {
         $accountId = app(AccountContext::class)->requireId();
-        $role = $roleId ? $directory->roles($accountId)->findOrFail($roleId) : null;
 
-        $save->execute(
-            $accountId,
-            $role,
-            SaveRoleData::fromInput($request->all(), $accountId, $roleId),
-            RoleAvailabilityData::fromInput($request->all(), $accountId, $role === null ? 'tenant' : $role->availability),
-        );
+        $data = CreateRoleData::fromInput($request->all(), $accountId);
+
+        $action->execute($data, $accountId);
         ApiPage::toast('Cargo salvo.');
 
+        return $this->afterSave($request, null);
+    }
+
+    public function updateRole(
+        Request $request,
+        AccessDirectoryQuery $directory,
+        UpdateRoleAction $action,
+        int $roleId,
+    ): RedirectResponse {
+        $accountId = app(AccountContext::class)->requireId();
+        $role = $directory->roles($accountId)->findOrFail($roleId);
+
+        $data = UpdateRoleData::fromInput($request->all(), $role);
+
+        $action->execute($data, $role);
+        ApiPage::toast('Cargo salvo.');
+
+        return $this->afterSave($request, $roleId);
+    }
+
+    private function afterSave(Request $request, ?int $roleId): RedirectResponse
+    {
         if ($request->user()->can('account.roles.list')) {
             return redirect(app(AccountContext::class)->path('cargos'));
         }

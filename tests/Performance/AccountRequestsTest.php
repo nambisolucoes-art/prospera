@@ -4,8 +4,8 @@ namespace Tests\Performance;
 
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Clientes\Domain\Models\Customer;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
@@ -28,11 +28,11 @@ final class AccountRequestsTest extends TestCase
         User::factory()->count(39)->forAccount($account->id, $role)->create();
 
         // Desde a E04 toda conta tem empresa e unidade principal; desde 2ba26f7 Pessoas entra por Clientes.
-        $company = app(CreateCompanyAction::class)->execute($account->id, SaveCompanyData::fromInput([
+        $company = app(CreateCompanyAction::class)->execute(CreateCompanyData::fromInput([
             'name' => 'Empresa sintética',
             'person_type' => 'company',
             'document' => '11222333',
-        ], $account->id, null));
+        ], $account->id), $account->id);
         $unit = $company->primaryEstablishment()->sole()->code;
 
         foreach (range(1, 25) as $index) {

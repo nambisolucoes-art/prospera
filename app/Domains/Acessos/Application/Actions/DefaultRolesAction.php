@@ -7,7 +7,7 @@ namespace App\Domains\Acessos\Application\Actions;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 
-final class DefaultRolesAction
+final readonly class DefaultRolesAction
 {
     /** @return array{Role, Role} */
     public function execute(int $accountId): array

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Colaboradores\Application\Actions\Departments;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Colaboradores\Application\Data\Departments\UpdateDepartmentData;
 use App\Domains\Colaboradores\Domain\DTOs\Departments\UpdateDepartmentDTO;

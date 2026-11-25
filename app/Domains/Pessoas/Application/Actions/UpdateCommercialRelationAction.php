@@ -8,17 +8,20 @@ use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
+use App\Domains\Pessoas\Application\Actions\People\UpdatePersonAction;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
-use App\Domains\Pessoas\Application\Data\SavePersonData;
+use App\Domains\Pessoas\Application\Data\People\UpdatePersonData;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Support\Exceptions\OperationNotAllowed;
+use App\Support\Exceptions\ResourceNotAvailable;
 
 final readonly class UpdateCommercialRelationAction
 {
     public function __construct(
-        private SavePersonAction $savePerson,
-        private SaveCommercialTagsAction $saveTags,
+        private UpdatePersonAction $updatePerson,
+        private SyncCommercialTagsAction $syncTags,
         private SetCommercialRelationAction $set,
         private CompanyDirectoryQuery $companies,
         private EffectivePermissions $permissions,
@@ -45,7 +48,9 @@ final readonly class UpdateCommercialRelationAction
         ): void {
             Client::whereKey($account->id)->lockForUpdate()->firstOrFail();
             $lockedCompany = Company::where('account_id', $account->id)->lockForUpdate()->findOrFail($company->id);
-            abort_unless($lockedCompany->active, 404);
+            if (! $lockedCompany->active) {
+                throw new ResourceNotAvailable;
+            }
 
             $relation = $role->model()::where('account_id', $account->id)
                 ->where('company_id', $lockedCompany->id)
@@ -56,8 +61,8 @@ final readonly class UpdateCommercialRelationAction
             $relation->refresh();
 
             if ($centralChanges !== []) {
-                $data = SavePersonData::forCommercialReuse($centralChanges, $person, allowIdentificationChange: true);
-                $this->savePerson->execute($account, $person, $data);
+                $data = UpdatePersonData::forCommercialReuse($centralChanges, $person, allowIdentificationChange: true);
+                $this->updatePerson->execute($data, $person, $account);
             }
 
             if ($active !== null && $relation->active !== $active) {
@@ -71,13 +76,15 @@ final readonly class UpdateCommercialRelationAction
                 $action = $selected ? 'activate' : 'deactivate';
                 $allowed = $role->allows($this->permissions, $user, $action, $target->id)
                     || ($selected && $role->allows($this->permissions, $user, 'create', $target->id));
-                abort_unless($allowed, 403);
+                if (! $allowed) {
+                    throw new OperationNotAllowed;
+                }
 
                 $this->set->execute($role, $target, $relation->person_id, active: $selected, link: $selected ? null : false);
             }
 
             if ($tags !== null) {
-                $this->saveTags->execute($role, $relation, $tags);
+                $this->syncTags->execute($role, $relation, $tags);
             }
         });
     }

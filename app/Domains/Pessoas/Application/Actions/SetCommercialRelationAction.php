@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Domains\Pessoas\Application\Actions;
 
 use App\Domains\Auditoria\Application\Actions\AuditLog;
-use App\Domains\Clientes\Application\Actions\SaveCustomerAction;
-use App\Domains\Fornecedores\Application\Actions\SaveSupplierAction;
+use App\Domains\Clientes\Application\Actions\ChangeCustomerRelationAction;
+use App\Domains\Fornecedores\Application\Actions\ChangeSupplierRelationAction;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Domains\Pessoas\Domain\Models\Person;
+use App\Support\Exceptions\ResourceNotAvailable;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -21,8 +22,8 @@ use Illuminate\Validation\ValidationException;
 final readonly class SetCommercialRelationAction
 {
     public function __construct(
-        private SaveCustomerAction $saveCustomer,
-        private SaveSupplierAction $saveSupplier,
+        private ChangeCustomerRelationAction $changeCustomer,
+        private ChangeSupplierRelationAction $changeSupplier,
     ) {}
 
     // link nulo permite criar ou reativar, conforme a escolha de empresas.
@@ -46,13 +47,13 @@ final readonly class SetCommercialRelationAction
             }
 
             if ($link === false && ! $exists) {
-                abort(404);
+                throw new ResourceNotAvailable;
             }
 
             if ($role === CommercialRole::Customer) {
-                $this->saveCustomer->execute($lockedPerson, $company, $active);
+                $this->changeCustomer->execute($lockedPerson, $company, $active);
             } else {
-                $this->saveSupplier->execute($lockedPerson, $company, $active);
+                $this->changeSupplier->execute($lockedPerson, $company, $active);
             }
 
             return ! $exists && $active;

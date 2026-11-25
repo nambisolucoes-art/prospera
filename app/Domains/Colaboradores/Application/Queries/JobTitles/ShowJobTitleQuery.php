@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Colaboradores\Application\Queries\JobTitles;
 
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Colaboradores\Domain\Models\JobTitle;
 
 /** Lê uma função dentro da conta e das empresas que o descritor da permissão autoriza. */

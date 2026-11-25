@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Auditoria\Application\Queries;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
+use App\Support\Exceptions\OperationNotAllowed;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
@@ -27,7 +28,9 @@ final class AuditQuery
             return $query;
         }
 
-        abort_unless($accountId !== null, 403);
+        if ($accountId === null) {
+            throw new OperationNotAllowed;
+        }
         $query->where('account_id', $accountId);
         ($nodes ?? new AuthorizedNodes)->apply($query);
 

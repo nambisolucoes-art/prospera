@@ -1,10 +1,10 @@
 <?php
 
 // Cenários sintéticos da E04, carregados somente no ambiente descartável preparado pelos runners.
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -47,7 +47,7 @@ foreach ($scenarios as $key => $units) {
         $root++;
         [$city, $state] = $cities[$companyIndex % count($cities)];
 
-        $company = app(CreateCompanyAction::class)->execute($account->id, SaveCompanyData::fromInput([
+        $company = app(CreateCompanyAction::class)->execute(CreateCompanyData::fromInput([
             'person_type' => 'company',
             'name' => 'Empresa '.($companyIndex + 1).' do cenário '.$key.' Ltda',
             'trade_name' => $key === '1x1' ? 'Gartan 3' : 'Marca '.($companyIndex + 1),
@@ -58,18 +58,18 @@ foreach ($scenarios as $key => $units) {
                 'address' => ['postal_code' => '46430000', 'city' => $city, 'state' => $state, 'street' => 'Rua Central'],
                 'phone' => '7734510000',
             ],
-        ], $account->id, null));
+        ], $account->id), $account->id);
 
         for ($order = 2; $order <= $total; $order++) {
             [$branchCity, $branchState] = $cities[$order % count($cities)];
 
-            app(SaveEstablishmentAction::class)->execute($company, null, SaveEstablishmentData::fromInput([
+            app(CreateEstablishmentAction::class)->execute(CreateEstablishmentData::fromInput([
                 'name' => 'Filial '.$order.' '.$branchCity,
                 'classification' => $order % 3 === 0 ? 'unregistered' : 'branch',
                 'tax_document' => cnpj($root, $order),
                 'address' => ['city' => $branchCity, 'state' => $branchState],
                 'email' => 'filial'.$order.'@e04.test',
-            ], $company, null));
+            ], $company), $company);
         }
     }
 }

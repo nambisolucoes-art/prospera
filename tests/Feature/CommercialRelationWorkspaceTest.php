@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Domains\Clientes\Domain\Models\Customer;
 use App\Domains\Etiquetas\Domain\Models\Tag;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Organizacao\Application\Queries;
 
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
-use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
-use App\Domains\Organizacao\Domain\DTOs\NavigableEstablishment;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableEstablishment;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use stdClass;

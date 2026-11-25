@@ -6,9 +6,9 @@ namespace App\Domains\Organizacao\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Organizacao\Application\Data\CompanyFiltersData;
-use App\Domains\Organizacao\Application\Data\EstablishmentFiltersData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Organizacao\Application\Data\Companies\ListCompaniesData;
+use App\Domains\Organizacao\Application\Data\Establishments\ListEstablishmentsData;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
@@ -44,7 +44,7 @@ final class OrganizationController
         $path = $context->path('organizacao');
         $requestedCompany = $request->integer('empresa') ?: null;
         $companyPage = $listCompanies
-            ? $companies->list($account->id, CompanyFiltersData::fromInput([]), $path, $companyNodes)
+            ? $companies->list($account->id, ListCompaniesData::fromInput([]), $path, $companyNodes)
             : null;
 
         $expanded = null;
@@ -72,7 +72,7 @@ final class OrganizationController
         $unitPage = $listUnits && (! $listCompanies || $expanded !== null)
             ? $establishments->list(
                 $account->id,
-                EstablishmentFiltersData::fromInput(['company' => $expanded]),
+                ListEstablishmentsData::fromInput(['company' => $expanded]),
                 $path,
                 'unidades',
                 $unitNodes,

@@ -3,9 +3,9 @@
 namespace Database\Seeders\Support;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;

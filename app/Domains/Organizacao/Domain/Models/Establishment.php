@@ -6,7 +6,8 @@ namespace App\Domains\Organizacao\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Organizacao\Domain\DTOs\EstablishmentDTO;
+use App\Domains\Organizacao\Domain\DTOs\Establishments\CreateEstablishmentDTO;
+use App\Domains\Organizacao\Domain\DTOs\Establishments\UpdateEstablishmentDTO;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -110,21 +111,30 @@ class Establishment extends Model implements Auditable
         return $this->getKey() === null ? null : (int) $this->getKey();
     }
 
-    public static function register(EstablishmentDTO $data, Company $company, string $code, bool $primary): self
+    public static function register(CreateEstablishmentDTO $data, Company $company, string $code, bool $primary): self
     {
-        $establishment = new self([
+        return new self([
             'account_id' => $company->account_id,
             'company_id' => $company->id,
             'code' => $code,
             'is_primary' => $primary,
+            'name' => $data->name,
+            'trade_name' => $data->tradeName,
+            'tax_document' => $data->taxDocument,
+            'state_registration' => $data->stateRegistration,
+            'municipal_registration' => $data->municipalRegistration,
+            'is_headquarters' => $data->isHeadquarters,
+            'active' => $data->active,
+            'address' => $data->address,
+            'phone' => $data->phone,
+            'whatsapp' => $data->whatsapp,
+            'email' => $data->email,
+            'additional_phones' => $data->additionalPhones,
+            'additional_emails' => $data->additionalEmails,
         ]);
-
-        $establishment->revise($data);
-
-        return $establishment;
     }
 
-    public function revise(EstablishmentDTO $data): void
+    public function revise(UpdateEstablishmentDTO $data): void
     {
         $this->fill([
             'name' => $data->name,

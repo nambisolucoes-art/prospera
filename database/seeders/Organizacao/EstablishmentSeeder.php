@@ -2,8 +2,8 @@
 
 namespace Database\Seeders\Organizacao;
 
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use Database\Seeders\Support\FiscalDocuments;
 use Database\Seeders\Support\SeedCatalog;
 use Database\Seeders\Support\SeedsAccountScenario;
@@ -17,13 +17,13 @@ final class EstablishmentSeeder extends Seeder
     public function run(): void
     {
         $this->actAsAccountAdministrator();
-        $save = app(SaveEstablishmentAction::class);
+        $save = app(CreateEstablishmentAction::class);
 
         foreach ($this->establishments() as [$root, $input]) {
             $company = $this->company($root);
-            $data = SaveEstablishmentData::fromInput($input, $company, null);
+            $data = CreateEstablishmentData::fromInput($input, $company);
 
-            $save->execute($company, null, $data);
+            $save->execute($data, $company);
         }
 
         $this->stopActing();

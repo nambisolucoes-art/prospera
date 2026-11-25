@@ -3,8 +3,8 @@
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RevokeAccountInvitationAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;

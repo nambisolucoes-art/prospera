@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Pessoas\Domain\Enums;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Clientes\Domain\Models\Customer;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
 use App\Models\User;

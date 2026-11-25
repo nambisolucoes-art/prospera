@@ -3,14 +3,14 @@
 // Executar exclusivamente no PostgreSQL descartável do laboratório E09.
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -25,22 +25,18 @@ if (getenv('DB_DATABASE') !== 'e09') {
 $accounts = [];
 foreach (range(1, 5) as $number) {
     $account = Client::firstOrCreate(['name' => 'Laboratório Conta '.$number], ['active' => true]);
-    $company = app(CreateCompanyAction::class)->execute($account->id, SaveCompanyData::fromInput([
+    $company = app(CreateCompanyAction::class)->execute(CreateCompanyData::fromInput([
         'name' => 'Empresa '.$number,
         'person_type' => 'company',
         'document' => str_pad((string) (11000000 + $number), 8, '0', STR_PAD_LEFT),
         'active' => true,
         'primary' => ['classification' => 'unregistered'],
-    ], $account->id, null));
+    ], $account->id), $account->id);
     if ($number === 1) {
-        app(SaveEstablishmentAction::class)->execute(
-            $company,
-            null,
-            SaveEstablishmentData::fromInput([
-                'name' => 'Unidade adicional',
-                'classification' => 'unregistered',
-            ], $company, null),
-        );
+        app(CreateEstablishmentAction::class)->execute(CreateEstablishmentData::fromInput([
+            'name' => 'Unidade adicional',
+            'classification' => 'unregistered',
+        ], $company), $company);
     }
     $accounts[] = $account;
 }

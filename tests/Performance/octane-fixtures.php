@@ -3,8 +3,8 @@
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -48,11 +48,11 @@ $second = Client::create(['name' => 'Conta B', 'active' => true]);
 
 // Desde a E04 toda conta tem empresa e unidade principal; os códigos são usados pelo cliente HTTP.
 foreach ([[$first, 'Empresa A', '11222333'], [$second, 'Empresa B', '44555666']] as [$account, $name, $root]) {
-    app(CreateCompanyAction::class)->execute($account->id, SaveCompanyData::fromInput([
+    app(CreateCompanyAction::class)->execute(CreateCompanyData::fromInput([
         'name' => $name,
         'person_type' => 'company',
         'document' => $root,
-    ], $account->id, null));
+    ], $account->id), $account->id);
 }
 
 $owner = User::factory()->asAccountAdministrator($first->id)->create();

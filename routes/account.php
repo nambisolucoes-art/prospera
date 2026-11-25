@@ -8,13 +8,13 @@ use App\Domains\Auditoria\UI\Controllers\AuditController;
 use App\Domains\Colaboradores\UI\Controllers\DepartmentController;
 use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
 use App\Domains\Etiquetas\UI\Controllers\TagController;
-use App\Domains\Organizacao\Domain\DTOs\OrganizationCode;
+use App\Domains\Organizacao\Domain\ValueObjects\OrganizationCode;
 use App\Domains\Organizacao\UI\Controllers\CompanyController;
 use App\Domains\Organizacao\UI\Controllers\EstablishmentContextController;
 use App\Domains\Organizacao\UI\Controllers\EstablishmentController;
 use App\Domains\Organizacao\UI\Controllers\OrganizationController;
 use App\Domains\Pessoas\UI\Controllers\CommercialRelationController;
-use App\Domains\Plataforma\Domain\DTOs\AccountCode;
+use App\Domains\Plataforma\Domain\ValueObjects\AccountCode;
 use App\Domains\Plataforma\UI\Controllers\AccountInspectionController;
 use App\Domains\Plataforma\UI\Controllers\ClientController;
 use App\Domains\Usuarios\UI\Controllers\Settings\ProfilePhotoController;
@@ -189,7 +189,7 @@ Route::middleware(['auth', 'verified', 'account'])
                 ->whereNumber('roleId')
                 ->name('roles.view');
 
-            Route::post('cargos', [$access, 'saveRole'])
+            Route::post('cargos', [$access, 'storeRole'])
                 ->middleware('can:account.roles.create')
                 ->name('roles.store');
 
@@ -198,7 +198,7 @@ Route::middleware(['auth', 'verified', 'account'])
                 ->middleware('can:account.roles.update')
                 ->name('roles.availability-impact');
 
-            Route::patch('cargos/{roleId}', [$access, 'saveRole'])
+            Route::patch('cargos/{roleId}', [$access, 'updateRole'])
                 ->whereNumber('roleId')
                 ->middleware('can:account.roles.update')
                 ->name('roles.update');
@@ -220,11 +220,11 @@ Route::middleware(['auth', 'verified', 'account'])
                 ->whereNumber('companyId')
                 ->name('view');
 
-            Route::post('empresas', [CompanyController::class, 'save'])
+            Route::post('empresas', [CompanyController::class, 'store'])
                 ->name('store')
                 ->middleware('can:account.companies.create');
 
-            Route::patch('empresas/{companyId}', [CompanyController::class, 'save'])
+            Route::patch('empresas/{companyId}', [CompanyController::class, 'update'])
                 ->whereNumber('companyId')
                 ->name('update');
         });
@@ -244,10 +244,10 @@ Route::middleware(['auth', 'verified', 'account'])
                 ->whereNumber('establishmentId')
                 ->name('view');
 
-            Route::post('estabelecimentos', [EstablishmentController::class, 'save'])
+            Route::post('estabelecimentos', [EstablishmentController::class, 'store'])
                 ->name('store');
 
-            Route::patch('estabelecimentos/{establishmentId}', [EstablishmentController::class, 'save'])
+            Route::patch('estabelecimentos/{establishmentId}', [EstablishmentController::class, 'update'])
                 ->whereNumber('establishmentId')
                 ->name('update');
 

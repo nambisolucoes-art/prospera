@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Plataforma\Application\Queries;
 
-use App\Domains\Plataforma\Application\Data\AccountFiltersData;
+use App\Domains\Plataforma\Application\Data\Accounts\ListAccountsData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use App\Support\TaxDocument;
@@ -27,7 +27,7 @@ final class AccountDirectoryQuery
     }
 
     /** @return LengthAwarePaginator<int, Client> */
-    public function list(AccountFiltersData $filters): LengthAwarePaginator
+    public function list(ListAccountsData $filters): LengthAwarePaginator
     {
         $search = $filters->search;
 

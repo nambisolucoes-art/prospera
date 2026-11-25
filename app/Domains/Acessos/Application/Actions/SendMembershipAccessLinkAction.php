@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Actions;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Usuarios\Application\Actions\SendUserInvitationAction;
 use Illuminate\Support\Facades\Gate;

@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Concerns;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -27,20 +27,20 @@ trait BuildsCommercialScenario
 
     protected function company(Client $account, string $name, string $root): Company
     {
-        $data = SaveCompanyData::fromInput([
+        $data = CreateCompanyData::fromInput([
             'name' => $name,
             'person_type' => 'company',
             'document' => $root,
-        ], $account->id, null);
+        ], $account->id);
 
-        return app(CreateCompanyAction::class)->execute($account->id, $data);
+        return app(CreateCompanyAction::class)->execute($data, $account->id);
     }
 
     protected function unit(Company $company, string $name): Establishment
     {
-        $data = SaveEstablishmentData::fromInput(['name' => $name, 'classification' => 'unregistered'], $company, null);
+        $data = CreateEstablishmentData::fromInput(['name' => $name, 'classification' => 'unregistered'], $company);
 
-        return app(SaveEstablishmentAction::class)->execute($company, null, $data);
+        return app(CreateEstablishmentAction::class)->execute($data, $company);
     }
 
     /** @param list<string> $slugs */

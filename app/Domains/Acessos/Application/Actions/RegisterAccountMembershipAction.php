@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Actions;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Etiquetas\Domain\Models\Tag;
-use App\Domains\Pessoas\Domain\DTOs\PersonDTO;
+use App\Domains\Pessoas\Domain\DTOs\People\CreatePersonDTO;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Models\User;
 
@@ -29,7 +29,7 @@ final readonly class RegisterAccountMembershipAction
     ): AccountMembership {
         return AuditLog::transaction(function () use ($user, $role, $node, $person, $grantedBy): AccountMembership {
             if ($person === null) {
-                $data = new PersonDTO(
+                $data = new CreatePersonDTO(
                     name: $user->name,
                     email: $user->email,
                     phone: null,

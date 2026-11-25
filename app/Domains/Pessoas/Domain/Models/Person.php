@@ -11,7 +11,8 @@ use App\Domains\Clientes\Domain\Models\Customer;
 use App\Domains\Etiquetas\Domain\Concerns\NamesAuditedTags;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Fornecedores\Domain\Models\Supplier;
-use App\Domains\Pessoas\Domain\DTOs\PersonDTO;
+use App\Domains\Pessoas\Domain\DTOs\People\CreatePersonDTO;
+use App\Domains\Pessoas\Domain\DTOs\People\UpdatePersonDTO;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -119,15 +120,28 @@ class Person extends Model implements Auditable
         ];
     }
 
-    public static function register(PersonDTO $data, int $accountId): self
+    public static function register(CreatePersonDTO $data, int $accountId): self
     {
-        $person = new self(['account_id' => $accountId]);
-        $person->revise($data);
-
-        return $person;
+        return new self([
+            'account_id' => $accountId,
+            'name' => $data->name,
+            'email' => $data->email,
+            'phone' => $data->phone,
+            'person_type' => $data->personType,
+            'document' => $data->document,
+            'trade_name' => $data->tradeName,
+            'state_registration' => $data->stateRegistration,
+            'municipal_registration' => $data->municipalRegistration,
+            'contact_name' => $data->contactName,
+            'whatsapp' => $data->whatsapp,
+            'website' => $data->website,
+            'address' => $data->address,
+            'additional_phones' => $data->additionalPhones,
+            'additional_emails' => $data->additionalEmails,
+        ]);
     }
 
-    public function revise(PersonDTO $data): void
+    public function revise(UpdatePersonDTO $data): void
     {
         $this->fill([
             'name' => $data->name,

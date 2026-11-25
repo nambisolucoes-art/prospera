@@ -9,10 +9,11 @@ use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Application\Data\StartAccountInspectionData;
 use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
-use App\Domains\Plataforma\Domain\DTOs\AccountInspectionDTO;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Domain\ValueObjects\AccountInspection;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
+use App\Support\Exceptions\OperationNotAllowed;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -29,8 +30,12 @@ final readonly class StartAccountInspectionAction
         StartAccountInspectionData $data,
         Session $session,
     ): void {
-        abort_unless($this->users->administrator($administrator->id) !== null, 403);
-        abort_if(AccountInspectionSession::current($session) !== null, 403);
+        if ($this->users->administrator($administrator->id) === null) {
+            throw new OperationNotAllowed;
+        }
+        if (AccountInspectionSession::current($session) !== null) {
+            throw new OperationNotAllowed;
+        }
 
         $target = $account->active ? $this->users->find($account, $data->userId) : null;
 
@@ -45,7 +50,7 @@ final readonly class StartAccountInspectionAction
             ->where('status', 'active')
             ->firstOrFail();
 
-        $inspectionDTO = new AccountInspectionDTO(
+        $inspectionDTO = new AccountInspection(
             administratorId: $administrator->id,
             accountId: $account->id,
             userId: $target->id,

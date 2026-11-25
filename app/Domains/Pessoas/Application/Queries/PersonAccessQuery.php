@@ -6,8 +6,8 @@ namespace App\Domains\Pessoas\Application\Queries;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Organizacao\Domain\Models\Establishment;
-use App\Domains\Pessoas\Domain\DTOs\PersonEditAuthority;
 use App\Domains\Pessoas\Domain\Models\Person;
+use App\Domains\Pessoas\Domain\ValueObjects\PersonEditAuthority;
 use App\Models\User;
 
 final readonly class PersonAccessQuery

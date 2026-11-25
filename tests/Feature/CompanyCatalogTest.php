@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Domains\Colaboradores\Domain\DTOs\Departments\CreateDepartmentDTO;
 use App\Domains\Colaboradores\Domain\DTOs\JobTitles\CreateJobTitleDTO;

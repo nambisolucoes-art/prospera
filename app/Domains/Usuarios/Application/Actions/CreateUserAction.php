@@ -8,7 +8,7 @@ use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
 use App\Domains\Acessos\Application\Actions\SaveRoleAssignmentsAction;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -19,6 +19,7 @@ use App\Domains\Usuarios\Domain\Enums\PasswordSetup;
 use App\Domains\Usuarios\Domain\Enums\UserRole;
 use App\Domains\Usuarios\Domain\Exceptions\IdentityCreationUnavailable;
 use App\Models\User;
+use App\Support\Exceptions\OperationNotAllowed;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
@@ -51,7 +52,9 @@ final readonly class CreateUserAction
             $assignedRole = null;
 
             if ($node !== null) {
-                abort_unless($account?->id === $node->accountId && $roleId !== null, 403);
+                if (! ($account?->id === $node->accountId && $roleId !== null)) {
+                    throw new OperationNotAllowed;
+                }
                 Client::whereKey($node->accountId)->lockForUpdate()->firstOrFail();
                 $this->permissions->forget();
                 Gate::authorize('account.users.create', $node);

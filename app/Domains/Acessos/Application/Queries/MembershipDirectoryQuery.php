@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Domains\Acessos\Application\Queries;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;

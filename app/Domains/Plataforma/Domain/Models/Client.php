@@ -8,8 +8,9 @@ use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Plataforma\Application\Queries\AccountCodesQuery;
-use App\Domains\Plataforma\Domain\DTOs\AccountCode;
-use App\Domains\Plataforma\Domain\DTOs\AccountDTO;
+use App\Domains\Plataforma\Domain\DTOs\Accounts\CreateAccountDTO;
+use App\Domains\Plataforma\Domain\DTOs\Accounts\UpdateAccountDTO;
+use App\Domains\Plataforma\Domain\ValueObjects\AccountCode;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -79,15 +80,20 @@ class Client extends Model implements Auditable
         return $this->getKey() === null ? null : (int) $this->getKey();
     }
 
-    public static function register(AccountDTO $data): self
+    public static function register(CreateAccountDTO $data): self
     {
-        $account = new self;
-        $account->revise($data);
-
-        return $account;
+        return new self([
+            'name' => $data->name,
+            'email' => $data->email,
+            'plan' => $data->plan,
+            'person_type' => $data->personType,
+            'document' => $data->document,
+            'active' => $data->active,
+            'details' => $data->details,
+        ]);
     }
 
-    public function revise(AccountDTO $data): void
+    public function revise(UpdateAccountDTO $data): void
     {
         // Os detalhes enviados se somam aos atuais; listas de contatos são substituídas inteiras.
         $details = $this->details;

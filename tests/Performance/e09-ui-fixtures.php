@@ -3,8 +3,8 @@
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Etiquetas\Domain\Models\Tag;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -16,12 +16,10 @@ if (getenv('DB_DATABASE') !== 'e09') {
     throw new RuntimeException('Somente laboratório.');
 }
 $account = Client::create(['name' => 'Inativa E09', 'active' => true]);
-app(CreateCompanyAction::class)->execute($account->id,
-    SaveCompanyData::fromInput([
-        'name' => 'Empresa inativa', 'person_type' => 'company', 'document' => '33000001',
-        'primary' => ['classification' => 'unregistered'],
-    ], $account->id, null),
-);
+app(CreateCompanyAction::class)->execute(CreateCompanyData::fromInput([
+    'name' => 'Empresa inativa', 'person_type' => 'company', 'document' => '33000001',
+    'primary' => ['classification' => 'unregistered'],
+], $account->id), $account->id);
 User::factory()->asAccountAdministrator($account->id)->create(['email' => 'inactive@e09.test']);
 $account->forceFill(['active' => false])->saveOrFail();
 User::factory()->create(['email' => 'revoked@e09.test', 'access_enabled' => false]);

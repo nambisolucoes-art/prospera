@@ -1,15 +1,15 @@
 <?php
 
 // Dados exclusivamente sintéticos da cópia isolada. Executado depois de e04-fixtures.php.
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -128,7 +128,7 @@ $structure = [
 $gartanUnits = [];
 
 foreach ($structure as [$name, $root, $code, $cities]) {
-    $company = app(CreateCompanyAction::class)->execute($gartan->id, SaveCompanyData::fromInput([
+    $company = app(CreateCompanyAction::class)->execute(CreateCompanyData::fromInput([
         'person_type' => 'company',
         'name' => $name.' Ltda',
         'trade_name' => $name,
@@ -138,21 +138,21 @@ foreach ($structure as [$name, $root, $code, $cities]) {
             'classification' => 'headquarters',
             'address' => ['city' => 'Guanambi', 'state' => 'BA'],
         ],
-    ], $gartan->id, null));
+    ], $gartan->id), $gartan->id);
 
     $primary = $company->primaryEstablishment()->sole();
     $primary->forceFill(['name' => $cities[0]])->saveOrFail();
     $gartanUnits[$code][] = $primary;
 
     foreach (array_slice($cities, 1) as $order => $city) {
-        $data = SaveEstablishmentData::fromInput([
+        $data = CreateEstablishmentData::fromInput([
             'name' => $city,
             'classification' => 'branch',
             'tax_document' => e06Cnpj($root, $order + 2),
             'address' => ['city' => $city, 'state' => $city === 'Janaúba' ? 'MG' : 'BA'],
-        ], $company, null);
+        ], $company);
 
-        $gartanUnits[$code][] = app(SaveEstablishmentAction::class)->execute($company, null, $data);
+        $gartanUnits[$code][] = app(CreateEstablishmentAction::class)->execute($data, $company);
     }
 }
 

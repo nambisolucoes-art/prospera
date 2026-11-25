@@ -179,18 +179,17 @@ Não mantenha compatibilidade com trilhas, rotas, classes ou estruturas antigas.
 
 ## Estado da adoção
 
-Registro vivo da migração do código existente para este padrão. Atualize ao concluir cada domínio. Código novo já nasce no padrão.
+Registro vivo da migração do código existente para este padrão. Atualize ao concluir cada ponto. Código novo já nasce no padrão.
 
-| Domínio | Estado | O que falta |
-| --- | --- | --- |
-| Todos | `declare(strict_types=1)` em todos os arquivos de `app/` | |
-| Colaboradores | **Adotado** (referência: `Departments` e `JobTitles`) | |
-| Etiquetas | **Adotado** (`Tags`, controller próprio, `ListSelectableTagsQuery`) | |
-| Organizacao | Pendente | `SaveCompanyData`, `SaveEstablishmentData` (criar, editar e unidade principal viram Datas próprias), `CreateCompanyAction`, `SaveCompanyAction`, `SaveEstablishmentAction`, DTOs únicos, Queries com vários métodos, `OrganizationController` |
-| Plataforma | Pendente | `SaveAccountData`, `SaveAccountAction`, Datas e Actions de inspeção, `AccountDTO`, `AccountInspectionDTO` |
-| Pessoas, Clientes, Fornecedores | Pendente | `SavePersonData`, `SavePersonDetailsData`, `CommercialRelationLinkData`, `SavePersonAction`, `SaveCustomerAction`, `SaveSupplierAction`, `RegisterCommercialRelationAction`, `UpdateCommercialRelationAction`, `SaveCommercialTagsAction`, `PeopleDirectoryQuery` e `CommercialRelationDirectoryQuery` (vários métodos) |
-| Acessos | Pendente | `SaveRoleData`, `SaveRoleAction`, `SaveRoleAssignmentsData` e Action, `RoleAvailabilityData`, Queries de vários métodos. Models `Role`, `RoleAssignment`, `AccountInvitation` sem `register` e `revise` |
-| Usuarios | Pendente | `UpdateProfileData` e demais, `ProfilePhotoData`, `SaveProfilePhotoAction` e Queries |
-| Value Objects | Pendente | Mover `AccessNode`, `AuthorizedNodes`, `NavigableCompany`, `NavigableEstablishment`, `OrganizationCode`, `AccountCode` e `PersonEditAuthority` de `Domain/DTOs` para `Domain/ValueObjects` |
-| `abort` e `abort_if` | Pendente | Trocar por exceções de domínio nas Actions de Acessos, Pessoas e Plataforma (hoje 15 ocorrências). Os serviços de contexto (`AccountContext`, `OrganizationContext`) e os Controllers mantêm o `abort` |
-| Seeders | Acompanham cada domínio | `database/seeders` chama as Actions e as Datas |
+| Ponto | Estado |
+| --- | --- |
+| `declare(strict_types=1)` em todos os arquivos de `app/` | **Adotado** |
+| Create e Update separados (Action, Data, DTO) | **Adotado** em Colaboradores (referência), Etiquetas, Organização (empresas e estabelecimentos), Plataforma (contas), Pessoas, Acessos (cargos). `SaveRoleAssignmentsAction` (conceder e revogar atribuições) e as Actions de Usuários (perfil, senha, foto, e-mail de acesso) já são de propósito único e seguem como estão |
+| Actions `final readonly`, sem funções privadas | **Adotado** |
+| Data tipada, sem `array $values` | **Adotado**. As Datas ainda sem prefixo de operação (`PasswordData`, `ProfilePhotoData`, `TwoFactorCodeData`, `ChangeAccessEmailData`) já são de uma operação só |
+| Value Objects em `Domain/ValueObjects` | **Adotado** (`AccessNode`, `AuthorizedNodes`, `NavigableCompany`, `NavigableEstablishment`, `OrganizationCode`, `AccountCode`, `PersonEditAuthority`, `AccountInspection`) |
+| Exceções de domínio no lugar de `abort` em Actions e Queries | **Adotado** (`App\Support\Exceptions`: `OperationNotAllowed` 403, `ResourceNotAvailable` 404, `ResourceGone` 410, `ConflictingChange` 409, e as de cada domínio). `AccountContext`, `OrganizationContext`, `WorkspaceDestinationData` e `WorkspaceSelectionData` mantêm o `abort`, por serem serviços de contexto de requisição |
+| Seeders e fixtures de desempenho nas novas Actions | **Adotado** |
+| Queries de propósito único (`execute`) | **Parcial**. Adotado em Colaboradores e Etiquetas. Pendentes, por terem vários métodos e muitos chamadores: `CommercialRelationDirectoryQuery`, `CompanyDirectoryQuery`, `EstablishmentDirectoryQuery`, `OrganizationContextQuery`, `AuditQuery`, `MembershipDirectoryQuery`, `AccessDirectoryQuery`, `PeopleDirectoryQuery`, `AccountDirectoryQuery`, `AccountInspectionUsersQuery`, `AccountMembershipsQuery`, `RoleAvailabilityQuery`, `UserDirectoryQuery` e outras |
+| `execute(Data, ...)` com a Data como primeiro argumento | **Adotado** nas Actions refatoradas. Pendentes: Actions de Usuários, Convites e `RegisterCommercialRelationAction`/`UpdateCommercialRelationAction`, que ainda recebem o `Client` antes e montam a Data de pessoa dentro da Action |
+| Controller só com injeção e redirecionamento | **Parcial**. `CommercialRelationController` e `EstablishmentController` ainda reúnem várias verificações de autorização e leitura no corpo dos métodos |

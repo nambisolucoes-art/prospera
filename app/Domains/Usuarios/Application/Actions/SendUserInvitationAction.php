@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Password;
 use Throwable;
 
-final class SendUserInvitationAction
+final readonly class SendUserInvitationAction
 {
     public function execute(User $user): bool
     {

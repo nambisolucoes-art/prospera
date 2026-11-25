@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Auditoria\Application\Queries;
 
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Domains\Plataforma\Domain\Models\Client;

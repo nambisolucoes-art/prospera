@@ -1,13 +1,12 @@
 <?php
 
-use App\Domains\Acessos\Application\Actions\SaveRoleAction;
+use App\Domains\Acessos\Application\Actions\Roles\UpdateRoleAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Application\Data\RoleAvailabilityData;
-use App\Domains\Acessos\Application\Data\SaveRoleData;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Application\Data\Roles\UpdateRoleData;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
 use App\Domains\Usuarios\Application\Data\CreateUserData;
@@ -45,15 +44,14 @@ auth()->login($user);
 app(AccountContext::class)->enter($user, $account->code);
 if ($argv[1] === 'revoke') {
     $role = Role::where('account_id', $account->id)->findOrFail($data['role']);
-    app(SaveRoleAction::class)->execute(
-        $account->id, $role,
-        SaveRoleData::fromInput([
+    app(UpdateRoleAction::class)->execute(
+        UpdateRoleData::fromInput([
             'name' => $role->name,
             'permission_ids' => Permission::whereIn('slug', ['account.users.assign-role', 'self.help.list'])
                 ->pluck('id')
                 ->all(),
-        ], $account->id, $role->id),
-        RoleAvailabilityData::fromInput([], $account->id),
+        ], $role),
+        $role,
     );
     file_put_contents('/tmp/e09-grant-release', 'committed');
     echo json_encode(['result' => 'revoked']), PHP_EOL;

@@ -4,7 +4,7 @@ namespace Database\Seeders\Clientes;
 
 use App\Domains\Pessoas\Application\Actions\RegisterCommercialRelationAction;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
-use App\Domains\Pessoas\Application\Data\SavePersonData;
+use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use Database\Seeders\Support\FiscalDocuments;
 use Database\Seeders\Support\SeedCatalog;
@@ -38,7 +38,7 @@ final class CustomerSeeder extends Seeder
                 CommercialRole::Customer,
                 $account,
                 $this->companyByKey($company),
-                SavePersonData::fromInput($person, $account->id),
+                CreatePersonData::fromInput($person, $account->id),
                 CommercialTagsData::fromInput($this->tagIds('customers', $tags)),
                 additionalCompanies: $additionalCodes,
             );

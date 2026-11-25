@@ -6,11 +6,12 @@ namespace App\Domains\Organizacao\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Actions\SaveCompanyAction;
-use App\Domains\Organizacao\Application\Data\CompanyFiltersData;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Actions\Companies\UpdateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
+use App\Domains\Organizacao\Application\Data\Companies\ListCompaniesData;
+use App\Domains\Organizacao\Application\Data\Companies\UpdateCompanyData;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Support\ApiPage;
@@ -24,7 +25,7 @@ final class CompanyController
     public function index(Request $request, CompanyDirectoryQuery $companies, EffectivePermissions $permissions): JsonResponse|View
     {
         $accountId = app(AccountContext::class)->requireId();
-        $filters = CompanyFiltersData::fromInput($request->query());
+        $filters = ListCompaniesData::fromInput($request->query());
 
         $nodes = $permissions->nodesFor($request->user(), 'account.companies.list');
         abort_if($nodes->isEmpty(), 403);
@@ -73,29 +74,39 @@ final class CompanyController
         ]);
     }
 
-    public function save(
+    public function store(Request $request, CreateCompanyAction $action): RedirectResponse
+    {
+        $accountId = app(AccountContext::class)->requireId();
+
+        $data = CreateCompanyData::fromInput($request->all(), $accountId);
+
+        $company = $action->execute($data, $accountId);
+        ApiPage::toast('Empresa salva com o estabelecimento principal.');
+
+        return $this->afterSave($request, $company);
+    }
+
+    public function update(
         Request $request,
         CompanyDirectoryQuery $companies,
-        CreateCompanyAction $create,
-        SaveCompanyAction $save,
-        ?int $companyId = null,
+        UpdateCompanyAction $action,
+        int $companyId,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
-        $company = $companyId === null ? null : $companies->find($accountId, $companyId);
+        $company = $companies->find($accountId, $companyId);
 
-        if ($company !== null) {
-            abort_unless($request->user()->can('account.companies.update', AccessNode::company($accountId, $company->id)), 404);
-        }
-        $data = SaveCompanyData::fromInput($request->all(), $accountId, $company);
+        abort_unless($request->user()->can('account.companies.update', AccessNode::company($accountId, $company->id)), 404);
 
-        if ($company === null) {
-            $company = $create->execute($accountId, $data);
-            ApiPage::toast('Empresa salva com o estabelecimento principal.');
-        } else {
-            $save->execute($company, $data);
-            ApiPage::toast('Empresa salva.');
-        }
+        $data = UpdateCompanyData::fromInput($request->all(), $company);
 
+        $action->execute($data, $company);
+        ApiPage::toast('Empresa salva.');
+
+        return $this->afterSave($request, $company);
+    }
+
+    private function afterSave(Request $request, Company $company): RedirectResponse
+    {
         if ($request->query('origem') === 'organizacao') {
             return to_route('account.organization', ['empresa' => $company->id]);
         }

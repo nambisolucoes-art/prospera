@@ -9,7 +9,7 @@ use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Queries\MembershipDirectoryQuery;
 use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
-use App\Domains\Usuarios\Application\Actions\SaveProfilePhotoAction;
+use App\Domains\Usuarios\Application\Actions\ReplaceProfilePhotoAction;
 use App\Domains\Usuarios\Application\Data\ProfilePhotoData;
 use App\Domains\Usuarios\Application\Queries\UserDirectoryQuery;
 use App\Http\Controllers\Controller;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class ProfilePhotoController extends Controller
 {
-    public function store(Request $request, SaveProfilePhotoAction $save): RedirectResponse
+    public function store(Request $request, ReplaceProfilePhotoAction $save): RedirectResponse
     {
         $save->execute($request->user(), ProfilePhotoData::fromFile($request->file('photo')));
 

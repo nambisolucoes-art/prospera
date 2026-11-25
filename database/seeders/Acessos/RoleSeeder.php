@@ -2,9 +2,8 @@
 
 namespace Database\Seeders\Acessos;
 
-use App\Domains\Acessos\Application\Actions\SaveRoleAction;
-use App\Domains\Acessos\Application\Data\RoleAvailabilityData;
-use App\Domains\Acessos\Application\Data\SaveRoleData;
+use App\Domains\Acessos\Application\Actions\Roles\CreateRoleAction;
+use App\Domains\Acessos\Application\Data\Roles\CreateRoleData;
 use App\Domains\Acessos\Domain\Models\Permission;
 use Database\Seeders\Support\SeedCatalog;
 use Database\Seeders\Support\SeedsAccountScenario;
@@ -24,24 +23,21 @@ final class RoleSeeder extends Seeder
     public function run(): void
     {
         $this->actAsAccountAdministrator();
-        $save = app(SaveRoleAction::class);
+        $create = app(CreateRoleAction::class);
         $accountId = $this->account()->id;
 
         foreach ($this->roles() as $name => [$slugs, $restrictedTo]) {
-            $data = SaveRoleData::fromInput(
-                ['name' => $name, 'permission_ids' => $this->permissionIds([...$slugs, ...self::SELF_SERVICE])],
-                $accountId,
-                null,
-            );
+            $input = [
+                'name' => $name,
+                'permission_ids' => $this->permissionIds([...$slugs, ...self::SELF_SERVICE]),
+                'availability' => $restrictedTo === null ? 'tenant' : 'restricted',
+            ];
 
-            $availability = $restrictedTo === null
-                ? RoleAvailabilityData::fromInput(['availability' => 'tenant'], $accountId)
-                : RoleAvailabilityData::fromInput([
-                    'availability' => 'restricted',
-                    'available_companies' => [$this->company($restrictedTo)->id],
-                ], $accountId);
+            if ($restrictedTo !== null) {
+                $input['available_companies'] = [$this->company($restrictedTo)->id];
+            }
 
-            $save->execute($accountId, null, $data, $availability);
+            $create->execute(CreateRoleData::fromInput($input, $accountId), $accountId);
         }
 
         $this->stopActing();

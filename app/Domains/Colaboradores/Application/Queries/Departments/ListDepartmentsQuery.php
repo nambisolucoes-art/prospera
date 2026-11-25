@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Colaboradores\Application\Queries\Departments;
 
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Colaboradores\Application\Data\Departments\ListDepartmentsData;
 use App\Domains\Colaboradores\Domain\Models\Department;
 use App\Support\NormalizedName;

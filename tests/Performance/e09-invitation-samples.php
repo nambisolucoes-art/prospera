@@ -2,8 +2,8 @@
 
 use App\Domains\Acessos\Application\Actions\CreateAccountInvitationAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;

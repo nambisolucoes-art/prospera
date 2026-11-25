@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Queries;
 
-use App\Domains\Acessos\Application\Data\RoleFiltersData;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
+use App\Domains\Acessos\Application\Data\Roles\ListRolesData;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -38,7 +38,7 @@ final class AccessDirectoryQuery
      */
     public function roleList(
         int $accountId,
-        RoleFiltersData $filters,
+        ListRolesData $filters,
         ?array $roleIds = null,
         ?AuthorizedNodes $nodes = null,
     ): LengthAwarePaginator {

@@ -6,9 +6,9 @@ namespace App\Domains\Acessos\Application\Context;
 
 use App\Domains\Acessos\Application\Queries\EffectivePermissionSlugsQuery;
 use App\Domains\Acessos\Application\Queries\MembershipAccessQuery;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Models\User;
 
 final class EffectivePermissions

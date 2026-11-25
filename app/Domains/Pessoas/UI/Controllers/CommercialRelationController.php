@@ -10,15 +10,15 @@ use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Etiquetas\Application\Queries\Tags\ListSelectableTagsQuery;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
-use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
 use App\Domains\Organizacao\Domain\Models\Company;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Domains\Pessoas\Application\Actions\RegisterCommercialRelationAction;
 use App\Domains\Pessoas\Application\Actions\SetCommercialRelationAction;
 use App\Domains\Pessoas\Application\Actions\UpdateCommercialRelationAction;
 use App\Domains\Pessoas\Application\Data\CommercialRelationFiltersData;
 use App\Domains\Pessoas\Application\Data\CommercialRelationLinkData;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
-use App\Domains\Pessoas\Application\Data\SavePersonData;
+use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
 use App\Domains\Pessoas\Application\Queries\CommercialRelationDirectoryQuery;
 use App\Domains\Pessoas\Application\Queries\PersonAccessQuery;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
@@ -407,7 +407,7 @@ final class CommercialRelationController
         } else {
             abort_if($permissions->nodesFor($request->user(), 'account.people.create')->isEmpty(), 403);
 
-            $person = SavePersonData::fromInput(
+            $person = CreatePersonData::fromInput(
                 $request->only([...Person::IDENTIFICATION_FIELDS, ...Person::CONTACT_FIELDS]),
                 $account->id,
             );

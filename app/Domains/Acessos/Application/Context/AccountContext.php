@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Acessos\Application\Context;
 
 use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
-use App\Domains\Plataforma\Domain\DTOs\AccountInspectionDTO;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Domain\ValueObjects\AccountInspection;
 use App\Models\User;
 
 /**
@@ -29,7 +29,7 @@ final class AccountContext
      * Código inexistente ou sem vínculo responde 404, sem revelar a conta. O vínculo suspenso e a conta
      * inativa respondem 403 apenas a quem tem vínculo com ela. Na inspeção, só a conta inspecionada abre.
      */
-    public function enter(User $user, string $code, ?AccountInspectionDTO $inspection = null): Client
+    public function enter(User $user, string $code, ?AccountInspection $inspection = null): Client
     {
         $this->forget();
 

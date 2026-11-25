@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Acessos\Domain\Models;
 
 use App\Domains\Acessos\Domain\Concerns\NamesAuditedRole;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Organizacao\Domain\Models\Company;

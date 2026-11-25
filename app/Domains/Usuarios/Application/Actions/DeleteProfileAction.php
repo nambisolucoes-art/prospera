@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
-final class DeleteProfileAction
+final readonly class DeleteProfileAction
 {
     public function execute(DeleteProfileData $data, Session $session): void
     {

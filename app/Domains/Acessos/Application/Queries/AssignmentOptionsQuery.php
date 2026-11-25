@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domains\Acessos\Application\Queries;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Models\User;

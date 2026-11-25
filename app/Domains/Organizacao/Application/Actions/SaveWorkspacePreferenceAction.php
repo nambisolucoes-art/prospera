@@ -8,6 +8,7 @@ use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Organizacao\Application\Data\WorkspaceSelectionData;
 use App\Models\User;
+use App\Support\Exceptions\ResourceNotAvailable;
 
 final readonly class SaveWorkspacePreferenceAction
 {
@@ -18,7 +19,9 @@ final readonly class SaveWorkspacePreferenceAction
         $accountId = $this->context->accountId();
         $available = array_column($this->context->navigable($user), 'code');
 
-        abort_if(array_diff($selection->codes, $available) !== [], 404);
+        if (array_diff($selection->codes, $available) !== []) {
+            throw new ResourceNotAvailable;
+        }
 
         AccountMembership::query()
             ->where('user_id', $user->id)

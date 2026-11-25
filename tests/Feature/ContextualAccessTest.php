@@ -3,15 +3,15 @@
 namespace Tests\Feature;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -641,12 +641,12 @@ final class ContextualAccessTest extends TestCase
 
     private function company(Client $account, string $name, string $root): Company
     {
-        $data = SaveCompanyData::fromInput([
+        $data = CreateCompanyData::fromInput([
             'name' => $name,
             'person_type' => 'company',
             'document' => $root,
-        ], $account->id, null);
+        ], $account->id);
 
-        return app(CreateCompanyAction::class)->execute($account->id, $data);
+        return app(CreateCompanyAction::class)->execute($data, $account->id);
     }
 }

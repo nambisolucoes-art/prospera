@@ -2,7 +2,7 @@
 
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
 

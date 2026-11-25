@@ -143,7 +143,7 @@ O contexto da requisição acima vale para a área autenticada. Sites e diretór
 | Serviços de contexto | `App\Domains\Acessos\Application\Context\AccountContext` (E03), `EffectivePermissions` (E03, estendido na E05) e `OrganizationContext` (E06), todos com binding `scoped` |
 | Middleware | `App\Http\Middleware\ResolveOrganizationContext` (E06), aplicado só aos grupos de rota com contexto |
 | Comando | `organization:check` (E04), somente leitura |
-| Actions previstas | `CreateCompanyAction`, `SaveCompanyAction`, `SaveEstablishmentAction`, `PromotePrimaryEstablishmentAction`, `SaveRoleAssignmentsAction` |
+| Actions previstas | `CreateCompanyAction`, `UpdateCompanyAction`, `CreateEstablishmentAction`, `UpdateEstablishmentAction`, `PromotePrimaryEstablishmentAction`, `SaveRoleAssignmentsAction` |
 | Colunas | `account_id`, `company_id`, `establishment_id`, `membership_id`; flags `is_primary`, `is_headquarters`, `active`; código `code` |
 
 ### Identificadores de empresa e estabelecimento

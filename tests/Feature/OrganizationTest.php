@@ -5,10 +5,10 @@ namespace Tests\Feature;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Domains\Plataforma\Domain\Models\Client;
@@ -69,14 +69,14 @@ final class OrganizationTest extends TestCase
     public function test_a_failure_while_provisioning_leaves_no_company_and_no_audit(): void
     {
         [$account] = $this->account();
-        $data = SaveCompanyData::fromInput($this->companyPayload(), $account->id, null);
+        $data = CreateCompanyData::fromInput($this->companyPayload(), $account->id);
 
         Event::listen('eloquent.creating: '.Establishment::class, function (): never {
             throw new \RuntimeException('Falha simulada na unidade principal.');
         });
 
         try {
-            app(CreateCompanyAction::class)->execute($account->id, $data);
+            app(CreateCompanyAction::class)->execute($data, $account->id);
             $this->fail('A criação deveria falhar.');
         } catch (\RuntimeException $exception) {
             $this->assertSame('Falha simulada na unidade principal.', $exception->getMessage());
@@ -407,16 +407,16 @@ final class OrganizationTest extends TestCase
     {
         [, $owner] = $this->account();
         $company = $this->createCompany($owner);
-        $data = SaveEstablishmentData::fromInput([
+        $data = CreateEstablishmentData::fromInput([
             'name' => 'Filial',
             'classification' => 'branch',
             'tax_document' => '11.222.333/0002-62',
-        ], $company, null);
+        ], $company);
 
         DB::table('companies')->where('id', $company->id)->update(['tax_root' => '11222334']);
 
         try {
-            app(SaveEstablishmentAction::class)->execute($company, null, $data);
+            app(CreateEstablishmentAction::class)->execute($data, $company);
             $this->fail('O CNPJ foi aceito com a raiz anterior da empresa.');
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('tax_document', $exception->errors());

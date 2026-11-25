@@ -1,9 +1,8 @@
 <?php
 
 // Código pré-E09: completa a massa do seeder com preferências da Área de Trabalho e uma segunda conta.
-use App\Domains\Plataforma\Application\Actions\SaveAccountAction;
-use App\Domains\Plataforma\Application\Data\SaveAccountData;
-use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Application\Actions\Accounts\CreateAccountAction;
+use App\Domains\Plataforma\Application\Data\Accounts\CreateAccountData;
 use App\Models\User;
 use Database\Seeders\Support\FiscalDocuments;
 use Illuminate\Contracts\Console\Kernel;
@@ -29,7 +28,7 @@ Auth::guard('web')->setUser(User::where('email', 'admin@prospera.test')->sole())
 foreach (['Árvore & Ação Comércio', 'Árvore & Ação Comércio'] as $index => $name) {
     app()->forgetScopedInstances();
     $document = FiscalDocuments::cnpj('7123456'.$index, '0001');
-    app(SaveAccountAction::class)->execute(new Client, SaveAccountData::fromInput([
+    app(CreateAccountAction::class)->execute(CreateAccountData::fromInput([
         'name' => $name, 'person_type' => 'company', 'document' => $document, 'details' => ['phone' => '7134567890'],
         'organization_setup' => 'automatic', 'contractor_classification' => 'headquarters',
         'administrator' => ['name' => 'Admin '.$index, 'email' => 'evolucao'.$index.'@e10.test', 'mode' => 'manual',

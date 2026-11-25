@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Pessoas\Application\Data;
 
-use App\Domains\Organizacao\Domain\DTOs\OrganizationCode;
+use App\Domains\Organizacao\Domain\ValueObjects\OrganizationCode;
 use App\Support\PageSize;
 
 final readonly class CommercialRelationFiltersData

@@ -9,9 +9,13 @@ use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
-use App\Domains\Plataforma\Application\Actions\SaveAccountAction;
-use App\Domains\Plataforma\Application\Data\AccountFiltersData;
-use App\Domains\Plataforma\Application\Data\SaveAccountData;
+use App\Domains\Plataforma\Application\Actions\Accounts\CreateAccountAction;
+use App\Domains\Plataforma\Application\Actions\Accounts\UpdateAccountAction;
+use App\Domains\Plataforma\Application\Actions\Accounts\UpdateAccountProfileAction;
+use App\Domains\Plataforma\Application\Data\Accounts\CreateAccountData;
+use App\Domains\Plataforma\Application\Data\Accounts\ListAccountsData;
+use App\Domains\Plataforma\Application\Data\Accounts\UpdateAccountData;
+use App\Domains\Plataforma\Application\Data\Accounts\UpdateAccountProfileData;
 use App\Domains\Plataforma\Application\Queries\AccountDirectoryQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
@@ -37,7 +41,7 @@ final class ClientController
         }
 
         abort_unless($request->user()->can('platform.accounts.list'), 403);
-        $filters = AccountFiltersData::fromInput($request->query());
+        $filters = ListAccountsData::fromInput($request->query());
 
         return ApiPage::respond([
             'accounts' => $directory->list($filters),
@@ -148,10 +152,13 @@ final class ClientController
         return ApiPage::respond(['client' => app(AccountContext::class)->requireAccount(), 'tenant' => true]);
     }
 
-    public function updateTenant(Request $request, SaveAccountAction $save): RedirectResponse
+    public function updateTenant(Request $request, UpdateAccountProfileAction $action): RedirectResponse
     {
         $account = app(AccountContext::class)->requireAccount();
-        $save->execute($account, SaveAccountData::fromTenantInput($request->all(), $account));
+
+        $data = UpdateAccountProfileData::fromInput($request->all(), $account);
+
+        $action->execute($data, $account);
         ApiPage::toast('Dados da conta salvos.');
 
         if ($request->query('origem') === 'organizacao') {
@@ -161,12 +168,22 @@ final class ClientController
         return to_route('account.dashboard');
     }
 
-    public function save(Request $request, SaveAccountAction $save, ?Client $client = null): RedirectResponse
+    public function store(Request $request, CreateAccountAction $action): RedirectResponse
     {
-        $data = SaveAccountData::fromInput($request->all(), $client);
-        $message = $save->execute($client ?? new Client, $data);
+        $data = CreateAccountData::fromInput($request->all());
 
+        $message = $action->execute($data);
         ApiPage::toast($message);
+
+        return to_route('dashboard');
+    }
+
+    public function update(Request $request, UpdateAccountAction $action, Client $client): RedirectResponse
+    {
+        $data = UpdateAccountData::fromInput($request->all(), $client);
+
+        $action->execute($data, $client);
+        ApiPage::toast('Conta salva.');
 
         return to_route('dashboard');
     }

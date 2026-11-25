@@ -3,11 +3,11 @@
 namespace Tests\Feature;
 
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Etiquetas\Domain\Models\Tag;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;

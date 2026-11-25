@@ -8,18 +8,23 @@ use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
+use App\Domains\Pessoas\Application\Actions\People\CreatePersonAction;
+use App\Domains\Pessoas\Application\Actions\People\UpdatePersonAction;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
-use App\Domains\Pessoas\Application\Data\SavePersonData;
+use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
+use App\Domains\Pessoas\Application\Data\People\UpdatePersonData;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Support\Exceptions\OperationNotAllowed;
 
 final readonly class RegisterCommercialRelationAction
 {
     public function __construct(
-        private SavePersonAction $savePerson,
+        private CreatePersonAction $createPerson,
+        private UpdatePersonAction $updatePerson,
         private SetCommercialRelationAction $set,
-        private SaveCommercialTagsAction $saveTags,
+        private SyncCommercialTagsAction $syncTags,
         private CompanyDirectoryQuery $companies,
         private EffectivePermissions $permissions,
     ) {}
@@ -32,7 +37,7 @@ final readonly class RegisterCommercialRelationAction
         CommercialRole $role,
         Client $account,
         Company $company,
-        int|SavePersonData $person,
+        int|CreatePersonData $person,
         CommercialTagsData $selection,
         array $centralChanges = [],
         array $additionalCompanies = [],
@@ -44,19 +49,21 @@ final readonly class RegisterCommercialRelationAction
 
             $targets = $this->companies->lockActiveCodes($account->id, [$company->code, ...$additionalCompanies]);
             foreach ($targets as $target) {
-                abort_unless($role->allows($this->permissions, auth()->user(), 'create', $target->id), 403);
+                if (! $role->allows($this->permissions, auth()->user(), 'create', $target->id)) {
+                    throw new OperationNotAllowed;
+                }
             }
 
             if (is_int($person)) {
                 if ($centralChanges !== []) {
                     $existing = Person::where('account_id', $account->id)->lockForUpdate()->findOrFail($person);
-                    $changes = SavePersonData::forCommercialReuse($centralChanges, $existing);
-                    $this->savePerson->execute($account, $existing, $changes);
+                    $changes = UpdatePersonData::forCommercialReuse($centralChanges, $existing);
+                    $this->updatePerson->execute($changes, $existing, $account);
                 }
 
                 $personId = $person;
             } else {
-                $personId = $this->savePerson->execute($account, null, $person)->id;
+                $personId = $this->createPerson->execute($person, $account)->id;
             }
 
             foreach ($targets as $target) {
@@ -68,7 +75,7 @@ final readonly class RegisterCommercialRelationAction
                         ->where('company_id', $target->id)
                         ->where('person_id', $personId)
                         ->firstOrFail();
-                    $this->saveTags->execute($role, $relation, $selection);
+                    $this->syncTags->execute($role, $relation, $selection);
                 }
             }
         });

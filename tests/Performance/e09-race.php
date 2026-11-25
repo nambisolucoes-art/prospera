@@ -4,16 +4,15 @@ use App\Domains\Acessos\Application\Actions\AcceptAccountInvitationAction;
 use App\Domains\Acessos\Application\Actions\CreateAccountInvitationAction;
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
-use App\Domains\Acessos\Application\Actions\SaveRoleAction;
+use App\Domains\Acessos\Application\Actions\Roles\UpdateRoleAction;
 use App\Domains\Acessos\Application\Actions\SetMembershipStatusAction;
 use App\Domains\Acessos\Application\Context\AccountContext;
-use App\Domains\Acessos\Application\Data\RoleAvailabilityData;
-use App\Domains\Acessos\Application\Data\SaveRoleData;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Application\Data\Roles\UpdateRoleData;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
-use App\Domains\Plataforma\Application\Actions\SaveAccountAction;
-use App\Domains\Plataforma\Application\Data\SaveAccountData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Plataforma\Application\Actions\Accounts\CreateAccountAction;
+use App\Domains\Plataforma\Application\Data\Accounts\CreateAccountData;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -51,12 +50,11 @@ try {
             ->where('name', 'Permissões concorrentes')->sole();
         $slug = $argv[2] === '1' ? 'account.tags.list' : 'account.tags.create';
         $permission = Permission::where('slug', $slug)->sole();
-        app(SaveRoleAction::class)->execute(
-            $account->id, $role,
-            SaveRoleData::fromInput([
+        app(UpdateRoleAction::class)->execute(
+            UpdateRoleData::fromInput([
                 'name' => $role->name, 'permission_ids' => [$permission->id],
-            ], $account->id, $role->id),
-            RoleAvailabilityData::fromInput([], $account->id),
+            ], $role),
+            $role,
         );
         echo json_encode(['result' => 'permission-saved', 'permission' => $slug]), PHP_EOL;
     } elseif ($argv[1] === 'admin-setup') {
@@ -87,7 +85,7 @@ try {
             $remainder = ($sum * 10) % 11;
             $document .= $remainder === 10 ? '0' : (string) $remainder;
         }
-        $data = SaveAccountData::fromInput([
+        $data = CreateAccountData::fromInput([
             'name' => 'Colisão Concorrente',
             'person_type' => 'individual',
             'document' => $document,
@@ -100,9 +98,7 @@ try {
                 'password_confirmation' => 'Synthetic-password-123!',
             ],
         ]);
-        $message = app(SaveAccountAction::class)->execute(
-            new Client, $data,
-        );
+        $message = app(CreateAccountAction::class)->execute($data);
         echo json_encode(['result' => 'created', 'message' => $message]), PHP_EOL;
     } elseif ($argv[1] === 'accept') {
         $user = User::whereKey($data['users']['recipient'])->firstOrFail();

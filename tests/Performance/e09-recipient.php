@@ -2,9 +2,9 @@
 
 use App\Domains\Acessos\Application\Actions\AcceptAccountInvitationAction;
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;

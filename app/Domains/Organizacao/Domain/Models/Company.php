@@ -6,7 +6,8 @@ namespace App\Domains\Organizacao\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Organizacao\Domain\DTOs\CompanyDTO;
+use App\Domains\Organizacao\Domain\DTOs\Companies\CreateCompanyDTO;
+use App\Domains\Organizacao\Domain\DTOs\Companies\UpdateCompanyDTO;
 use App\Support\TaxDocument;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
@@ -84,19 +85,23 @@ class Company extends Model implements Auditable
         return $this->getKey() === null ? null : (int) $this->getKey();
     }
 
-    public static function register(CompanyDTO $data, int $accountId, string $code): self
+    public static function register(CreateCompanyDTO $data, int $accountId, string $code): self
     {
-        $company = new self([
+        return new self([
             'account_id' => $accountId,
             'code' => $code,
+            'name' => $data->name,
+            'trade_name' => $data->tradeName,
+            'person_type' => $data->personType,
+            'tax_root' => $data->taxRoot,
+            'individual_document' => $data->individualDocument,
+            'tax_regime' => $data->taxRegime,
+            'main_cnae' => $data->mainCnae,
+            'active' => $data->active,
         ]);
-
-        $company->revise($data);
-
-        return $company;
     }
 
-    public function revise(CompanyDTO $data): void
+    public function revise(UpdateCompanyDTO $data): void
     {
         $this->fill([
             'name' => $data->name,

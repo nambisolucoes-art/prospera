@@ -4,9 +4,9 @@ Identificação, endereço principal e contatos pertencem à pessoa, independent
 
 ## Estrutura e migração
 
-Person contém os dados comuns. SavePersonDetailsData normaliza e valida CPF/CNPJ (inclusive alfanumérico), unicidade por conta, tipo, inscrições, site e endereço. SavePersonData coordena essa validação e os campos da pessoa; SavePersonAction aplica PersonDetailsDTO e executa as gravações na mesma transação da classificação e das etiquetas.
+Person contém os dados comuns. CreatePersonData e UpdatePersonData normalizam e validam CPF/CNPJ (inclusive alfanumérico), unicidade por conta, tipo, inscrições, site e endereço. CreatePersonAction e UpdatePersonAction aplicam CreatePersonDTO e UpdatePersonDTO e executam as gravações na mesma transação da classificação e das etiquetas.
 
-Supplier guarda somente account_id, person_id e active. Não possui cópia de documento, contato ou endereço. SaveSupplierAction verifica cadastrar, ativar e inativar o papel. Listar e visualizar a classificação têm permissões específicas; editar a identidade usa Pessoas. A permissão experimental de editar dados exclusivos de fornecedor foi removida do catálogo com permissions:sync --prune, após confirmar que era a única definição obsoleta.
+Supplier guarda somente account_id, person_id e active. Não possui cópia de documento, contato ou endereço. ChangeSupplierRelationAction verifica cadastrar, ativar e inativar o papel. Listar e visualizar a classificação têm permissões específicas; editar a identidade usa Pessoas. A permissão experimental de editar dados exclusivos de fornecedor foi removida do catálogo com permissions:sync --prune, após confirmar que era a única definição obsoleta.
 
 A migração 000008 copia os dados existentes da primeira estrutura de fornecedor para sua pessoa e remove as colunas duplicadas. A migração não reescreve eventos históricos. Nome semelhante em etiqueta comum não é convertido automaticamente em papel de fornecedor.
 

@@ -6,10 +6,11 @@ namespace App\Domains\Acessos\Application\Actions;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Support\Exceptions\OperationNotAllowed;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -22,7 +23,9 @@ final readonly class RevokeAccountInvitationAction
 
     public function execute(int $accountId, int $invitationId): void
     {
-        abort_unless($this->accounts->requireId() === $accountId, 403);
+        if ($this->accounts->requireId() !== $accountId) {
+            throw new OperationNotAllowed;
+        }
         Gate::authorize('account.users.revoke-invitation', AccessNode::tenant($accountId));
 
         AuditLog::transaction(function () use ($accountId, $invitationId): void {

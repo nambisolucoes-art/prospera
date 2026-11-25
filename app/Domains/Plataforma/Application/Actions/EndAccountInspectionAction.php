@@ -9,6 +9,7 @@ use App\Domains\Plataforma\Application\Queries\AccountInspectionUsersQuery;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
+use App\Support\Exceptions\OperationNotAllowed;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +21,9 @@ final readonly class EndAccountInspectionAction
     public function execute(User $inspectedUser, Session $session): bool
     {
         $inspection = AccountInspectionSession::current($session);
-        abort_unless($inspection !== null && $inspection->userId === $inspectedUser->id, 403);
+        if (! ($inspection !== null && $inspection->userId === $inspectedUser->id)) {
+            throw new OperationNotAllowed;
+        }
 
         $accountName = Client::whereKey($inspection->accountId)->value('name');
 

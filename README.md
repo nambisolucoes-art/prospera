@@ -113,7 +113,7 @@ O código de negócio se organiza em `app/Domains/{Dominio}`.
 - A `Action` coordena o caso de uso e a persistência. Para operações com vários valores de domínio, ela monta um DTO imutável em `Domain/DTOs` e entrega ao model.
 - As consultas de listagem ficam em `Application/Queries` e recebem os filtros normalizados.
 
-O cadastro de estabelecimentos é uma referência. O controller cria `SaveEstablishmentData`, `SaveEstablishmentAction` monta `EstablishmentDTO` e o model `Establishment` aplica o estado.
+O cadastro de estabelecimentos é uma referência. O controller cria `CreateEstablishmentData` (ou `UpdateEstablishmentData`), `CreateEstablishmentAction` monta `CreateEstablishmentDTO` e o model `Establishment` aplica o estado. O padrão completo está em [Código do backend](docs/convencoes/codigo-backend.md).
 
 ## Cargos e catálogo de permissões
 

@@ -1,11 +1,11 @@
 <?php
 
 // Dados exclusivamente sintéticos da cópia isolada. Executado depois de e04-fixtures.php e e05-fixtures.php.
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;

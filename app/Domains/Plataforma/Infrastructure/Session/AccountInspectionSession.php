@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Domains\Plataforma\Infrastructure\Session;
 
-use App\Domains\Plataforma\Domain\DTOs\AccountInspectionDTO;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
+use App\Domains\Plataforma\Domain\ValueObjects\AccountInspection;
 use Illuminate\Contracts\Session\Session;
 
 final class AccountInspectionSession
 {
     private const KEY = 'account_inspection';
 
-    public static function current(Session $session): ?AccountInspectionDTO
+    public static function current(Session $session): ?AccountInspection
     {
         $values = $session->get(self::KEY);
 
-        return $values === null ? null : new AccountInspectionDTO(
+        return $values === null ? null : new AccountInspection(
             $values['administrator_id'], $values['account_id'], $values['user_id'],
             AccountInspectionMode::tryFrom($values['mode'] ?? '') ?? AccountInspectionMode::ReadOnly,
             $values['membership_id'] ?? null,
@@ -24,7 +24,7 @@ final class AccountInspectionSession
         );
     }
 
-    public static function start(Session $session, AccountInspectionDTO $inspection): void
+    public static function start(Session $session, AccountInspection $inspection): void
     {
         $session->put(self::KEY, self::context($inspection));
     }
@@ -39,7 +39,7 @@ final class AccountInspectionSession
      *     membership_id: int|null,
      * }
      */
-    public static function context(AccountInspectionDTO $inspection): array
+    public static function context(AccountInspection $inspection): array
     {
         return [
             'id' => $inspection->id,

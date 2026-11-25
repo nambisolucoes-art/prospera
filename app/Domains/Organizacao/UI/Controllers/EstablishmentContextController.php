@@ -9,7 +9,7 @@ use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Organizacao\Application\Actions\SaveWorkspacePreferenceAction;
 use App\Domains\Organizacao\Application\Data\WorkspaceDestinationData;
 use App\Domains\Organizacao\Application\Data\WorkspaceSelectionData;
-use App\Domains\Organizacao\Domain\DTOs\NavigableEstablishment;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableEstablishment;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;

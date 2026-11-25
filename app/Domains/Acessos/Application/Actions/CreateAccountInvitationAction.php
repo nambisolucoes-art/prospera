@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace App\Domains\Acessos\Application\Actions;
 
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
+use App\Support\Exceptions\ResourceNotAvailable;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Mail;
@@ -65,7 +66,9 @@ final readonly class CreateAccountInvitationAction
             }
 
             if ($person !== null) {
-                abort_unless($person->account_id === $account->id, 404);
+                if ($person->account_id !== $account->id) {
+                    throw new ResourceNotAvailable;
+                }
             }
 
             // Um convite pendente por e-mail: o novo envio revoga o anterior.

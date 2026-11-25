@@ -15,7 +15,7 @@ use App\Domains\Colaboradores\Application\Queries\Departments\ListDepartmentsQue
 use App\Domains\Colaboradores\Application\Queries\Departments\ShowDepartmentQuery;
 use App\Domains\Colaboradores\Domain\Models\Department;
 use App\Domains\Organizacao\Application\Queries\OrganizationContextQuery;
-use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Support\ApiPage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;

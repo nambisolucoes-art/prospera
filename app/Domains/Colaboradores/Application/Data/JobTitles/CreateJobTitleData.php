@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Colaboradores\Application\Data\JobTitles;
 
 use App\Domains\Colaboradores\Domain\Exceptions\CompanyNotAvailable;
-use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use App\Support\NormalizedName;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;

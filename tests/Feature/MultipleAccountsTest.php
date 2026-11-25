@@ -5,15 +5,15 @@ namespace Tests\Feature;
 use App\Domains\Acessos\Application\Actions\DefaultRolesAction;
 use App\Domains\Acessos\Application\Actions\RegisterAccountMembershipAction;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Acessos\Domain\Models\Role;
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
 use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
-use App\Domains\Plataforma\Domain\DTOs\AccountCode;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Domain\ValueObjects\AccountCode;
 use App\Domains\Usuarios\Application\Actions\CreateUserAction;
 use App\Domains\Usuarios\Application\Data\CreateUserData;
 use App\Domains\Usuarios\Domain\Enums\UserRole;
@@ -195,15 +195,12 @@ final class MultipleAccountsTest extends TestCase
     public function test_invitation_cannot_grant_an_assignment_to_a_company_inactivated_after_issue(): void
     {
         $account = Client::create(['name' => 'Conta convite local', 'active' => true]);
-        $company = app(CreateCompanyAction::class)->execute(
-            $account->id,
-            SaveCompanyData::fromInput([
-                'name' => 'Empresa convite',
-                'person_type' => 'company',
-                'document' => '11000001',
-                'primary' => ['classification' => 'unregistered'],
-            ], $account->id, null),
-        );
+        $company = app(CreateCompanyAction::class)->execute(CreateCompanyData::fromInput([
+            'name' => 'Empresa convite',
+            'person_type' => 'company',
+            'document' => '11000001',
+            'primary' => ['classification' => 'unregistered'],
+        ], $account->id), $account->id);
         $role = Role::create([
             'account_id' => $account->id, 'name' => 'Cargo local',
         ]);

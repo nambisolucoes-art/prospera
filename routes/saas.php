@@ -41,7 +41,7 @@ Route::middleware(['auth', 'can:access-saas', 'verified'])->group(function () {
             ->name('create')
             ->middleware('can:platform.accounts.create');
 
-        Route::post('/', [ClientController::class, 'save'])
+        Route::post('/', [ClientController::class, 'store'])
             ->name('store')
             ->middleware('can:platform.accounts.create');
 
@@ -75,7 +75,7 @@ Route::middleware(['auth', 'can:access-saas', 'verified'])->group(function () {
             ->name('inspection.start')
             ->middleware('can:platform.inspection.start');
 
-        Route::patch('{client}', [ClientController::class, 'save'])
+        Route::patch('{client}', [ClientController::class, 'update'])
             ->name('update')
             ->middleware('can:platform.accounts.update');
     });

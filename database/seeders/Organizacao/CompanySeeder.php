@@ -2,8 +2,8 @@
 
 namespace Database\Seeders\Organizacao;
 
-use App\Domains\Organizacao\Application\Actions\CreateCompanyAction;
-use App\Domains\Organizacao\Application\Data\SaveCompanyData;
+use App\Domains\Organizacao\Application\Actions\Companies\CreateCompanyAction;
+use App\Domains\Organizacao\Application\Data\Companies\CreateCompanyData;
 use Database\Seeders\Support\FiscalDocuments;
 use Database\Seeders\Support\SeedCatalog;
 use Database\Seeders\Support\SeedsAccountScenario;
@@ -24,9 +24,9 @@ final class CompanySeeder extends Seeder
         $accountId = $this->account()->id;
 
         foreach ($this->companies() as $input) {
-            $data = SaveCompanyData::fromInput($input, $accountId, null);
+            $data = CreateCompanyData::fromInput($input, $accountId);
 
-            $create->execute($accountId, $data);
+            $create->execute($data, $accountId);
         }
 
         $this->stopActing();

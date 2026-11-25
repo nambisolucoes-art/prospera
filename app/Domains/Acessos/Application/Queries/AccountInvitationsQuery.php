@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Queries;
 
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
 use App\Domains\Acessos\Domain\Models\AccountInvitation;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 
 final class AccountInvitationsQuery
 {

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Context;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Organizacao\Application\Queries\OrganizationContextQuery;
-use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
-use App\Domains\Organizacao\Domain\DTOs\NavigableEstablishment;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableEstablishment;
 use App\Models\User;
 
 /**

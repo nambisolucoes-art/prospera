@@ -6,12 +6,14 @@ namespace App\Domains\Organizacao\UI\Controllers;
 
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
-use App\Domains\Organizacao\Application\Actions\PromotePrimaryEstablishmentAction;
-use App\Domains\Organizacao\Application\Actions\SaveEstablishmentAction;
-use App\Domains\Organizacao\Application\Data\EstablishmentFiltersData;
-use App\Domains\Organizacao\Application\Data\SaveEstablishmentData;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
+use App\Domains\Organizacao\Application\Actions\Establishments\CreateEstablishmentAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\PromotePrimaryEstablishmentAction;
+use App\Domains\Organizacao\Application\Actions\Establishments\UpdateEstablishmentAction;
+use App\Domains\Organizacao\Application\Data\Establishments\CreateEstablishmentData;
+use App\Domains\Organizacao\Application\Data\Establishments\ListEstablishmentsData;
+use App\Domains\Organizacao\Application\Data\Establishments\UpdateEstablishmentData;
 use App\Domains\Organizacao\Application\Queries\CompanyDirectoryQuery;
 use App\Domains\Organizacao\Application\Queries\EstablishmentDirectoryQuery;
 use App\Domains\Organizacao\Domain\Models\Company;
@@ -33,7 +35,7 @@ final class EstablishmentController
         EffectivePermissions $permissions,
     ): JsonResponse|View {
         $accountId = app(AccountContext::class)->requireId();
-        $filters = EstablishmentFiltersData::fromInput($request->query());
+        $filters = ListEstablishmentsData::fromInput($request->query());
         $nodes = $permissions->nodesFor($request->user(), 'account.establishments.list');
         abort_if($nodes->isEmpty(), 403);
         $options = $this->companyOptions($companies, $accountId, $filters->companyId, $nodes);
@@ -115,40 +117,63 @@ final class EstablishmentController
         ]);
     }
 
-    public function save(
+    public function store(
+        Request $request,
+        CompanyDirectoryQuery $companies,
+        CreateEstablishmentAction $action,
+    ): RedirectResponse {
+        $accountId = app(AccountContext::class)->requireId();
+        $companyId = filter_var($request->input('company_id'), FILTER_VALIDATE_INT);
+
+        if ($companyId === false) {
+            throw ValidationException::withMessages(['company_id' => 'Selecione a empresa.']);
+        }
+
+        abort_if(
+            app(EffectivePermissions::class)->nodesFor($request->user(), 'account.establishments.create')->isEmpty(),
+            403,
+        );
+
+        $company = $companies->find($accountId, $companyId);
+
+        abort_unless(
+            $request->user()->can('account.establishments.create', AccessNode::company($accountId, $company->id)),
+            404,
+        );
+
+        $data = CreateEstablishmentData::fromInput($request->all(), $company);
+
+        $saved = $action->execute($data, $company);
+        ApiPage::toast('Estabelecimento salvo.');
+
+        return $this->afterSave($request, $saved);
+    }
+
+    public function update(
         Request $request,
         EstablishmentDirectoryQuery $establishments,
-        CompanyDirectoryQuery $companies,
-        SaveEstablishmentAction $save,
-        ?int $establishmentId = null,
+        UpdateEstablishmentAction $action,
+        int $establishmentId,
     ): RedirectResponse {
         $accountId = app(AccountContext::class)->requireId();
 
-        if ($establishmentId === null) {
-            $companyId = filter_var($request->input('company_id'), FILTER_VALIDATE_INT);
+        // A empresa proprietária é fixa: a edição nunca move a unidade para outra pessoa jurídica.
+        $establishment = $establishments->find($accountId, $establishmentId);
 
-            if ($companyId === false) {
-                throw ValidationException::withMessages(['company_id' => 'Selecione a empresa.']);
-            }
+        abort_unless($request->user()->can('account.establishments.update', $this->node($establishment)), 404);
 
-            $establishment = null;
-            abort_if(app(EffectivePermissions::class)->nodesFor($request->user(), 'account.establishments.create')->isEmpty(), 403);
-            $company = $companies->find($accountId, $companyId);
-            abort_unless($request->user()->can('account.establishments.create', AccessNode::company($accountId, $company->id)), 404);
-        } else {
-            // A empresa proprietária é fixa: a edição nunca move a unidade para outra pessoa jurídica.
-            $establishment = $establishments->find($accountId, $establishmentId);
-            abort_unless($request->user()->can('account.establishments.update', $this->node($establishment)), 404);
-            $company = $establishment->company;
-        }
+        $data = UpdateEstablishmentData::fromInput($request->all(), $establishment);
 
-        $data = SaveEstablishmentData::fromInput($request->all(), $company, $establishment);
-        $saved = $save->execute($company, $establishment, $data);
-
+        $saved = $action->execute($data, $establishment);
         ApiPage::toast('Estabelecimento salvo.');
 
+        return $this->afterSave($request, $saved);
+    }
+
+    private function afterSave(Request $request, Establishment $saved): RedirectResponse
+    {
         if ($request->query('origem') === 'organizacao') {
-            return to_route('account.organization', ['empresa' => $company->id]);
+            return to_route('account.organization', ['empresa' => $saved->company_id]);
         }
 
         if ($request->user()->can('account.establishments.list')) {

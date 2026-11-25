@@ -4,7 +4,7 @@ namespace Database\Seeders\Fornecedores;
 
 use App\Domains\Pessoas\Application\Actions\RegisterCommercialRelationAction;
 use App\Domains\Pessoas\Application\Data\CommercialTagsData;
-use App\Domains\Pessoas\Application\Data\SavePersonData;
+use App\Domains\Pessoas\Application\Data\People\CreatePersonData;
 use App\Domains\Pessoas\Domain\Enums\CommercialRole;
 use App\Domains\Pessoas\Domain\Models\Person;
 use Database\Seeders\Clientes\CustomerSeeder;
@@ -37,7 +37,7 @@ final class SupplierSeeder extends Seeder
                 CommercialRole::Supplier,
                 $account,
                 $this->companyByKey($company),
-                SavePersonData::fromInput($person, $account->id),
+                CreatePersonData::fromInput($person, $account->id),
                 CommercialTagsData::fromInput($this->tagIds('suppliers', $tags)),
                 additionalCompanies: $additionalCodes,
             );

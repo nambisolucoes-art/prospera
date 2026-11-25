@@ -8,7 +8,7 @@ use App\Http\Middleware\EnsureIdentitySessionCurrent;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-final class EndOtherIdentitySessionsAction
+final readonly class EndOtherIdentitySessionsAction
 {
     public function execute(User $user, ?string $currentSession): void
     {

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Domain\Models;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\DTOs\Roles\CreateRoleDTO;
+use App\Domains\Acessos\Domain\DTOs\Roles\UpdateRoleDTO;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -27,6 +29,20 @@ class Role extends Model implements Auditable
     public static function auditedFields(): array
     {
         return ['name' => 'Nome', 'account_id' => 'Conta', 'system_key' => 'Cargo inicial', 'availability' => 'Abrangência'];
+    }
+
+    public static function register(CreateRoleDTO $data, int $accountId): self
+    {
+        $role = new self(['account_id' => $accountId, 'name' => $data->name]);
+        $role->availability = $data->availability;
+
+        return $role;
+    }
+
+    public function revise(UpdateRoleDTO $data): void
+    {
+        $this->name = $data->name;
+        $this->availability = $data->availability;
     }
 
     /** @return array<int,int> */

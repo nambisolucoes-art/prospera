@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domains\Organizacao\Application\Queries;
 
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
-use App\Domains\Organizacao\Application\Data\EstablishmentFiltersData;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
+use App\Domains\Organizacao\Application\Data\Establishments\ListEstablishmentsData;
 use App\Domains\Organizacao\Domain\Models\Establishment;
 use App\Support\TaxDocument;
 use Illuminate\Database\Eloquent\Collection;
@@ -30,7 +30,7 @@ final class EstablishmentDirectoryQuery
     /** @return LengthAwarePaginator<int, Establishment> */
     public function list(
         int $accountId,
-        EstablishmentFiltersData $filters,
+        ListEstablishmentsData $filters,
         string $path,
         string $pageName = 'page',
         ?AuthorizedNodes $nodes = null,

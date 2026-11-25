@@ -2,9 +2,8 @@
 
 namespace Database\Seeders\Plataforma;
 
-use App\Domains\Plataforma\Application\Actions\SaveAccountAction;
-use App\Domains\Plataforma\Application\Data\SaveAccountData;
-use App\Domains\Plataforma\Domain\Models\Client;
+use App\Domains\Plataforma\Application\Actions\Accounts\CreateAccountAction;
+use App\Domains\Plataforma\Application\Data\Accounts\CreateAccountData;
 use Database\Seeders\Support\FiscalDocuments;
 use Database\Seeders\Support\SeedCatalog;
 use Database\Seeders\Support\SeedsAccountScenario;
@@ -21,9 +20,9 @@ final class TenantAccountSeeder extends Seeder
     public function run(): void
     {
         $this->actAsPlatformAdministrator();
-        $save = app(SaveAccountAction::class);
+        $save = app(CreateAccountAction::class);
 
-        $data = SaveAccountData::fromInput([
+        $data = CreateAccountData::fromInput([
             'name' => 'Grupo Horizonte Comércio Ltda',
             'email' => 'contato@grupohorizonte.test',
             'plan' => 'Empresarial',
@@ -73,7 +72,7 @@ final class TenantAccountSeeder extends Seeder
             ],
         ]);
 
-        $save->execute(new Client, $data);
+        $save->execute($data);
 
         $this->stopActing();
     }

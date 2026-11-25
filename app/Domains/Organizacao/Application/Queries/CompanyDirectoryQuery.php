@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Domains\Organizacao\Application\Queries;
 
-use App\Domains\Acessos\Domain\DTOs\AuthorizedNodes;
-use App\Domains\Organizacao\Application\Data\CompanyFiltersData;
+use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
+use App\Domains\Organizacao\Application\Data\Companies\ListCompaniesData;
 use App\Domains\Organizacao\Domain\Models\Company;
+use App\Support\Exceptions\ResourceNotAvailable;
 use App\Support\TaxDocument;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -28,7 +29,7 @@ final class CompanyDirectoryQuery
     /** @return LengthAwarePaginator<int, Company> */
     public function list(
         int $accountId,
-        CompanyFiltersData $filters,
+        ListCompaniesData $filters,
         string $path,
         ?AuthorizedNodes $nodes = null,
     ): LengthAwarePaginator {
@@ -114,7 +115,9 @@ final class CompanyDirectoryQuery
             ->lockForUpdate()
             ->get();
 
-        abort_unless($companies->count() === count($codes), 404);
+        if ($companies->count() !== count($codes)) {
+            throw new ResourceNotAvailable;
+        }
 
         return $companies;
     }

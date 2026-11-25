@@ -6,7 +6,7 @@ O modal reutiliza BusinessForm, os campos horizontais e o Colorpicker do Ubold. 
 
 `TagLabel.colors.ts` compartilha a cor e o contraste entre TagLabel e TagSelect. A cor cadastrada aparece nos marcadores selecionados e opções de Pessoas, nas listagens, na visualização da pessoa e na visualização da etiqueta. A etiqueta especial Usuário preserva sua própria cor e suas regras de acesso. Remover um marcador mantém o foco no seletor, permitindo fechá-lo por Esc.
 
-As gravações continuam em SaveTagAction e SavePersonAction, na mesma transação da auditoria. Cadastro e edição registram autor, conta e valores anteriores e novos, incluindo a cor. As permissões de listar, visualizar, cadastrar e editar continuam independentes e são verificadas no servidor. Nenhuma permissão nova ou operação de negócio adicional foi criada.
+As gravações continuam em CreateTagAction, UpdateTagAction, CreatePersonAction e UpdatePersonAction, na mesma transação da auditoria. Cadastro e edição registram autor, conta e valores anteriores e novos, incluindo a cor. As permissões de listar, visualizar, cadastrar e editar continuam independentes e são verificadas no servidor. Nenhuma permissão nova ou operação de negócio adicional foi criada.
 
 ## Verificação
 

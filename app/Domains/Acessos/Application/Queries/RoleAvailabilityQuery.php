@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Acessos\Application\Queries;
 
-use App\Domains\Acessos\Application\Data\RoleAvailabilityData;
+use App\Domains\Acessos\Application\Data\Roles\RoleAvailabilityData;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
 use App\Domains\Organizacao\Domain\Models\Company;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domains\Auditoria\Application\Actions;
 
 use App\Domains\Acessos\Domain\Models\AccountMembership;
-use App\Domains\Plataforma\Domain\DTOs\AccountInspectionDTO;
+use App\Domains\Plataforma\Domain\ValueObjects\AccountInspection;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -75,7 +75,7 @@ final class AuditContext
     }
 
     public function identifyInspection(
-        AccountInspectionDTO $inspection,
+        AccountInspection $inspection,
         ?string $administratorName,
         ?string $representedName,
     ): void {

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Domains\Colaboradores\Application\Actions\JobTitles;
 
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Colaboradores\Application\Data\JobTitles\CreateJobTitleData;
 use App\Domains\Colaboradores\Domain\DTOs\JobTitles\CreateJobTitleDTO;
 use App\Domains\Colaboradores\Domain\Models\JobTitle;
-use App\Domains\Organizacao\Domain\DTOs\NavigableCompany;
 use App\Domains\Organizacao\Domain\Models\Company;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableCompany;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Gate;

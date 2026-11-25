@@ -8,13 +8,15 @@ use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Data\SaveRoleAssignmentsData;
 use App\Domains\Acessos\Application\Queries\AssignmentNodeQuery;
-use App\Domains\Acessos\Domain\DTOs\AccessNode;
 use App\Domains\Acessos\Domain\Models\AccountMembership;
 use App\Domains\Acessos\Domain\Models\Role;
 use App\Domains\Acessos\Domain\Models\RoleAssignment;
+use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Plataforma\Domain\Models\Client;
+use App\Support\Exceptions\ConflictingChange;
+use App\Support\Exceptions\OperationNotAllowed;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -30,21 +32,23 @@ final readonly class SaveRoleAssignmentsAction
     public function assertAssignable(int $accountId, int $roleId, ?AccessNode $node = null): Role
     {
         $node ??= AccessNode::tenant($accountId);
-        abort_unless($this->accounts->requireId() === $accountId && $node->accountId === $accountId, 403);
+        if (! ($this->accounts->requireId() === $accountId && $node->accountId === $accountId)) {
+            throw new OperationNotAllowed;
+        }
 
         Gate::authorize('account.users.assign-role', $node);
 
         $role = Role::where('account_id', $accountId)->findOrFail($roleId);
-        abort_unless($role->isAvailableAt($node), 403, 'O cargo não está disponível neste local.');
+        if (! $role->isAvailableAt($node)) {
+            throw new OperationNotAllowed('O cargo não está disponível neste local.');
+        }
 
         $operator = auth()->user();
 
         foreach ($role->permissions()->pluck('slug') as $slug) {
-            abort_unless(
-                $this->permissions->canDelegate($operator, $slug, $node),
-                403,
-                'Você não pode gerenciar um cargo com permissões que não possui neste local.',
-            );
+            if (! $this->permissions->canDelegate($operator, $slug, $node)) {
+                throw new OperationNotAllowed('Você não pode gerenciar um cargo com permissões que não possui neste local.');
+            }
         }
 
         return $role;
@@ -52,12 +56,16 @@ final readonly class SaveRoleAssignmentsAction
 
     public function execute(int $accountId, int $membershipId, SaveRoleAssignmentsData $data): void
     {
-        abort_unless($this->accounts->requireId() === $accountId, 403);
+        if ($this->accounts->requireId() !== $accountId) {
+            throw new OperationNotAllowed;
+        }
 
         $operator = auth()->user();
 
         if ($data->grants === [] && $data->revocations === []) {
-            abort_if($this->permissions->nodesFor($operator, 'account.users.assign-role')->isEmpty(), 403);
+            if ($this->permissions->nodesFor($operator, 'account.users.assign-role')->isEmpty()) {
+                throw new OperationNotAllowed;
+            }
 
             throw ValidationException::withMessages(['grants' => 'Informe uma concessão ou revogação de cargo.']);
         }
@@ -65,7 +73,9 @@ final readonly class SaveRoleAssignmentsAction
         AuditLog::transaction(function () use ($accountId, $membershipId, $data, $operator): void {
             Client::whereKey($accountId)->lockForUpdate()->firstOrFail();
             $this->permissions->forget();
-            abort_if($this->permissions->nodesFor($operator, 'account.users.assign-role')->isEmpty(), 403);
+            if ($this->permissions->nodesFor($operator, 'account.users.assign-role')->isEmpty()) {
+                throw new OperationNotAllowed;
+            }
 
             $membership = AccountMembership::where('account_id', $accountId)
                 ->lockForUpdate()
@@ -111,7 +121,9 @@ final readonly class SaveRoleAssignmentsAction
                     throw ValidationException::withMessages(['role_id' => 'Mantenha ao menos um administrador da conta.']);
                 }
 
-                abort_unless($assignment->delete() === true, 409);
+                if ($assignment->delete() !== true) {
+                    throw new ConflictingChange;
+                }
             }
         });
 

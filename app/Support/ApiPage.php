@@ -7,7 +7,7 @@ namespace App\Support;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
-use App\Domains\Organizacao\Domain\DTOs\NavigableEstablishment;
+use App\Domains\Organizacao\Domain\ValueObjects\NavigableEstablishment;
 use App\Domains\Plataforma\Application\Queries\AccountMembershipsQuery;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;

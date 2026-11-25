@@ -12,6 +12,8 @@ use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Models\Client;
 use App\Models\User;
+use App\Support\Exceptions\OperationNotAllowed;
+use App\Support\Exceptions\ResourceGone;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -30,15 +32,15 @@ final readonly class AcceptAccountInvitationAction
 
     public function execute(User $user, string $token): Client
     {
-        abort_unless(
-            config('prospera.multiple_accounts'),
-            403,
-            'A entrada em outras contas por convite ainda não está liberada.',
-        );
+        if (! config('prospera.multiple_accounts')) {
+            throw new OperationNotAllowed('A entrada em outras contas por convite ainda não está liberada.');
+        }
 
         $hash = AccountInvitation::hashToken($token);
         $candidate = AccountInvitation::where('token_hash', $hash)->first(['id', 'account_id']);
-        abort_if($candidate === null, 410, self::UNAVAILABLE);
+        if ($candidate === null) {
+            throw new ResourceGone(self::UNAVAILABLE);
+        }
 
         return AuditLog::transaction(function () use ($user, $candidate): Client {
             // Mesma ordem de travas da criação do convite: primeiro a conta, depois o convite.
@@ -55,13 +57,17 @@ final readonly class AcceptAccountInvitationAction
                 && $lockedUser->hasVerifiedEmail()
                 && ! $lockedUser->password_setup_pending;
 
-            abort_unless($usable, 410, self::UNAVAILABLE);
+            if (! $usable) {
+                throw new ResourceGone(self::UNAVAILABLE);
+            }
 
             $alreadyMember = AccountMembership::where('account_id', $account->id)
                 ->where('user_id', $user->id)
                 ->exists();
 
-            abort_if($alreadyMember, 410, self::UNAVAILABLE);
+            if ($alreadyMember) {
+                throw new ResourceGone(self::UNAVAILABLE);
+            }
 
             try {
                 $node = $this->nodes->resolve(
@@ -72,11 +78,13 @@ final readonly class AcceptAccountInvitationAction
                     granting: true,
                 );
             } catch (ValidationException) {
-                abort(410, self::UNAVAILABLE);
+                throw new ResourceGone(self::UNAVAILABLE);
             }
 
             $role = Role::where('account_id', $account->id)->find($lockedInvitation->role_id);
-            abort_unless($role !== null && $role->isAvailableAt($node), 410, self::UNAVAILABLE);
+            if (! ($role !== null && $role->isAvailableAt($node))) {
+                throw new ResourceGone(self::UNAVAILABLE);
+            }
 
             $person = null;
 
@@ -88,7 +96,9 @@ final readonly class AcceptAccountInvitationAction
                 $personInUse = $person === null
                     || AccountMembership::where('account_id', $account->id)->where('person_id', $person->id)->exists();
 
-                abort_if($personInUse, 410, self::UNAVAILABLE);
+                if ($personInUse) {
+                    throw new ResourceGone(self::UNAVAILABLE);
+                }
             }
 
             $this->registerMembership->execute($lockedUser, $role, $node, $person, $lockedInvitation->invited_by);
