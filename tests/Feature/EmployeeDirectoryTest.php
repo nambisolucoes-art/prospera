@@ -353,7 +353,7 @@ class EmployeeDirectoryTest extends TestCase
             ->assertJsonPath('canSeeAccess', true)
             ->assertJsonPath('employees.data.0.has_access', true);
         $this->getJson('/conta/colaboradores?access=no')->assertJsonPath('employees.total', 0);
-        $this->getJson('/conta/colaboradores/'.$person->id.'/editar')->assertJsonPath('access', true);
+        $this->assertArrayNotHasKey('access', $this->getJson('/conta/colaboradores/'.$person->id.'/editar')->json());
 
         $blind = $this->operatorOn($this->roupas);
         $this->actingAs($blind);
@@ -364,9 +364,6 @@ class EmployeeDirectoryTest extends TestCase
         // O filtro é ignorado, sem diferença de resposta, e a ficha não traz o indicador.
         $this->getJson('/conta/colaboradores?access=no')->assertJsonPath('employees.total', 1);
         $this->getJson('/conta/colaboradores?access=yes')->assertJsonPath('employees.total', 1);
-        $this->getJson('/conta/colaboradores/'.$person->id.'/editar')
-            ->assertJsonPath('access', null)
-            ->assertJsonPath('canSeeAccess', false);
     }
 
     public function test_registering_and_deactivating_an_employee_never_touch_login_or_permissions(): void

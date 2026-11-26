@@ -2,13 +2,14 @@ import { useState } from 'react';
 import BusinessForm, { BusinessFormActions, BusinessFormRow, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
 import Button from '@/components/Button/Button';
-import CardBox from '@/components/CardBox/CardBox';
 import ChoiceControl from '@/components/ChoiceControl/ChoiceControl';
 import FormField from '@/components/FormField/FormField';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import Label from '@/components/Label/Label';
+import InfoTooltip from '@/components/InfoTooltip/InfoTooltip';
 import Modal from '@/components/Modal/Modal';
 import WorkContactFields from './WorkContactFields';
+import './ContactFields.css';
 import './Employees.css';
 
 export type AssignmentRow = {
@@ -64,8 +65,9 @@ const titles: Record<Mode, string> = {
 };
 
 // Lotações de um vínculo: períodos por estabelecimento, com função e departamento do período e a principal marcada.
-export default function EmployeeAssignments({ personId, link, today, writable }: {
+export default function EmployeeAssignments({ personId, link, today, writable, onClose }: {
   personId: number;
+  onClose: () => void;
   link: {
     id: number;
     company_name: string;
@@ -91,15 +93,27 @@ export default function EmployeeAssignments({ personId, link, today, writable }:
   const shown = history ? [...open, ...ended] : open;
   const base = `@/colaboradores/${personId}/vinculos/${link.id}/lotacoes`;
 
+  // Adicionar, corrigir, trocar, encerrar e tornar principal abrem um painel dentro do mesmo modal, sem janela aninhada.
+  if (dialog && options) {
+    return (
+      <Modal open bootstrap manageFocus size="large" title={`${titles[dialog.mode]} em ${link.company_name}`} onClose={onClose}>
+        <AssignmentDialog dialog={dialog} base={base} options={options} today={today} siblings={link.assignments}
+          onClose={() => setDialog(undefined)} />
+      </Modal>
+    );
+  }
+
   return (
-    <CardBox>
-      <div className="business-form" data-tour="employee-assignments">
-        <BusinessFormSection title={`Lotações em ${link.company_name}`}>
-          <p className="employees__note">
-            {link.scope === 'unit'
-              ? 'Você vê somente as lotações das unidades que o seu acesso alcança.'
-              : 'Cada lotação é um período em um estabelecimento, com função e departamento do período.'}
-          </p>
+    <Modal open bootstrap manageFocus size="large" onClose={onClose} title={<>
+      Lotações em {link.company_name}{' '}
+      <InfoTooltip label="lotações"
+        text="Cada lotação é um período em um estabelecimento, com função e departamento do período." />
+    </>}>
+      <div className="business-form">
+        <BusinessFormSection title="Períodos de lotação">
+          {link.scope === 'unit' && (
+            <p className="employees__note">Você vê somente as lotações das unidades que o seu acesso alcança.</p>
+          )}
           {!link.active && link.assignments.length > 0 && (
             <p className="employees__note">
               O vínculo está inativo: as lotações vigentes foram encerradas e as futuras ficam sem efeito. Reative o
@@ -131,25 +145,33 @@ export default function EmployeeAssignments({ personId, link, today, writable }:
                     {formatDate(assignment.starts_on)} a {assignment.ends_on ? formatDate(assignment.ends_on) : 'sem data final'}
                   </div>
                   {writable && assignment.can_manage && link.company_active && (
-                    <div className="business-list__actions employees__assignment-actions">
+                    <div className="employees__assignment-actions">
                       {assignment.status !== 'ended' && link.active && (
                         <>
-                          <Button iconOnly tone="primary" leftIconClass="fa fa-exchange" title="Alterar função ou departamento"
+                          <button type="button" className="employees__icon-button" title="Alterar função ou departamento"
                             aria-label={`Alterar função ou departamento em ${assignment.establishment_name}`}
-                            onClick={() => setDialog({ mode: 'change', assignment })} />
+                            onClick={() => setDialog({ mode: 'change', assignment })}>
+                            <i className="fa fa-exchange" aria-hidden="true" />
+                          </button>
                           {!assignment.is_primary && (
-                            <Button iconOnly tone="primary" leftIconClass="fa fa-flag" title="Tornar principal"
-                              aria-label={`Tornar principal a lotação em ${assignment.establishment_name}`}
-                              onClick={() => setDialog({ mode: 'primary', assignment })} />
+                            <button type="button" className="employees__icon-button" title="Tornar principal"
+                            aria-label={`Tornar principal a lotação em ${assignment.establishment_name}`}
+                            onClick={() => setDialog({ mode: 'primary', assignment })}>
+                            <i className="fa fa-flag" aria-hidden="true" />
+                          </button>
                           )}
-                          <Button iconOnly tone="danger" leftIconClass="fa fa-sign-out" title="Encerrar lotação"
+                          <button type="button" className="employees__icon-button employees__icon-button--danger" title="Encerrar lotação"
                             aria-label={`Encerrar a lotação em ${assignment.establishment_name}`}
-                            onClick={() => setDialog({ mode: 'end', assignment })} />
+                            onClick={() => setDialog({ mode: 'end', assignment })}>
+                            <i className="fa fa-times" aria-hidden="true" />
+                          </button>
                         </>
                       )}
-                      <Button iconOnly tone="primary" leftIconClass="fa fa-pencil" title="Corrigir lotação"
-                        aria-label={`Corrigir a lotação em ${assignment.establishment_name}`}
-                        onClick={() => setDialog({ mode: 'edit', assignment })} />
+                      <button type="button" className="employees__icon-button" title="Corrigir lotação"
+                            aria-label={`Corrigir a lotação em ${assignment.establishment_name}`}
+                            onClick={() => setDialog({ mode: 'edit', assignment })}>
+                            <i className="fa fa-pencil" aria-hidden="true" />
+                          </button>
                     </div>
                   )}
                 </li>
@@ -158,29 +180,25 @@ export default function EmployeeAssignments({ personId, link, today, writable }:
           )}
           <div className="employees__assignment-footer">
             {canAdd && (
-              <span data-tour="employee-assignment-add">
-                <Button tone="primary" labelIconClass="fa fa-plus" aria-haspopup="dialog"
-                  onClick={() => setDialog({ mode: 'create' })}>
-                  Adicionar lotação
-                </Button>
-              </span>
+              <button type="button" className="contact-fields__add waves-effect waves-light" aria-haspopup="dialog"
+                aria-label="Adicionar lotação" onClick={() => setDialog({ mode: 'create' })}>
+                <span aria-hidden="true"><i className="fa fa-plus" /></span>Lotação
+              </button>
             )}
             {ended.length > 0 && (
-              <span data-tour="employee-assignment-history">
-                <Button tone="white" labelIconClass="fa fa-history" aria-pressed={history}
-                  onClick={() => setHistory((value) => !value)}>
-                  {history ? 'Ocultar histórico' : `Histórico (${ended.length})`}
-                </Button>
-              </span>
+              <button type="button" className="contact-fields__add waves-effect waves-light" aria-pressed={history}
+                onClick={() => setHistory((value) => !value)}>
+                <span aria-hidden="true"><i className="fa fa-history" /></span>
+                {history ? 'Ocultar histórico' : `Histórico (${ended.length})`}
+              </button>
             )}
           </div>
         </BusinessFormSection>
+        <div className="employees__assignment-footer">
+          <Button tone="white" onClick={onClose}>Fechar</Button>
+        </div>
       </div>
-      {dialog && options && (
-        <AssignmentDialog dialog={dialog} base={base} options={options} today={today} siblings={link.assignments}
-          onClose={() => setDialog(undefined)} />
-      )}
-    </CardBox>
+    </Modal>
   );
 }
 
@@ -233,8 +251,8 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
   );
 
   return (
-    <Modal open bootstrap manageFocus size="large" title={titles[mode]} onClose={onClose}>
-      <BusinessForm className="business-form--wide-labels" action={action} method={method}
+    <div>
+      <BusinessForm className="business-form--wide-labels employees__assignment-form" action={action} method={method}
         options={{ preserveScroll: true }} onSuccess={onClose}>
         {({ errors, processing }) => (
           <>
@@ -313,6 +331,6 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
           </>
         )}
       </BusinessForm>
-    </Modal>
+    </div>
   );
 }

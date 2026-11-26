@@ -27,7 +27,7 @@ export function BusinessFormSection({
   as = 'fieldset',
   tourTarget,
 }: {
-  title: string;
+  title: ReactNode;
   note?: ReactNode;
   children: ReactNode;
   as?: 'fieldset' | 'section';

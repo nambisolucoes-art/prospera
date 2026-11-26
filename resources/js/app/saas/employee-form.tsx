@@ -18,34 +18,18 @@ import type { PersonRow } from './Directory.types';
 import PersonContactFields from './PersonContactFields';
 import PersonIdentityFields from './PersonIdentityFields';
 import WorkContactFields from './WorkContactFields';
-import EmployeeAssignments, { type AssignmentOptions, type AssignmentRow } from './EmployeeAssignments';
+import EmployeeLinksTable, { type Link, type Tag } from './EmployeeLinksTable';
 import SaasLayout from './SaasLayout';
 import './Directory.css';
 import './Employees.css';
 
 type CompanyOption = { code: string; name: string };
-type Found = { id: number; name: string; person_type: string; links: { code: string; active: boolean }[] };
-type Link = {
-  id: number;
-  company_code: string;
-  company_name: string;
-  company_active: boolean;
-  active: boolean;
-  work_email: string | null;
-  work_phone: string | null;
-  work_whatsapp: string | null;
-  tag_ids: number[];
-  scope: 'company' | 'unit';
-  assignments: AssignmentRow[];
-  assignment_options: AssignmentOptions | null;
-  can_update: boolean;
-  can_change_status: boolean;
-};
-type Tag = { id: number; name: string; color: string };
+type Found = { id: number; name: string; person_type: string; has_user_tag?: boolean; links: { code: string; active: boolean }[] };
 type Props = {
   companies?: CompanyOption[];
   canCreatePeople?: boolean;
   registrationTags?: Tag[];
+  userTag?: Tag | null;
   person?: {
     id: number;
     name: string;
@@ -57,8 +41,6 @@ type Props = {
   links?: Link[];
   today?: string;
   linkable?: CompanyOption[];
-  access?: boolean | null;
-  canSeeAccess?: boolean;
 };
 
 const EMPLOYEE_TAG_COLOR = '#1abc9c';
@@ -154,7 +136,7 @@ export default function EmployeeForm(props: Props) {
   return props.person ? <Edit key={props.person.id} {...props} /> : <Register {...props} />;
 }
 
-function Register({ companies = [], canCreatePeople = false, registrationTags = [] }: Props) {
+function Register({ companies = [], canCreatePeople = false, registrationTags = [], userTag = null }: Props) {
   const [tagIds, setTagIds] = useState<number[]>([]);
   const contextUrl = useContextUrl();
   const [selected, setSelected] = useState<string[]>(() => (companies.length === 1 ? [companies[0].code] : []));
@@ -299,8 +281,9 @@ function Register({ companies = [], canCreatePeople = false, registrationTags = 
               <BusinessFormSection title="Etiquetas" tourTarget="employee-tags">
                 <TagSelect
                   options={[{ id: 0, name: 'Colaborador', color: EMPLOYEE_TAG_COLOR, locked: true, displayOnly: true },
+                    ...(userTag ? [{ ...userTag, locked: true, displayOnly: true }] : []),
                     ...registrationTags]}
-                  selected={[0, ...tagIds]}
+                  selected={[0, ...(userTag && found?.has_user_tag ? [userTag.id] : []), ...tagIds]}
                   onChange={(ids) => setTagIds(ids.filter((id) => id !== 0))}
                   disabled={processing}
                   error={Object.entries(errors).find(([key]) => key === 'tag_ids' || key.startsWith('tag_ids.'))?.[1]} />
@@ -316,56 +299,7 @@ function Register({ companies = [], canCreatePeople = false, registrationTags = 
   );
 }
 
-function LinkForm({ link, personId, writable, tags }: { link: Link; personId: number; writable: boolean; tags: Tag[] }) {
-  const [tagIds, setTagIds] = useState(link.tag_ids);
-  const [status, setStatus] = useState(link.active ? '1' : '0');
-  const editable = writable && link.company_active;
-
-  return (
-    <CardBox>
-      <BusinessForm action={`@/colaboradores/${personId}/vinculos/${link.id}`} method="patch"
-        className="business-form--wide-labels">
-        {({ errors, processing }) => {
-          const readOnly = !editable || !link.can_update;
-          const disabled = readOnly || processing;
-
-          return (
-            <>
-              <BusinessFormSection title={`Vínculo em ${link.company_name}`}>
-                <p className="employees__link-title">
-                  <Label variant={link.active ? 'success' : 'danger'}>{link.active ? 'Ativo' : 'Inativo'}</Label>
-                  {!link.company_active && <Label variant="danger">Empresa inativa</Label>}
-                </p>
-                {editable && link.can_change_status ? (
-                  <Select label="Situação" name="active" value={status} error={errors.active}
-                    onChange={setStatus}
-                    options={[{ value: '1', label: 'Ativo' }, { value: '0', label: 'Inativo' }]} />
-                ) : (
-                  <Field label="Situação" value={link.active ? 'Ativo' : 'Inativo'} readOnly />
-                )}
-                {!readOnly && <input type="hidden" name="edit_tags" value="1" />}
-                <TagSelect
-                  options={readOnly ? tags.map((tag) => ({ ...tag, locked: true, displayOnly: true })) : tags}
-                  selected={tagIds} onChange={setTagIds} disabled={processing}
-                  error={Object.entries(errors).find(([key]) => key === 'tag_ids' || key.startsWith('tag_ids.'))?.[1]} />
-                <WorkContactFields
-                  names={{ email: 'work_email', phone: 'work_phone', whatsapp: 'work_whatsapp' }}
-                  values={{ email: link.work_email, phone: link.work_phone, whatsapp: link.work_whatsapp }}
-                  errors={{ email: errors.work_email, phone: errors.work_phone, whatsapp: errors.work_whatsapp }}
-                  disabled={disabled} />
-              </BusinessFormSection>
-              {editable && (link.can_update || link.can_change_status) && (
-                <BusinessFormActions processing={processing} cancelHref="@/colaboradores" />
-              )}
-            </>
-          );
-        }}
-      </BusinessForm>
-    </CardBox>
-  );
-}
-
-function Edit({ person, links = [], linkable = [], access, canSeeAccess = false, registrationTags = [], today = '' }: Props) {
+function Edit({ person, links = [], linkable = [], registrationTags = [], today = '' }: Props) {
   const { auth } = useApiPage<SessionProps>().props;
   const writable = auth.inspection_mode !== 'read-only';
   const [selected, setSelected] = useState<string[]>([]);
@@ -407,16 +341,7 @@ function Edit({ person, links = [], linkable = [], access, canSeeAccess = false,
         </BusinessForm>
       </CardBox>
 
-      <div data-tour="employee-links">
-        {links.map((link) => (
-          <div key={link.id}>
-            {link.scope === 'company' && (
-              <LinkForm link={link} personId={person.id} writable={writable} tags={registrationTags} />
-            )}
-            <EmployeeAssignments personId={person.id} link={link} today={today} writable={writable} />
-          </div>
-        ))}
-      </div>
+      <EmployeeLinksTable personId={person.id} links={links} tags={registrationTags} writable={writable} today={today} />
 
       {writable && linkable.length > 0 && (
         <CardBox>
@@ -452,21 +377,6 @@ function Edit({ person, links = [], linkable = [], access, canSeeAccess = false,
         </CardBox>
       )}
 
-      {canSeeAccess && (
-        <CardBox>
-          <div className="business-form" data-tour="employee-access">
-            <BusinessFormSection title="Acesso ao Prospera">
-            <p>
-              <Label variant={access ? 'success' : 'info'}>{access ? 'Possui acesso à conta' : 'Sem acesso à conta'}</Label>
-            </p>
-            <FormHelp>
-              Somente leitura. Ser colaborador não concede acesso nem permissões, e inativar o vínculo não remove o
-              login. O acesso é administrado em Usuários.
-            </FormHelp>
-            </BusinessFormSection>
-          </div>
-        </CardBox>
-      )}
     </SaasLayout>
   );
 }

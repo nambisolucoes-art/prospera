@@ -87,8 +87,9 @@
 }
 
 .employees__empty {
-  margin: 0;
+  margin: 0 0 8px;
   color: var(--bold-color-text-muted);
+  font-size: 13px;
 }
 
 @media (max-width: 480px) {
@@ -116,4 +117,76 @@
 
 .employees__assignment-contacts[data-source='override'] {
   color: inherit;
+}
+
+
+/* Tabela de vínculos no estilo da tabela de contatos do tema: só divisórias horizontais e ações em ícones. */
+.employees__links-table.table {
+  margin-bottom: 0;
+  font-size: 14px;
+}
+
+.employees__links-table > thead > tr > th {
+  border-top: 0;
+  border-bottom: 1px solid var(--bold-color-border, #ebeff2);
+  color: #666;
+  font-weight: 600;
+}
+
+.employees__links-table > tbody > tr > td {
+  border-top: 1px solid var(--bold-color-border, #ebeff2);
+  vertical-align: middle;
+}
+
+.employees__links-table.table-hover > tbody > tr:hover > td {
+  background: var(--bold-color-surface-alt) !important;
+}
+
+.employees__links-actions {
+  position: sticky;
+  right: 0;
+  width: 1%;
+  background: #fff;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.employees__links-table > thead > tr > th.employees__links-actions {
+  text-align: right;
+}
+
+.employees__links-table.table-hover > tbody > tr:hover > td.employees__links-actions {
+  background: var(--bold-color-surface-alt) !important;
+}
+
+.employees__icon-button {
+  padding: 4px 8px;
+  border: 0;
+  background: transparent;
+  color: #98a6ad;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.employees__icon-button:hover,
+.employees__icon-button:focus-visible {
+  color: var(--prospera-navy);
+}
+
+.employees__icon-button--danger:hover,
+.employees__icon-button--danger:focus-visible {
+  color: #dc3545;
+}
+
+.employees__assignment-actions {
+  display: flex;
+  gap: 2px;
+}
+
+/* "Estabelecimento" com o ícone de informação não cabe na largura padrão do rótulo. */
+@media (min-width: 768px) {
+  .employees__assignment-form.business-form--wide-labels {
+    --business-label-width: 200px;
+  }
 }

@@ -22,12 +22,9 @@ A tela é única para a conta: uma linha por Pessoa, com os vínculos das empres
 | Cadastro | `employee-work-contacts` | Contatos profissionais | Próprios de cada empresa, sem alterar os contatos centrais. |
 | Ficha | `person-identity` | Dados centrais da pessoa | Valem para todas as empresas e papéis. |
 | Ficha | `employee-tags` | Etiquetas | Derivadas, somente leitura. |
-| Ficha | `employee-links` | Vínculos empresariais | Situação e contatos de cada empresa, independentes. |
-| Ficha | `employee-assignments` | Lotações | O que é lotação, diferença entre estabelecimento, departamento e função, principal, vigência e a origem dos contatos profissionais (herdados, personalizados ou sem contato local). |
-| Ficha | `employee-assignment-add` | Adicionar lotação | Unidade, função, departamento e início; sem sobreposição na mesma unidade; troca ao longo do tempo. |
-| Ficha | `employee-assignment-history` | Histórico | Lotações encerradas preservadas; encerrar; inativar e reativar. |
+| Ficha | `employee-links` | Vínculos empresariais | Tabela com uma linha por empresa; o lápis abre a janela de edição do vínculo. |
+| Ficha | `employee-assignments` | Lotações | Cabeçalho da coluna Lotações da tabela de vínculos; o botão de cada linha abre a janela das lotações (o tour não a abre). O que é lotação, diferença entre estabelecimento, departamento e função, principal, vigência e a origem dos contatos profissionais (herdados, personalizados ou sem contato local). |
 | Ficha | `employee-add-link` | Vincular a outra empresa | Cria vínculos novos sem alterar os existentes. |
-| Ficha | `employee-access` | Acesso ao Prospera | Indicador somente leitura, só para quem lista usuários. |
 
 Na listagem, os filtros de estabelecimento, departamento, função e situação da lotação ficam depois do filtro de empresa. O tour não abre os modais de lotação nem grava dados.
 

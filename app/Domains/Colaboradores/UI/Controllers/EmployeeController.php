@@ -20,7 +20,6 @@ use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeFilterOp
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeLinksQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeesQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ListEmployeeTagIdsQuery;
-use App\Domains\Colaboradores\Application\Queries\Employees\PersonHasAccountAccessQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ShowEmployeeLinkQuery;
 use App\Domains\Colaboradores\Application\Queries\Employees\ShowEmployeePersonQuery;
 use App\Domains\Colaboradores\Domain\Models\Employee;
@@ -35,6 +34,7 @@ use App\Domains\Pessoas\Application\Queries\PersonAccessQuery;
 use App\Domains\Pessoas\Domain\Models\Person;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
+use App\Models\User;
 use App\Support\ApiPage;
 use App\Support\BusinessDate;
 use App\Support\TaxDocument;
@@ -42,6 +42,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
@@ -173,7 +174,29 @@ final class EmployeeController
             'companies' => $this->options($companies),
             'canCreatePeople' => ! $permissions->nodesFor($request->user(), 'account.people.create')->isEmpty(),
             'registrationTags' => $selectableTags->execute($account->requireId(), 'employees'),
+            'userTag' => $this->userTag($permissions, $request->user(), $account->requireId()),
         ]);
+    }
+
+    /**
+     * A etiqueta especial Usuário, somente para exibição e só para quem lista usuários. Quem não lista não recebe
+     * a etiqueta e, portanto, nada indica a existência de login.
+     *
+     * @return array{id: int, name: string, color: string}|null
+     */
+    private function userTag(EffectivePermissions $permissions, User $user, int $accountId): ?array
+    {
+        if ($permissions->nodesFor($user, 'account.users.list')->isEmpty()) {
+            return null;
+        }
+
+        $tag = DB::table('tags')
+            ->where('account_id', $accountId)
+            ->where('module', 'people')
+            ->where('system_key', 'user')
+            ->first(['id', 'name', 'color']);
+
+        return $tag === null ? null : ['id' => (int) $tag->id, 'name' => (string) $tag->name, 'color' => (string) $tag->color];
     }
 
     /**
@@ -200,6 +223,16 @@ final class EmployeeController
         );
 
         $person = $findPerson->execute($accountId, $lookup['document'], $lookup['person_type'], $companyIds);
+
+        // A pessoa já ter acesso à conta (etiqueta Usuário) só é informada a quem lista usuários.
+        $userTag = $this->userTag($permissions, $request->user(), $accountId);
+
+        if ($person !== null && $userTag !== null) {
+            $person['has_user_tag'] = DB::table('person_tag')
+                ->where('person_id', $person['id'])
+                ->where('tag_id', $userTag['id'])
+                ->exists();
+        }
 
         return response()->json(['person' => $person], headers: ['Cache-Control' => 'private, no-store']);
     }
@@ -260,7 +293,6 @@ final class EmployeeController
         ShowEmployeePersonQuery $showPerson,
         ListEmployeeLinksQuery $listLinks,
         FindEmployeePersonQuery $findPerson,
-        PersonHasAccountAccessQuery $hasAccess,
         ListDerivedPersonTagsQuery $derivedTags,
         PersonAccessQuery $personAccess,
         ListEmployeeTagIdsQuery $linkTagIds,
@@ -314,8 +346,6 @@ final class EmployeeController
             $linkable,
             fn (NavigableCompany $company) => ! in_array($company->code, $takenCodes, true),
         ));
-
-        $canSeeAccess = ! $permissions->nodesFor($user, 'account.users.list')->isEmpty();
 
         $tagIds = $linkTagIds->execute($accountId, array_values($links->pluck('id')->map(fn ($id) => (int) $id)->all()));
 
@@ -401,8 +431,6 @@ final class EmployeeController
                 ];
             })->values()->all(),
             'linkable' => $this->options($linkable),
-            'access' => $canSeeAccess ? $hasAccess->execute($accountId, $person->id) : null,
-            'canSeeAccess' => $canSeeAccess,
         ]);
     }
 
