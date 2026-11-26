@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da frente Institucional, Equipe e Sites White Label |
-| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **S01 a S06 estão concluídas e homologadas tecnicamente** (seções 28 a 33; as seções 28 a 31 preservam a classificação original de revisão). **S07 em validação, aguardando homologação formal** (seção 34). S08 a S15 não foram iniciadas |
+| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **S01 a S07 estão concluídas e homologadas tecnicamente** (seções 28 a 33; as seções 28 a 31 preservam a classificação original de revisão). **S07 concluída e homologada tecnicamente em 26/11/2026** (seção 34). S08 a S15 não foram iniciadas |
 | Base de código auditada | Branch `feat/pagina-inicial`, commit `33fd8df`, árvore de trabalho limpa |
 | Data da auditoria | 24/11/2026 |
 | Antecessor | Briefing `prospera_plano_institucional_white_label.md` (fora do repositório) e a análise aprovada na sessão de 24/11/2026 |
@@ -1578,7 +1578,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 
 ## 25. Quadro de acompanhamento
 
-**Estado geral (atualizado na seção 34): S01 a S06 concluídas e homologadas tecnicamente; S07 em validação, aguardando homologação formal.** O texto original deste quadro registrava S01 e S02 concluídas e as etapas S03 a S15 ainda não iniciadas, e o histórico segue nas seções 26 a 32. A S07 foi autorizada e executada em 26/11/2026 (seção 34); as etapas S08 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
+**Estado geral (atualizado na seção 34): S01 a S07 concluídas e homologadas tecnicamente.** O texto original deste quadro registrava S01 e S02 concluídas e as etapas S03 a S15 ainda não iniciadas, e o histórico segue nas seções 26 a 32. A S07 foi autorizada e executada em 26/11/2026 (seção 34); as etapas S08 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
 
 | Etapa | Nome | Estado | Referência |
 | --- | --- | --- | --- |
@@ -1588,7 +1588,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 | S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | **Concluída e homologada tecnicamente** (aprovação do responsável registrada na seção 33). Fechamento técnico em 25/11/2026; commits `8fad837` e `46009bc`; ficha reformulada em `b4cb9fb` | Seções 29 e 33 |
 | S05 | Lotações e histórico (com o complemento de contatos por lotação) | **Concluída e homologada tecnicamente, inclusive o complemento** (aprovação do responsável registrada na seção 33). Implementação registrada em 26/11/2026; commits `c8a272e` e `b0d14b5` | Seções 30, 31 e 33 |
 | S06 | Perfil institucional e herança | **Concluída e homologada tecnicamente** (registrada em 26/11/2026). Commit `458d147` | Seções 32 e 33 |
-| S07 | Horários e exceções | **Em validação, aguardando homologação formal.** Executada em 26/11/2026 sobre a `main` em `a41c83b`, na branch local `feat/s07-horarios-excecoes`, sem commit | Seção 34 |
+| S07 | Horários e exceções | **Concluída e homologada tecnicamente em 26/11/2026**, após a revisão dirigida da seção 34.9. Implementada sobre a `main` em `a41c83b` (validação em 34.4) | Seção 34 |
 | S08 | Biblioteca de mídia | Pendente | |
 | S09 | Perfil público do colaborador | Pendente | |
 | S10 | Sites, páginas, blocos e revisões (somente retaguarda) | Pendente | |
@@ -1600,6 +1600,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 
 ### Registro de revisões
 
+- **Seção 34.9 (26/11/2026):** revisão dirigida e homologação técnica da S07.
 - **Seção 34 (26/11/2026):** execução da S07, sem alterar o contrato aprovado. Resolve duas lacunas do plano (turno que atravessa a meia-noite e fuso dentro de `hours_weekly`) sem decisão nova de produto, detalhadas na seção 34.2.
 - **Revisão 4 (24/11/2026):** revisão final dirigida antes de versionar a S02. Detalhes na seção 27.8.
 - **Revisão 3 (24/11/2026):** execução da S02 (seção 27). Decisões aprovadas PD2-01, 04, 06, 08, 09, 10, 12, 13 e 15 (seção 23.1). Separação entre execução síncrona, fila e agendador por etapa, com a S14 como primeira que exige worker e agendador (DA2-21, seção 19.1). Host público do diretório (DA2-19, `public_hosts` no lugar de `site_domains`), perfil público do colaborador (DA2-20), revisões e despublicação neutra (DA2-22), endereço e ficha da empresa (DA2-23). `directory_entries` reclassificada para empresa ou estabelecimento. Alvos de FK composta fechados (seção 06.1). Cenário 17 sem auditoria de negação. Dependência S10 de S07. Fence solta da seção 24.2 corrigida.
@@ -2129,7 +2130,7 @@ As Actions de `public_categories` têm segurança de contexto, mas a interface e
 
 ## 34. Registro da S07: Horários, exceções e fusos
 
-**Estado: em validação, aguardando homologação formal.** Não está concluída nem homologada. Executada em 26/11/2026 na branch local `feat/s07-horarios-excecoes`, criada da `main` no commit `a41c83b` (local e remota idênticas, árvore limpa). **Sem commit, merge, push, deploy, migration em base oficial ou alteração de container oficial.** As provas em PostgreSQL, FrankenPHP e Chromium usaram um laboratório descartável (`tests/Performance/s07-lab.sh`: PostgreSQL 18 em `tmpfs`, rede interna, rótulo `s07`), removido ao final. S08 em diante não foram iniciadas. As homologações de S01 a S06 não foram tocadas.
+**Estado original da execução: em validação, aguardando homologação formal (preservado como registro). Atualização: após a revisão dirigida da seção 34.9, a S07 foi homologada tecnicamente em 26/11/2026.** Executada em 26/11/2026 na branch local `feat/s07-horarios-excecoes`, criada da `main` no commit `a41c83b` (local e remota idênticas, árvore limpa). **Sem commit, merge, push, deploy, migration em base oficial ou alteração de container oficial.** As provas em PostgreSQL, FrankenPHP e Chromium usaram um laboratório descartável (`tests/Performance/s07-lab.sh`: PostgreSQL 18 em `tmpfs`, rede interna, rótulo `s07`), removido ao final. S08 em diante não foram iniciadas. As homologações de S01 a S06 não foram tocadas.
 
 ### 34.1 Estado inicial
 
@@ -2200,3 +2201,24 @@ S11 lê `HoursResolver`, `EffectiveHours` e `valid_until` para a grade, as exce�
 ### 34.8 Arquivos e Git
 
 84 arquivos (33 modificados e 51 novos), cerca de 5,5 mil linhas, todos nesta branch e **não versionados**. Backend: `app/Domains/Institucional` (Actions, Data, Queries, Context, Models, Enums, Value Objects e controller de horários), `app/Domains/Colaboradores` (vigência por fuso), `Organizacao` (duas Queries de data e o fuso no Model), `app/Support` (`BusinessDate`, `IanaTimezone`), rotas, `config/audit.php`, `config/prospera.php` e duas migrations. Frontend: seis componentes novos de horários e ajustes no perfil, no formulário de lotação, no tour e nos tipos. Documentação: plano, convenção, ajuda e tour. Testes: `OperatingHoursTest`, `HoursTimezoneTest` e a edição das três linhas de `EmployeeAssignmentTest`. Evidências reprodutíveis em `tests/Performance/s07-*` e `tests/Browser/s07-*`, sem senha, token, cookie ou dado pessoal real (a senha sintética vem de `LAB_PASSWORD`).
+
+### 34.9 Revisão dirigida e homologação técnica
+
+A aprovação para revisão final pediu três verificações. Todas passaram; nenhum defeito de produto foi encontrado, e as duas diferenças abaixo foram de teste e de texto.
+
+**1. `24:00` (turnos que "atravessam" a meia-noite).** O contrato continua o da seção 34.2: um turno não atravessa a meia-noite e `24:00` só vale como fim, com o turno seguinte começando em `00:00` do dia seguinte. Turnos noturnos contínuos não foram implementados.
+
+| Camada | Confirmação |
+| --- | --- |
+| Validação | `rules()` aceita fim `24:00` e recusa início `24:00` e fim `24:01`; `Shift::between` lança `InvalidHourException` |
+| Persistência | Guardado como a string `24:00` (1.440 minutos na leitura), em `profile_sections` e em `hour_exceptions.shifts`; a leitura devolve `24:00`, nunca `00:00` |
+| Resolução | Quarta 18:00 a 24:00: 23:59:00 e 23:59:59 abertos; quinta 00:00:00 já é outro dia (sem atendimento, `closed_day`, `local_date` da quinta); sexta abre em 00:00; sob agendamento até 24:00 e domingo fechado; horário especial até 24:00 volta ao semanal no dia seguinte |
+| Interface | O campo nativo `type="time"` **não aceita** `24:00` (provado no Chromium: o valor fica vazio). A opção "Até o fim do dia (24:00)" é a que grava `24:00`: marcada por teclado, desabilita o campo de término, envia `24:00`, a grade mostra "18:00 às 24:00", ao reabrir continua marcada e desmarcar reabilita o campo |
+
+**2. `applies_to_overrides` e unidade que adota horário próprio depois.** Contrato aprovado mantido. Teste de regressão novo: exceção confirmada com a unidade herdando, depois a unidade adota horário próprio e a exceção continua alcançando-a durante a vigência (`reached_override`, listada como herdada na tela) e deixa de valer ao fim do período; uma exceção sem a opção não alcança quem adotar horário próprio depois. **Texto:** o modal da exceção (sempre visível, não só com a opção marcada), o tour e o artigo de ajuda dizem que a exceção continua alcançando as unidades com horário próprio durante todo o período, inclusive as que adotarem horário próprio depois da confirmação.
+
+**3. Fusos e S05.** Nenhum consumidor de `BusinessDate::today()` nem de `prospera.business_timezone` resta em `app`, `tests`, `resources`, `config` e `routes` (só menções históricas nesta documentação). A data civil de cada unidade é usada na listagem e nos filtros por situação, na inativação (`ends_on` por unidade), no formulário de lotação, na ficha e no `institutional:check`; `statusOn`, histórico, principal e contatos profissionais não foram alterados. Lotações encerrada, vigente e futura ficaram idênticas antes, após o rollback e após a reaplicação das migrations (seção 34.4). Os testes homologados de S05 (`EmployeeAssignmentTest` e `EmployeeDirectoryTest`) passam sem mudança, exceto as três linhas já registradas na seção 34.3.
+
+**Resultado final.** Suíte PHP **451 testes, 6.132 asserções** (os 448 anteriores mais 3 desta revisão: `24:00`, exceção corporativa posterior e o caso de dado `fim 24:01`), 56 testes de S05 e fusos em separado, PHPStan sem erros, Pint limpo, `npm run check` e 20 testes de frontend sem erros, Chromium sem erro de JavaScript nem 5xx. As provas de PostgreSQL, concorrência e FrankenPHP da seção 34.4 não dependem do que mudou nesta revisão (testes e texto) e valem como estão.
+
+**Situação: S07 concluída e homologada tecnicamente em 26/11/2026.** S08 não iniciada. A integração e a implantação dependem de autorização própria.

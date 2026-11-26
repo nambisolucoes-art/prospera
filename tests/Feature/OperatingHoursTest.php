@@ -189,6 +189,7 @@ class OperatingHoursTest extends TestCase
 
         return [
             'formato da hora' => [['kind' => 'open', 'shifts' => [$shift('8h', '12:00')]], 'value.days.mon.shifts.0.start'],
+            'fim 24:01' => [['kind' => 'open', 'shifts' => [$shift('18:00', '24:01')]], 'value.days.mon.shifts.0.end'],
             'hora inexistente' => [['kind' => 'open', 'shifts' => [$shift('25:00', '26:00')]], 'value.days.mon.shifts.0.start'],
             'minutos inexistentes' => [['kind' => 'open', 'shifts' => [$shift('08:60', '12:00')]], 'value.days.mon.shifts.0.start'],
             'início 24:00' => [['kind' => 'open', 'shifts' => [$shift('24:00', '24:00')]], 'value.days.mon.shifts.0.start'],
@@ -819,5 +820,80 @@ class OperatingHoursTest extends TestCase
         $profiles->forget(ProfileOwner::company($this->gartan->id, $this->roupas->id));
 
         $this->assertSame(OpenStatus::Closed, $resolver->forUnit($owner, $instant)->status);
+    }
+
+    public function test_end_of_day_24_00_is_stored_shown_and_resolved_across_the_midnight_boundary(): void
+    {
+        // Quarta até 24:00, quinta sem atendimento, sexta a partir de 00:00 e sábado sob agendamento até 24:00.
+        $this->saveCompanyHours([
+            'wed' => $this->shifts(['18:00', '24:00']),
+            'thu' => ['kind' => 'closed', 'shifts' => ''],
+            'fri' => $this->shifts(['00:00', '06:00']),
+            'sat' => ['kind' => 'appointment', 'shifts' => [['start' => '20:00', 'end' => '24:00']]],
+        ])->assertNoContent();
+
+        // Persistência e leitura: o fim continua "24:00" no banco e na tela, sem virar 00:00.
+        $this->assertSame('24:00', ProfileSection::sole()->value['days']['wed']['shifts'][0]['end']);
+        $section = collect($this->getJson($this->companyUrl())->json('sections'))->firstWhere('key', 'hours_weekly');
+        $this->assertSame('24:00', $section['draft']['value']['days']['wed']['shifts'][0]['end']);
+
+        // 23:59 abre, 24:00 é o primeiro instante da quinta (00:00, sem atendimento) e a sexta abre às 00:00.
+        $this->assertSame(OpenStatus::Open, $this->at($this->sede, '2026-06-10 23:59:00')->status);
+        $this->assertSame(OpenStatus::Open, $this->at($this->sede, '2026-06-10 23:59:59')->status);
+        $thursday = $this->at($this->sede, '2026-06-11 00:00:00');
+        $this->assertSame(OpenStatus::Closed, $thursday->status);
+        $this->assertSame('closed_day', $thursday->closedReason);
+        $this->assertSame('2026-06-11', $thursday->localDate);
+        $this->assertSame(OpenStatus::Closed, $this->at($this->sede, '2026-06-11 23:59:00')->status);
+        $this->assertSame(OpenStatus::Open, $this->at($this->sede, '2026-06-12 00:00:00')->status);
+        $this->assertSame(OpenStatus::Closed, $this->at($this->sede, '2026-06-12 06:00:00')->status);
+
+        // Sob agendamento até 24:00 e depois o domingo sem atendimento.
+        $this->assertSame(OpenStatus::ByAppointment, $this->at($this->sede, '2026-06-13 23:59:00')->status);
+        $this->assertSame(OpenStatus::Closed, $this->at($this->sede, '2026-06-14 00:00:00')->status);
+
+        // O horário especial também aceita 24:00 e volta ao semanal no dia seguinte.
+        $this->exception($this->unitUrl($this->guanambi, '/excecoes'), [
+            'kind' => 'special_hours', 'starts_on' => '2026-06-16', 'shifts' => [['start' => '18:00', 'end' => '24:00']],
+        ])->assertNoContent();
+        $this->assertSame('24:00', HourException::sole()->shifts[0]['end']);
+        $this->assertSame(OpenStatus::Open, $this->at($this->guanambi, '2026-06-16 23:59:00')->status);
+        $this->assertSame('weekly', $this->at($this->guanambi, '2026-06-17 00:00:00')->scheduleSource);
+
+        // 24:00 só vale como fim.
+        $this->saveCompanyHours(['mon' => $this->shifts(['24:00', '24:00'])])->assertUnprocessable();
+    }
+
+    public function test_a_confirmed_corporate_exception_keeps_reaching_units_that_adopt_own_hours_later(): void
+    {
+        // O relógio fica antes da exceção: a tela só lista as vigentes e as futuras.
+        $this->travelTo(CarbonImmutable::parse('2026-06-01 12:00:00', 'UTC'));
+        $this->saveCompanyHours()->assertNoContent();
+        $this->saveUnitHours($this->caetite, 'override', $this->standardWeek())->assertNoContent();
+
+        // Guanambi herda: a exceção com `applies_to_overrides` é confirmada com o resumo vigente (Caetité já tem horário próprio).
+        $query = ['kind' => 'temporary_closure', 'starts_on' => '2026-06-10', 'ends_on' => '2026-06-12'];
+        $impact = $this->impact($query);
+        $this->assertSame([$this->caetite->code], array_column($impact['overriding'], 'code'));
+        $this->exception($this->companyUrl('', '/excecoes'), $query + ['applies_to_overrides' => true, 'impact_token' => $impact['token']])
+            ->assertNoContent();
+        $this->assertSame(OpenStatus::Closed, $this->at($this->guanambi, '2026-06-11 09:00')->status);
+
+        // Depois da confirmação, Guanambi adota horário próprio: a exceção continua valendo para ela durante a vigência.
+        $this->saveUnitHours($this->guanambi, 'override', $this->standardWeek())->assertNoContent();
+        $reached = $this->at($this->guanambi, '2026-06-11 09:00');
+        $this->assertSame(OpenStatus::Closed, $reached->status);
+        $this->assertSame('temporary_closure', $reached->closedReason);
+        $this->assertTrue($reached->exception['reached_override']);
+        $this->assertCount(1, $this->getJson($this->unitUrl($this->guanambi))->json('hours.inherited_exceptions'));
+
+        // Terminada a vigência, o horário próprio volta ao normal.
+        $this->assertSame(OpenStatus::Open, $this->at($this->guanambi, '2026-06-15 09:00')->status);
+
+        // Já uma exceção SEM `applies_to_overrides` não alcança quem adotar horário próprio depois dela.
+        $this->exception($this->companyUrl('', '/excecoes'), ['kind' => 'holiday', 'starts_on' => '2026-06-22'])->assertNoContent();
+        $this->assertSame(OpenStatus::Closed, $this->at($this->sede, '2026-06-22 09:00')->status);
+        $this->saveUnitHours($this->sede, 'override', $this->standardWeek())->assertNoContent();
+        $this->assertSame(OpenStatus::Open, $this->at($this->sede, '2026-06-22 09:00')->status);
     }
 }

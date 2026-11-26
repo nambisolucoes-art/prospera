@@ -112,9 +112,10 @@ export default function InstitutionalExceptionModal({ owner, exception, onClose 
                         label={`Confirmo que ${reaches} unidade(s) com horário próprio também serão atingidas`}
                         onChange={setConfirmed} />
                     )}
-                    {applies && (
-                      <FormHelp>Vale também para unidades que passarem a ter horário próprio depois desta confirmação.</FormHelp>
-                    )}
+                    <FormHelp>
+                      Com esta opção marcada, a exceção continua alcançando as unidades com horário próprio durante todo o período,
+                      inclusive as que adotarem horário próprio depois desta confirmação.
+                    </FormHelp>
                     {errors.impact && <p className="formField__error" role="alert">{errors.impact}</p>}
                     {errors.applies_to_overrides && <p className="formField__error" role="alert">{errors.applies_to_overrides}</p>}
                   </div>

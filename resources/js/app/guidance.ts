@@ -223,7 +223,7 @@ export function tourFor(
         'Cadastrar exceção',
         unit
           ? 'Informe o tipo, as datas (o último dia vale inteiro) e, no horário especial, os turnos. Períodos do mesmo dono não podem se sobrepor.'
-          : 'Informe o tipo e as datas. O resumo mostra quais unidades serão alcançadas. Para atingir também as que têm horário próprio, marque a opção e confirme o resumo.',
+          : 'Informe o tipo e as datas. O resumo mostra quais unidades serão alcançadas. Para atingir também as que têm horário próprio, marque a opção e confirme o resumo: a exceção continua alcançando essas unidades durante todo o período, mesmo as que adotarem horário próprio depois.',
       ),
       ...(unit
         ? [at('institutional-address', 'Exibir endereço', 'O endereço é o do cadastro do estabelecimento e nunca é copiado. Por padrão não é público. Ligue a opção só se quiser exibi-lo.')]
