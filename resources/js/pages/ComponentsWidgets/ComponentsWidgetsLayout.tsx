@@ -8,7 +8,7 @@ export function PageTitle(): JSX.Element {
     <div className="componentsWidgetsPage__row componentsWidgetsPage__titleRow">
       <div className="componentsWidgetsPage__col componentsWidgetsPage__col--full">
         <h4 className="page-title componentsWidgetsPage__pageTitle">Widgets</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Widgets' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Widgets' }]} />
       </div>
     </div>
   );

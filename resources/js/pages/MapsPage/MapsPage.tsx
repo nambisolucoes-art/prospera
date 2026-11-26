@@ -16,7 +16,7 @@ export default function MapsPage({ variant }: { variant: MapsPageVariant }): JSX
       <h4 className="mapsPage__title">{title}</h4>
       <PageBreadcrumb
         items={[
-          { label: 'Ubold', href: '#' },
+          { label: 'Prospera', href: '#' },
           { label: 'Maps', href: '#' },
           { label: variant === 'google' ? 'Gmaps' : title }
         ]}

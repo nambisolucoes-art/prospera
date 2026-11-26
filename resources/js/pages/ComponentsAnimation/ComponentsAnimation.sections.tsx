@@ -9,7 +9,7 @@ export function PageTitle(): JSX.Element {
     <div className="componentsAnimationPage__pageTitleRow">
       <div className="componentsAnimationPage__col componentsAnimationPage__col--full">
         <h4 className="page-title componentsAnimationPage__pageTitle">Animação</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Animação' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Animação' }]} />
       </div>
     </div>
   );

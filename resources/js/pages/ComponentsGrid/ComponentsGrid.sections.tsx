@@ -83,7 +83,7 @@ export function PageTitle(): JSX.Element {
     <div className="componentsGridPage__pageTitleRow">
       <div className="componentsGridPage__col componentsGridPage__col--full">
         <h4 className="page-title componentsGridPage__pageTitle">Sistema de grade</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Grade' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Grade' }]} />
       </div>
     </div>
   );

@@ -15,4 +15,4 @@ export const pages: Record<string, PageDefinition> = {
   'page-500.html': { key: 'page-500', kind: 'error', code: '500', standalone: true },
   'page-503.html': { key: 'page-503', kind: 'error', code: '503', standalone: true },
 };
-export const starterCopy = { title: 'Página em branco', section: 'Páginas', brand: 'Ubold' };
+export const starterCopy = { title: 'Página em branco', section: 'Páginas', brand: 'Prospera' };

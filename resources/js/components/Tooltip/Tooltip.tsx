@@ -14,7 +14,7 @@ export default function Tooltip({ text, children, side = 'top', disabled = false
   disabled?: boolean;
   asChild?: boolean;
   touch?: boolean;
-  appearance?: 'ubold';
+  appearance?: 'theme';
 }): JSX.Element {
   const id = useId();
   const trigger = useRef<HTMLElement>(null);
@@ -31,7 +31,7 @@ export default function Tooltip({ text, children, side = 'top', disabled = false
 
   useLayoutEffect(() => {
     if (open) { setVisible(true); return; }
-    const timer = window.setTimeout(() => setVisible(false), appearance === 'ubold' ? 150 : 120);
+    const timer = window.setTimeout(() => setVisible(false), appearance === 'theme' ? 150 : 120);
     return () => window.clearTimeout(timer);
   }, [appearance, open]);
 
@@ -42,7 +42,7 @@ export default function Tooltip({ text, children, side = 'top', disabled = false
       const rect = trigger.current.getBoundingClientRect();
       const width = overlay.current.offsetWidth;
       const height = overlay.current.offsetHeight;
-      const gap = appearance === 'ubold' ? 8 : 9;
+      const gap = appearance === 'theme' ? 8 : 9;
       const margin = 8;
       let nextSide: string = side;
       if (side === 'top' && rect.top < height + gap + margin) nextSide = 'bottom';

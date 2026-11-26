@@ -10,4 +10,4 @@ Toda tela nova ou alterada visualmente deve ser conferida na aplicação rodando
 
 `npm run check` verifica arquitetura e tipos. A inspeção no navegador cobre a apresentação e as interações. Uma alteração restrita à documentação segue revisão de texto e links.
 
-Referência consultada no Controle Bar em `docs/sessoes/2026-10-27-estabelecimento-e-auditoria-no-celular.md`. No Prospera, a conferência é responsabilidade de quem entrega a mudança.
+No Prospera, a conferência é responsabilidade de quem entrega a mudança.

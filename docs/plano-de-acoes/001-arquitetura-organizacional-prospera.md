@@ -40,7 +40,7 @@ Legenda usada em todo o documento:
 14. [Laravel Octane e FrankenPHP](#14-laravel-octane-e-frankenphp)
 15. [Contrato de performance](#15-contrato-de-performance)
 16. [Banco de dados e índices](#16-banco-de-dados-e-índices)
-17. [Componentes e padrões UBold](#17-componentes-e-padrões-ubold)
+17. [Componentes e padrões do tema](#17-componentes-e-padrões-do-tema)
 18. [Telas administrativas e sidebar](#18-telas-administrativas-e-sidebar)
 19. [Plano incremental](#19-plano-incremental)
 20. [Matriz de dependências](#20-matriz-de-dependências)
@@ -82,7 +82,7 @@ O plano introduz, em nove etapas de implementação incrementais e reversíveis:
 - Um **contexto organizacional** resolvido pela URL e validado no servidor, seguro para várias abas e para os workers do Octane.
 - **Auditoria contextual** filtrada no banco pelo escopo autorizado, consolidando a trilha legada `DirectoryAudit`.
 
-A padronização visual (UBold) é distribuída nas etapas que já alteram cada tela, para evitar reescrever a mesma tela duas vezes.
+A padronização visual (tema) é distribuída nas etapas que já alteram cada tela, para evitar reescrever a mesma tela duas vezes.
 
 ---
 
@@ -129,7 +129,7 @@ Posteriormente à auditoria anterior, entraram três commits (`e826f7a`, `30613c
 - Barra de filtros padronizada (`BusinessListSearch`, `useBusinessListFilters`).
 - Filtros de Etiquetas e Cargos (`TagFiltersData`, `RoleFiltersData`, `PeopleDirectoryQuery::tagList`, `AccessDirectoryQuery::roleList`).
 - Componente `DatePicker`.
-- Títulos no padrão Visdom.
+- Títulos no padrão do tema.
 
 Nenhum deles altera a estrutura organizacional. Todos os achados anteriores foram reconfirmados, com dois ajustes de precisão:
 
@@ -1062,13 +1062,13 @@ Não é adotado. Se a medição mostrar que a query de permissões efetivas é r
 
 ---
 
-## 17. Componentes e padrões UBold
+## 17. Componentes e padrões do tema
 
 ### 17.1 Componentes a reutilizar (existentes)
 
 | Necessidade | Componente |
 | --- | --- |
-| Moldura e título | `SaasLayout`, `PageHeader` (padrão Visdom), `PageHeaderTour` |
+| Moldura e título | `SaasLayout`, `PageHeader` (padrão tema), `PageHeaderTour` |
 | Listagens | `BusinessList`, `BusinessListSearch`, `useBusinessListFilters`, `BusinessListTour`, `StatusLabel`, `TagLabel`, `Badge` |
 | Formulários | `BusinessForm`, `ApiForm`, `TextInput`, `InputGroup`, `SelectControl`, `SelectChecklist`, `TagSelect`, `ChoiceControl`, `DatePicker`, `MaskedInput`; campos de identidade, endereço e contato de Pessoas (`PersonIdentityFields`, `PersonContactFields`, `ContactFields`) |
 | Modais e visualização | `Modal`, `PreviewSection` |

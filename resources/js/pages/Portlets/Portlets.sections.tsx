@@ -38,7 +38,7 @@ export function PortletsShowcase(): JSX.Element {
     <section className="portletsPage" aria-label="Portlets">
       <div className="portletsPage__pageTitleRow">
         <h4 className="page-title portletsPage__pageTitle">Portlets</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Portlets' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Portlets' }]} />
       </div>
       <div className="portletsPage__grid">
         {portlets.map((item: PortletItem, index: number) => {

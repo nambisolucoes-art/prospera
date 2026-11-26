@@ -42,7 +42,7 @@ Navegador em 1440, 390 e 320 px: cabeçalho do detalhe com a mesma cor da listag
 
 ## Cores por ação de auditoria
 
-Referência consultada: GNAI2/resources/js/components/Audit/Audit.utils.ts, com criação success, exclusão danger, restauração info e alterações warning. AuditEventLabel centraliza esse mapeamento para listagem e modal. Entrada usa info, saída inverse, início de inspeção purple, fim de inspeção inverse e sincronização warning. Eventos desconhecidos usam warning. O tipo do registro continua neutro.
+Referência consultada: sistema de referência/resources/js/components/Audit/Audit.utils.ts, com criação success, exclusão danger, restauração info e alterações warning. AuditEventLabel centraliza esse mapeamento para listagem e modal. Entrada usa info, saída inverse, início de inspeção purple, fim de inspeção inverse e sincronização warning. Eventos desconhecidos usam warning. O tipo do registro continua neutro.
 
 A API inclui event_key, o identificador estável do evento, junto do rótulo traduzido. As cores e a comparação de antes e depois usam o identificador em vez do texto traduzido. Mantidos tamanho confortável e nome visível da ação.
 

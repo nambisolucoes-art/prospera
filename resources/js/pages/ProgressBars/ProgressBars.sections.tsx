@@ -56,7 +56,7 @@ export function ProgressBarsPageTitle(): JSX.Element {
       <h4 className="page-title progressBarsPage__pageTitle">Barras de progresso</h4>
       <PageBreadcrumb
         items={[
-          { label: 'Ubold', href: '#' },
+          { label: 'Prospera', href: '#' },
           { label: 'UI Kit', href: '#' },
           { label: 'Barras de progresso' }
         ]}

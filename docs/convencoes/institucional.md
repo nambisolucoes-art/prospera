@@ -239,4 +239,4 @@ Os do [Checklist de módulos](checklist-modulos.md), mais: leitura cruzada de ra
 
 ## Decisões em aberto
 
-PD2-02 (domínio gerenciado), PD2-03 (titularidade do GNAI2), PD2-05 (armazenamento e CDN), PD2-07 (consentimento), PD2-11 (limites por conta) e PD2-14 (worker e agendador). Nenhuma etapa decide sozinha uma delas.
+PD2-02 (domínio gerenciado), PD2-03 (titularidade do sistema de referência), PD2-05 (armazenamento e CDN), PD2-07 (consentimento), PD2-11 (limites por conta) e PD2-14 (worker e agendador). Nenhuma etapa decide sozinha uma delas.

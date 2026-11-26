@@ -10,7 +10,7 @@ export function PageTitle(): JSX.Element {
     <div className="componentsRangeSlidersPage__pageTitleRow">
       <div className="componentsRangeSlidersPage__col componentsRangeSlidersPage__col--full">
         <h4 className="page-title componentsRangeSlidersPage__pageTitle">Sliders de intervalo</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Slider de intervalo' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Slider de intervalo' }]} />
       </div>
     </div>
   );

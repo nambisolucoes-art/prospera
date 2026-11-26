@@ -14,7 +14,7 @@ export default function Applications({
       <h4 className="applicationsPage__title">{page.title}</h4>
       <PageBreadcrumb
         items={[
-          { label: "Ubold", href: "#" },
+          { label: "Prospera", href: "#" },
           { label: "Aplicativos", href: "#" },
           { label: page.title },
         ]}

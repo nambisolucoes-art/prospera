@@ -1,5 +1,5 @@
 export const comingSoonCopy = {
-  titles: ["Somos UBold", "Somos modernos", "Somos criativos"],
+  titles: ["Somos Prospera", "Somos modernos", "Somos criativos"],
   description: [
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed feugiat arcu ut orci porta, eget porttitor felis suscipit.",
     "Sed a nisl ullamcorper, tempus augue at, rutrum lacus. Duis et turpis eros.",

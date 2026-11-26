@@ -2,7 +2,7 @@
 
 Voltar ao SaaS usa somente ícone vermelho, sem fundo e sem borda. O controle continua sendo um botão semântico, com nome acessível, foco visível e bloqueio durante o envio. A área de toque é de 44 px no celular; o desktop mantém 30 px. Ajuda e roteiro de inspeção atualizados.
 
-SelectMenu compartilha a presença do menu durante a animação entre SelectControl, SelectChecklist (Colunas) e TagSelect. A abertura usa opacidade e translateY de -6 px com scaleY de 0,96 até 1. O fechamento executa a sequência inversa antes de desmontar o menu. Ambos duram 250 ms com ease, seguindo a referência GNAI/resources/react/components/Forms/SelectField/SelectField.css.
+SelectMenu compartilha a presença do menu durante a animação entre SelectControl, SelectChecklist (Colunas) e TagSelect. A abertura usa opacidade e translateY de -6 px com scaleY de 0,96 até 1. O fechamento executa a sequência inversa antes de desmontar o menu. Ambos duram 250 ms com ease, seguindo a referência padrão adotado/resources/react/components/Forms/SelectField/SelectField.css.
 
 O fechamento ocorre após selecionar uma opção simples, clicar novamente, sair por Esc ou clicar fora. Os seletores múltiplos mantêm sua seleção sem fechar a cada marcação. Na saída, o menu fica inerte e oculto para tecnologias assistivas. Reabrir cancela o temporizador de saída. Movimento reduzido desativa ambas as animações. Roteiro compartilhado revisado, com os mesmos alvos e ordem.
 

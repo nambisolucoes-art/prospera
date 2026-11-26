@@ -1,7 +1,7 @@
 .datePicker { min-width: 0; }
 .datePicker .inputGroup { max-width: none; }
 
-/* The calendar addon keeps the neutral InputGroup button, as in Visdom. */
+/* The calendar addon keeps the neutral InputGroup button. */
 .datePicker__toggle:disabled { cursor: not-allowed; }
 
 .datePicker__error {

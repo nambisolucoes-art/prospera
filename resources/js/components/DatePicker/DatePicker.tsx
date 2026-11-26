@@ -39,7 +39,7 @@ async function loadRuntime(): Promise<DatePickerRuntime> {
 }
 
 /**
- * Bootstrap Datepicker of the Bold theme, as used by Visdom and Gnai.
+ * Bootstrap Datepicker of the Bold theme.
  * Receives and emits `AAAA-MM-DD`; partial typing is kept locally and only complete dates are emitted.
  */
 export default function DatePicker({

@@ -8,7 +8,7 @@ Prévia conferida em 1440, 390 e 320 px, na entrada inicial e entre Contas, Usu�
 
 Validação do preloader no Chrome em 1440, 390 e 320 px: entrada inicial de Contas e login, navegação entre Contas, Usuários e Auditoria, módulos já carregados sem sobreposição, respostas atrasadas com conteúdo anterior visível, paginação lenta sem preloader, voltar e avançar, cancelamento seguido de outra navegação, erro de rede e movimento reduzido. Com atraso de 1200 ms, o indicador fechou cerca de 180 ms após a tela ficar pronta. Verificados favicon, oito pontos nas cores da marca, centralização, desfoque e liberação da rolagem.
 
-As cores auxiliares de badges, labels, botões, painéis e barras de progresso usam o GNAI2 como referência (`resources/css/tokens.css` e `resources/css/variables.css`), com os tons mais suaves atualizados: sucesso `#16a34a`, perigo `#ef4444`, aviso `#f59e0b`, informação `#0284c7`, inverse `#475569`, roxo `#7c3aed` e rosa `#db2777`. As ações das listagens usam o azul auxiliar `#2e5cb8`. A marca Prospera, primary, sidebar, dimensões, textos e alvos dos tours permanecem preservados.
+As cores auxiliares de badges, labels, botões, painéis e barras de progresso usam a paleta do projeto (`resources/css/tokens.css` e `resources/css/variables.css`), com os tons mais suaves atualizados: sucesso `#16a34a`, perigo `#ef4444`, aviso `#f59e0b`, informação `#0284c7`, inverse `#475569`, roxo `#7c3aed` e rosa `#db2777`. As ações das listagens usam o azul auxiliar `#2e5cb8`. A marca Prospera, primary, sidebar, dimensões, textos e alvos dos tours permanecem preservados.
 
 Validação da paleta em 1440, 390 e 320 px: Auditoria (listagem, detalhe e tour de resumo), Contas, cadastro de usuário e demonstrações de botões e badges. Conferidos os tons calculados no navegador, a consistência entre listagem e detalhe, os estados de foco, hover e pressionado dos botões e a preservação dos tokens da marca, primary e navegação. Os destaques do tour mantêm os mesmos alvos e a saída fecha o detalhe aberto pela demonstração.
 
@@ -42,9 +42,9 @@ Cores das ações do tour: Anterior usa Button branco e Próximo ou Concluir usa
 
 Formulários de negócio usam Cancelar branco e Salvar verde no BusinessFormActions. A paleta de cores abre sobre o conteúdo, preferindo o espaço acima quando o modal não comporta a abertura abaixo, sem alterar a altura do formulário.
 
-Badges e etiquetas seguem a dimensão medida na tabela de ordens de serviço da referência Visdom: fonte 10,5 px, entrelinha 14 px, padding 3 px por 6 px, peso 600 e espaçamento 0,05 em. Tokens compartilhados mantêm altura aproximada de 20 px nas tabelas, modais e seletores. Cores semânticas e cantos do tema são preservados.
+Badges e etiquetas seguem a dimensão medida na tabela de ordens de serviço da referência visual: fonte 10,5 px, entrelinha 14 px, padding 3 px por 6 px, peso 600 e espaçamento 0,05 em. Tokens compartilhados mantêm altura aproximada de 20 px nas tabelas, modais e seletores. Cores semânticas e cantos do tema são preservados.
 
-Os seletores compartilham animação de abertura do menu de 250 ms, com opacidade e leve deslocamento e escala vertical, seguindo o SelectField do GNAI. O padrão abrange SelectControl, TagSelect e o menu Colunas (SelectChecklist). A preferência por movimento reduzido desliga a animação. Alvos e ordem dos tours preservados.
+Os seletores compartilham animação de abertura do menu de 250 ms, com opacidade e leve deslocamento e escala vertical, seguindo o SelectField do padrão adotado. O padrão abrange SelectControl, TagSelect e o menu Colunas (SelectChecklist). A preferência por movimento reduzido desliga a animação. Alvos e ordem dos tours preservados.
 
 O fechamento executa a animação inversa por 250 ms antes de desmontar o menu, inclusive ao selecionar uma opção, clicar novamente no campo, sair por Esc ou clicar fora. Durante a saída, o menu fica inerte e oculto para tecnologias assistivas. Reabrir cancela a saída pendente. Colunas e Etiquetas preservam a seleção múltipla e fecham ao sair do menu.
 
@@ -60,8 +60,6 @@ Revisados os alvos e a ordem dos tours de Contas, Usuários, Pessoas, Organizaç
 
 ### Referências da implementação de tooltips
 
-- Controle Bar: `/home/djavan/controle-bar/resources/js/components/ui/sidebar.tsx` (`SidebarMenuButton`) e `ui/tooltip.tsx`. Usa Radix, portal, seta, posicionamento lateral e exibição condicionada ao estado recolhido.
-- GNAI2: `/home/djavan/woquiton/GNAI2/resources/js/components/UI/InfoTooltip/InfoTooltip.tsx`, `UI/Tooltip/Tooltip.tsx` e `Forms/FormField/FormField.tsx`. Usa botão de informação, tooltip compartilhado e descrição acessível preservada.
 - Os projetos de referência foram apenas lidos. No Prospera, o Tooltip existente foi ampliado sem adicionar bibliotecas. InfoTooltip reutiliza essa base.
 
 ### Arquivos desta melhoria

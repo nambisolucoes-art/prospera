@@ -20,7 +20,7 @@ export default function IconsPage({ pageKey }: IconsPageProps): JSX.Element {
         <div className="iconsPage__pageTitleRow">
           <div className="iconsPage__col iconsPage__col--full">
             <h4 className="page-title iconsPage__pageTitle">{page.title}</h4>
-            <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Ícones', href: '#' }, { label: page.breadcrumb }]} />
+            <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Ícones', href: '#' }, { label: page.breadcrumb }]} />
           </div>
         </div>
 

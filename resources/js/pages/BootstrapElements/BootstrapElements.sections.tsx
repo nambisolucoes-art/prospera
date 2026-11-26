@@ -337,7 +337,7 @@ export function BootstrapElementsPageTitle(): JSX.Element {
       <h4 className="page-title bootstrapElementsPage__pageTitle">Interface Bootstrap</h4>
       <PageBreadcrumb
         items={[
-          { label: 'Ubold', href: '#' },
+          { label: 'Prospera', href: '#' },
           { label: 'UI Kit', href: '#' },
           { label: 'Interface Bootstrap' }
         ]}

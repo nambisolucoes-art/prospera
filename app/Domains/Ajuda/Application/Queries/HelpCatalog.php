@@ -24,7 +24,7 @@ final class HelpCatalog
 
             $source = (string) file_get_contents($path);
 
-            // Cada artigo é um HTML com a tipografia do Ubold e um comentário de metadados no topo.
+            // Cada artigo é um HTML com a tipografia do tema e um comentário de metadados no topo.
             if (! preg_match('/\A<!--\R(.*?)\R-->\R(.*)\z/s', $source, $m)) {
                 continue;
             }

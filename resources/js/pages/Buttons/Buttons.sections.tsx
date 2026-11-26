@@ -109,7 +109,7 @@ export function ButtonsShowcase(): JSX.Element {
               <h4 className="page-title buttonsPage__pageTitle">Botões</h4>
               <PageBreadcrumb
                 items={[
-                  { label: 'Ubold', href: '#' },
+                  { label: 'Prospera', href: '#' },
                   { label: 'UI Kit', href: '#' },
                   { label: 'Botões' }
                 ]}

@@ -109,7 +109,7 @@ export function ModalsShowcase(): JSX.Element {
   const accordionItems: AccordionItem[] = [1, 2, 3].map((number) => ({ id: `modal-accordion-${number}`, title: `Item do grupo recolhível #${number}`, content: modalAccordionText }));
 
   return <section className="modalsPage" aria-label="Modais">
-    <div className="modalsPage__titleRow"><h4 className="modalsPage__title">Modais</h4><PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Modais' }]} /></div>
+    <div className="modalsPage__titleRow"><h4 className="modalsPage__title">Modais</h4><PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Modais' }]} /></div>
 
     <CardBox className="modalsPage__card">
       <h4 className="header-title"><b>Modais Bootstrap (padrão)</b></h4><p className="modalsPage__description text-muted">Um modal renderizado com cabeçalho, corpo e ações no rodapé.</p>

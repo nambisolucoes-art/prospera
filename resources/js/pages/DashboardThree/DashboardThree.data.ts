@@ -85,12 +85,12 @@ export const dashboardThreeSparklineCards: DashboardThreeSparklineCardData[] = [
 ];
 
 export const dashboardThreeProjects: DashboardThreeProjectItem[] = [
-  { id: 1, projectName: 'Ubold Admin v1', startDate: '01/01/2015', dueDate: '26/04/2015', status: 'Released', statusVariant: 'info', assign: 'Coderthemes' },
-  { id: 2, projectName: 'Ubold Frontend v1', startDate: '01/01/2015', dueDate: '26/04/2015', status: 'Released', statusVariant: 'success', assign: 'Coderthemes' },
-  { id: 3, projectName: 'Ubold Admin v1.1', startDate: '01/05/2015', dueDate: '10/05/2015', status: 'Pending', statusVariant: 'pink', assign: 'Coderthemes' },
-  { id: 4, projectName: 'Ubold Frontend v1.1', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Work in Progress', statusVariant: 'purple', assign: 'Coderthemes' },
-  { id: 5, projectName: 'Ubold Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Coming soon', statusVariant: 'warning', assign: 'Coderthemes' },
-  { id: 6, projectName: 'Ubold Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Coming soon', statusVariant: 'primary', assign: 'Coderthemes' },
-  { id: 7, projectName: 'Ubold Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Cool', statusVariant: 'info', assign: 'Coderthemes' },
-  { id: 8, projectName: 'Ubold Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Coming soon', statusVariant: 'warning', assign: 'Coderthemes' }
+  { id: 1, projectName: 'Prospera Admin v1', startDate: '01/01/2015', dueDate: '26/04/2015', status: 'Released', statusVariant: 'info', assign: 'Prospera' },
+  { id: 2, projectName: 'Prospera Frontend v1', startDate: '01/01/2015', dueDate: '26/04/2015', status: 'Released', statusVariant: 'success', assign: 'Prospera' },
+  { id: 3, projectName: 'Prospera Admin v1.1', startDate: '01/05/2015', dueDate: '10/05/2015', status: 'Pending', statusVariant: 'pink', assign: 'Prospera' },
+  { id: 4, projectName: 'Prospera Frontend v1.1', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Work in Progress', statusVariant: 'purple', assign: 'Prospera' },
+  { id: 5, projectName: 'Prospera Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Coming soon', statusVariant: 'warning', assign: 'Prospera' },
+  { id: 6, projectName: 'Prospera Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Coming soon', statusVariant: 'primary', assign: 'Prospera' },
+  { id: 7, projectName: 'Prospera Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Cool', statusVariant: 'info', assign: 'Prospera' },
+  { id: 8, projectName: 'Prospera Admin v1.3', startDate: '01/01/2015', dueDate: '31/05/2015', status: 'Coming soon', statusVariant: 'warning', assign: 'Prospera' }
 ];

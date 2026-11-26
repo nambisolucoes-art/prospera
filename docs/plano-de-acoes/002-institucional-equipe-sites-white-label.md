@@ -69,7 +69,7 @@ O Prospera passa a oferecer presença digital institucional administrada pela me
 4. **A herança é por seção**, com três modos (`inherit`, `override`, `disabled`) e um único resolvedor. Ausência, limpeza e desativação têm representações distintas e testáveis.
 5. **O público nunca lê as tabelas privadas.** Rotas públicas são sem sessão, resolvem o site pelo host e usam Queries e Resources com lista de campos permitidos. O diretório lê uma projeção própria, gravada somente na publicação.
 6. **Domínio próprio é a última etapa de entrega**, depois da publicação em subdomínio gerenciado e do diretório (S14).
-7. **O GNAI2 é referência de regras e de acessibilidade, não de código.** O módulo `Website` dele é uma linha de configuração com seções fixas em JSON, sem tenant, versões, rascunho ou domínio, e com schema MySQL (seção 02.3).
+7. **O sistema de referência é referência de regras e de acessibilidade, não de código.** O módulo `Website` dele é uma linha de configuração com seções fixas em JSON, sem tenant, versões, rascunho ou domínio, e com schema MySQL (seção 02.3).
 8. **Dado operacional e conteúdo editorial têm regras diferentes** (DA2-16). Conteúdo editorial tem valor de trabalho e valor publicado, e só chega ao público por publicação explícita. Dado operacional (horário, contato, endereço da unidade) vale ao salvar. Retratações (revogar consentimento, inativar colaborador, despublicar) valem na hora. Editar rascunho nunca altera a publicação atual.
 9. **O diretório sem site tem autoridade própria** (DA2-17): a ficha pública é um `directory_listing` com publicação e despublicação próprias, não depende de página nem de `PublishPageAction`.
 
@@ -135,9 +135,9 @@ Verificado em 24/11/2026 sobre o commit `33fd8df`. Itens [H] não foram abertos.
 | Busca textual | [C] `pg_trgm` 1.6 e `unaccent` 1.1 disponíveis no `postgres:18` (18.7), ambos confiáveis (seção 26, H2). Nenhuma extensão é criada no banco da aplicação |
 | Produtos e serviços | [A] só contrato futuro, plano 001 seção 10.3 |
 
-### 02.5 GNAI2 (referência) [C]
+### 02.5 Sistema de referência anterior [C]
 
-Auditado em `/home/marley/Projects/GNAI2`.
+Auditado fora deste repositório.
 
 | Aspecto | Achado | Consequência |
 | --- | --- | --- |
@@ -146,9 +146,9 @@ Auditado em `/home/marley/Projects/GNAI2`.
 | Versões, rascunho, preview, domínio, cache | Não encontrados | Tudo isso é novo |
 | Banco | Migration com `InnoDB` e `utf8mb4` (MySQL) | O schema não é portável para PostgreSQL |
 | Reaproveitável como ideia | Value objects de aparência (`HeroAppearance`, `TeamAppearance` e afins), regras de contraste (`WebsiteContrast`, `WebsiteAccessibility`, `WebsiteAppearanceAccessibility`), armazenamento de mídia (`WebsiteMediaStorage`), cobertura de testes | Conferir licença e autoria (PD2-03) antes de portar qualquer trecho |
-| Licença | `composer.json` do GNAI2 declara `MIT`. Titularidade do código e dos textos não foi confirmada | Bloqueio documentado em PD2-03 |
+| Licença | `composer.json` do sistema de referência declara `MIT`. Titularidade do código e dos textos não foi confirmada | Bloqueio documentado em PD2-03 |
 
-Conclusão: o GNAI2 fornece o **catálogo de tipos de bloco** e as **regras de acessibilidade**. O modelo de dados, a resolução de site, a publicação e a segurança pública são novos.
+Conclusão: o sistema de referência fornece o **catálogo de tipos de bloco** e as **regras de acessibilidade**. O modelo de dados, a resolução de site, a publicação e a segurança pública são novos.
 
 ---
 
@@ -170,7 +170,7 @@ Conclusão: o GNAI2 fornece o **catálogo de tipos de bloco** e as **regras de a
 | Tipo | Item |
 | --- | --- |
 | **Fato** | Seções 02 e 03 |
-| **Decisão do responsável [DP]** | Colaborador é papel de Pessoa. Sem entidade Marca neste ciclo. Empresa e estabelecimento podem ter publicação própria, sem limite permanente de uma página por empresa. Herança explícita com INHERIT, OVERRIDE e DISABLED. Domínio próprio no plano, depois do domínio ou subdomínio gerenciado. GNAI2 é referência, e a titularidade deve ser conferida antes de reutilizar código |
+| **Decisão do responsável [DP]** | Colaborador é papel de Pessoa. Sem entidade Marca neste ciclo. Empresa e estabelecimento podem ter publicação própria, sem limite permanente de uma página por empresa. Herança explícita com INHERIT, OVERRIDE e DISABLED. Domínio próprio no plano, depois do domínio ou subdomínio gerenciado. sistema de referência é referência, e a titularidade deve ser conferida antes de reutilizar código |
 | **Decisão aprovada [AP]** | PD2-01 (Função), PD2-04 (diretório por conta), PD2-06 (editar e publicar distintos, sem aprovação em duas etapas), PD2-08 (fuso IANA por estabelecimento), PD2-09 (prévia autenticada), PD2-10 (Redis só após medição), PD2-12 (categorias em tabela própria), PD2-13 (sem `exif` por ausência), PD2-15 (blocos tipados com formatação restrita) e PD2-16 (gestor de unidade seleciona a equipe da unidade com `select-team`, sem alterar o perfil corporativo), todas em 24/11/2026 |
 | **Decisão proposta [R]** | DA2-01 a DA2-23 (seção 08). Os DA2-19 a DA2-23 foram introduzidos pela S02 para fechar contradições e aguardam ratificação junto com o plano |
 | **Hipótese [H]** | H1 a H7 foram verificadas na S01 (seção 26). Restam dependências de infraestrutura e de decisão: PD2-02, PD2-05 (armazenamento e CDN), PD2-14. A medição do cache público (H4) só é possível com o site público e fica na S11 |
@@ -420,11 +420,11 @@ Seção 11.6. O Caddy usa TLS sob demanda com endpoint `ask` que só autoriza ho
 - **Vigência e relógio.** Conteúdo que muda com a data sem evento (lotação que termina, exceção de horário que começa, `starts_on` futuro) segue o contrato de frescor da seção 09.7, item 6: `valid_until` conferido na leitura, revalidação a cada acesso (`no-cache` com `ETag`) e nenhuma resposta vencida servida. O estado "aberto agora" nunca é gravado no HTML em cache (seção 09.5).
 - **Invalidar não é varrer.** Nenhum job de limpeza de cache existe: trocar a versão basta. A revogação de consentimento apaga os derivados da imagem na própria Action (síncrono).
 
-### DA2-15: Reaproveitamento do GNAI2
+### DA2-15: Reaproveitamento do sistema de referência
 
 - **Reutilizável como ideia:** catálogo de tipos de bloco, aparências tipadas, regras de contraste, fluxo de validação de mídia.
 - **Reutilizável como código somente após PD2-03:** `WebsiteContrast`, `WebsiteAccessibility`, `WebsiteAppearanceAccessibility`, adaptados ao padrão Actions, Data e DTO do Prospera.
-- **Não reutilizar:** `website_settings`, o enum fixo como estrutura de dados, controllers, o front React do GNAI2.
+- **Não reutilizar:** `website_settings`, o enum fixo como estrutura de dados, controllers, o front React do sistema de referência.
 
 ### DA2-16: Dado operacional, conteúdo editorial e retratação (revisão 2)
 
@@ -911,7 +911,7 @@ Documento (CPF e CNPJ de pessoa), endereço e contatos pessoais, e-mail de login
 
 ### 13.2 Acessibilidade
 
-- Contraste mínimo WCAG AA validado ao salvar `palette` (reaproveitando a regra do GNAI2 após PD2-03, ou implementação própria).
+- Contraste mínimo WCAG AA validado ao salvar `palette` (reaproveitando a regra do sistema de referência após PD2-03, ou implementação própria).
 - Estrutura semântica: um `h1` por página, hierarquia de títulos, landmarks, `alt` obrigatório, foco visível, navegação por teclado, links com nome acessível, `lang="pt-BR"`.
 - Mapa e carrosséis têm alternativa textual. Sem conteúdo que dependa de movimento.
 - Teste automatizado simples (ausência de `alt`, `h1` único, contraste do tema) na suíte; verificação manual por leitor de tela no fechamento técnico e na homologação funcional posterior.
@@ -1414,7 +1414,7 @@ O cenário 14 depende do catálogo e o 22 de uma etapa de importação. **Ambos 
 
 ## 21. Ajuda e tours
 
-Toda tela de negócio nova tem artigo de ajuda e tour próprio. Um artigo pode cobrir várias telas do mesmo fluxo. Até que o suporte de registro esteja disponível, o conteúdo é versionado em `docs/ajuda/{slug}.html` e `docs/tours/{slug}.md`, com a integração pendente registrada na entrega, conforme o AGENTS.md. Artigos em HTML com a tipografia do Ubold. Tours reutilizam `PageHeaderTour` e `BusinessListTour`, e demonstrações de menus, abas e colunas restauram o estado ao sair. O tour pertence à tela, nunca ao modal.
+Toda tela de negócio nova tem artigo de ajuda e tour próprio. Um artigo pode cobrir várias telas do mesmo fluxo. Até que o suporte de registro esteja disponível, o conteúdo é versionado em `docs/ajuda/{slug}.html` e `docs/tours/{slug}.md`, com a integração pendente registrada na entrega, conforme o AGENTS.md. Artigos em HTML com a tipografia do tema. Tours reutilizam `PageHeaderTour` e `BusinessListTour`, e demonstrações de menus, abas e colunas restauram o estado ao sair. O tour pertence à tela, nunca ao modal.
 
 | Etapa | Artigos de ajuda | Tours |
 | --- | --- | --- |
@@ -1445,7 +1445,7 @@ Cada artigo documenta quem pode executar, pré-requisitos, etapas, resultado e b
 | Busca insuficiente sem extensões | Médio | Normalização em PHP, medição, avaliar `pg_trgm` só se justificado |
 | Conflito de nomenclatura Cargo e Função | Médio | Resolvido: **Função** (PD2-01, aprovada) e teste de texto (seção 20.5) |
 | Crescimento de escopo do editor | Médio | Catálogo fechado de blocos, sem HTML livre, sem builder genérico |
-| Reuso indevido do GNAI2 | Jurídico | PD2-03 antes de portar qualquer trecho |
+| Reuso indevido do sistema de referência | Jurídico | PD2-03 antes de portar qualquer trecho |
 | Regressão do plano 001 | Alto | Testes de regressão por etapa, `audit:check`, etapas pequenas |
 | Manutenção de muitos domínios | Médio | Revalidação automática (exige agendador e worker, S14), painel de situação, limites |
 | Funcionalidade entregue com lacuna por falta de worker | Médio | DA2-21: se a medição reprovar o síncrono, a própria etapa incorpora o assíncrono e o laboratório (seção 19.1) |
@@ -1490,7 +1490,7 @@ Estados: **Aprovada** (decidida pelo responsável em 24/11/2026, já refletida n
 | Código | Decisão | Estado | Evidência ou padrão proposto | Bloqueia |
 | --- | --- | --- | --- | --- |
 | PD2-02 | Domínio registrável dos sites gerenciados, hospedagem e wildcard TLS | **Pendente, depende do responsável** | O repositório só tem Compose local e a imagem Caddy **não tem módulo de DNS** (H5), então wildcard por DNS-01 exige build customizada. O domínio deve ser registrável distinto do app (DA2-08) | **S11**, e o host do diretório na S13 |
-| PD2-03 | Titularidade e condições do código e dos textos do GNAI2 | **Pendente, depende do responsável** | `composer.json` declara MIT, mas não há arquivo `LICENSE`, e o histórico tem dois autores. Nenhum código foi portado. Sem confirmação, só se reaproveitam ideias | Reuso de código (contraste, S10) |
+| PD2-03 | Titularidade e condições do código e dos textos do sistema de referência | **Pendente, depende do responsável** | `composer.json` declara MIT, mas não há arquivo `LICENSE`, e o histórico tem dois autores. Nenhum código foi portado. Sem confirmação, só se reaproveitam ideias | Reuso de código (contraste, S10) |
 | PD2-05 | Armazenamento e CDN da mídia | **Pendente (parte)** | A biblioteca está decidida: GD, sem dependência nova, limites de 5 MB e 20 MP. Falta armazenamento e CDN de produção; o disco local atende o laboratório | Produção da S08 |
 | PD2-07 | Texto, base legal e retenção do consentimento de foto e contato | **Pendente, depende do responsável** | Nada no repositório define isso. O plano só prevê o registro técnico; o texto exige revisão jurídica | **S09** |
 | PD2-11 | Limites por conta (sites, domínios, mídia) | **Pendente, depende do responsável** | Plano comercial. Padrão conservador até lá | S11 e S14 |
@@ -1622,7 +1622,7 @@ Execução em 24/11/2026 sobre o commit `33fd8df`, com a árvore de trabalho lim
 | H2 PostgreSQL | `pg_trgm` 1.6 e `unaccent` 1.1 em `postgres:18` (18.7), ambos `trusted`. Um papel **sem superusuário** (dono do banco) criou as duas extensões. `unaccent` é `STABLE`, portanto não serve em índice de expressão: grava-se `search_text` normalizado (já previsto). Laboratório com 200.000 linhas de **uma única conta** (pior caso): `ILIKE` com dois termos, 148 ms sem índice e **4,6 ms com GIN trigram**; o operador de similaridade `%` com termo comum a todas as linhas levou 658 ms | **Confirmada.** O índice GIN só entra na S13 se o volume e o plano medido justificarem. Similaridade fica fora do primeiro corte. A busca usa `ILIKE` por termo sobre `search_text` |
 | H3 Fila | O Compose tem `app`, `postgres` e `mailpit`: **não há worker de fila nem agendador**. O código **não despacha nenhum job** (`ShouldQueue`, `dispatch`, `Queueable` ausentes em `app`). `QUEUE_CONNECTION=database` e a tabela `jobs` existe, mas nada a consome | **Refutada** a premissa de worker em execução. Consequência: S08 e S11 síncronas; a S14 precisa de fila e agendador (PD2-14). O contrato do plano 001 (job leva contexto e reautoriza) continua valendo e não tem exemplo existente |
 | H4 Cache | Cache, sessão e fila em banco. **Sem Redis**: nenhum serviço, extensão `redis` ausente (`REDIS_CLIENT=phpredis` só aparece em `.env.example`). O driver `octane` de cache não foi testado | **Parcialmente verificada.** A infraestrutura está confirmada. A adequação a páginas públicas **só pode ser medida com o site público**, na S11, junto com cache HTTP por `content_version` (`ETag` e `Cache-Control`). Redis só se a medição o exigir (PD2-10) |
-| H5 DNS e TLS | A imagem FrankenPHP/Caddy tem `tls.issuance.acme`, `tls.issuance.zerossl`, `tls.permission.http` (necessário ao `ask` do TLS sob demanda) e `tls.ech.publishers.dns`. **Não há módulo `dns.providers.*`**, então DNS-01 e wildcard não existem na imagem atual. O repositório não tem configuração de produção (só Compose local; o nome do servidor vem do Octane). `dns_get_record` executa no contêiner sem erro, mas isso não prova o resolvedor de produção. O GNAI2 tem `docker-compose.tunnel.yml` (Cloudflare Tunnel), citado só como indício e não analisado | **Parcialmente verificada, com impedimento concreto.** Domínio gerenciado, provedor de DNS e hospedagem dependem do responsável (PD2-02). Nada foi emitido ou alterado |
+| H5 DNS e TLS | A imagem FrankenPHP/Caddy tem `tls.issuance.acme`, `tls.issuance.zerossl`, `tls.permission.http` (necessário ao `ask` do TLS sob demanda) e `tls.ech.publishers.dns`. **Não há módulo `dns.providers.*`**, então DNS-01 e wildcard não existem na imagem atual. O repositório não tem configuração de produção (só Compose local; o nome do servidor vem do Octane). `dns_get_record` executa no contêiner sem erro, mas isso não prova o resolvedor de produção. O sistema de referência tem `docker-compose.tunnel.yml` (Cloudflare Tunnel), citado só como indício e não analisado | **Parcialmente verificada, com impedimento concreto.** Domínio gerenciado, provedor de DNS e hospedagem dependem do responsável (PD2-02). Nada foi emitido ou alterado |
 | H6 Etiquetas especiais | Mapa completo na seção 26.2 | **Confirmada com correção:** a criação é preguiçosa nas contas novas, não só por migration |
 | H7 Editor | Mapa na seção 26.3 | **Confirmada:** o editor é viável sem segunda biblioteca visual, mas com componentes ainda não integrados |
 
@@ -1650,7 +1650,7 @@ O mecanismo não se limita ao enum `CommercialRole`. Para uma terceira etiqueta 
 - **Existem como componentes Bold, mas só em páginas de demonstração**: `FileDropzone`, `ImageCropper`, `TimePicker`, `SummernoteEditor`, `TinyMceEditor`, `GoogleMap` e `FormWizard`. A S07 (horários) e a S08 (mídia) precisam integrá-los ao padrão de formulário de negócio, sem criar componente paralelo.
 - `NestableRow` é apenas um contêiner estilizado, **sem arrastar e soltar**. Reordenar blocos exige botões de mover ou um contrato novo na S10. `package.json` não traz biblioteca de arrastar e soltar.
 - `TinyMceEditor` carrega o TinyMCE da série 4 de `public/assets/plugins/tinymce` (licença LGPL 2.1). Emite HTML, portanto exigiria sanitização no servidor, e é uma série antiga. PD2-15 propõe marcação restrita.
-- **GNAI2:** `WebsiteBuilderController` tem só `edit` e `update` de uma linha de configuração, em React com Inertia. Não existe editor de blocos nem lista de páginas para reaproveitar. O que há são as classes de aparência e de contraste.
+- **sistema de referência:** `WebsiteBuilderController` tem só `edit` e `update` de uma linha de configuração, em React com Inertia. Não existe editor de blocos nem lista de páginas para reaproveitar. O que há são as classes de aparência e de contraste.
 - Conclusão: o editor é viável com `BusinessForm`, `Modal`, `Tabs` e `PreviewSection`, mais componentes a integrar na S07, S08 e S10. A prova prática do editor (reordenar, editar bloco, prévia) fica como primeira tarefa da S10.
 
 ### 26.4 Inconsistências do plano corrigidas na revisão 2
@@ -1676,7 +1676,7 @@ O mecanismo não se limita ao enum `CommercialRole`. Para uma terceira etiqueta 
 
 ### 26.5 Pendências e limpeza
 
-- **Dependem do responsável:** PD2-02 (domínio gerenciado e hospedagem), PD2-03 (titularidade do GNAI2), PD2-07 (consentimento), PD2-11 (limites por conta) e a aprovação de mudanças de infraestrutura (PD2-05, PD2-13 e PD2-14).
+- **Dependem do responsável:** PD2-02 (domínio gerenciado e hospedagem), PD2-03 (titularidade do sistema de referência), PD2-07 (consentimento), PD2-11 (limites por conta) e a aprovação de mudanças de infraestrutura (PD2-05, PD2-13 e PD2-14).
 - **Padrões propostos sem decisão:** PD2-01, PD2-04, PD2-06, PD2-08, PD2-09, PD2-10 e PD2-12.
 - **Riscos novos:** limite de memória do GD (20 MP), ausência de worker e agendador, ausência de DNS-01 na imagem, TinyMCE 4 como componente não integrado.
 - **Limpeza:** arquivos temporários do laboratório de imagens removidos do contêiner e do host; contêineres `postgres:18` descartáveis parados e removidos; nenhum volume, banco ou extensão da aplicação alterado.
@@ -1761,7 +1761,7 @@ As emendas às convenções existentes são **por adição**: linhas acrescentad
 
 ### 27.6 Pendências de produto e infraestrutura
 
-PD2-02 (domínio gerenciado, bloqueia a S11), PD2-03 (GNAI2), PD2-05 (armazenamento e CDN), PD2-07 (consentimento, bloqueia a S09), PD2-11 (limites por conta), e PD2-14 (worker e agendador, bloqueia a S14). Mais a ratificação de DA2-19 a DA2-23.
+PD2-02 (domínio gerenciado, bloqueia a S11), PD2-03 (sistema de referência), PD2-05 (armazenamento e CDN), PD2-07 (consentimento, bloqueia a S09), PD2-11 (limites por conta), e PD2-14 (worker e agendador, bloqueia a S14). Mais a ratificação de DA2-19 a DA2-23.
 
 ### 27.7 Condições para iniciar a S03 e a S04
 
@@ -2145,14 +2145,14 @@ Linha de base na `main` (`a41c83b`): 391 testes e 5.351 asserções, Pint, PHPSt
 | Sobreposição entre exceções do mesmo dono | Recusada na gravação (422), serializada pelo bloqueio da empresa. Dados antigos que sobreponham resolvem por menor período e menor id, e `institutional:check` os acusa |
 | Limites não definidos | Até 6 turnos por dia, exceção de até 366 dias, observação de até 160 caracteres, datas de 2000 a 2100. São validações de sanidade, não regras de negócio |
 | `applies_to_overrides` e unidades que mudam depois | É regra avaliada na leitura, não lista congelada: a unidade que passar a ter horário próprio depois da confirmação também é alcançada. A tela e a ajuda dizem isso |
-| `null` e `''` | O middleware do framework converte `''` em `null`, então `null` vale vazio em `shifts`, `ends_on` e `note`. `kind` e `starts_on` são obrigatórios e `applies_to_overrides` rejeita `null`. **A edição de exceção substitui os valores** (como o formulário envia e como as Update Data do GNAI), em vez de PATCH parcial; o PATCH parcial por dia continua no horário semanal, como em toda seção |
+| `null` e `''` | O middleware do framework converte `''` em `null`, então `null` vale vazio em `shifts`, `ends_on` e `note`. `kind` e `starts_on` são obrigatórios e `applies_to_overrides` rejeita `null`. **A edição de exceção substitui os valores** (como o formulário envia e como as Update Data do padrão adotado), em vez de PATCH parcial; o PATCH parcial por dia continua no horário semanal, como em toda seção |
 
 ### 34.3 Arquitetura entregue
 
 - **Migrations** (aditivas, classe R): `2026_11_28_000001_add_timezone_to_establishments` (`timezone` com padrão `America/Sao_Paulo` e CHECK não vazio no PostgreSQL) e `2026_11_28_000002_create_hour_exceptions` (CHECKs de tipo, período, turnos por tipo e `applies_to_overrides` só na empresa; FKs compostas por conta, empresa e unidade; índice `(company_id, establishment_id, starts_on)`). Nenhuma migration homologada foi alterada.
 - **Horário semanal.** Seção `hours_weekly` no catálogo (operacional, desativável). `HoursWeeklyValue` valida o formato por `rules()` e `messages()`, e os Value Objects `Shift`, `Shifts` e `DaySchedule` (construtor privado, construtores nomeados, invariantes com `InvalidHourException`) cuidam de início antes do fim, ordem, sobreposição e coerência entre tipo e turnos, com PATCH parcial por dia, como toda seção. Os dois pares (trabalho e publicado) são gravados juntos (DA2-16).
 - **Herança.** Nenhum código novo lê `profile_sections`: o `HoursResolver` usa o `ProfileResolver`, que ganhou `warm()` (carrega empresa e N unidades numa consulta) e passou a invalidar também as unidades quando a empresa é gravada na mesma requisição (lacuna latente da S06, com teste).
-- **Exceções (padrão do GNAI, [Código do backend](../convencoes/codigo-backend.md)).** `CreateHourExceptionAction`, `UpdateHourExceptionAction` e `DeleteHourExceptionAction`, uma por caso de uso, com `CreateHourExceptionData` e `UpdateHourExceptionData` (cada uma com `rules()` e `messages()` próprias, edição por substituição completa), `CreateHourExceptionDTO` e `UpdateHourExceptionDTO`, e `HourException::register()` e `revise()`, que aplicam as invariantes (período, 366 dias, turnos só no horário especial, `applies_to_overrides` só na empresa) lançando `InvalidHourException`. Passos com nome próprio são sub-Actions (`LockHourOwnerAction`, `AssertHourExceptionPeriodFreeAction`, `AssertHourExceptionImpactAction`), sem funções privadas nas Actions. `HourExceptionImpactQuery` devolve o resumo com `token`. Ordem de bloqueios: empresa, unidade, exceção, a mesma da S06.
+- **Exceções (padrão do padrão adotado, [Código do backend](../convencoes/codigo-backend.md)).** `CreateHourExceptionAction`, `UpdateHourExceptionAction` e `DeleteHourExceptionAction`, uma por caso de uso, com `CreateHourExceptionData` e `UpdateHourExceptionData` (cada uma com `rules()` e `messages()` próprias, edição por substituição completa), `CreateHourExceptionDTO` e `UpdateHourExceptionDTO`, e `HourException::register()` e `revise()`, que aplicam as invariantes (período, 366 dias, turnos só no horário especial, `applies_to_overrides` só na empresa) lançando `InvalidHourException`. Passos com nome próprio são sub-Actions (`LockHourOwnerAction`, `AssertHourExceptionPeriodFreeAction`, `AssertHourExceptionImpactAction`), sem funções privadas nas Actions. `HourExceptionImpactQuery` devolve o resumo com `token`. Ordem de bloqueios: empresa, unidade, exceção, a mesma da S06.
 - **Resolução.** `HoursResolver` (`scoped`) devolve `EffectiveHours`: condição (`open`, `closed`, `by_appointment`, `not_informed`, `disabled`, `inactive`), motivo de fechamento, atendimento do dia, origem, fuso, data e hora locais, exceção aplicada e `valid_until` (início do próximo dia civil no fuso, por `BusinessDate::startOfNextDay`). Três consultas para qualquer número de unidades. Sem rota pública, sem API, sem cache: a S11 consome esse contrato.
 - **Fuso e S05.** `establishments.timezone`, `IanaTimezone`, `SetEstablishmentTimezoneAction` com `SetEstablishmentTimezoneData` (autorizada por `account.institutional.update` sobre a unidade; a invariante IANA está em `Establishment::useTimezone()`). `BusinessDate::today()` e `prospera.business_timezone` foram removidos; a vigência usa `LocalDatePredicate` (condição por fuso com subconsulta, sem junção, então o `FOR UPDATE` da inativação trava só as lotações) e `todayIn` por unidade. O formulário de lotação usa a data do fuso da unidade escolhida. **Única edição em teste anterior:** três chamadas `BusinessDate::today()` em `EmployeeAssignmentTest` viraram `BusinessDate::todayIn('America/Sao_Paulo')`, equivalentes, porque a API foi removida de propósito (sem compatibilidade com estrutura antiga).
 - **Permissões e auditoria.** Nenhuma permissão nova (`permissions:sync`: 0 criadas, 104 descobertas). `HourException` e `Establishment.timezone` auditados com `company_id` e `establishment_id` do nó escrito; sem evento para unidades que apenas herdam, para escritas sem mudança ou para tentativas negadas. `audit:check` cobre 20 modelos. `institutional:check` verifica horário semanal, fuso IANA, turnos e sobreposição.
@@ -2175,7 +2175,7 @@ Linha de base na `main` (`a41c83b`): 391 testes e 5.351 asserções, Pint, PHPSt
 
 ### 34.4.1 Aderência ao padrão de backend
 
-Na primeira entrega, a S07 destoava do padrão do GNAI 1: uma `SaveHourExceptionAction` única para criar e editar, uma Data que validava à mão e mesclava com o registro atual, um DTO único e invariantes espalhadas. Foi refatorada para o padrão (seção 34.3): Create e Update separadas em Action, Data e DTO, `rules()` e `messages()` por operação, invariantes no Model e nos Value Objects com exceção de domínio, sub-Actions no lugar de funções privadas. As provas de PostgreSQL, concorrência e Chromium foram repetidas depois da refatoração, com o mesmo resultado. **A S06 também foi refatorada** (por pedido do responsável): `SaveProfileSectionAction`, `SaveProfileSectionData` e `SaveProfileSectionDTO` foram substituídos por `CreateProfileSectionAction` e `UpdateProfileSectionAction`, `CreateProfileSectionData` e `UpdateProfileSectionData` (cada uma com `rules()` e `messages()`), `CreateProfileSectionDTO` e `UpdateProfileSectionDTO`, `FindProfileSectionQuery` e `LockProfileOwnerAction` (compartilhada com os horários). As invariantes que dependem do dono (a empresa só personaliza, a galeria é local, desativação só onde o catálogo permite) passaram para `ProfileSection::register()` e `revise()` com `InvalidProfileSection`. O controller escolhe Create ou Update pela existência da linha. **Efeito observável:** duas primeiras gravações simultâneas da mesma seção deixam de gravar as duas; a primeira vence e as demais respondem 409 (`ConflictingChange`), com 1 linha no banco (provado com 6 processos em PostgreSQL). Os demais comportamentos da S06 e os 391 testes anteriores não mudaram.
+Na primeira entrega, a S07 destoava do padrão do padrão adotado 1: uma `SaveHourExceptionAction` única para criar e editar, uma Data que validava à mão e mesclava com o registro atual, um DTO único e invariantes espalhadas. Foi refatorada para o padrão (seção 34.3): Create e Update separadas em Action, Data e DTO, `rules()` e `messages()` por operação, invariantes no Model e nos Value Objects com exceção de domínio, sub-Actions no lugar de funções privadas. As provas de PostgreSQL, concorrência e Chromium foram repetidas depois da refatoração, com o mesmo resultado. **A S06 também foi refatorada** (por pedido do responsável): `SaveProfileSectionAction`, `SaveProfileSectionData` e `SaveProfileSectionDTO` foram substituídos por `CreateProfileSectionAction` e `UpdateProfileSectionAction`, `CreateProfileSectionData` e `UpdateProfileSectionData` (cada uma com `rules()` e `messages()`), `CreateProfileSectionDTO` e `UpdateProfileSectionDTO`, `FindProfileSectionQuery` e `LockProfileOwnerAction` (compartilhada com os horários). As invariantes que dependem do dono (a empresa só personaliza, a galeria é local, desativação só onde o catálogo permite) passaram para `ProfileSection::register()` e `revise()` com `InvalidProfileSection`. O controller escolhe Create ou Update pela existência da linha. **Efeito observável:** duas primeiras gravações simultâneas da mesma seção deixam de gravar as duas; a primeira vence e as demais respondem 409 (`ConflictingChange`), com 1 linha no banco (provado com 6 processos em PostgreSQL). Os demais comportamentos da S06 e os 391 testes anteriores não mudaram.
 
 ### 34.5 Defeitos encontrados e corrigidos
 

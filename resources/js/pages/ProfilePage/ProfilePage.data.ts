@@ -14,7 +14,7 @@ export const profileData: ProfileData = {
     },
     {
       label: "E-mail",
-      value: "johnathan@ubold.com",
+      value: "johnathan@prospera.example",
     },
     {
       label: "Localização",

@@ -12,7 +12,7 @@ export default function Invoice(): JSX.Element {
         <>
           <div className="invoice__top">
             <h4>
-              <img src="/assets/images/logo_dark.png" alt="UBold" />
+              <img src="/assets/images/logo_dark.png" alt="Prospera" />
             </h4>
             <h4>
               Fatura #<br />

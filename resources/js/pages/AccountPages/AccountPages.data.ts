@@ -1,5 +1,5 @@
 export const accountPageCopy = {
-  brand: 'UBold', signinTitle: 'Entrar no', signupTitle: 'Cadastre-se no', welcomeTitle: 'Bem-vindo ao',
+  brand: 'Prospera', signinTitle: 'Entrar no', signupTitle: 'Cadastre-se no', welcomeTitle: 'Bem-vindo ao',
   resetTitle: 'Redefinir senha', resetLead: 'Digite seu', resetEmail: 'e-mail',
   resetInstructions: 'para receber as instruções!', resetPlaceholder: 'Digite seu e-mail', resetButton: 'Redefinir',
   signinHeading: 'Entrar', signupHeading: 'Cadastrar',

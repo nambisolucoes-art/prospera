@@ -59,7 +59,7 @@ export function NotificationsPageTitle(): JSX.Element {
       <h4 className="page-title notificationsPage__pageTitle">Notificações</h4>
       <PageBreadcrumb
         items={[
-          { label: 'Ubold', href: '#' },
+          { label: 'Prospera', href: '#' },
           { label: 'UI Kit', href: '#' },
           { label: 'Notificações' }
         ]}

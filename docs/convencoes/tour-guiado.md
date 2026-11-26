@@ -12,7 +12,7 @@ Cada tela de negócio deve oferecer uma orientação sob demanda na barra superi
 
 O primeiro conjunto pode aproveitar `SaasLayout`, `BusinessList` e `BusinessForm` para cobrir a listagem de contas, o cadastro, a edição e o modal de visualização. O modal pode entrar como passo da listagem, já que faz parte da mesma tela.
 
-Referência consultada no GenAI em `AGENTS.md` e `docs/ai-conventions/frontend/guided-tours.md`.
+Referência consultada no outro sistema em `AGENTS.md` e `docs/ai-conventions/frontend/guided-tours.md`.
 
 O executor React `GuidedTour` é aberto por **Tutorial desta tela** na topbar. O catálogo `resources/js/app/guidance.ts` associa cada rota de negócio a seus passos e artigo. Alvos ausentes ou ocultos são pulados. O tour não abre formulários nem grava dados.
 

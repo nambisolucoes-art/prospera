@@ -105,7 +105,7 @@
   }
 }
 
-/* Light Speed do UBold espelhado para o aviso sair da borda do campo. */
+/* Animação Light Speed do tema espelhada para o aviso sair da borda do campo. */
 @keyframes commercial-registration-light-speed-out {
   0% { opacity: 0; transform: var(--notice-travel) skewX(30deg); }
   60% { opacity: 1; transform: skewX(-20deg); }

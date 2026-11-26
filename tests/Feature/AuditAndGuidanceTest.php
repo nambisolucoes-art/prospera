@@ -297,7 +297,7 @@ class AuditAndGuidanceTest extends TestCase
         $this->getJson('/ajuda')->assertForbidden();
     }
 
-    public function test_every_help_article_is_html_with_metadata_unique_anchors_and_the_ubold_typography(): void
+    public function test_every_help_article_is_html_with_metadata_unique_anchors_and_the_theme_typography(): void
     {
         $files = glob(base_path('docs/ajuda/*.html'));
         $this->assertNotEmpty($files);

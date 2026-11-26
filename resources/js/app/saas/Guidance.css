@@ -55,7 +55,7 @@
   white-space: pre-wrap;
 }
 
-/* Tipografia do Ubold (UI Kit, Tipografia) para os artigos em HTML de docs/ajuda. */
+/* Tipografia do tema (UI Kit, Tipografia) para os artigos em HTML de docs/ajuda. */
 .help-article p {
   margin: 0 0 12px;
 }
@@ -165,7 +165,7 @@
 .help-article small {
   color: var(--bold-color-legacy-muted);
 }
-/* Cores contextuais de texto do Ubold, com os tons do Prospera. */
+/* Cores contextuais de texto do tema, com os tons do Prospera. */
 .help-article .text-custom { color: var(--bold-color-custom); }
 .help-article .text-primary { color: var(--bold-color-primary); }
 .help-article .text-success { color: var(--bold-color-success); }
@@ -175,7 +175,7 @@
 .help-article .text-pink { color: var(--bold-color-pink); }
 .help-article .text-purple { color: var(--bold-color-purple); }
 .help-article .text-muted { color: var(--bold-color-legacy-muted); }
-/* Citações em bloco do Ubold como avisos: permissão, atenção e dica. */
+/* Citações em bloco do tema como avisos: permissão, atenção e dica. */
 .help-article blockquote {
   margin: 0 0 16px;
   padding: 10px 16px;

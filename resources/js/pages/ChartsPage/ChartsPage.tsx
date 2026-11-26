@@ -33,7 +33,7 @@ export default function ChartsPage({
       <h4 className="chartsPage__title">{title}</h4>
       <PageBreadcrumb
         items={[
-          { label: "Ubold", href: "#" },
+          { label: "Prospera", href: "#" },
           { label: "Charts", href: "#" },
           { label: title },
         ]}

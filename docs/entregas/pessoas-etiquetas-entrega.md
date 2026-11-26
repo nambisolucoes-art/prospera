@@ -15,6 +15,6 @@ Ajuda e tours estão versionados em `docs/ajuda/` e `docs/tours/`. Central de Aj
 
 ## Revisão dos padrões visuais
 
-Busca de Pessoas com lupa clicável à direita e envio por Enter, preservando a busca automática. Marcadores de etiquetas quadrados e na cor cadastrada, com estrela amarela discreta e tooltip Especial. O mesmo componente é usado nas listas de Pessoas e Etiquetas e no modal da pessoa. Filtro de módulos sem rótulo visível, mantendo o nome acessível. Campo Cor integra o plugin mjolnic-bootstrap-colorpicker do Ubold, com hexadecimal e amostra à direita; a paleta abre abaixo do campo.
+Busca de Pessoas com lupa clicável à direita e envio por Enter, preservando a busca automática. Marcadores de etiquetas quadrados e na cor cadastrada, com estrela amarela discreta e tooltip Especial. O mesmo componente é usado nas listas de Pessoas e Etiquetas e no modal da pessoa. Filtro de módulos sem rótulo visível, mantendo o nome acessível. Campo Cor integra o plugin mjolnic-bootstrap-colorpicker do tema, com hexadecimal e amostra à direita; a paleta abre abaixo do campo.
 
 Arquitetura, TypeScript e build Docker aprovados. Chrome em 1440, 390 e 320 px: clique da busca, raio zero dos marcadores, filtro aberto, hover da estrela, abertura da paleta, alteração de saturação e gravação da cor conferidos. Capturas em `/tmp/padroes-*.png`. Artigos e passos afetados revisados; executor dos tours integrado na tarefa de auditoria.

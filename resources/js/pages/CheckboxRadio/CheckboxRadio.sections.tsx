@@ -36,7 +36,7 @@ export function Section({ title, description, children }: { title: string; descr
 
 export function CheckboxRadioShowcase(): JSX.Element {
   return <section className="checkboxRadioPage" aria-label="Checkboxes e rádios">
-    <div className="checkboxRadioPage__pageTitleRow"><h4 className="page-title checkboxRadioPage__pageTitle">Checkboxes e rádios</h4><PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Checkboxes e rádios' }]} /></div>
+    <div className="checkboxRadioPage__pageTitleRow"><h4 className="page-title checkboxRadioPage__pageTitle">Checkboxes e rádios</h4><PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Checkboxes e rádios' }]} /></div>
     <div className="checkboxRadioPage__card">
       <div className="checkboxRadioPage__grid">
         <Section title="Básico" description={<>Suporta as cores da marca: <code>.checkbox-primary</code>, <code>.checkbox-info</code> etc.</>}><ChoiceList type="checkbox" /><p className="checkboxRadioPage__hint">Checkboxes sem texto <code>.checkbox-single</code></p><ChoiceControl type="checkbox" id="single-checkbox" single /><ChoiceControl type="checkbox" id="single-checkbox-checked" tone="primary" checked single /><p className="checkboxRadioPage__hint">Checkboxes em linha</p><div className="checkboxRadioPage__inlineGroup"><ChoiceControl type="checkbox" id="inline-checkbox-1" label="Em linha 1" inline /><ChoiceControl type="checkbox" id="inline-checkbox-2" label="Em linha 2" tone="success" checked inline /><ChoiceControl type="checkbox" id="inline-checkbox-3" label="Em linha 3" tone="pink" inline /></div></Section>

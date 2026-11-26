@@ -2,7 +2,7 @@
 
 Aplicação Laravel 13 com PHP 8.5, Octane e FrankenPHP. O frontend **Bold**, migrado de `clean-web-design`, usa React, TypeScript e Vite. O Laravel entrega a estrutura HTML inicial e o React consulta e envia os dados da aplicação pela API JSON.
 
-As [orientações do projeto](AGENTS.md) indicam quando documentar ajuda, tours e auditoria e como verificar as telas no navegador.
+As [orientações do projeto](AGENTS.md) e a [arquitetura do backend](docs/convencoes/arquitetura.md) indicam quando documentar ajuda, tours e auditoria e como verificar as telas no navegador.
 
 ## Rodar com Docker
 
@@ -49,7 +49,7 @@ A raiz encaminha para o login ou para o painel correspondente ao usuário. O cad
 - `resources/js/pages/` organiza as telas do Bold por recurso. Os componentes reutilizáveis ficam em `resources/js/components/`, com seus estilos locais.
 - Formulários e modais usam **Salvar** para gravar e **Excluir** para confirmar exclusões, sem acrescentar o nome do recurso. Os componentes de formulário oferecem esses textos como padrão.
 - Badges de situação usam `StatusLabel`: Ativa em verde e Inativa em vermelho.
-- Badges e etiquetas usam os tokens `--bold-label-*`, medidos na tabela de ordens de serviço da referência Visdom: fonte de 10,5 px e altura aproximada de 20 px em uma linha, inclusive em modais e seletores.
+- Badges e etiquetas usam os tokens `--bold-label-*`, medidos na tabela de ordens de serviço da referência visual: fonte de 10,5 px e altura aproximada de 20 px em uma linha, inclusive em modais e seletores.
 - `resources/js/styles/` mantém os estilos e tokens compartilhados. Imagens, fontes de ícones e plugins do tema ficam em `public/assets/`.
 - Telas de empresa e de estabelecimento usam o código na URL (`/contas/{conta}/estabelecimento/{codigo}`). Na barra superior, a área de trabalho permite selecionar uma ou várias unidades navegáveis e salvar um padrão pessoal por conta. Aplicar a seleção muda apenas a aba atual. Endereços `~/` em `ApiLink`, `ApiForm` e `useContextUrl` são resolvidos no contexto da página. Veja [Contexto organizacional](docs/convencoes/contexto-organizacional.md).
 - `npm run check` valida a arquitetura e os tipos. `npm run build` também gera a distribuição do frontend.
@@ -131,14 +131,14 @@ O comando descobre as verificações no PHP e sincroniza o catálogo preservando
 
 Toda alteração de negócio é auditada pelo contrato `Auditable` e pelo observer compartilhado. Relacionamentos e eventos de acesso são registrados explicitamente. Operações revertidas não geram histórico concluído. Dados protegidos são substituídos por marcadores, sem senhas, segredos ou imagens. `docker compose exec app php artisan audit:check` verifica a cobertura e também roda na inicialização. Consulte a [convenção de auditoria](docs/convencoes/auditoria.md).
 
-A **Central de Ajuda** está no menu e usa os artigos em HTML de `docs/ajuda/` (tipografia do Ubold: letra capitular, descrição horizontal e listas sem estilo), filtrados no servidor por contexto e permissão. O botão **Tutorial desta tela**, com ícone de informação na barra superior, inicia os passos da página, inclusive no celular. O tour respeita os controles disponíveis, não modifica os dados digitados e pode ser fechado com Esc. As configurações estão em `resources/js/app/guidance.ts` e seus roteiros em `docs/tours/`.
+A **Central de Ajuda** está no menu e usa os artigos em HTML de `docs/ajuda/` (tipografia do tema: letra capitular, descrição horizontal e listas sem estilo), filtrados no servidor por contexto e permissão. O botão **Tutorial desta tela**, com ícone de informação na barra superior, inicia os passos da página, inclusive no celular. O tour respeita os controles disponíveis, não modifica os dados digitados e pode ser fechado com Esc. As configurações estão em `resources/js/app/guidance.ts` e seus roteiros em `docs/tours/`.
 
 A suíte impõe SQLite em memória em `tests/bootstrap.php`, antes de carregar o Laravel, para impedir que as variáveis do Docker direcionem os testes ao PostgreSQL da aplicação.
 
-Após uma atualização, a aplicação recupera uma falha de carregamento dos arquivos de tela com uma única navegação GET, sem reenviar formulários. O HTML não fica armazenado em cache. Falhas persistentes oferecem Recarregar tela; a tentativa automática é limitada para evitar loops. Consulte a [verificação de recuperação](docs/convencoes/recuperacao-assets-etiquetas-entrega.md).
+Após uma atualização, a aplicação recupera uma falha de carregamento dos arquivos de tela com uma única navegação GET, sem reenviar formulários. O HTML não fica armazenado em cache. Falhas persistentes oferecem Recarregar tela; a tentativa automática é limitada para evitar loops. Consulte a [verificação de recuperação](docs/entregas/recuperacao-assets-etiquetas-entrega.md).
 
 O preloader aparece somente quando uma troca de tela ultrapassa 300 ms e sai assim que o conteúdo fica pronto, sem duração mínima de exibição. Navegações rápidas e atualizações de filtros ou paginação na mesma tela não mostram a sobreposição. O indicador usa o favicon Prospera com oito pontos verdes e azuis sobre um desfoque discreto, respeitando a preferência por movimento reduzido. Os dados da API continuam sendo consultados no servidor a cada navegação.
 
 O modo normal está ativo com `appLoaderPreviewEnabled = false` em `resources/js/utils/appPageTransition.ts`. Para conferir a animação temporariamente, altere a chave para `true` e execute `make up`: toda navegação mostrará o indicador imediatamente por pelo menos 500 ms, além da transição de saída. Retorne a chave para `false` e execute `make up` para restaurar o modo normal.
 
-A listagem da Central de Ajuda segue a busca do Ubold e do GNAI: campo centralizado, abas com contadores por categoria e resultados em lista com título, caminho e resumo. SearchInput, SearchResults, SearchResultItem, Tabs e Badge são reutilizados; categorias e contagens usam somente os artigos autorizados retornados pelo servidor.
+A listagem da Central de Ajuda segue a busca do tema e do padrão adotado: campo centralizado, abas com contadores por categoria e resultados em lista com título, caminho e resumo. SearchInput, SearchResults, SearchResultItem, Tabs e Badge são reutilizados; categorias e contagens usam somente os artigos autorizados retornados pelo servidor.

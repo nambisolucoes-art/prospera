@@ -42,7 +42,7 @@ export default function TablesPage({
       <h4 className="tablesPage__title">{title}</h4>
       <PageBreadcrumb
         items={[
-          { label: 'Ubold', href: '#' },
+          { label: 'Prospera', href: '#' },
           { label: 'Tabelas', href: '#' },
           { label: title },
         ]}

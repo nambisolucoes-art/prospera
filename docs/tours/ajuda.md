@@ -14,6 +14,6 @@ Em `/ajuda/{slug}`, PageHeaderTour apresenta a moldura e help-article orienta a 
 
 O botão Tutorial desta tela fica na topbar, inclusive no mobile. Esc fecha e devolve o foco. O artigo Central de Ajuda documenta busca, categorias e abertura dos resultados.
 
-A busca fica acima do painel. As abas e os resultados usam a variante framed de Tabs, com o contorno da aba ativa conectado à borda do conteúdo no padrão da Visdom. A aba ativa mantém o texto azul. Os alvos do tour permanecem nos mesmos controles após o ajuste do contêiner.
+A busca fica acima do painel. As abas e os resultados usam a variante framed de Tabs, com o contorno da aba ativa conectado à borda do conteúdo no padrão do tema. A aba ativa mantém o texto azul. Os alvos do tour permanecem nos mesmos controles após o ajuste do contêiner.
 
 O botão Buscar usa o azul primário do tema. A revisão de cor preserva os alvos, a sequência e o comportamento do tour.

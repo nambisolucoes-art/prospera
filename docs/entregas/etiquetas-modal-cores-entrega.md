@@ -2,7 +2,7 @@
 
 Cadastro e edição de etiquetas passaram a usar `TagEditorModal` na própria listagem. Removida a tela React separada `tag-form.tsx`. Endereços antigos continuam autorizados por ação e compõem a mesma listagem com o modal aberto. Quem possui cadastro ou edição sem listar recebe somente o formulário e uma listagem vazia no servidor; os demais registros não são enviados.
 
-O modal reutiliza BusinessForm, os campos horizontais e o Colorpicker do Ubold. Erros permanecem no formulário, Cancelar não grava, salvar atualiza a listagem. Esc fecha primeiro a paleta e depois o modal. O tour da listagem demonstra os campos sem salvar; O tutorial é iniciado na listagem e abre e fecha o modal durante a explicação, sem instância ou botão de tour dentro dele. Artigos de Etiquetas e Pessoas e seus roteiros foram atualizados.
+O modal reutiliza BusinessForm, os campos horizontais e o Colorpicker do tema. Erros permanecem no formulário, Cancelar não grava, salvar atualiza a listagem. Esc fecha primeiro a paleta e depois o modal. O tour da listagem demonstra os campos sem salvar; O tutorial é iniciado na listagem e abre e fecha o modal durante a explicação, sem instância ou botão de tour dentro dele. Artigos de Etiquetas e Pessoas e seus roteiros foram atualizados.
 
 `TagLabel.colors.ts` compartilha a cor e o contraste entre TagLabel e TagSelect. A cor cadastrada aparece nos marcadores selecionados e opções de Pessoas, nas listagens, na visualização da pessoa e na visualização da etiqueta. A etiqueta especial Usuário preserva sua própria cor e suas regras de acesso. Remover um marcador mantém o foco no seletor, permitindo fechá-lo por Esc.
 

@@ -59,7 +59,7 @@ Os resultados do checkpoint anterior eram uma linha de base, não uma homologaç
 
 Reaproveitados: vínculos e RBAC da E05, Organização e preferências da E06, relações comerciais da E07,
 AuditLog e inspeção da E08, resolução da conta pela URL, código público, migrations, seleção, convites,
-Fortify, componentes UBold e infraestrutura de navegação já presentes.
+Fortify, componentes tema e infraestrutura de navegação já presentes.
 
 Lacunas corrigidas nesta validação:
 

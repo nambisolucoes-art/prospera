@@ -192,7 +192,7 @@ export function FormAdvancedPageTitle(): JSX.Element {
     <div className="formAdvancedPage__pageTitleRow">
       <div className="formAdvancedPage__col formAdvancedPage__col--full">
         <h4 className="page-title formAdvancedPage__pageTitle">Plugins avançados</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Formulários', href: '#' }, { label: 'Plugins avançados' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Formulários', href: '#' }, { label: 'Plugins avançados' }]} />
       </div>
     </div>
   );

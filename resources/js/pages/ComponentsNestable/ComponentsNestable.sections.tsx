@@ -7,7 +7,7 @@ export function PageTitle(): JSX.Element {
     <div className="componentsNestablePage__row">
       <div className="componentsNestablePage__col componentsNestablePage__col--full">
         <h4 className="page-title componentsNestablePage__pageTitle">Listas aninháveis</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Listas aninháveis' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Listas aninháveis' }]} />
       </div>
     </div>
   );

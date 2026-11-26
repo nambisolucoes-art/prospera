@@ -17,7 +17,7 @@ export default function Ecommerce({
         title={page.title}
         subtitle={
           page.kind === "dashboard"
-            ? "Bem-vindo ao painel administrativo Ubold!"
+            ? "Bem-vindo ao painel administrativo Prospera!"
             : undefined
         }
         breadcrumbItems={

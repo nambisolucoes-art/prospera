@@ -177,7 +177,7 @@ export function FormValidationPageTitle(): JSX.Element {
     <div className="formValidationPage__pageTitleRow row">
       <div className="formValidationPage__col col-sm-12">
         <h4 className="page-title">Validação de formulário</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Formulários', href: '#' }, { label: 'Validação de formulário' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Formulários', href: '#' }, { label: 'Validação de formulário' }]} />
       </div>
     </div>
   );

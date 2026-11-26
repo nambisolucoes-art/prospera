@@ -25,7 +25,7 @@ export default function Extras({
           <h4 className="extrasPage__title">{page.title}</h4>
           <PageBreadcrumb
             items={[
-              { label: "Ubold", href: "#" },
+              { label: "Prospera", href: "#" },
               { label: "Extras", href: "#" },
               { label: page.title },
             ]}

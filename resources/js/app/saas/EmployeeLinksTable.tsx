@@ -30,7 +30,7 @@ export type Link = {
   can_change_status: boolean;
 };
 
-// Vínculos empresariais da pessoa: uma linha por empresa, editada num modal dentro da ficha (tabela do tema Visdom).
+// Vínculos empresariais da pessoa: uma linha por empresa, editada num modal dentro da ficha (tabela do tema).
 export default function EmployeeLinksTable({ personId, links, tags, writable }: {
   personId: number;
   links: Link[];

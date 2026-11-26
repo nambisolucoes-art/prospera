@@ -86,7 +86,7 @@ export function FormPickersPageTitle(): JSX.Element {
     <div className="formPickersPage__pageTitleRow row">
       <div className="formPickersPage__col col-sm-12">
         <h4 className="page-title">Form Pickers</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Forms', href: '#' }, { label: 'Form Pickers' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Forms', href: '#' }, { label: 'Form Pickers' }]} />
       </div>
     </div>
   );

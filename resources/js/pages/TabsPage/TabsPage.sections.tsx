@@ -17,7 +17,7 @@ export function Pills({ suffix }: { suffix: string }): JSX.Element {
 
 export function TabsShowcase(): JSX.Element {
   return <section className="tabsPage" aria-label="Abas e accordions">
-    <div className="tabsPage__titleRow"><h4 className="tabsPage__title">Abas e acordions</h4><PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Abas e acordions' }]} /></div>
+    <div className="tabsPage__titleRow"><h4 className="tabsPage__title">Abas e acordions</h4><PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Abas e acordions' }]} /></div>
     <div className="tabsPage__row"><Tabs items={tabItems('basic')} /><Tabs items={tabItems('top')} variant="material" /></div>
     <div className="tabsPage__row"><Tabs items={tabItems('profile')} initialActiveId="profile-profile" variant="bootstrap" /><Tabs items={tabItems('justified')} initialActiveId="justified-profile" variant="justified" /></div>
     <div className="tabsPage__row"><Tabs items={tabItems('vertical')} initialActiveId="vertical-profile" variant="vertical" /><Tabs items={tabItems('vertical-reverse')} variant="vertical-reverse" /></div>

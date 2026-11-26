@@ -1,6 +1,6 @@
-# Tours e detalhe de auditoria no padrão do GNAI
+# Tours e detalhe de auditoria no padrão do padrão adotado
 
-Referência conferida no GNAI rodando em `http://localhost/auditoria`, com acesso autenticado, e nos componentes `TableList/tableListTour.ts`, `UI/GuidedTour/`, `Audit/auditTours.ts`, `Audit/Details/AuditRecordModal.tsx` e seu CSS. A referência foi consultada sem alterar seu código.
+Referência conferida no padrão adotado rodando em `http://localhost/auditoria`, com acesso autenticado, e nos componentes `TableList/tableListTour.ts`, `UI/GuidedTour/`, `Audit/auditTours.ts`, `Audit/Details/AuditRecordModal.tsx` e seu CSS. A referência foi consultada sem alterar seu código.
 
 ## Alterações
 
@@ -27,7 +27,7 @@ Chrome em 1440, 390 e 320 px, na auditoria da conta e da plataforma: título Aç
 
 ## Miniabas inverse
 
-Formatado e Log técnico reutilizam as classes `button--inverse` e `button--sm` do tema, no padrão consultado em `GNAI2/SegmentedControl` e `site-visdom-estagio-2026/css/components.css`: fundo grafite `#4c5667`, texto branco, botões unidos e sombra interna no selecionado. Foco por teclado branco dentro do botão. Alvos e comportamento do tour preservados.
+Formatado e Log técnico reutilizam as classes `button--inverse` e `button--sm` do tema, no padrão do tema: fundo grafite `#4c5667`, texto branco, botões unidos e sombra interna no selecionado. Foco por teclado branco dentro do botão. Alvos e comportamento do tour preservados.
 
 Build, arquitetura e TypeScript aprovados. Chrome em 1440, 390 e 320 px: cor dos dois botões, hover, sombra selecionada, clique, setas do teclado, foco, fechamento do modal e ausência de rolagem horizontal da página. Capturas temporárias em `/tmp/inverse-tabs-*.png`. Dados temporários removidos ao concluir.
 

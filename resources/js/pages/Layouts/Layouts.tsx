@@ -13,7 +13,7 @@ export default function Layouts({
         title={page.title}
         variant={page.header}
         breadcrumbItems={[
-          { label: "Ubold", href: "#" },
+          { label: "Prospera", href: "#" },
           { label: "Layouts", href: "#" },
           { label: page.title },
         ]}

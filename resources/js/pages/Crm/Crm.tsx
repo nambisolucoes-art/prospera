@@ -16,13 +16,13 @@ export default function Crm({
         title={page.title}
         subtitle={
           page.kind === "dashboard"
-            ? "Bem-vindo ao painel administrativo Ubold!"
+            ? "Bem-vindo ao painel administrativo Prospera!"
             : undefined
         }
         breadcrumbItems={
           page.breadcrumb
             ? [
-                { label: "Ubold", href: "#" },
+                { label: "Prospera", href: "#" },
                 { label: page.breadcrumb, href: "#" },
                 { label: page.title },
               ]

@@ -253,7 +253,7 @@ export function ImagesPageTitle(): JSX.Element {
       <h4 className="page-title imagesPage__pageTitle">Imagens</h4>
       <PageBreadcrumb
         items={[
-          { label: 'Ubold', href: '#' },
+          { label: 'Prospera', href: '#' },
           { label: 'UI Kit', href: '#' },
           { label: 'Imagens' }
         ]}

@@ -14,7 +14,7 @@ export function PageTitle(): JSX.Element {
     <div className="componentsSweetAlertPage__pageTitleRow">
       <div className="componentsSweetAlertPage__col componentsSweetAlertPage__col--full">
         <h4 className="page-title componentsSweetAlertPage__pageTitle">Sweet-Alert</h4>
-        <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Sweet-Alert' }]} />
+        <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'Componentes', href: '#' }, { label: 'Sweet-Alert' }]} />
       </div>
     </div>
   );

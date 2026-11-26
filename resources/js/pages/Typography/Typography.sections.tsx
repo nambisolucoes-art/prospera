@@ -272,7 +272,7 @@ export function TypographyPageTitle(): JSX.Element {
       <div className="typographyPage__col typographyPage__col--full">
         <div className="typographyPage__pageTitleRow">
           <h4 className="page-title typographyPage__pageTitle">Tipografia</h4>
-          <PageBreadcrumb items={[{ label: 'Ubold', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Tipografia' }]} />
+          <PageBreadcrumb items={[{ label: 'Prospera', href: '#' }, { label: 'UI Kit', href: '#' }, { label: 'Tipografia' }]} />
         </div>
       </div>
     </div>

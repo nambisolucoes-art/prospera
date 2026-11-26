@@ -10,24 +10,24 @@ export const ecommercePages: Record<string, EcommercePageDefinition> = {
     key: "ecommerce-products",
     kind: "products",
     title: "Produtos",
-    breadcrumb: ["Ubold"],
+    breadcrumb: ["Prospera"],
   },
   "ecommerce-product-detail.html": {
     key: "ecommerce-product-detail",
     kind: "product-detail",
     title: "Adicionar/editar produto",
-    breadcrumb: ["Ubold", "eCommerce"],
+    breadcrumb: ["Prospera", "eCommerce"],
   },
   "ecommerce-orders.html": {
     key: "ecommerce-orders",
     kind: "orders",
     title: "Pedidos",
-    breadcrumb: ["Ubold", "eCommerce"],
+    breadcrumb: ["Prospera", "eCommerce"],
   },
   "ecommerce-sellers.html": {
     key: "ecommerce-sellers",
     kind: "sellers",
     title: "Vendedores",
-    breadcrumb: ["Ubold", "eCommerce"],
+    breadcrumb: ["Prospera", "eCommerce"],
   },
 };

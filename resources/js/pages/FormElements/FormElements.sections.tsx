@@ -21,7 +21,7 @@ export function FormElementsPageTitle(): JSX.Element {
       <div className="formElementsPage__col col-sm-12">
         <h4 className="page-title">Elementos de formulário</h4>
         <ol className="breadcrumb">
-          <li><a href="#" onClick={(event) => event.preventDefault()}>Ubold</a></li>{' '}
+          <li><a href="#" onClick={(event) => event.preventDefault()}>Prospera</a></li>{' '}
           <li>{' '}<a href="#" onClick={(event) => event.preventDefault()}>Formulários</a></li>{' '}
           <li className="active">{' '}Elementos gerais</li>
         </ol>

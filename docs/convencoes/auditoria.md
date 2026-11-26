@@ -18,7 +18,7 @@ A auditoria deve permitir que um usuário autorizado descubra quem fez uma mudan
 - Aplique o escopo no servidor em listagens, detalhes e filtros. Um usuário de uma conta só pode consultar os eventos daquela conta que seu perfil permite. Operações da plataforma exigem autorização própria.
 - Use os testes das operações auditáveis para conferir autoria, conta, valores registrados e reversão por transação. Ao implementar a consulta, verifique também a tentativa de acessar o registro de outra conta e a visualização do detalhe no mobile.
 
-Referências consultadas no Controle Bar em `docs/specs/0003-auditoria/` e no GenAI em `Docs/audit.md`. A prioridade acima segue os fluxos atuais do Prospera.
+A prioridade acima segue os fluxos atuais do Prospera.
 
 A implementação usa `Auditable`, `AuditsChanges`, `AuditObserver` e `AuditLog::transaction()`. Declare campos permitidos e exclusões justificadas. Para pivôs, use `recordAuditFieldChange()` dentro da transação da Action. A consulta `/conta/auditoria` ou `/saas/auditoria` é somente leitura e separa listar, visualizar e detalhes técnicos. `audit:check` verifica todos os modelos de domínio, as colunas persistidas e a informação de `company_id` e `establishment_id`; é obrigatório também para módulos novos.
 

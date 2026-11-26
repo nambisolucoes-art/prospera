@@ -37,7 +37,7 @@
   --bold-color-primary: var(--prospera-blue);
   --bold-color-navigation: var(--prospera-navy);
   --bold-color-navigation-accent: var(--prospera-lime);
-  /* Referência GNAI2 com tons auxiliares atualizados, independentes da marca Prospera. */
+  /* Tons auxiliares atualizados, independentes da marca Prospera. */
   --bold-color-list-action: #2e5cb8;
   --bold-color-danger: #ef4444;
   --bold-validation-message-color: var(--bold-color-danger);

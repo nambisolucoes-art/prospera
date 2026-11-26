@@ -29,7 +29,7 @@ export function PanelsShowcase(): JSX.Element {
               <h4 className="page-title panelsPage__pageTitle">Painéis</h4>
               <PageBreadcrumb
                 items={[
-                  { label: 'Ubold', href: '#' },
+                  { label: 'Prospera', href: '#' },
                   { label: 'UI Kit', href: '#' },
                   { label: 'Painéis' }
                 ]}

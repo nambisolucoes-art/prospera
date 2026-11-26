@@ -1,25 +1,25 @@
 # Código do backend
 
-Padrão de escrita do backend, auditado a partir do GNAI 1 (branch `main`, domínio `InclusiveRadar`, mais `Auth` e `Backup`) e confirmado no módulo de Itens do GNAI2. O objetivo é um código que uma pessoa entende ao bater o olho, mesmo com mais linhas e com repetição entre arquivos. **Toda classe nova segue este documento. Código que não o segue é refatorado na mesma tarefa em que é tocado.**
+Mapa curto e receita: [Arquitetura do backend](arquitetura.md). Padrão de escrita do backend. O objetivo é um código que uma pessoa entende ao bater o olho, mesmo com mais linhas e com repetição entre arquivos. **Toda classe nova segue este documento. Código que não o segue é refatorado na mesma tarefa em que é tocado.**
 
-## O que o GNAI faz e como o Prospera o aplica
+## Práticas do padrão e como o Prospera as aplica
 
-| Prática do GNAI | Aplicação no Prospera |
+| Prática | Aplicação no Prospera |
 | --- | --- |
-| `declare(strict_types=1);` em todo arquivo PHP | Igual. Obrigatório em todo arquivo de `app/` |
-| Uma Action por caso de uso (`CreateBarrierAction`, `UpdateBarrierAction`, `DeleteBarrierAction`), `final readonly`, método único `execute()` | Igual. Nada de `SaveXAction` que cria e edita. Ativar e inativar seguem como campo de situação do Create e do Update, com a permissão própria conferida na Action |
-| A Action recebe o objeto Data tipado, monta o DTO numa variável com argumentos nomeados e o entrega ao Model | Igual. A Action nunca lê `$data->values['campo']` nem recebe `array` |
-| Uma Data por operação (`CreateXData`, `UpdateXData`, `ListXData`), cada uma com **as próprias regras e mensagens**, mesmo repetidas | Igual. Sem Data compartilhada entre criar e editar. A repetição é aceita: cada arquivo se explica sozinho |
-| Data tipada: propriedades públicas `readonly` com tipo, enums, objetos de valor | Igual. `final readonly class` com construtor tipado. Sem `array $values` |
-| Validação dentro da Data (`rules()`, `messages()`), sem FormRequest | Igual. O Prospera valida em `fromInput(array $input, ...contexto)`, que chama `rules()` e `messages()` da própria classe. Não há `spatie/laravel-data`: a validação precisa da conta e do contexto da requisição (unicidade por empresa, descritor de acesso), que a biblioteca não alcança |
-| DTO por operação (`CreateXDTO`, `UpdateXDTO`), `final readonly`, valores tipados e sem regra | Igual. DTO só existe para entrada de escrita no Model |
-| Model: `register(CreateXDTO)` e `revise(UpdateXDTO)` preenchem os atributos, normalizam e aplicam as regras do registro | Igual. Persistência (`save`) fica na Action |
-| Query de propósito único, `final readonly`, método `execute()` (`ListBarriersQuery`, `ShowBarrierQuery`, `InstitutionHasActiveBarriersQuery`) | Igual para código novo. Consultas antigas com vários métodos são divididas quando tocadas |
-| `ValueObjects` (`Stock`, `AssetCode`): `final readonly`, construtor privado, construtores nomeados, invariantes que lançam exceção de domínio | Igual. Valores com regra própria vão para `Domain/ValueObjects` (`OrganizationCode`, `AccountCode`, `AccessNode`, `AuthorizedNodes`) |
-| `Enums` com `label()` e `options()` | Igual |
-| Exceções de domínio tipadas (`InvalidBarrier extends InclusiveRadarException`) e `@throws` na Action | Igual para regra de negócio violada. `abort_if` e `abort` ficam só no Controller e no middleware |
-| Controller recebe a Data e a Action por injeção e só redireciona (`store(CreateXData $data, CreateXAction $action)`) | Igual, com a diferença de que o Prospera monta a Data com `XData::fromInput($request->all(), ...contexto)` |
-| Pastas por recurso dentro de cada camada (`Actions/Barriers`, `Data/Barriers`, `Queries/Barriers`, `DTOs/Barriers`) | Igual quando o domínio tem mais de um recurso |
+| `declare(strict_types=1);` em todo arquivo PHP | Obrigatório em todo arquivo de `app/` |
+| Uma Action por caso de uso (`CreateDepartmentAction`, `UpdateDepartmentAction`), `final readonly`, método único `execute()` | Nada de `SaveXAction` que cria e edita. Ativar e inativar seguem como campo de situação do Create e do Update, com a permissão própria conferida na Action |
+| A Action recebe o objeto Data tipado, monta o DTO numa variável com argumentos nomeados e o entrega ao Model | A Action nunca lê `$data->values['campo']` nem recebe `array` |
+| Uma Data por operação (`CreateXData`, `UpdateXData`, `ListXData`), cada uma com **as próprias regras e mensagens**, mesmo repetidas | Sem Data compartilhada entre criar e editar. A repetição é aceita: cada arquivo se explica sozinho |
+| Data tipada: propriedades públicas `readonly` com tipo, enums, objetos de valor | `final readonly class` com construtor tipado. Sem `array $values` |
+| Validação dentro da Data (`rules()`, `messages()`), sem FormRequest | O Prospera valida em `fromInput(array $input, ...contexto)`, que chama `rules()` e `messages()` da própria classe. Não há biblioteca de Data: a validação precisa da conta e do contexto da requisição (unicidade por empresa, descritor de acesso), que a biblioteca não alcança |
+| DTO por operação (`CreateXDTO`, `UpdateXDTO`), `final readonly`, valores tipados e sem regra | DTO só existe para entrada de escrita no Model |
+| Model: `register(CreateXDTO)` e `revise(UpdateXDTO)` preenchem os atributos, normalizam e aplicam as regras do registro | Persistência (`save`) fica na Action |
+| Query de propósito único, `final readonly`, método `execute()` (`ListDepartmentsQuery`, `ShowDepartmentQuery`, `DepartmentNameExistsQuery`) | Vale para código novo. Consultas antigas com vários métodos são divididas quando tocadas |
+| `ValueObjects` (`OrganizationCode`, `Shift`): `final readonly`, construtor privado, construtores nomeados, invariantes que lançam exceção de domínio | Valores com regra própria vão para `Domain/ValueObjects` (`OrganizationCode`, `AccountCode`, `AccessNode`, `AuthorizedNodes`) |
+| `Enums` com `label()` e `options()` | Vale |
+| Exceções de domínio tipadas (`InvalidHourException`, `CompanyNotAvailable`) e `@throws` na Action | Vale para regra de negócio violada. `abort_if` e `abort` ficam só no Controller e no middleware |
+| Controller recebe a Data e a Action por injeção e só redireciona (`store(CreateXData $data, CreateXAction $action)`) | O Prospera monta a Data com `XData::fromInput($request->all(), ...contexto)` |
+| Pastas por recurso dentro de cada camada (`Actions/Departments`, `Data/Departments`, `Queries/Departments`, `DTOs/Departments`) | Vale quando o domínio tem mais de um recurso |
 
 ## Camadas
 
@@ -193,3 +193,4 @@ Registro vivo da migração do código existente para este padrão. Atualize ao 
 | Queries de propósito único (`execute`) | **Adotado**: cada Query tem um método `execute` e fica numa pasta por recurso (`Companies`, `Establishments`, `Context`, `CommercialRelations`, `Memberships`, `Roles`, `People`, `Accounts`, `Users` e outras). Exceções por não serem consultas de um registro: `AuditQuery` (pipeline de Builder: escopo, filtro e paginação do histórico, com a formatação de cada evento) e `HelpCatalog` (catálogo e renderização de artigos, sem banco) |
 | `execute(Data, ...)` com a Data como primeiro argumento | **Adotado** em todas as Actions que recebem uma Data. As Actions comerciais recebem `RegisterCommercialRelationData` e `UpdateCommercialRelationData`, e os dados centrais da pessoa ficam em `CommercialPersonChangesData`, que só vira `UpdatePersonData` depois que a Action trava a pessoa. A troca do e-mail de acesso virou `RequestAccessEmailChangeAction` e `ConfirmAccessEmailChangeAction`, e `SaveRoleAssignmentsAction` virou `ChangeRoleAssignmentsAction` com `AssertRoleAssignableAction` à parte |
 | Controller só com injeção e redirecionamento | **Adotado** em Relações comerciais (cadastro, edição, ativar e inativar chamam a Action com a Data pronta e a autorização mora na Action). **Exceção declarada:** `EstablishmentController` mantém no controller a autorização de cadastrar, editar e promover, porque `CreateEstablishmentAction`, `UpdateEstablishmentAction` e `PromotePrimaryEstablishmentAction` também rodam em seeders, migrations e fixtures sem operador autenticado. Mover a verificação para a Action exige separar esse uso interno |
+| Institucional (S06 e S07) | **Adotado**: seções do perfil (`CreateProfileSectionAction`, `UpdateProfileSectionAction`), exceções de horário (`Create`, `Update` e `DeleteHourExceptionAction`) e fuso, com Data e DTO por operação, invariantes em `ProfileSection`, `HourException`, `Establishment::useTimezone()` e nos Value Objects `Shift`, `Shifts` e `DaySchedule`, e sub-Actions no lugar de funções privadas |
