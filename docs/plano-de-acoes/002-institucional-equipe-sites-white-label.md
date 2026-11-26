@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da frente Institucional, Equipe e Sites White Label |
-| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **A S03 foi implementada e aguarda revisão, sem commit (seção 28).** S04 a S15 não foram iniciadas |
+| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **S01 a S06 estão concluídas e homologadas tecnicamente** (seções 28 a 33; as seções 28 a 31 preservam a classificação original de revisão). S07 a S15 não foram iniciadas |
 | Base de código auditada | Branch `feat/pagina-inicial`, commit `33fd8df`, árvore de trabalho limpa |
 | Data da auditoria | 24/11/2026 |
 | Antecessor | Briefing `prospera_plano_institucional_white_label.md` (fora do repositório) e a análise aprovada na sessão de 24/11/2026 |
@@ -1578,16 +1578,16 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 
 ## 25. Quadro de acompanhamento
 
-**Estado geral: contrato institucional formalizado, com S01 e S02 concluídas.** As etapas S03 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
+**Estado geral (atualizado na seção 33): S01 a S06 concluídas e homologadas tecnicamente.** O texto original deste quadro registrava S01 e S02 concluídas e as etapas S03 a S15 ainda não iniciadas, e o histórico segue nas seções 26 a 32. As etapas S07 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
 
 | Etapa | Nome | Estado | Referência |
 | --- | --- | --- | --- |
 | S01 | Verificação das hipóteses e fechamento das decisões | **Concluída em 24/11/2026**, com impedimentos registrados (H4 depende do site público; H5 depende de infraestrutura do responsável) | Seção 26 |
 | S02 | Contrato institucional | **Concluída em 24/11/2026**, com DA2-19 a DA2-23 a ratificar | Seção 27 e [`institucional.md`](../convencoes/institucional.md) |
-| S03 | Departamentos e funções | **Implementada em 24/11/2026, em revisão (sem commit)** | Seção 28 |
-| S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | **Tecnicamente concluída em 25/11/2026** (commit local `feat: colaboradores como papel de Pessoa por empresa (S04)`) | Seção 29 |
-| S05 | Lotações e histórico | **Implementada em 26/11/2026, em revisão (sem commit)** | Seção 30 |
-| S06 | Perfil institucional e herança | **Concluída e homologada tecnicamente em 26/11/2026** (versionamento local ainda não realizado) | Seção 32 |
+| S03 | Departamentos e funções | **Concluída e homologada tecnicamente** (aprovação do responsável registrada na seção 33). Implementação registrada em 24/11/2026; commit `cb2d765` | Seções 28 e 33 |
+| S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | **Concluída e homologada tecnicamente** (aprovação do responsável registrada na seção 33). Fechamento técnico em 25/11/2026; commits `8fad837` e `46009bc`; ficha reformulada em `b4cb9fb` | Seções 29 e 33 |
+| S05 | Lotações e histórico (com o complemento de contatos por lotação) | **Concluída e homologada tecnicamente, inclusive o complemento** (aprovação do responsável registrada na seção 33). Implementação registrada em 26/11/2026; commits `c8a272e` e `b0d14b5` | Seções 30, 31 e 33 |
+| S06 | Perfil institucional e herança | **Concluída e homologada tecnicamente** (registrada em 26/11/2026). Commit `458d147` | Seções 32 e 33 |
 | S07 | Horários e exceções | Pendente | |
 | S08 | Biblioteca de mídia | Pendente | |
 | S09 | Perfil público do colaborador | Pendente | |
@@ -1858,7 +1858,7 @@ Tour: abertura, passos do cadastro com a janela aberta pela demonstração, ence
 
 ### 28.8 Classificação
 
-**S03: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.
+**S03: implementada, verificada e versionada (`cb2d765`).** Classificação original: em revisão. **Homologada tecnicamente pelo responsável** (registro na seção 33). Estar versionada não substitui a homologação, e esta foi dada separadamente.
 
 ## 29. Registro da S04: Colaborador como papel de Pessoa
 
@@ -1921,7 +1921,7 @@ Executada em 25/11/2026 sobre a branch `feat/pagina-inicial` (base `9e01157`), v
 
 ### 29.6 Classificação
 
-**S04: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.
+**S04: implementada, verificada e versionada (`8fad837` e `46009bc`).** Classificação original: em revisão. O fechamento técnico foi aprovado em 25/11/2026 e a **homologação técnica foi dada pelo responsável** (seção 33).
 
 ## 30. Registro da S05: Lotações e histórico
 
@@ -1978,7 +1978,7 @@ Executada em 26/11/2026 sobre a branch `feat/pagina-inicial` (HEAD `46009bc`), s
 
 ### 30.6 Classificação
 
-**S05: implementada e verificada, em revisão.** Não marcar Concluída sem a revisão do responsável. Sem commit.
+**S05: implementada, verificada e versionada (`c8a272e`).** Classificação original: em revisão. **Homologada tecnicamente pelo responsável** (seção 33).
 
 ## 31. Complemento da S05: contatos profissionais por lotação e autoridade da principal
 
@@ -2025,7 +2025,7 @@ A S09 lerá o contato efetivo da lotação aplicável (seção 10.6), com `show_
 
 ### 31.6 Classificação
 
-**Complemento da S05: implementado e verificado, em revisão.** Sem commit.
+**Complemento da S05: implementado, verificado e versionado (`b0d14b5`).** Classificação original: em revisão. **Homologado tecnicamente pelo responsável** (seção 33).
 
 ## 32. Registro da S06: Perfil institucional e herança
 
@@ -2074,7 +2074,7 @@ Suíte de 366 testes verde antes da S06. `main` em `b0d14b5` (S05 e complemento)
 
 - Logotipo, banners, galeria (S08) e equipe exibida (S09) ficam declarados e indisponíveis. `hours_weekly` e o fuso por estabelecimento são da S07.
 - Sem sites não há contagem de sites no impacto nem invalidação por `content_version` (S10 e S11).
-- A administração de categorias públicas (tela e permissão de tenant) é da S13.
+- Categorias públicas: as Actions têm **segurança de contexto** (só dentro da própria conta, dados de outra conta recusados, nenhuma rota ou tela as alcança), mas a **interface e o controle administrativo de permissões serão concluídos na S13**, com a permissão de tenant do diretório.
 - O conteúdo das seções aparece como JSON na tela de Auditoria. A formatação legível é uma evolução.
 - A leitura em lote de vários donos pelo diretório (S13) deve ganhar um carregamento conjunto no resolvedor, medido nessa etapa.
 
@@ -2100,3 +2100,28 @@ As implementações permanecem intactas e verdes na suíte. A atualização dos 
 
 **Resultado.** Sem defeitos novos além do endurecimento das Actions de categorias (acrescentado nesta revisão). **S06: Concluída e homologada tecnicamente.**
 
+## 33. Regularização documental e homologação técnica de S03 a S06
+
+Esta seção só organiza o registro. Nenhuma implementação foi alterada e as evidências são as já registradas nas seções 28 a 32. Os históricos de implementação e de revisão permanecem como foram escritos: a classificação original de cada etapa ("em revisão") continua nas seções 28 a 31, e a homologação é um registro posterior e separado.
+
+**Três datas diferentes.** (a) *Implementação*: a data registrada na abertura de cada seção (24/11/2026 para a S03, 25/11 para a S04 e 26/11 para a S05, o complemento e a S06). (b) *Commit*: a data do Git, de 24/11/2026 para a S03 e 25/11/2026 para todos os demais. (c) *Homologação técnica*: o ato do responsável, registrado em 25/11/2026 (relógio do ambiente) para S03, S04, S05 e o complemento, e em 26/11/2026 para a S06, como já constava na seção 32. As datas "26/11" das seções 30 a 32 divergem da data dos commits (25/11) e foram mantidas por serem o registro histórico original, sem que isso altere o que o Git prova.
+
+**Princípio.** Estar versionada (existir commit, inclusive na `main`) não equivale a estar homologada. A homologação técnica é um ato do responsável e consta abaixo porque foi dada.
+
+### 33.1 Situação por etapa
+
+| Etapa | Commits (data do Git) | Evidências | Estado do registro | Na `main` |
+| --- | --- | --- | --- | --- |
+| S03 | `cb2d765` (24/11/2026), com os refatoramentos de padrão `afa85bd`, `7959bc2`, `3d2bb8e` e `9e01157` | Seção 28: `CompanyCatalogTest` (36 casos), suíte, PostgreSQL 18 descartável, navegador em 1440, 390 e 320 px, `audit:check` e `organization:check` | **Concluída e homologada tecnicamente** | Sim |
+| S04 | `8fad837` e `46009bc` (25/11/2026); ficha reformulada em `b4cb9fb` (25/11/2026) | Seção 29: `EmployeeDirectoryTest`, concorrência em PostgreSQL, navegador, fechamento técnico | **Concluída e homologada tecnicamente** | `8fad837` e `46009bc` sim; `b4cb9fb` ainda não |
+| S05 | `c8a272e` (25/11/2026) | Seção 30: `EmployeeAssignmentTest`, concorrência em PostgreSQL, plano de consulta medido, navegador, `institutional:check` | **Concluída e homologada tecnicamente** | Sim |
+| Complemento da S05 | `b0d14b5` (25/11/2026) | Seção 31: contatos por lotação, autoridade da principal, provas em PostgreSQL e navegador | **Concluído e homologado tecnicamente** | Sim |
+| S06 | `458d147` (25/11/2026) | Seção 32: 391 testes, PostgreSQL, concorrência, FrankenPHP, navegador | **Concluída e homologada tecnicamente** | Ainda não |
+
+### 33.2 Estado do Git e da integração
+
+`main` e `origin/main` estão em `b0d14b5` e contêm S03, S04, S05 e o complemento. Fora da `main` há exatamente dois commits, em linha reta sobre `b0d14b5`: `b4cb9fb` (ficha reformulada do colaborador, tabela de vínculos e lotações em modal) e `458d147` (S06). A integração não foi feita e depende de autorização do responsável; a proposta, o diff e as verificações estão registrados na entrega correspondente.
+
+### 33.3 Registro mantido
+
+As Actions de `public_categories` têm segurança de contexto, mas a interface e o controle administrativo de permissões serão concluídos na S13 (seção 32.5).
