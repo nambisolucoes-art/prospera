@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Colaboradores\Application\Queries\Violations;
 
+use App\Domains\Institucional\Domain\Enums\ProfileSectionType;
 use App\Support\BusinessDate;
 use Illuminate\Support\Facades\DB;
 
@@ -101,6 +102,34 @@ final readonly class ListInstitutionalViolationsQuery
 
         foreach ($inactive as $id) {
             $violations[] = "Lotação {$id} segue vigente com o vínculo do colaborador inativo.";
+        }
+
+        // Perfil institucional (S06): coerência entre modo e valor, seções conhecidas e escopo da seção.
+        $known = ProfileSectionType::values();
+
+        $sections = DB::table('profile_sections')->get(['id', 'section', 'establishment_id', 'mode', 'value', 'published_mode', 'published_value']);
+
+        foreach ($sections as $row) {
+            if (! in_array($row->section, $known, true)) {
+                $violations[] = "Seção de perfil {$row->id} tem o tipo desconhecido {$row->section}.";
+            }
+
+            if ($row->establishment_id === null && $row->section === 'gallery') {
+                $violations[] = "Seção de perfil {$row->id}: a galeria existe só em estabelecimento.";
+            }
+
+            if ($row->establishment_id === null && $row->mode !== 'override') {
+                $violations[] = "Seção de perfil {$row->id}: a empresa só tem modo override.";
+            }
+
+            $workCoherent = ($row->mode === 'override') === ($row->value !== null);
+            $publishedCoherent = $row->published_mode === null
+                ? $row->published_value === null
+                : (($row->published_mode === 'override') === ($row->published_value !== null));
+
+            if (! $workCoherent || ! $publishedCoherent) {
+                $violations[] = "Seção de perfil {$row->id} tem modo incoerente com o valor gravado.";
+            }
         }
 
         return $violations;

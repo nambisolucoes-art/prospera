@@ -10,6 +10,7 @@ use App\Domains\Acessos\Application\Context\OrganizationContext;
 use App\Domains\Acessos\Domain\ValueObjects\AccessNode;
 use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
+use App\Domains\Institucional\Application\Context\ProfileResolver;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
@@ -35,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(AccountContext::class);
         $this->app->scoped(EffectivePermissions::class);
         $this->app->scoped(OrganizationContext::class);
+        $this->app->scoped(ProfileResolver::class);
     }
 
     /**

@@ -16,6 +16,7 @@ return [
         'departments' => 'Departamentos',
         'job-titles' => 'Funções',
         'employees' => 'Colaboradores',
+        'institutional' => 'Perfil institucional',
         'dashboard' => 'Início',
         'accounts' => 'Contas SaaS',
         'inspection' => 'Inspeção de contas',
@@ -51,6 +52,7 @@ return [
         'delete' => 'Excluir',
         'promote' => 'Promover a principal',
         'assign' => 'Gerenciar lotações',
+        'publish' => 'Publicar',
     ],
 
     /*
@@ -94,6 +96,9 @@ return [
         'account.establishments.promote' => ['company'],
         'account.establishments.update' => ['establishment'],
         'account.establishments.view' => ['tenant', 'company', 'establishment'],
+        'account.institutional.publish' => ['company', 'establishment'],
+        'account.institutional.update' => ['company', 'establishment'],
+        'account.institutional.view' => ['company', 'establishment'],
         'account.job-titles.activate' => ['company'],
         'account.job-titles.create' => ['company'],
         'account.job-titles.deactivate' => ['company'],

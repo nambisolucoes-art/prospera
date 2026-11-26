@@ -162,6 +162,42 @@ export function tourFor(
         table: 'Cada linha é a relação de uma pessoa com uma empresa. Use Visualizar cadastro para abrir a ficha, Editar para alterar os dados e Ativar ou Inativar para mudar a situação da relação, conforme seu cargo.',
       }),
     ];
+  } else if (path === '/conta/institucional') {
+    title = 'Perfil institucional';
+    help = 'perfil-institucional';
+    steps = [
+      at(
+        'institutional-owners',
+        'Empresas e estabelecimentos',
+        'A lista traz as empresas e os estabelecimentos que o seu acesso alcança. Abra o perfil da empresa para definir o padrão institucional e o de cada unidade para herdar, personalizar ou desativar seções.',
+      ),
+    ];
+  } else if (/^\/conta\/(empresa|estabelecimento)\/[a-z0-9][a-z0-9-]{1,39}\/institucional$/.test(path)) {
+    const unit = path.startsWith('/conta/estabelecimento/');
+    title = 'Perfil institucional';
+    help = 'perfil-institucional';
+    steps = [
+      at(
+        'institutional-sections',
+        'Seções do perfil',
+        unit
+          ? 'Cada seção mostra o valor efetivo desta unidade. A empresa define o padrão e a unidade pode herdar, personalizar ou, quando permitido, desativar a seção.'
+          : 'Cada seção mostra o valor definido pela empresa. Os estabelecimentos herdam esse padrão, a menos que personalizem ou desativem a seção.',
+      ),
+      at(
+        'institutional-origin',
+        'Origem do conteúdo',
+        'Informa de onde vem o valor: própria, herdada da empresa ou padrão da plataforma. Seções editoriais ficam como rascunho até a publicação, e as operacionais (contatos e redes sociais) valem ao salvar.',
+      ),
+      at(
+        'institutional-publish',
+        'Publicar alterações',
+        'Publica as seções editoriais com rascunho alterado. Antes de confirmar, o resumo mostra quantas unidades herdam e serão atingidas e quantas têm conteúdo próprio e não serão afetadas.',
+      ),
+      ...(unit
+        ? [at('institutional-address', 'Exibir endereço', 'O endereço é o do cadastro do estabelecimento e nunca é copiado. Por padrão não é público. Ligue a opção só se quiser exibi-lo.')]
+        : []),
+    ];
   } else if (path === '/conta/colaboradores') {
     title = 'Colaboradores';
     help = 'colaboradores';

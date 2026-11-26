@@ -1587,7 +1587,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 | S03 | Departamentos e funções | **Implementada em 24/11/2026, em revisão (sem commit)** | Seção 28 |
 | S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | **Tecnicamente concluída em 25/11/2026** (commit local `feat: colaboradores como papel de Pessoa por empresa (S04)`) | Seção 29 |
 | S05 | Lotações e histórico | **Implementada em 26/11/2026, em revisão (sem commit)** | Seção 30 |
-| S06 | Perfil institucional e herança | Pendente | |
+| S06 | Perfil institucional e herança | **Concluída e homologada tecnicamente em 26/11/2026** (versionamento local ainda não realizado) | Seção 32 |
 | S07 | Horários e exceções | Pendente | |
 | S08 | Biblioteca de mídia | Pendente | |
 | S09 | Perfil público do colaborador | Pendente | |
@@ -2026,4 +2026,77 @@ A S09 lerá o contato efetivo da lotação aplicável (seção 10.6), com `show_
 ### 31.6 Classificação
 
 **Complemento da S05: implementado e verificado, em revisão.** Sem commit.
+
+## 32. Registro da S06: Perfil institucional e herança
+
+Executada em 26/11/2026 na branch local `feat/s06-perfil-institucional`, criada a partir de `fix/ficha-sem-acesso` (HEAD `b4cb9fb`, que já contém a S05 e o complemento). Sem commit, merge, push ou deploy. S03, S04 e S05 seguem com o estado registrado nas seções 28 a 31: este registro não as homologa. A S07 não foi iniciada.
+
+### 32.1 Estado inicial
+
+Suíte de 366 testes verde antes da S06. `main` em `b0d14b5` (S05 e complemento), a branch `fix/ficha-sem-acesso` à frente com a ficha do colaborador. As migrations da S06 não alteram migrations históricas. O complemento da S05 (`contact_mode`, `work_contacts`, contato efetivo e autoridade da principal) permaneceu intacto, com os testes correspondentes verdes.
+
+### 32.2 Contrato entregue
+
+| Ponto | Contrato |
+| --- | --- |
+| Persistência | Migration `2026_11_27_000001`: `profile_sections` (pares de trabalho e publicado, CHECKs, únicos parciais por dono, FKs compostas), `public_categories` e `establishments.show_public_address` |
+| Resolvedor | `ProfileResolver` `scoped`, estados `draft` e `published`, uma consulta por dono, padrão tipado da plataforma. Teste arquitetural contra leituras fora dele |
+| Seções | Editoriais `palette`, `typography`, `about`, `seo_defaults`; operacionais `contacts` e `social_links`; declaradas e indisponíveis `logo`, `banners`, `gallery` (S08) e `team_display` (S09). Contraste verificado no servidor, fontes de catálogo fechado, texto sem HTML, redes só com HTTPS e domínio da rede |
+| Herança | Por seção inteira; vazio intencional não herda; desativar só onde o catálogo permite; galeria local; publicar a empresa não toca unidades com `override` nem o rascunho delas |
+| Publicação | `PublishProfileSectionsAction` com impacto recalculado e confirmação obrigatória; evento `published` no nó escrito |
+| Permissões | `account.institutional.view`, `update` e `publish` (empresa e estabelecimento); editar não publica; gestor de unidade só alcança a própria unidade |
+| Privacidade | Contatos públicos digitados, nunca de Pessoas, colaborador ou contatos operacionais; endereço só com "Exibir endereço" (desligada por padrão) |
+| Interface | Lista de donos, perfil da empresa e do estabelecimento com origem, rascunho, publicado, Voltar a herdar, Desativar, publicação com resumo e opção de endereço; ajuda e tour |
+| Categorias | `public_categories` por conta com Actions auditadas (sem tela nem permissão até a S13) |
+
+### 32.3 Verificações
+
+| Verificação | Resultado |
+| --- | --- |
+| Suíte completa (SQLite) | 391 testes, verdes (366 anteriores mais 25 da S06), ver 32.7 |
+| `InstitutionalProfileTest` | 23 cenários que cobrem os 38 itens obrigatórios aplicáveis a esta etapa (herança em rascunho e publicado, overrides, vazio intencional, 422, PATCH parcial, isolamento entre contas, empresas e unidades, permissões, inspeção, privacidade, impacto, rollback, auditoria e consultas) |
+| PostgreSQL 18 descartável | Rollback e reaplicação sobre dados existentes; CHECKs, únicos parciais, FK composta e únicos de categoria recusam as violações em SQL direto |
+| Concorrência (4 processos, `s06-race.sh`) | Criação simultânea da mesma seção: 1 linha. Publicação simultânea: 1 evento e estado coerente. Salvar e publicar juntos: publicado sempre coerente. Unidades diferentes não interferem |
+| Performance | 60 unidades, 91 linhas: 1 consulta por dono (1,8 ms para draft e published; mediana 0,27 ms e p95 0,68 ms por unidade). Em 60,6 mil linhas, o plano usa BitmapOr dos dois índices parciais em 0,054 ms |
+| FrankenPHP (workers persistentes, `tests/Browser/s06-octane.mjs`) | Com 1 e com 2 workers: 540 verificações alternando contas, usuários, permissões, rascunho e publicado, com escritas intercaladas, sem vazamento |
+| Navegador | 1440, 1024, 768, 390 e 320 px: lista, perfil da empresa e da unidade, edição, contraste inválido, publicação com resumo, voltar a herdar, desativar e reativar, endereço, gestor de unidade isolado, editor sem publicar e tour; sem rolagem horizontal e sem erros de JS |
+
+### 32.4 Defeitos encontrados e correções
+
+| Defeito | Correção |
+| --- | --- |
+| Botões das seções sem o estilo do padrão de adicionar | Importação de `ContactFields.css` |
+| Verificação de impacto do teste confirmava 0 e 0 | O teste passou a confirmar os números calculados pelo servidor, como a tela faz |
+| Falha simulada na publicação não disparava com `saveQuietly` | O teste força a falha na segunda gravação via `DB::listen` |
+| PHPStan: leituras `object` do query builder e coleções sem tipo | `\stdClass` e listas explícitas |
+
+### 32.5 Limitações e pendências
+
+- Logotipo, banners, galeria (S08) e equipe exibida (S09) ficam declarados e indisponíveis. `hours_weekly` e o fuso por estabelecimento são da S07.
+- Sem sites não há contagem de sites no impacto nem invalidação por `content_version` (S10 e S11).
+- A administração de categorias públicas (tela e permissão de tenant) é da S13.
+- O conteúdo das seções aparece como JSON na tela de Auditoria. A formatação legível é uma evolução.
+- A leitura em lote de vários donos pelo diretório (S13) deve ganhar um carregamento conjunto no resolvedor, medido nessa etapa.
+
+### 32.6 Classificação
+
+**S06: Concluída e homologada tecnicamente em 26/11/2026**, após a revisão dirigida da seção 32.7. O versionamento local fica para a decisão do responsável.
+
+### 32.7 Revisão dirigida e homologação técnica
+
+**1. Actions de `public_categories` (isolamento e autorização).** Não existe rota, controller, tela nem outro domínio que as chame (teste arquitetural). Enquanto a permissão de tenant da S13 não existe, as Actions recusam por construção: `AuthorizationException` quando o usuário não está dentro da conta informada (ou não há conta aberta), `ResourceNotAvailable` quando os dados validados são de outra conta, e categoria de outra conta responde como inexistente (`ModelNotFoundException`). Os `Data` carregam `accountId`. Testes: cadastro e edição na própria conta, nome e slug únicos por conta, iguais em outra conta, conta divergente do contexto, sem conta aberta, dados mistos e categoria alheia, sem alterar nada.
+
+**2. Consistência transacional.** Toda escrita do perfil (salvar, publicar, endereço) trava a empresa antes de qualquer linha, na mesma ordem, o que serializa salvar e publicar do mesmo perfil e as escritas de unidades da mesma empresa, sem inversão de ordem de travas. O impacto é recalculado depois da trava. Prova em PostgreSQL (`s06-race.sh`, 4 a 8 processos): criação simultânea gera uma linha; publicações simultâneas geram um evento; 8 salvamentos simultâneos deixam a cadeia de auditoria contínua (o "antes" de cada evento é o "depois" do anterior, 0 quebras) e o valor final é o do último evento; salvar e publicar em paralelo deixam o publicado igual a um rascunho já auditado; unidades diferentes não interferem. Mais o teste de rollback (falha na segunda gravação não deixa publicação nem evento parcial).
+
+**3. Situação documental de S03, S04 e S05, sem alteração de estado.** Conferido, sem editar nenhum estado ou registro anterior:
+
+| Etapa | Estado registrado | Observação documental |
+| --- | --- | --- |
+| S03 | "Implementada, em revisão (sem commit)" no quadro e na seção 28 | O código foi versionado depois (commit `cb2d765`); o texto "sem commit" ficou desatualizado |
+| S04 | "Tecnicamente concluída" no quadro; a seção 29.6 diz "em revisão, sem commit" | Há divergência interna entre o quadro e a seção 29.6; o commit existe (`8fad837` e `46009bc`) |
+| S05 e complemento | "Em revisão (sem commit)" no quadro e nas seções 30 e 31 | Versionados (`c8a272e` e `b0d14b5`) e já na `main`; o texto "sem commit" ficou desatualizado |
+
+As implementações permanecem intactas e verdes na suíte. A atualização dos estados e a harmonização desses textos dependem da decisão do responsável.
+
+**Resultado.** Sem defeitos novos além do endurecimento das Actions de categorias (acrescentado nesta revisão). **S06: Concluída e homologada tecnicamente.**
 

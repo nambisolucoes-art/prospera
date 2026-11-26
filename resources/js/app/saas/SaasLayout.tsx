@@ -58,6 +58,7 @@ function sectionFor(path: string, tenant: boolean, userPage: boolean): string {
   if (path === '/conta/departamentos') return 'departments';
   if (path === '/conta/funcoes') return 'job-titles';
   if (/^\/conta\/colaboradores(?:\/|$)/.test(path)) return 'employees';
+  if (/^\/conta\/(?:institucional|(?:empresa|estabelecimento)\/[^/]+\/institucional)$/.test(path)) return 'institutional';
   if (path.includes('/auditoria')) return 'audit';
   const section = sections.find(([prefix]) => path.startsWith(prefix));
   if (section) return section[1];

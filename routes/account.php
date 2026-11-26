@@ -10,6 +10,7 @@ use App\Domains\Colaboradores\UI\Controllers\EmployeeAssignmentController;
 use App\Domains\Colaboradores\UI\Controllers\EmployeeController;
 use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
 use App\Domains\Etiquetas\UI\Controllers\TagController;
+use App\Domains\Institucional\UI\Controllers\InstitutionalProfileController;
 use App\Domains\Organizacao\Domain\ValueObjects\OrganizationCode;
 use App\Domains\Organizacao\UI\Controllers\CompanyController;
 use App\Domains\Organizacao\UI\Controllers\EstablishmentContextController;
@@ -289,6 +290,10 @@ Route::middleware(['auth', 'verified', 'account'])
                 ->name($name.'.update');
         }
 
+        // S06: o perfil institucional pertence a uma empresa ou a um estabelecimento. A lista leva a cada dono.
+        Route::get('institucional', [InstitutionalProfileController::class, 'index'])
+            ->name('institutional.index');
+
         // S04: colaboradores de todas as empresas do acesso, numa só tela, com uma linha por pessoa. Cada operação
         // confere a permissão sobre a empresa do vínculo ou sobre as empresas escolhidas no cadastro.
         Route::get('colaboradores', [EmployeeController::class, 'index'])
@@ -374,6 +379,17 @@ Route::middleware(['auth', 'verified', 'account'])
                         ->defaults('role', $role)
                         ->name(($role === 'customer' ? 'customers' : 'suppliers').'.edit');
                 }
+
+                // S06: perfil institucional do estabelecimento. O consolidado `todos` nunca escreve nem lê aqui.
+                Route::get('institucional', [InstitutionalProfileController::class, 'show'])->name('institutional.show');
+                Route::get('institucional/impacto', [InstitutionalProfileController::class, 'impact'])
+                    ->name('institutional.impact');
+                Route::patch('institucional/secoes/{secao}', [InstitutionalProfileController::class, 'saveSection'])
+                    ->name('institutional.section');
+                Route::post('institucional/publicar', [InstitutionalProfileController::class, 'publish'])
+                    ->name('institutional.publish');
+                Route::patch('institucional/endereco-publico', [InstitutionalProfileController::class, 'setAddress'])
+                    ->name('institutional.address');
             });
 
         // E07: escritas comerciais nomeiam a empresa responsável; nunca há empresa escolhida pelo sistema.
@@ -413,5 +429,14 @@ Route::middleware(['auth', 'verified', 'account'])
                         ->defaults('role', $role)
                         ->name($name.'deactivate');
                 }
+
+                // S06: perfil institucional da empresa.
+                Route::get('institucional', [InstitutionalProfileController::class, 'show'])->name('institutional.show');
+                Route::get('institucional/impacto', [InstitutionalProfileController::class, 'impact'])
+                    ->name('institutional.impact');
+                Route::patch('institucional/secoes/{secao}', [InstitutionalProfileController::class, 'saveSection'])
+                    ->name('institutional.section');
+                Route::post('institucional/publicar', [InstitutionalProfileController::class, 'publish'])
+                    ->name('institutional.publish');
             });
     });

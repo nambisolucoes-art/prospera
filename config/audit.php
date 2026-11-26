@@ -26,12 +26,15 @@ return [
         'job-title' => 'Função',
         'employee' => 'Colaborador',
         'employee-assignment' => 'Lotação',
+        'profile-section' => 'Seção do perfil institucional',
+        'public-category' => 'Categoria pública',
         'permission-catalog' => 'Catálogo de permissões',
     ],
     'events' => [
         'created' => 'Cadastro',
         'updated' => 'Alteração',
         'deleted' => 'Exclusão',
+        'published' => 'Publicação',
         'login' => 'Entrada',
         'logout' => 'Saída',
         'inspection-started' => 'Inspeção iniciada',
@@ -81,6 +84,15 @@ return [
                 'customer' => 'Cliente',
                 'employee' => 'Colaborador',
             ],
+        ],
+        'profile-section' => [
+            'section' => [
+                'logo' => 'Logotipo', 'palette' => 'Paleta de cores', 'typography' => 'Tipografia', 'about' => 'Sobre',
+                'contacts' => 'Contatos públicos', 'social_links' => 'Redes sociais', 'banners' => 'Banners',
+                'gallery' => 'Galeria', 'seo_defaults' => 'SEO padrão', 'team_display' => 'Equipe exibida',
+            ],
+            'mode' => ['inherit' => 'Herdar', 'override' => 'Personalizado', 'disabled' => 'Desativado'],
+            'published_mode' => ['inherit' => 'Herdar', 'override' => 'Personalizado', 'disabled' => 'Desativado'],
         ],
         'role' => ['system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário']],
         'account-invitation' => [

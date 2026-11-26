@@ -1,0 +1,138 @@
+.institutional__owner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.institutional__owner-name {
+  margin: 0;
+  font-size: 18px;
+}
+
+.institutional__note {
+  margin: 0 0 8px;
+  color: var(--bold-color-text-muted);
+  font-size: 13px;
+}
+
+.institutional__empty {
+  margin: 0 0 8px;
+  color: var(--bold-color-text-muted);
+  font-size: 13px;
+}
+
+.institutional__section-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.institutional__section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.institutional__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.institutional__origin {
+  margin: 0 0 8px;
+  color: var(--bold-color-text-muted);
+  font-size: 13px;
+}
+
+.institutional__summary {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 8px;
+}
+
+.institutional__summary > div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.institutional__summary dt {
+  font-weight: 600;
+}
+
+.institutional__summary dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.institutional__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.institutional__swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-inline-end: 6px;
+  border: 1px solid #ccd3d9;
+  vertical-align: text-bottom;
+}
+
+.institutional__swatch--field {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+}
+
+.institutional__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.institutional__units {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.institutional__publish-list {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.institutional__impact {
+  padding: 10px 12px;
+  border: 1px solid var(--bold-color-border, #e5e7eb);
+  background: var(--bold-color-surface-alt);
+}
+
+.institutional__impact ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+@media (max-width: 480px) {
+  .institutional__summary > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}

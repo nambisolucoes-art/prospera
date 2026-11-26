@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_headquarters
  * @property bool $is_primary
  * @property bool $active
+ * @property bool $show_public_address
  */
 #[Fillable([
     'account_id',
@@ -45,6 +46,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'email',
     'additional_phones',
     'additional_emails',
+    'show_public_address',
 ])]
 class Establishment extends Model implements Auditable
 {
@@ -56,6 +58,7 @@ class Establishment extends Model implements Auditable
         'active' => true,
         'additional_phones' => '[]',
         'additional_emails' => '[]',
+        'show_public_address' => false,
     ];
 
     protected function casts(): array
@@ -67,6 +70,7 @@ class Establishment extends Model implements Auditable
             'address' => 'array',
             'additional_phones' => 'array',
             'additional_emails' => 'array',
+            'show_public_address' => 'boolean',
         ];
     }
 
@@ -102,6 +106,7 @@ class Establishment extends Model implements Auditable
             'email' => 'E-mail',
             'additional_phones' => 'Telefones adicionais',
             'additional_emails' => 'E-mails adicionais',
+            'show_public_address' => 'Exibir endereço',
         ];
     }
 
