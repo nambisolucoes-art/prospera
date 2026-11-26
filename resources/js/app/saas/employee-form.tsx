@@ -39,7 +39,6 @@ type Props = {
     tags: Tag[];
   };
   links?: Link[];
-  today?: string;
   linkable?: CompanyOption[];
 };
 
@@ -299,7 +298,7 @@ function Register({ companies = [], canCreatePeople = false, registrationTags = 
   );
 }
 
-function Edit({ person, links = [], linkable = [], registrationTags = [], today = '' }: Props) {
+function Edit({ person, links = [], linkable = [], registrationTags = [] }: Props) {
   const { auth } = useApiPage<SessionProps>().props;
   const writable = auth.inspection_mode !== 'read-only';
   const [selected, setSelected] = useState<string[]>([]);
@@ -341,7 +340,7 @@ function Edit({ person, links = [], linkable = [], registrationTags = [], today 
         </BusinessForm>
       </CardBox>
 
-      <EmployeeLinksTable personId={person.id} links={links} tags={registrationTags} writable={writable} today={today} />
+      <EmployeeLinksTable personId={person.id} links={links} tags={registrationTags} writable={writable} />
 
       {writable && linkable.length > 0 && (
         <CardBox>

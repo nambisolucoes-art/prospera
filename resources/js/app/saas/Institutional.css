@@ -136,3 +136,121 @@
     gap: 0;
   }
 }
+
+/* S07: horários e exceções */
+.institutional__week > div {
+  grid-template-columns: 90px minmax(0, 1fr);
+}
+
+.institutional__subtitle {
+  margin: 16px 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.institutional__now {
+  margin-bottom: 12px;
+}
+
+.institutional__now-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.institutional__timezone {
+  margin: 8px 0 12px;
+}
+
+.institutional__hours-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.institutional__day {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.institutional__day-title {
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 8px 0 4px;
+  border: 0;
+  border-bottom: 1px solid var(--bold-color-border, #e5e7eb);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.institutional__shift {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 0 0 8px;
+}
+
+.institutional__shift-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.institutional__shift-field .textInput {
+  width: 120px;
+}
+
+.institutional__shift-label {
+  font-weight: 600;
+}
+
+.institutional__shift-error {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.institutional__exceptions,
+.institutional__unit-status {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.institutional__exception {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--bold-color-border, #e5e7eb);
+}
+
+.institutional__exception-main {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.institutional__exception .institutional__actions {
+  margin-top: 0;
+}
+
+@media (max-width: 480px) {
+  .institutional__week > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .institutional__shift-field .textInput {
+    width: 100%;
+  }
+}

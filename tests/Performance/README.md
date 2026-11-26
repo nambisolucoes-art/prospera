@@ -175,3 +175,14 @@ subir. Os scripts recusam prefixos fora de `prospera-e10-lab-*` e só removem re
 - Planos: `e08-plans.sql` com as variáveis da conta A após `e08-volume.sql`; para as telas, `auto_explain` ligado só no
   PostgreSQL do laboratório (`alter system`, `octane:reload`, `15-planos.php`) e desligado em seguida. Remova as linhas
   `Query Parameters` antes de versionar.
+
+## S07: horários, exceções e fusos
+
+Laboratório descartável com PostgreSQL 18 em `tmpfs` e FrankenPHP numa rede interna (rótulo `s07`), a partir da imagem `prospera-app:latest`. Rode `npm run build` antes (os assets vão na cópia) e defina `LAB_PASSWORD` com uma senha sintética. Nunca usa `docker compose`, volumes ou containers oficiais.
+
+- `LAB_PASSWORD=... S07_WORKERS=2 bash tests/Performance/s07-lab.sh up|down` cria e remove o laboratório (porta `127.0.0.1:18207`) com a massa de `s07-fixtures.php`.
+- `bash tests/Performance/s07-race.sh` roda concorrência real com processos PHP independentes: exceções do mesmo dono, resumo de alcance velho contra mudança de herança, salvamentos de horário e troca de fuso, auditoria e deadlocks.
+- `bash tests/Performance/s07-evolution.sh` semeia lotações, faz rollback das duas migrations, reaplica, compara a situação das lotações e testa as constraints.
+- `bash tests/Performance/s07-perf.sh prepare` mede o resolvedor numa rede de 40 unidades e mostra os planos. `bash tests/Performance/s07-index.sh` justifica o índice com 600 mil linhas sintéticas.
+- `tests/Browser/s07-journeys.mjs` (use um laboratório novo, a jornada grava dados) e `tests/Browser/s07-octane.mjs` (1 e 2 workers) exigem `playwright-core` instalado fora do repositório e `LAB_PASSWORD`.
+

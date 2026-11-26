@@ -92,7 +92,10 @@ palavras-chave: colaborador, colaboradores, funcionário, equipe, pessoa, víncu
   <dd>
     O <strong>Início</strong> é o primeiro dia e o <strong>Fim</strong> é o último, ambos inclusivos. Sem data final
     significa sem data definida, e uma lotação futura só vale a partir do início. Na mesma unidade, os períodos não
-    podem se sobrepor: o dia seguinte ao último dia de uma lotação já pode iniciar outra.
+    podem se sobrepor: o dia seguinte ao último dia de uma lotação já pode iniciar outra. "Hoje" é a data do
+    <strong>fuso do estabelecimento</strong> da lotação: duas unidades em fusos diferentes podem estar em dias diferentes
+    no mesmo instante, e a situação (vigente, futura ou encerrada) acompanha a data local de cada uma. Trocar o fuso de
+    uma unidade não altera as datas gravadas.
   </dd>
   <dt>Principal</dt>
   <dd>
@@ -129,7 +132,7 @@ palavras-chave: colaborador, colaboradores, funcionário, equipe, pessoa, víncu
 <h2 id="inativar-e-lotacoes">Inativar e reativar com lotações</h2>
 
 <p>
-  Inativar o vínculo encerra, no dia da operação, as lotações já iniciadas e vigentes. As futuras permanecem sem efeito
+  Inativar o vínculo encerra, no dia da operação (a data local do fuso de cada unidade), as lotações já iniciadas e vigentes. As futuras permanecem sem efeito
   enquanto o vínculo estiver inativo, e o histórico não é apagado. Reativar não reabre períodos antigos: cadastre uma
   lotação nova. Nada disso altera o login, os cargos ou os cadastros de Cliente e Fornecedor da pessoa.
 </p>

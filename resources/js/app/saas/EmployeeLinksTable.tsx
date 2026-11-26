@@ -31,9 +31,8 @@ export type Link = {
 };
 
 // Vínculos empresariais da pessoa: uma linha por empresa, editada num modal dentro da ficha (tabela do tema Visdom).
-export default function EmployeeLinksTable({ personId, links, tags, writable, today }: {
+export default function EmployeeLinksTable({ personId, links, tags, writable }: {
   personId: number;
-  today: string;
   links: Link[];
   tags: Tag[];
   writable: boolean;
@@ -110,7 +109,7 @@ export default function EmployeeLinksTable({ personId, links, tags, writable, to
         </BusinessFormSection>
       </div>
       {assigningLink && (
-        <EmployeeAssignments personId={personId} link={assigningLink} today={today} writable={writable}
+        <EmployeeAssignments personId={personId} link={assigningLink} writable={writable}
           onClose={() => setAssigning(undefined)} />
       )}
       {editing && <LinkModal personId={personId} link={editing} tags={tags} onClose={() => setEditing(undefined)} />}

@@ -12,7 +12,4 @@ return [
 
     // Validade do convite para uma identidade existente.
     'invitation_days' => (int) env('PROSPERA_INVITATION_DAYS', 7),
-
-    // S05: fuso do "hoje" das lotações até a S07 criar o fuso por estabelecimento (PD2-08).
-    'business_timezone' => env('PROSPERA_BUSINESS_TIMEZONE', 'America/Sao_Paulo'),
 ];

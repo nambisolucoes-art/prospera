@@ -36,7 +36,6 @@ use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 use App\Domains\Plataforma\Infrastructure\Session\AccountInspectionSession;
 use App\Models\User;
 use App\Support\ApiPage;
-use App\Support\BusinessDate;
 use App\Support\TaxDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -82,7 +81,6 @@ final class EmployeeController
         $assignments = $listAssignments
             ->execute($accountId, $nodes, array_values($linkRows->pluck('id')->map(fn ($id) => (int) $id)->all()))
             ->groupBy('employee_id');
-        $today = BusinessDate::today();
         $assignable = $permissions->nodesFor($user, 'account.employees.assign');
 
         $viewable = $permissions->nodesFor($user, 'account.employees.view');
@@ -96,7 +94,6 @@ final class EmployeeController
                 $links,
                 $assignments,
                 $assignable,
-                $today,
                 $viewable,
                 $updatable,
                 $activatable,
@@ -121,7 +118,7 @@ final class EmployeeController
                     'active_count' => $own->where('active', true)->count(),
                     'units' => $own->flatMap(fn (Employee $link) => $assignments->get($link->id, collect())
                         ->map(fn (EmployeeAssignment $assignment) => [
-                            'status' => $assignment->statusOn($today),
+                            'status' => $assignment->currentStatus(),
                             'name' => (string) $assignment->getAttribute('establishment_name'),
                             'job_title' => $assignment->getAttribute('job_title_name'),
                             'primary' => $assignment->is_primary,
@@ -317,7 +314,6 @@ final class EmployeeController
 
         $links = $listLinks->execute($accountId, $viewable, [$person->id]);
         $assignable = $permissions->nodesFor($user, 'account.employees.assign');
-        $today = BusinessDate::today();
         $assignments = $listAssignments
             ->execute($accountId, $viewable, array_values($links->pluck('id')->map(fn ($id) => (int) $id)->all()))
             ->groupBy('employee_id');
@@ -361,7 +357,6 @@ final class EmployeeController
                 'can_edit_contacts' => $canEditCentral && $authority->contacts,
                 'tags' => $derivedTags->execute($accountId, [$person->id], $user)[$person->id] ?? [],
             ],
-            'today' => $today,
             'links' => $links->map(function (Employee $link) use (
                 $viewable,
                 $updatable,
@@ -372,7 +367,6 @@ final class EmployeeController
                 $assignmentOptions,
                 $accountId,
                 $tagIds,
-                $today,
             ) {
                 // Quem alcança só a unidade vê a lotação dela, sem os dados da relação (DA2-18).
                 $full = $this->covers($viewable, $link->company_id);
@@ -423,7 +417,8 @@ final class EmployeeController
                         ],
                         // O contato efetivo da lotação aparece mesmo ao gestor de unidade, que não recebe os dados da relação.
                         'effective_contacts' => $assignment->effectiveContacts($link),
-                        'status' => $assignment->statusOn($today),
+                        'status' => $assignment->currentStatus(),
+                        'today' => $assignment->localToday(),
                         'can_manage' => $assignable->tenant
                             || in_array($assignment->company_id, $assignable->companies, true)
                             || in_array($assignment->establishment_id, $assignable->establishments, true),

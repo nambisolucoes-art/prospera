@@ -189,9 +189,9 @@ class EmployeeAssignmentTest extends TestCase
         $this->postJson($this->url(), $this->body($this->guanambi, '2026-12-01', '2027-02-01'))
             ->assertUnprocessable();
 
-        $this->assertSame('ended', $first->fresh()->statusOn(BusinessDate::today()));
-        $this->assertSame('ended', $second->fresh()->statusOn(BusinessDate::today()));
-        $this->assertSame('future', $future->fresh()->statusOn(BusinessDate::today()));
+        $this->assertSame('ended', $first->fresh()->statusOn(BusinessDate::todayIn('America/Sao_Paulo')));
+        $this->assertSame('ended', $second->fresh()->statusOn(BusinessDate::todayIn('America/Sao_Paulo')));
+        $this->assertSame('future', $future->fresh()->statusOn(BusinessDate::todayIn('America/Sao_Paulo')));
 
         // Um dia de duração é válido, e o fim antes do início é recusado.
         $this->assign($this->sede, '2026-11-26', '2026-11-26');

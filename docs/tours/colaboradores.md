@@ -23,7 +23,7 @@ A tela é única para a conta: uma linha por Pessoa, com os vínculos das empres
 | Ficha | `person-identity` | Dados centrais da pessoa | Valem para todas as empresas e papéis. |
 | Ficha | `employee-tags` | Etiquetas | Derivadas, somente leitura. |
 | Ficha | `employee-links` | Vínculos empresariais | Tabela com uma linha por empresa; o lápis abre a janela de edição do vínculo. |
-| Ficha | `employee-assignments` | Lotações | Cabeçalho da coluna Lotações da tabela de vínculos; o botão de cada linha abre a janela das lotações (o tour não a abre). O que é lotação, diferença entre estabelecimento, departamento e função, principal, vigência e a origem dos contatos profissionais (herdados, personalizados ou sem contato local). |
+| Ficha | `employee-assignments` | Lotações | Cabeçalho da coluna Lotações da tabela de vínculos; o botão de cada linha abre a janela das lotações (o tour não a abre). O que é lotação, diferença entre estabelecimento, departamento e função, principal, vigência (na data local do fuso da unidade) e a origem dos contatos profissionais (herdados, personalizados ou sem contato local). |
 | Ficha | `employee-add-link` | Vincular a outra empresa | Cria vínculos novos sem alterar os existentes. |
 
 Na listagem, os filtros de estabelecimento, departamento, função e situação da lotação ficam depois do filtro de empresa. O tour não abre os modais de lotação nem grava dados.

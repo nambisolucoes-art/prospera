@@ -1,10 +1,13 @@
 <?php
 
 use App\Domains\Acessos\Application\Context\AccountContext;
+use App\Domains\Institucional\Application\Actions\Profile\CreateProfileSectionAction;
 use App\Domains\Institucional\Application\Actions\Profile\PublishProfileSectionsAction;
-use App\Domains\Institucional\Application\Actions\Profile\SaveProfileSectionAction;
+use App\Domains\Institucional\Application\Actions\Profile\UpdateProfileSectionAction;
+use App\Domains\Institucional\Application\Data\Profile\CreateProfileSectionData;
 use App\Domains\Institucional\Application\Data\Profile\PublishProfileSectionsData;
-use App\Domains\Institucional\Application\Data\Profile\SaveProfileSectionData;
+use App\Domains\Institucional\Application\Data\Profile\UpdateProfileSectionData;
+use App\Domains\Institucional\Application\Queries\Profile\FindProfileSectionQuery;
 use App\Domains\Institucional\Application\Queries\Profile\ProfileImpactQuery;
 use App\Domains\Institucional\Domain\Enums\ProfileSectionType;
 use App\Domains\Institucional\Domain\ValueObjects\ProfileOwner;
@@ -17,6 +20,19 @@ use Illuminate\Support\Facades\Auth;
 require '/app/vendor/autoload.php';
 $app = require '/app/bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
+
+// Cria ou altera a seção, como o controller: Create sem linha anterior, Update com ela.
+$saveSection = function (string $section, array $input, ProfileOwner $owner): void {
+    $existing = app(FindProfileSectionQuery::class)->execute($owner, ProfileSectionType::from($section));
+
+    if ($existing === null) {
+        app(CreateProfileSectionAction::class)->execute(CreateProfileSectionData::fromInput($section, $input), $owner);
+
+        return;
+    }
+
+    app(UpdateProfileSectionAction::class)->execute(UpdateProfileSectionData::fromInput($section, $input, null), $existing);
+};
 
 if (getenv('DB_DATABASE') !== 's04') {
     throw new RuntimeException('Somente o laboratório S04.');
@@ -40,8 +56,7 @@ $owner = $target === 'empresa'
 
 try {
     if ($scenario === 'save') {
-        $data = SaveProfileSectionData::fromInput($section, ['mode' => 'override', 'value' => ['title' => $title]], $owner->isEstablishment(), null);
-        app(SaveProfileSectionAction::class)->execute($data, $owner);
+        $saveSection($section, ['mode' => 'override', 'value' => ['title' => $title]], $owner);
     } else {
         $impact = app(ProfileImpactQuery::class)
             ->execute($owner, [ProfileSectionType::from($section)]);

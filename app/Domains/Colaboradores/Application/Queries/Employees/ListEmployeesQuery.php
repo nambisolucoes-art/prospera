@@ -6,9 +6,10 @@ namespace App\Domains\Colaboradores\Application\Queries\Employees;
 
 use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Colaboradores\Application\Data\Employees\ListEmployeesData;
+use App\Domains\Colaboradores\Application\Queries\Assignments\LocalDatePredicate;
 use App\Domains\Colaboradores\Domain\Models\Employee;
+use App\Domains\Organizacao\Application\Queries\Establishments\ListTimezoneDatesQuery;
 use App\Domains\Pessoas\Domain\Models\Person;
-use App\Support\BusinessDate;
 use App\Support\NormalizedName;
 use App\Support\TaxDocument;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,6 +24,8 @@ use Illuminate\Support\Facades\DB;
  */
 final readonly class ListEmployeesQuery
 {
+    public function __construct(private ListTimezoneDatesQuery $timezoneDates) {}
+
     /** @return LengthAwarePaginator<int, Person> */
     public function execute(
         int $accountId,
@@ -94,8 +97,6 @@ final readonly class ListEmployeesQuery
      */
     private function filterByAssignment(Builder $links, int $accountId, AuthorizedNodes $nodes, ListEmployeesData $filters): void
     {
-        $today = BusinessDate::today();
-
         $assignments = DB::table('employee_assignments as a')
             ->whereColumn('a.employee_id', 'employees.id')
             ->where('a.account_id', $accountId)
@@ -141,13 +142,15 @@ final readonly class ListEmployeesQuery
                 ->select('id'));
         }
 
-        match ($filters->assignment) {
-            'current' => $assignments->where('a.starts_on', '<=', $today)
-                ->where(fn ($period) => $period->whereNull('a.ends_on')->orWhere('a.ends_on', '>=', $today)),
-            'future' => $assignments->where('a.starts_on', '>', $today),
-            'ended' => $assignments->where('a.ends_on', '<', $today),
-            default => null,
-        };
+        // A vigência é a da data civil do fuso de cada unidade (PD2-08).
+        if ($filters->assignment !== '') {
+            LocalDatePredicate::apply(
+                $assignments,
+                $filters->assignment,
+                $this->timezoneDates->execute($accountId),
+                'a.',
+            );
+        }
 
         $links->whereExists($assignments);
     }

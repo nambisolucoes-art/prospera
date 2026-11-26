@@ -9,6 +9,7 @@ use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Colaboradores\Domain\DTOs\Assignments\CreateEmployeeAssignmentDTO;
 use App\Domains\Colaboradores\Domain\DTOs\Assignments\UpdateEmployeeAssignmentDTO;
 use App\Domains\Organizacao\Domain\Models\Establishment;
+use App\Support\BusinessDate;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -145,6 +146,18 @@ class EmployeeAssignment extends Model implements Auditable
     }
 
     /** Vigente, futura ou encerrada na data de calendário informada. */
+    /** A situação na data civil do fuso da unidade da lotação (PD2-08), lida da junção com `establishments`. */
+    public function currentStatus(): string
+    {
+        return $this->statusOn($this->localToday());
+    }
+
+    /** A data civil de hoje no fuso da unidade da lotação. */
+    public function localToday(): string
+    {
+        return BusinessDate::todayIn((string) $this->getAttribute('establishment_timezone'));
+    }
+
     public function statusOn(string $today): string
     {
         $starts = substr((string) $this->starts_on, 0, 10);

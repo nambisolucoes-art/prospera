@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da frente Institucional, Equipe e Sites White Label |
-| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **S01 a S06 estão concluídas e homologadas tecnicamente** (seções 28 a 33; as seções 28 a 31 preservam a classificação original de revisão). S07 a S15 não foram iniciadas |
+| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **S01 a S06 estão concluídas e homologadas tecnicamente** (seções 28 a 33; as seções 28 a 31 preservam a classificação original de revisão). **S07 em validação, aguardando homologação formal** (seção 34). S08 a S15 não foram iniciadas |
 | Base de código auditada | Branch `feat/pagina-inicial`, commit `33fd8df`, árvore de trabalho limpa |
 | Data da auditoria | 24/11/2026 |
 | Antecessor | Briefing `prospera_plano_institucional_white_label.md` (fora do repositório) e a análise aprovada na sessão de 24/11/2026 |
@@ -1040,7 +1040,7 @@ Os nomes abaixo são intenção de contrato. **Nenhuma rota, controller ou Actio
 | Domínio | Actions |
 | --- | --- |
 | `Colaboradores` | `SaveDepartmentAction`, `SaveJobTitleAction`, `RegisterEmployeeAction`, `SaveEmployeeAction`, `SetEmployeeStatusAction`, `SaveEmployeeAssignmentAction`, `EndEmployeeAssignmentAction`, `SaveEmployeePublicProfileAction`, `RecordPhotoConsentAction`, `RevokePhotoConsentAction` |
-| `Institucional` | `SaveProfileSectionAction`, `PublishProfileSectionsAction`, `SaveHourExceptionAction`, `DeleteHourExceptionAction` |
+| `Institucional` | `CreateProfileSectionAction`, `UpdateProfileSectionAction`, `PublishProfileSectionsAction`, `CreateHourExceptionAction`, `UpdateHourExceptionAction`, `DeleteHourExceptionAction` |
 | `Midia` | `UploadMediaAction`, `UpdateMediaAction`, `DeleteMediaAction`, `GenerateMediaVariantsAction` (chamada **síncrona** por `UploadMediaAction`) |
 | `Sites` | `CreateSiteAction`, `SaveSiteAction`, `SavePageAction`, `SavePageRevisionAction`, `PublishPageAction`, `PublishSiteSettingsAction`, `ActivateSiteAction`, `UnpublishSiteAction`, `RevertPageRevisionAction`, `RenamePageSlugAction` |
 | `Dominios` | `RequestDomainAction`, `VerifyDomainAction` (síncrona sob demanda; job periódico a partir da S14), `ActivateDomainAction`, `RevokeDomainAction` |
@@ -1193,7 +1193,7 @@ A **homologação funcional com usuários** (administrador, gestor de unidade, e
 - **Implementação prevista.** Value objects de turno, resolução por data e fuso, telas, ajuda e tour.
 - **Evidências.** Testes por fuso e por mudança de horário de verão, exceção da unidade A sem afetar B, feriado corporativo, fechamento temporário, exceção corporativa que não alcança unidade com `override` e que a alcança com `applies_to_overrides`, migration do fuso sem mudar nenhuma vigência.
 - **Dependências.** S06 e S05 (o fuso passa a ser lido pelo cálculo de "hoje" da lotação). Nenhuma decisão pendente.
-- **Encerramento.** Parte de horário dos cenários 6 e 15.
+- **Encerramento.** Parte de horário dos cenários 6 e 15. **Registro de execução:** seção 34.
 
 ### S08: Biblioteca de mídia
 
@@ -1578,7 +1578,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 
 ## 25. Quadro de acompanhamento
 
-**Estado geral (atualizado na seção 33): S01 a S06 concluídas e homologadas tecnicamente.** O texto original deste quadro registrava S01 e S02 concluídas e as etapas S03 a S15 ainda não iniciadas, e o histórico segue nas seções 26 a 32. As etapas S07 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
+**Estado geral (atualizado na seção 34): S01 a S06 concluídas e homologadas tecnicamente; S07 em validação, aguardando homologação formal.** O texto original deste quadro registrava S01 e S02 concluídas e as etapas S03 a S15 ainda não iniciadas, e o histórico segue nas seções 26 a 32. A S07 foi autorizada e executada em 26/11/2026 (seção 34); as etapas S08 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
 
 | Etapa | Nome | Estado | Referência |
 | --- | --- | --- | --- |
@@ -1588,7 +1588,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 | S04 | Colaborador como papel de Pessoa (por empresa, sem lotação) | **Concluída e homologada tecnicamente** (aprovação do responsável registrada na seção 33). Fechamento técnico em 25/11/2026; commits `8fad837` e `46009bc`; ficha reformulada em `b4cb9fb` | Seções 29 e 33 |
 | S05 | Lotações e histórico (com o complemento de contatos por lotação) | **Concluída e homologada tecnicamente, inclusive o complemento** (aprovação do responsável registrada na seção 33). Implementação registrada em 26/11/2026; commits `c8a272e` e `b0d14b5` | Seções 30, 31 e 33 |
 | S06 | Perfil institucional e herança | **Concluída e homologada tecnicamente** (registrada em 26/11/2026). Commit `458d147` | Seções 32 e 33 |
-| S07 | Horários e exceções | Pendente | |
+| S07 | Horários e exceções | **Em validação, aguardando homologação formal.** Executada em 26/11/2026 sobre a `main` em `a41c83b`, na branch local `feat/s07-horarios-excecoes`, sem commit | Seção 34 |
 | S08 | Biblioteca de mídia | Pendente | |
 | S09 | Perfil público do colaborador | Pendente | |
 | S10 | Sites, páginas, blocos e revisões (somente retaguarda) | Pendente | |
@@ -1600,6 +1600,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 
 ### Registro de revisões
 
+- **Seção 34 (26/11/2026):** execução da S07, sem alterar o contrato aprovado. Resolve duas lacunas do plano (turno que atravessa a meia-noite e fuso dentro de `hours_weekly`) sem decisão nova de produto, detalhadas na seção 34.2.
 - **Revisão 4 (24/11/2026):** revisão final dirigida antes de versionar a S02. Detalhes na seção 27.8.
 - **Revisão 3 (24/11/2026):** execução da S02 (seção 27). Decisões aprovadas PD2-01, 04, 06, 08, 09, 10, 12, 13 e 15 (seção 23.1). Separação entre execução síncrona, fila e agendador por etapa, com a S14 como primeira que exige worker e agendador (DA2-21, seção 19.1). Host público do diretório (DA2-19, `public_hosts` no lugar de `site_domains`), perfil público do colaborador (DA2-20), revisões e despublicação neutra (DA2-22), endereço e ficha da empresa (DA2-23). `directory_entries` reclassificada para empresa ou estabelecimento. Alvos de FK composta fechados (seção 06.1). Cenário 17 sem auditoria de negação. Dependência S10 de S07. Fence solta da seção 24.2 corrigida.
 - **Revisão 1 (24/11/2026):** criação do plano a partir do briefing institucional e da auditoria aprovada na mesma data.
@@ -2125,3 +2126,77 @@ Esta seção só organiza o registro. Nenhuma implementação foi alterada e as 
 ### 33.3 Registro mantido
 
 As Actions de `public_categories` têm segurança de contexto, mas a interface e o controle administrativo de permissões serão concluídos na S13 (seção 32.5).
+
+## 34. Registro da S07: Horários, exceções e fusos
+
+**Estado: em validação, aguardando homologação formal.** Não está concluída nem homologada. Executada em 26/11/2026 na branch local `feat/s07-horarios-excecoes`, criada da `main` no commit `a41c83b` (local e remota idênticas, árvore limpa). **Sem commit, merge, push, deploy, migration em base oficial ou alteração de container oficial.** As provas em PostgreSQL, FrankenPHP e Chromium usaram um laboratório descartável (`tests/Performance/s07-lab.sh`: PostgreSQL 18 em `tmpfs`, rede interna, rótulo `s07`), removido ao final. S08 em diante não foram iniciadas. As homologações de S01 a S06 não foram tocadas.
+
+### 34.1 Estado inicial
+
+Linha de base na `main` (`a41c83b`): 391 testes e 5.351 asserções, Pint, PHPStan, `audit:check`, `organization:check` e `institutional:check` verdes. A leitura do código confirmou os pontos de contato: `ProfileResolver` (S06) como única porta de `profile_sections`, `BusinessDate::today()` com `prospera.business_timezone` em seis pontos da S05 (listagem e filtros, ficha, inativação, `institutional:check`) e a tela do perfil institucional como o lugar da S07.
+
+### 34.2 Lacunas e conflitos do plano, e o tratamento
+
+| Ponto | Tratamento |
+| --- | --- |
+| A seção 09.5 diz que `hours_weekly` guarda o fuso, e a mesma seção (PD2-08) e a DA2-23 dizem que o fuso é coluna de `establishments` | Vale a coluna: duplicar o fuso no valor criaria uma cópia que divergiria. O valor guarda só os turnos, e a hora cadastrada é a hora local da unidade |
+| Turno que atravessa a meia-noite não está definido | **Não é aceito**: o turno é `[início, fim)` num único dia, com fim até `24:00`. Atender depois da meia-noite é um turno até 24:00 e outro a partir de 00:00 no dia seguinte. Mensagem de erro explica. Não cria decisão de produto nova |
+| "Atendimento sob agendamento" não diz se tem turnos | Marca do dia: `appointment` aceita zero turnos (vale o dia todo) ou turnos (janelas) |
+| Sobreposição entre exceções do mesmo dono | Recusada na gravação (422), serializada pelo bloqueio da empresa. Dados antigos que sobreponham resolvem por menor período e menor id, e `institutional:check` os acusa |
+| Limites não definidos | Até 6 turnos por dia, exceção de até 366 dias, observação de até 160 caracteres, datas de 2000 a 2100. São validações de sanidade, não regras de negócio |
+| `applies_to_overrides` e unidades que mudam depois | É regra avaliada na leitura, não lista congelada: a unidade que passar a ter horário próprio depois da confirmação também é alcançada. A tela e a ajuda dizem isso |
+| `null` e `''` | O middleware do framework converte `''` em `null`, então `null` vale vazio em `shifts`, `ends_on` e `note`. `kind` e `starts_on` são obrigatórios e `applies_to_overrides` rejeita `null`. **A edição de exceção substitui os valores** (como o formulário envia e como as Update Data do GNAI), em vez de PATCH parcial; o PATCH parcial por dia continua no horário semanal, como em toda seção |
+
+### 34.3 Arquitetura entregue
+
+- **Migrations** (aditivas, classe R): `2026_11_28_000001_add_timezone_to_establishments` (`timezone` com padrão `America/Sao_Paulo` e CHECK não vazio no PostgreSQL) e `2026_11_28_000002_create_hour_exceptions` (CHECKs de tipo, período, turnos por tipo e `applies_to_overrides` só na empresa; FKs compostas por conta, empresa e unidade; índice `(company_id, establishment_id, starts_on)`). Nenhuma migration homologada foi alterada.
+- **Horário semanal.** Seção `hours_weekly` no catálogo (operacional, desativável). `HoursWeeklyValue` valida o formato por `rules()` e `messages()`, e os Value Objects `Shift`, `Shifts` e `DaySchedule` (construtor privado, construtores nomeados, invariantes com `InvalidHourException`) cuidam de início antes do fim, ordem, sobreposição e coerência entre tipo e turnos, com PATCH parcial por dia, como toda seção. Os dois pares (trabalho e publicado) são gravados juntos (DA2-16).
+- **Herança.** Nenhum código novo lê `profile_sections`: o `HoursResolver` usa o `ProfileResolver`, que ganhou `warm()` (carrega empresa e N unidades numa consulta) e passou a invalidar também as unidades quando a empresa é gravada na mesma requisição (lacuna latente da S06, com teste).
+- **Exceções (padrão do GNAI, [Código do backend](../convencoes/codigo-backend.md)).** `CreateHourExceptionAction`, `UpdateHourExceptionAction` e `DeleteHourExceptionAction`, uma por caso de uso, com `CreateHourExceptionData` e `UpdateHourExceptionData` (cada uma com `rules()` e `messages()` próprias, edição por substituição completa), `CreateHourExceptionDTO` e `UpdateHourExceptionDTO`, e `HourException::register()` e `revise()`, que aplicam as invariantes (período, 366 dias, turnos só no horário especial, `applies_to_overrides` só na empresa) lançando `InvalidHourException`. Passos com nome próprio são sub-Actions (`LockHourOwnerAction`, `AssertHourExceptionPeriodFreeAction`, `AssertHourExceptionImpactAction`), sem funções privadas nas Actions. `HourExceptionImpactQuery` devolve o resumo com `token`. Ordem de bloqueios: empresa, unidade, exceção, a mesma da S06.
+- **Resolução.** `HoursResolver` (`scoped`) devolve `EffectiveHours`: condição (`open`, `closed`, `by_appointment`, `not_informed`, `disabled`, `inactive`), motivo de fechamento, atendimento do dia, origem, fuso, data e hora locais, exceção aplicada e `valid_until` (início do próximo dia civil no fuso, por `BusinessDate::startOfNextDay`). Três consultas para qualquer número de unidades. Sem rota pública, sem API, sem cache: a S11 consome esse contrato.
+- **Fuso e S05.** `establishments.timezone`, `IanaTimezone`, `SetEstablishmentTimezoneAction` com `SetEstablishmentTimezoneData` (autorizada por `account.institutional.update` sobre a unidade; a invariante IANA está em `Establishment::useTimezone()`). `BusinessDate::today()` e `prospera.business_timezone` foram removidos; a vigência usa `LocalDatePredicate` (condição por fuso com subconsulta, sem junção, então o `FOR UPDATE` da inativação trava só as lotações) e `todayIn` por unidade. O formulário de lotação usa a data do fuso da unidade escolhida. **Única edição em teste anterior:** três chamadas `BusinessDate::today()` em `EmployeeAssignmentTest` viraram `BusinessDate::todayIn('America/Sao_Paulo')`, equivalentes, porque a API foi removida de propósito (sem compatibilidade com estrutura antiga).
+- **Permissões e auditoria.** Nenhuma permissão nova (`permissions:sync`: 0 criadas, 104 descobertas). `HourException` e `Establishment.timezone` auditados com `company_id` e `establishment_id` do nó escrito; sem evento para unidades que apenas herdam, para escritas sem mudança ou para tentativas negadas. `audit:check` cobre 20 modelos. `institutional:check` verifica horário semanal, fuso IANA, turnos e sobreposição.
+- **Telas, ajuda e tour.** Integrado ao perfil institucional (sem tela concorrente): grade semanal agrupada, editor de turnos sem JSON (copiar dias, fim em 24:00), painel de situação e exceções (agora, fuso, lista própria e herdada, unidades), modal de exceção com resumo de alcance e confirmação. Artigo `perfil-institucional.html` e tour `perfil-institucional.md` atualizados, mais os trechos de vigência em `colaboradores`. A convenção `institucional.md` ganhou a seção da S07.
+
+### 34.4 Verificação
+
+| Prova | Resultado |
+| --- | --- |
+| Suíte PHP | **448 testes, 6.085 asserções** (391 anteriores intactas, mais 57: `OperatingHoursTest` com 42 e `HoursTimezoneTest` com 15) |
+| Pint, PHPStan, `npm run check`, 20 testes de frontend, build | Sem erros |
+| `audit:check`, `organization:check`, `institutional:check`, `permissions:sync` | Sem violações e sem permissões novas |
+| Domínio | 5 casos do "aberto agora" (09:00, 12:30, 15:00, 19:00 e as pontas), exceção local de A sem afetar B, feriado corporativo, `applies_to_overrides` com resumo confirmado, adulterado e velho, dois fusos no mesmo instante, data local diferente da UTC, horário de verão em Nova York (dias de 23 e 25 horas, hora de abertura que muda em UTC), meia-noite que não existe em Havana, virada de dia, vigência futura e encerrada por fuso, inativação por fuso, troca de fuso sem alterar datas, migration sem mudar nenhuma vigência |
+| PostgreSQL 18 (`s07-evolution.sh`) | Instalação limpa; lotações encerrada, vigente e futura idênticas antes, após o rollback das duas migrations e após a reaplicação (SQL puro e código atual coincidem); fuso volta ao padrão; 8 estados incompatíveis recusados (tipo, período, turnos, `applies_to_overrides` em unidade, FK entre empresas, conta inexistente, fuso vazio); linha válida aceita |
+| Concorrência real (`s07-race.sh`, processos PHP independentes) | 6 exceções iguais: 1 gravada e 5 recusadas; 6 de períodos diferentes: 6 gravadas, 0 sobreposições; 30 tentativas cruzadas: 4 gravadas, 0 sobreposições; resumo velho x mudança de herança: recusado em 6 de 6 rodadas, nunca aplicado; 24 salvamentos de horário (empresa e unidades): sem deadlock e valor final igual ao último evento auditado; troca de fuso x horário x exceção: coerente; **0 deadlocks** no log do PostgreSQL; nenhuma exceção sem evento `created` |
+| Performance (`s07-perf.sh`, rede de 40 unidades em 4 fusos, 84 exceções) | Resolvedor: 3 consultas fixas (4 com a empresa de 5 unidades). 1 unidade: mediana 1,8 a 2,2 ms; 10 unidades: 2,7 ms; 40 unidades: mediana **5,5 ms**, p95 6,6 ms; resumo de alcance 1,7 ms; memória de pico 25,7 MB |
+| Índice (`s07-index.sh`, 600 mil exceções) | Com o índice: Bitmap e Index Scan, 11 buffers, 0,1 ms. Sem ele: Parallel Seq Scan, 7.794 buffers, **37 a 50 ms**. Índice justificado e mantido |
+| FrankenPHP (`s07-octane.mjs`), 1 e 2 workers | 1.330 verificações em cada configuração, 0 falhas: contas A e B, fusos de unidades, gestor de unidade, consulta e edição, exceções herdadas, escritas de fuso e horário seguidas de leituras, sem vazamento de conta, empresa, unidade, permissão, fuso, horário ou exceção |
+| Chromium (`s07-journeys.mjs`), 1440, 1024, 768, 390 e 320 px | 49 verificações, 0 falhas, sem erro de JavaScript nem resposta 5xx: horário semanal com copiar dias e erro por campo, unidade personalizada, voltar a herdar, exceção da empresa com resumo e confirmação (Salvar bloqueado até confirmar), horário especial com turnos, edição recusada no campo, exclusão, troca de fuso com busca, consulta sem botões, gestor de unidade só na própria unidade (404 na API e tela indisponível), teclado (Enter abre, foco entra no modal, Escape fecha), sem rolagem horizontal em nenhuma largura, nas telas e nos modais |
+
+### 34.4.1 Aderência ao padrão de backend
+
+Na primeira entrega, a S07 destoava do padrão do GNAI 1: uma `SaveHourExceptionAction` única para criar e editar, uma Data que validava à mão e mesclava com o registro atual, um DTO único e invariantes espalhadas. Foi refatorada para o padrão (seção 34.3): Create e Update separadas em Action, Data e DTO, `rules()` e `messages()` por operação, invariantes no Model e nos Value Objects com exceção de domínio, sub-Actions no lugar de funções privadas. As provas de PostgreSQL, concorrência e Chromium foram repetidas depois da refatoração, com o mesmo resultado. **A S06 também foi refatorada** (por pedido do responsável): `SaveProfileSectionAction`, `SaveProfileSectionData` e `SaveProfileSectionDTO` foram substituídos por `CreateProfileSectionAction` e `UpdateProfileSectionAction`, `CreateProfileSectionData` e `UpdateProfileSectionData` (cada uma com `rules()` e `messages()`), `CreateProfileSectionDTO` e `UpdateProfileSectionDTO`, `FindProfileSectionQuery` e `LockProfileOwnerAction` (compartilhada com os horários). As invariantes que dependem do dono (a empresa só personaliza, a galeria é local, desativação só onde o catálogo permite) passaram para `ProfileSection::register()` e `revise()` com `InvalidProfileSection`. O controller escolhe Create ou Update pela existência da linha. **Efeito observável:** duas primeiras gravações simultâneas da mesma seção deixam de gravar as duas; a primeira vence e as demais respondem 409 (`ConflictingChange`), com 1 linha no banco (provado com 6 processos em PostgreSQL). Os demais comportamentos da S06 e os 391 testes anteriores não mudaram.
+
+### 34.5 Defeitos encontrados e corrigidos
+
+1. **Vazio chegava como `null`.** O teste de horário com `shifts: ''` falhou porque o middleware converte `''` em `null`; a regra de `null` foi ajustada por campo (seção 34.2) e coberta.
+2. **Data inválida respondia 500.** `CarbonImmutable::createFromFormat` lança exceção neste Carbon; a validação passou a `preg_match` e `checkdate`, com 422 por campo e teste (`10/06/2026`, `2026-02-30`).
+3. **`ProfileResolver::forget` da empresa não limpava as unidades** na mesma requisição (S06, latente): corrigido com teste.
+Nenhum defeito de segurança, isolamento ou integridade foi encontrado nas provas de PostgreSQL, FrankenPHP e Chromium. As falhas observadas na jornada do Chromium vinham do limite de tentativas de login do laboratório e do estado deixado por uma execução anterior; a jornada passou a reaproveitar a sessão e exige laboratório novo.
+
+### 34.6 Limitações justificadas
+
+- **"Aberto agora" público, `/api/publico/horarios`, TTL curto e cache por `valid_until` pertencem à S11.** A S07 entrega o cálculo e o `valid_until` tipados, sem rota pública.
+- Não há feriados nacionais pré-cadastrados nem repetição anual: cada exceção é uma data ou período.
+- O campo de hora usa o formato do navegador (12 ou 24 horas conforme o idioma); o valor gravado é sempre `HH:MM` em 24 horas.
+- `applies_to_overrides` é uma regra avaliada na leitura (seção 34.2), e a confirmação mostra as unidades no momento de salvar.
+- O fuso é por unidade; a empresa não tem fuso próprio, de acordo com o contrato.
+- As provas de FrankenPHP usaram 1 e 2 workers e a imagem de produção; não houve medição com tráfego público, que não existe ainda.
+
+### 34.7 Dependências para S08 a S15
+
+S11 lê `HoursResolver`, `EffectiveHours` e `valid_until` para a grade, as exceções próximas e `/api/publico/horarios`. S12 usa o horário da unidade e o fuso dela. S13 projeta o horário efetivo no diretório. A S10 usa o bloco `hours` sobre o mesmo resolvedor. A S08 e a S09 não dependem desta etapa.
+
+### 34.8 Arquivos e Git
+
+84 arquivos (33 modificados e 51 novos), cerca de 5,5 mil linhas, todos nesta branch e **não versionados**. Backend: `app/Domains/Institucional` (Actions, Data, Queries, Context, Models, Enums, Value Objects e controller de horários), `app/Domains/Colaboradores` (vigência por fuso), `Organizacao` (duas Queries de data e o fuso no Model), `app/Support` (`BusinessDate`, `IanaTimezone`), rotas, `config/audit.php`, `config/prospera.php` e duas migrations. Frontend: seis componentes novos de horários e ajustes no perfil, no formulário de lotação, no tour e nos tipos. Documentação: plano, convenção, ajuda e tour. Testes: `OperatingHoursTest`, `HoursTimezoneTest` e a edição das três linhas de `EmployeeAssignmentTest`. Evidências reprodutíveis em `tests/Performance/s07-*` e `tests/Browser/s07-*`, sem senha, token, cookie ou dado pessoal real (a senha sintética vem de `LAB_PASSWORD`).

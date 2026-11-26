@@ -7,13 +7,17 @@ namespace App\Domains\Institucional\UI\Controllers;
 use App\Domains\Acessos\Application\Context\AccountContext;
 use App\Domains\Acessos\Application\Context\EffectivePermissions;
 use App\Domains\Acessos\Application\Context\OrganizationContext;
+use App\Domains\Institucional\Application\Actions\Profile\CreateProfileSectionAction;
 use App\Domains\Institucional\Application\Actions\Profile\PublishProfileSectionsAction;
-use App\Domains\Institucional\Application\Actions\Profile\SaveProfileSectionAction;
 use App\Domains\Institucional\Application\Actions\Profile\SetPublicAddressAction;
+use App\Domains\Institucional\Application\Actions\Profile\UpdateProfileSectionAction;
 use App\Domains\Institucional\Application\Context\ProfileResolver;
+use App\Domains\Institucional\Application\Data\Profile\CreateProfileSectionData;
 use App\Domains\Institucional\Application\Data\Profile\PublishProfileSectionsData;
-use App\Domains\Institucional\Application\Data\Profile\SaveProfileSectionData;
 use App\Domains\Institucional\Application\Data\Profile\SetPublicAddressData;
+use App\Domains\Institucional\Application\Data\Profile\UpdateProfileSectionData;
+use App\Domains\Institucional\Application\Queries\Hours\ShowHoursOverviewQuery;
+use App\Domains\Institucional\Application\Queries\Profile\FindProfileSectionQuery;
 use App\Domains\Institucional\Application\Queries\Profile\ListProfileOwnersQuery;
 use App\Domains\Institucional\Application\Queries\Profile\ProfileImpactQuery;
 use App\Domains\Institucional\Application\Queries\Profile\ShowProfileOwnerQuery;
@@ -21,6 +25,7 @@ use App\Domains\Institucional\Domain\Enums\ProfileSectionType;
 use App\Domains\Institucional\Domain\Enums\ProfileState;
 use App\Domains\Institucional\Domain\ValueObjects\ProfileOwner;
 use App\Support\ApiPage;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -54,6 +59,7 @@ final class InstitutionalProfileController
         ProfileResolver $resolver,
         ShowProfileOwnerQuery $showOwner,
         ListProfileOwnersQuery $listOwners,
+        ShowHoursOverviewQuery $hoursOverview,
     ): JsonResponse|View {
         $owner = $this->owner($context);
         Gate::authorize('account.institutional.view', $owner->node());
@@ -94,6 +100,11 @@ final class InstitutionalProfileController
             'canUpdate' => Gate::allows('account.institutional.update', $owner->node()),
             'canPublish' => Gate::allows('account.institutional.publish', $owner->node()),
             'sections' => $sections,
+            'hours' => $hoursOverview->execute(
+                $owner,
+                CarbonImmutable::now(),
+                Gate::allows('account.institutional.update', $owner->node()),
+            ),
             'fonts' => $this->options(config('institutional.fonts')),
             'networks' => $this->options(array_map(
                 fn (array $network): string => $network['label'],
@@ -109,7 +120,9 @@ final class InstitutionalProfileController
         Request $request,
         OrganizationContext $context,
         ProfileResolver $resolver,
-        SaveProfileSectionAction $action,
+        FindProfileSectionQuery $find,
+        CreateProfileSectionAction $create,
+        UpdateProfileSectionAction $update,
         string $secao,
     ): Response {
         $owner = $this->owner($context);
@@ -118,12 +131,17 @@ final class InstitutionalProfileController
         $type = ProfileSectionType::tryFrom($secao);
         abort_if($type === null, 404);
 
-        $draft = $resolver->resolve($owner, $type, ProfileState::Draft);
-        $current = $draft->mode === 'override' && $draft->source !== 'platform' ? $draft->value : null;
+        $section = $find->execute($owner, $type);
 
-        $data = SaveProfileSectionData::fromInput($secao, $request->all(), $owner->isEstablishment(), $current);
+        if ($section === null) {
+            $create->execute(CreateProfileSectionData::fromInput($secao, $request->all()), $owner);
+        } else {
+            $draft = $resolver->resolve($owner, $type, ProfileState::Draft);
+            $current = $draft->mode === 'override' && $draft->source !== 'platform' ? $draft->value : null;
 
-        $action->execute($data, $owner);
+            $update->execute(UpdateProfileSectionData::fromInput($secao, $request->all(), $current), $section);
+        }
+
         ApiPage::toast($type->isOperational()
             ? $type->label().' salvos. A alteração já aparece nos sites publicados.'
             : $type->label().' salva como rascunho.');

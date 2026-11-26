@@ -6,6 +6,7 @@ namespace App\Domains\Institucional\Domain\Enums;
 
 use App\Domains\Institucional\Application\Data\Profile\Sections\AboutValue;
 use App\Domains\Institucional\Application\Data\Profile\Sections\ContactsValue;
+use App\Domains\Institucional\Application\Data\Profile\Sections\HoursWeeklyValue;
 use App\Domains\Institucional\Application\Data\Profile\Sections\PaletteValue;
 use App\Domains\Institucional\Application\Data\Profile\Sections\SeoDefaultsValue;
 use App\Domains\Institucional\Application\Data\Profile\Sections\SocialLinksValue;
@@ -15,7 +16,7 @@ use App\Domains\Institucional\Domain\Contracts\SectionValue;
 /**
  * Catálogo de seções do perfil institucional (seção 09.4 do plano 002). Cada seção tem classe (editorial ou
  * operacional), regra de desligamento e escopo. Seções que dependem de etapas futuras ficam declaradas e
- * indisponíveis: mídia (S08) e equipe (S09 e S12). `hours_weekly` entra com a S07.
+ * indisponíveis: mídia (S08) e equipe (S09 e S12). `hours_weekly` entrou com a S07 e é operacional.
  */
 enum ProfileSectionType: string
 {
@@ -25,6 +26,7 @@ enum ProfileSectionType: string
     case About = 'about';
     case Contacts = 'contacts';
     case SocialLinks = 'social_links';
+    case HoursWeekly = 'hours_weekly';
     case Banners = 'banners';
     case Gallery = 'gallery';
     case SeoDefaults = 'seo_defaults';
@@ -39,6 +41,7 @@ enum ProfileSectionType: string
             self::About => 'Sobre',
             self::Contacts => 'Contatos públicos',
             self::SocialLinks => 'Redes sociais',
+            self::HoursWeekly => 'Horário de funcionamento',
             self::Banners => 'Banners',
             self::Gallery => 'Galeria',
             self::SeoDefaults => 'SEO padrão',
@@ -49,12 +52,12 @@ enum ProfileSectionType: string
     /** Editorial: só muda o público por publicação explícita. Operacional: vale ao salvar (DA2-16). */
     public function isOperational(): bool
     {
-        return in_array($this, [self::Contacts, self::SocialLinks], true);
+        return in_array($this, [self::Contacts, self::SocialLinks, self::HoursWeekly], true);
     }
 
     public function canDisable(): bool
     {
-        return in_array($this, [self::About, self::SocialLinks, self::Banners, self::Gallery, self::TeamDisplay], true);
+        return in_array($this, [self::About, self::SocialLinks, self::HoursWeekly, self::Banners, self::Gallery, self::TeamDisplay], true);
     }
 
     /** A galeria é local por natureza: existe só no estabelecimento e não herda da empresa. */
@@ -86,6 +89,7 @@ enum ProfileSectionType: string
             self::About => AboutValue::class,
             self::Contacts => ContactsValue::class,
             self::SocialLinks => SocialLinksValue::class,
+            self::HoursWeekly => HoursWeeklyValue::class,
             self::SeoDefaults => SeoDefaultsValue::class,
             default => null,
         };

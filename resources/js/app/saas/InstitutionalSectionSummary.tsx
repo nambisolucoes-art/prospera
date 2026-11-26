@@ -1,4 +1,5 @@
-import type { ProfileFont, ProfileNetwork, Resolved } from './InstitutionalProfile.types';
+import InstitutionalHoursSummary from './InstitutionalHoursSummary';
+import type { HoursValue, ProfileFont, ProfileNetwork, Resolved } from './InstitutionalProfile.types';
 
 const text = (value: unknown) => (typeof value === 'string' && value.trim() !== '' ? value : null);
 const list = (value: unknown) => (Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []);
@@ -71,6 +72,10 @@ export default function InstitutionalSectionSummary({ sectionKey, resolved, font
         ))}
       </dl>
     );
+  }
+
+  if (sectionKey === 'hours_weekly') {
+    return <InstitutionalHoursSummary value={value as unknown as HoursValue} />;
   }
 
   if (sectionKey === 'seo_defaults') {

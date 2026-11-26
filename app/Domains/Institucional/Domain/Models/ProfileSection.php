@@ -6,8 +6,11 @@ namespace App\Domains\Institucional\Domain\Models;
 
 use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
-use App\Domains\Institucional\Domain\DTOs\Profile\SaveProfileSectionDTO;
+use App\Domains\Institucional\Domain\DTOs\Profile\CreateProfileSectionDTO;
+use App\Domains\Institucional\Domain\DTOs\Profile\UpdateProfileSectionDTO;
 use App\Domains\Institucional\Domain\Enums\ProfileSectionType;
+use App\Domains\Institucional\Domain\Exceptions\InvalidProfileSection;
+use App\Domains\Institucional\Domain\ValueObjects\ProfileOwner;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -49,27 +52,37 @@ class ProfileSection extends Model implements Auditable
         ];
     }
 
-    public static function register(SaveProfileSectionDTO $data, int $accountId, int $companyId, ?int $establishmentId, string $section): self
-    {
+    /**
+     * @throws InvalidProfileSection
+     */
+    public static function register(
+        CreateProfileSectionDTO $data,
+        int $accountId,
+        int $companyId,
+        ?int $establishmentId,
+        string $section,
+    ): self {
         return new self([
             'account_id' => $accountId,
             'company_id' => $companyId,
             'establishment_id' => $establishmentId,
             'section' => $section,
-            'mode' => $data->mode,
-            'value' => $data->mode === 'override' ? $data->value : null,
+            ...self::attributesFrom($data, $section, $establishmentId),
         ]);
     }
 
-    /** Altera só o par de trabalho. O publicado muda por `publish()` ou, nas operacionais, por `revisePublished()`. */
-    public function revise(SaveProfileSectionDTO $data): void
+    /**
+     * Altera só o par de trabalho. O publicado muda por `publish()` ou, nas operacionais, por `revisePublished()`.
+     *
+     * @throws InvalidProfileSection
+     */
+    public function revise(UpdateProfileSectionDTO $data): void
     {
-        $this->mode = $data->mode;
-        $this->value = $data->mode === 'override' ? $data->value : null;
+        $this->fill(self::attributesFrom($data, $this->section, $this->establishment_id));
     }
 
     /** Seção operacional: o par publicado acompanha o de trabalho ao salvar (DA2-16). */
-    public function revisePublished(SaveProfileSectionDTO $data, int $userId): void
+    public function revisePublished(CreateProfileSectionDTO|UpdateProfileSectionDTO $data, int $userId): void
     {
         $this->published_mode = $data->mode;
         $this->published_value = $data->mode === 'override' ? $data->value : null;
@@ -78,6 +91,53 @@ class ProfileSection extends Model implements Auditable
             $this->published_at = Carbon::now();
             $this->published_by = $userId;
         }
+    }
+
+    /** O dono da seção: a empresa, ou o estabelecimento quando há `establishment_id`. */
+    public function owner(): ProfileOwner
+    {
+        if ($this->establishment_id === null) {
+            return ProfileOwner::company($this->account_id, $this->company_id);
+        }
+
+        return ProfileOwner::establishment($this->account_id, $this->company_id, $this->establishment_id);
+    }
+
+    /**
+     * Regras que dependem do dono: a empresa só personaliza, a galeria é local e a desativação só vale onde o catálogo
+     * permite. Modo e valor ficam coerentes (valor só no `override`).
+     *
+     * @return array<string, mixed>
+     *
+     * @throws InvalidProfileSection
+     */
+    private static function attributesFrom(
+        CreateProfileSectionDTO|UpdateProfileSectionDTO $data,
+        string $section,
+        ?int $establishmentId,
+    ): array {
+        $type = ProfileSectionType::from($section);
+
+        if ($establishmentId === null && $data->mode !== 'override') {
+            throw InvalidProfileSection::in('mode', 'A empresa define o padrão: só é possível personalizar.');
+        }
+
+        if ($establishmentId === null && $type->isEstablishmentOnly()) {
+            throw InvalidProfileSection::in('section', 'Esta seção existe só nos estabelecimentos.');
+        }
+
+        if ($data->mode === 'inherit' && $type->isEstablishmentOnly()) {
+            throw InvalidProfileSection::in('mode', 'Esta seção é local e não herda da empresa.');
+        }
+
+        if ($data->mode === 'disabled' && ! $type->canDisable()) {
+            throw InvalidProfileSection::in('mode', 'Esta seção não pode ser desativada.');
+        }
+
+        return [
+            'mode' => $data->mode,
+            'value' => $data->mode === 'override' ? $data->value : null,
+        ];
     }
 
     /** Copia o valor de trabalho para o publicado. Devolve falso quando já são iguais. */

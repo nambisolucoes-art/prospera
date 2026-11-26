@@ -6,6 +6,7 @@ namespace App\Domains\Colaboradores\Application\Queries\Assignments;
 
 use App\Domains\Acessos\Domain\ValueObjects\AuthorizedNodes;
 use App\Domains\Colaboradores\Application\Data\Assignments\AssignmentOptions;
+use App\Support\BusinessDate;
 use Illuminate\Support\Facades\DB;
 
 /** Unidades, departamentos e funções que uma lotação da empresa pode escolher, limitados ao escopo de `assign`. */
@@ -30,7 +31,7 @@ final readonly class ListAssignmentOptionsQuery
                 ->whereIntegerInRaw('id', $assign->establishments))
             ->orderByDesc('is_primary')
             ->orderBy('name')
-            ->get(['id', 'code', 'name']);
+            ->get(['id', 'code', 'name', 'timezone']);
 
         $departments = DB::table('departments')
             ->where('account_id', $accountId)
@@ -49,7 +50,11 @@ final readonly class ListAssignmentOptionsQuery
         return new AssignmentOptions(
             establishmentIds: $units->pluck('id', 'code')->map(fn ($id): int => (int) $id)->all(),
             establishments: array_values($units
-                ->map(fn (object $unit) => ['code' => (string) $unit->code, 'name' => (string) $unit->name])
+                ->map(fn (object $unit) => [
+                    'code' => (string) $unit->code,
+                    'name' => (string) $unit->name,
+                    'today' => BusinessDate::todayIn((string) $unit->timezone),
+                ])
                 ->all()),
             departments: array_values($departments
                 ->map(fn (object $item) => ['id' => (int) $item->id, 'name' => (string) $item->name])

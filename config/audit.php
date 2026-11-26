@@ -27,6 +27,7 @@ return [
         'employee' => 'Colaborador',
         'employee-assignment' => 'Lotação',
         'profile-section' => 'Seção do perfil institucional',
+        'hour-exception' => 'Exceção de horário',
         'public-category' => 'Categoria pública',
         'permission-catalog' => 'Catálogo de permissões',
     ],
@@ -88,11 +89,15 @@ return [
         'profile-section' => [
             'section' => [
                 'logo' => 'Logotipo', 'palette' => 'Paleta de cores', 'typography' => 'Tipografia', 'about' => 'Sobre',
-                'contacts' => 'Contatos públicos', 'social_links' => 'Redes sociais', 'banners' => 'Banners',
+                'contacts' => 'Contatos públicos', 'social_links' => 'Redes sociais', 'hours_weekly' => 'Horário de funcionamento',
+                'banners' => 'Banners',
                 'gallery' => 'Galeria', 'seo_defaults' => 'SEO padrão', 'team_display' => 'Equipe exibida',
             ],
             'mode' => ['inherit' => 'Herdar', 'override' => 'Personalizado', 'disabled' => 'Desativado'],
             'published_mode' => ['inherit' => 'Herdar', 'override' => 'Personalizado', 'disabled' => 'Desativado'],
+        ],
+        'hour-exception' => [
+            'kind' => ['holiday' => 'Feriado', 'temporary_closure' => 'Fechamento temporário', 'special_hours' => 'Horário especial'],
         ],
         'role' => ['system_key' => ['administrator' => 'Administrador da conta', 'member' => 'Usuário']],
         'account-invitation' => [

@@ -690,6 +690,7 @@ class InstitutionalProfileTest extends TestCase
             'app/Domains/Institucional/Domain/Models/ProfileSection.php',
             'app/Domains/Institucional/Application/Actions/Profile/',
             'app/Domains/Institucional/Application/Queries/Profile/ProfileImpactQuery.php',
+            'app/Domains/Institucional/Application/Queries/Profile/FindProfileSectionQuery.php',
             'app/Domains/Colaboradores/Application/Queries/Violations/ListInstitutionalViolationsQuery.php',
         ];
 

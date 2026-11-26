@@ -8,6 +8,8 @@ use App\Domains\Auditoria\Domain\Concerns\AuditsChanges;
 use App\Domains\Auditoria\Domain\Contracts\Auditable;
 use App\Domains\Organizacao\Domain\DTOs\Establishments\CreateEstablishmentDTO;
 use App\Domains\Organizacao\Domain\DTOs\Establishments\UpdateEstablishmentDTO;
+use App\Domains\Organizacao\Domain\Exceptions\InvalidTimezone;
+use App\Support\IanaTimezone;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_primary
  * @property bool $active
  * @property bool $show_public_address
+ * @property string $timezone
  */
 #[Fillable([
     'account_id',
@@ -47,6 +50,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'additional_phones',
     'additional_emails',
     'show_public_address',
+    'timezone',
 ])]
 class Establishment extends Model implements Auditable
 {
@@ -59,6 +63,7 @@ class Establishment extends Model implements Auditable
         'additional_phones' => '[]',
         'additional_emails' => '[]',
         'show_public_address' => false,
+        'timezone' => IanaTimezone::DEFAULT,
     ];
 
     protected function casts(): array
@@ -72,6 +77,21 @@ class Establishment extends Model implements Auditable
             'additional_emails' => 'array',
             'show_public_address' => 'boolean',
         ];
+    }
+
+    /**
+     * Muda o fuso IANA da unidade (PD2-08). A hora cadastrada passa a valer como hora local desse fuso e a vigência das
+     * lotações usa a data civil dele; as datas gravadas não mudam.
+     *
+     * @throws InvalidTimezone
+     */
+    public function useTimezone(string $timezone): void
+    {
+        if (! IanaTimezone::isValid($timezone)) {
+            throw InvalidTimezone::for($timezone);
+        }
+
+        $this->timezone = $timezone;
     }
 
     public static function auditType(): string
@@ -107,6 +127,7 @@ class Establishment extends Model implements Auditable
             'additional_phones' => 'Telefones adicionais',
             'additional_emails' => 'E-mails adicionais',
             'show_public_address' => 'Exibir endereço',
+            'timezone' => 'Fuso horário',
         ];
     }
 

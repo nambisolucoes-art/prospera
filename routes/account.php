@@ -10,6 +10,7 @@ use App\Domains\Colaboradores\UI\Controllers\EmployeeAssignmentController;
 use App\Domains\Colaboradores\UI\Controllers\EmployeeController;
 use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
 use App\Domains\Etiquetas\UI\Controllers\TagController;
+use App\Domains\Institucional\UI\Controllers\InstitutionalHoursController;
 use App\Domains\Institucional\UI\Controllers\InstitutionalProfileController;
 use App\Domains\Organizacao\Domain\ValueObjects\OrganizationCode;
 use App\Domains\Organizacao\UI\Controllers\CompanyController;
@@ -390,6 +391,15 @@ Route::middleware(['auth', 'verified', 'account'])
                     ->name('institutional.publish');
                 Route::patch('institucional/endereco-publico', [InstitutionalProfileController::class, 'setAddress'])
                     ->name('institutional.address');
+                // S07: exceções de horário e fuso da unidade.
+                Route::post('institucional/excecoes', [InstitutionalHoursController::class, 'store'])
+                    ->name('institutional.exceptions.store');
+                Route::patch('institucional/excecoes/{excecao}', [InstitutionalHoursController::class, 'update'])
+                    ->name('institutional.exceptions.update');
+                Route::delete('institucional/excecoes/{excecao}', [InstitutionalHoursController::class, 'destroy'])
+                    ->name('institutional.exceptions.destroy');
+                Route::patch('institucional/fuso', [InstitutionalHoursController::class, 'setTimezone'])
+                    ->name('institutional.timezone');
             });
 
         // E07: escritas comerciais nomeiam a empresa responsável; nunca há empresa escolhida pelo sistema.
@@ -438,5 +448,14 @@ Route::middleware(['auth', 'verified', 'account'])
                     ->name('institutional.section');
                 Route::post('institucional/publicar', [InstitutionalProfileController::class, 'publish'])
                     ->name('institutional.publish');
+                // S07: exceções de horário da empresa e o resumo do alcance sobre unidades com horário próprio.
+                Route::post('institucional/excecoes', [InstitutionalHoursController::class, 'store'])
+                    ->name('institutional.exceptions.store');
+                Route::patch('institucional/excecoes/{excecao}', [InstitutionalHoursController::class, 'update'])
+                    ->name('institutional.exceptions.update');
+                Route::delete('institucional/excecoes/{excecao}', [InstitutionalHoursController::class, 'destroy'])
+                    ->name('institutional.exceptions.destroy');
+                Route::get('institucional/excecoes/impacto', [InstitutionalHoursController::class, 'impact'])
+                    ->name('institutional.exceptions.impact');
             });
     });

@@ -10,10 +10,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Gravação de uma seção: modo e, no `override`, o objeto da seção. Campos ausentes dentro do valor mantêm o valor
- * próprio atual; limpar é enviar o campo vazio de propósito.
+ * Alteração de uma seção que o dono já tem. Campos ausentes dentro do valor mantêm o valor próprio atual (`$currentOwn`); limpar é enviar o campo vazio.
+ * O modo e o formato do valor são validados aqui; as regras que dependem do dono (empresa só personaliza, seção local,
+ * seção que não pode ser desativada) são invariantes do Model.
  */
-final readonly class SaveProfileSectionData
+final readonly class UpdateProfileSectionData
 {
     /** @param array<string,mixed>|null $value */
     public function __construct(
@@ -29,7 +30,7 @@ final readonly class SaveProfileSectionData
      * @throws ResourceNotAvailable
      * @throws ValidationException
      */
-    public static function fromInput(string $section, array $input, bool $isEstablishment, ?array $currentOwn): self
+    public static function fromInput(string $section, array $input, ?array $currentOwn): self
     {
         $type = ProfileSectionType::tryFrom($section);
 
@@ -38,40 +39,46 @@ final readonly class SaveProfileSectionData
             throw new ResourceNotAvailable;
         }
 
-        $values = Validator::validate($input, ['mode' => ['required', 'string', 'in:inherit,override,disabled']], [
-            'mode.required' => 'Escolha herdar, personalizar ou desativar.',
-            'mode.in' => 'Escolha herdar, personalizar ou desativar.',
-        ]);
-
-        $mode = $values['mode'];
+        $values = Validator::validate($input, self::rules(), self::messages());
 
         if (! $type->isAvailable()) {
             throw ValidationException::withMessages(['section' => $type->unavailableReason()]);
         }
 
-        if (! $isEstablishment && $mode !== 'override') {
-            throw ValidationException::withMessages(['mode' => 'A empresa define o padrão: só é possível personalizar.']);
+        if ($values['mode'] !== 'override') {
+            return new self($type, $values['mode'], null);
         }
 
-        if ($type->isEstablishmentOnly() && ! $isEstablishment) {
-            throw ValidationException::withMessages(['section' => 'Esta seção existe só nos estabelecimentos.']);
-        }
+        return new self($type, $values['mode'], self::valueOf($type, $input['value'] ?? null, $currentOwn));
+    }
 
-        if ($mode === 'inherit' && $type->isEstablishmentOnly()) {
-            throw ValidationException::withMessages(['mode' => 'Esta seção é local e não herda da empresa.']);
-        }
+    /** @return array<string,list<string>> */
+    public static function rules(): array
+    {
+        return [
+            'mode' => ['required', 'string', 'in:inherit,override,disabled'],
+        ];
+    }
 
-        if ($mode === 'disabled' && ! $type->canDisable()) {
-            throw ValidationException::withMessages(['mode' => 'Esta seção não pode ser desativada.']);
-        }
+    /** @return array<string,string> */
+    public static function messages(): array
+    {
+        return [
+            'mode.required' => 'Escolha herdar, personalizar ou desativar.',
+            'mode.in' => 'Escolha herdar, personalizar ou desativar.',
+        ];
+    }
 
-        if ($mode !== 'override') {
-            return new self($type, $mode, null);
-        }
-
-        $raw = $input['value'] ?? null;
-
-        // Sem `value`, o PATCH só muda o modo e mantém o conteúdo próprio atual. Sem conteúdo nenhum, é 422.
+    /**
+     * Valor do `override`. Sem `value`, o PATCH só muda o modo e mantém o conteúdo próprio atual; sem conteúdo nenhum, é 422.
+     *
+     * @param  array<string,mixed>|null  $currentOwn
+     * @return array<string,mixed>
+     *
+     * @throws ValidationException
+     */
+    private static function valueOf(ProfileSectionType $type, mixed $raw, ?array $currentOwn): array
+    {
         if ($raw === null && $currentOwn === null) {
             throw ValidationException::withMessages(['value' => 'Informe o conteúdo da seção.']);
         }
@@ -83,7 +90,7 @@ final readonly class SaveProfileSectionData
         $class = $type->valueClass();
 
         try {
-            $value = $class::fromInput($raw ?? [], $currentOwn ?? [])->toArray();
+            return $class::fromInput($raw ?? [], $currentOwn ?? [])->toArray();
         } catch (ValidationException $failure) {
             $errors = [];
 
@@ -93,7 +100,5 @@ final readonly class SaveProfileSectionData
 
             throw ValidationException::withMessages($errors);
         }
-
-        return new self($type, $mode, $value);
     }
 }

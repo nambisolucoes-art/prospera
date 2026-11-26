@@ -187,16 +187,47 @@ export function tourFor(
       at(
         'institutional-origin',
         'Origem do conteúdo',
-        'Informa de onde vem o valor: própria, herdada da empresa ou padrão da plataforma. Seções editoriais ficam como rascunho até a publicação, e as operacionais (contatos e redes sociais) valem ao salvar.',
+        'Informa de onde vem o valor: própria, herdada da empresa ou padrão da plataforma. Seções editoriais ficam como rascunho até a publicação, e as operacionais (contatos, redes sociais e horário de funcionamento) valem ao salvar.',
       ),
       at(
         'institutional-publish',
         'Publicar alterações',
         'Publica as seções editoriais com rascunho alterado. Antes de confirmar, o resumo mostra quantas unidades herdam e serão atingidas e quantas têm conteúdo próprio e não serão afetadas.',
       ),
+      at(
+        'hours-panel',
+        'Situação e exceções de horário',
+        unit
+          ? 'Mostra como a unidade está agora, no fuso dela, e as exceções por data. A alteração vale ao salvar e aparece nos sites publicados.'
+          : 'Mostra a situação de cada unidade agora e as exceções da empresa. A alteração vale ao salvar e aparece nos sites publicados.',
+      ),
+      at(
+        'hours-now',
+        'Aberto agora',
+        'A condição é calculada na hora, com a data e a hora locais da unidade, os turnos do dia e as exceções. Ela nunca é gravada: muda sozinha com o relógio.',
+      ),
+      at(
+        'hours-timezone',
+        'Fuso horário',
+        'O fuso IANA da unidade define a hora local dos horários, inclusive no horário de verão, e a data usada na vigência das lotações. Trocar o fuso não altera nenhuma data gravada.',
+      ),
+      at(
+        'hours-exceptions',
+        'Exceções de horário',
+        unit
+          ? 'Feriado, fechamento temporário e horário especial por data. As exceções desta unidade valem só para ela; as da empresa que a alcançam aparecem como herdadas.'
+          : 'Feriado, fechamento temporário e horário especial por data. Alcançam as unidades que herdam o horário e, só se você marcar, as que têm horário próprio.',
+      ),
+      at(
+        'hours-add-exception',
+        'Cadastrar exceção',
+        unit
+          ? 'Informe o tipo, as datas (o último dia vale inteiro) e, no horário especial, os turnos. Períodos do mesmo dono não podem se sobrepor.'
+          : 'Informe o tipo e as datas. O resumo mostra quais unidades serão alcançadas. Para atingir também as que têm horário próprio, marque a opção e confirme o resumo.',
+      ),
       ...(unit
         ? [at('institutional-address', 'Exibir endereço', 'O endereço é o do cadastro do estabelecimento e nunca é copiado. Por padrão não é público. Ligue a opção só se quiser exibi-lo.')]
-        : []),
+        : [at('hours-units', 'Unidades agora', 'Cada unidade mostra se está aberta, fechada ou com horário não informado agora, e se herda o horário da empresa ou tem o próprio.')]),
     ];
   } else if (path === '/conta/colaboradores') {
     title = 'Colaboradores';
@@ -221,7 +252,7 @@ export function tourFor(
         at('person-identity', 'Dados centrais da pessoa', 'Identidade, documento e contatos valem para todas as empresas e para os demais papéis da pessoa, como cliente e fornecedor. Os campos aparecem conforme suas permissões.'),
         at('employee-tags', 'Etiquetas', 'As etiquetas são derivadas dos vínculos e dos outros papéis da pessoa. Não podem ser atribuídas nem removidas aqui.'),
         at('employee-links', 'Vínculos empresariais', 'Tabela com uma linha por empresa: situação, etiquetas, contatos profissionais e resumo das lotações. O lápis abre a edição do vínculo numa janela. Salvar um vínculo não altera os outros.'),
-        at('employee-assignments', 'Lotações', 'O botão de lotações de cada empresa abre a janela com os períodos, o histórico e as ações: adicionar, corrigir, alterar função ou departamento, encerrar e tornar principal. Lotação é o período em que o colaborador atua em um estabelecimento, com a função e o departamento daquele período. Estabelecimento é a unidade, departamento é a área da empresa e função é a atividade profissional. A principal é a lotação de referência: só pode haver uma por período. Vigência vai do primeiro ao último dia, inclusive, e sem data final significa sem data definida. Cada lotação mostra de onde vêm os contatos profissionais: herdados do vínculo, personalizados na unidade ou sem contato local, de forma intencional.'),
+        at('employee-assignments', 'Lotações', 'O botão de lotações de cada empresa abre a janela com os períodos, o histórico e as ações: adicionar, corrigir, alterar função ou departamento, encerrar e tornar principal. Lotação é o período em que o colaborador atua em um estabelecimento, com a função e o departamento daquele período. Estabelecimento é a unidade, departamento é a área da empresa e função é a atividade profissional. A principal é a lotação de referência: só pode haver uma por período. Vigência vai do primeiro ao último dia, inclusive, na data local do fuso do estabelecimento da lotação, e sem data final significa sem data definida. Cada lotação mostra de onde vêm os contatos profissionais: herdados do vínculo, personalizados na unidade ou sem contato local, de forma intencional.'),
         at('employee-add-link', 'Vincular a outra empresa', 'Marque as empresas em que você pode cadastrar e que ainda não têm vínculo da pessoa.'),
       ]
       : [

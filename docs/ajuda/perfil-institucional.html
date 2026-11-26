@@ -2,7 +2,7 @@
 titulo: Perfil institucional
 resumo: Defina a identidade e a apresentação da empresa e deixe cada estabelecimento herdar, personalizar ou desativar as seções.
 categoria: Institucional
-palavras-chave: perfil institucional, identidade visual, paleta, cores, tipografia, sobre, contatos públicos, redes sociais, SEO, herança, herdar, personalizar, desativar, rascunho, publicar, publicação, endereço, empresa, estabelecimento
+palavras-chave: horário de funcionamento, horários, turnos, feriado, fechamento temporário, horário especial, exceção, fuso horário, aberto agora, agendamento, perfil institucional, identidade visual, paleta, cores, tipografia, sobre, contatos públicos, redes sociais, SEO, herança, herdar, personalizar, desativar, rascunho, publicar, publicação, endereço, empresa, estabelecimento
 -->
 
 <h2 id="o-que-e">O que é o perfil institucional</h2>
@@ -10,7 +10,7 @@ palavras-chave: perfil institucional, identidade visual, paleta, cores, tipograf
 <p>
   <span class="dropcap text-primary">O</span> <strong>perfil institucional</strong> reúne a identidade e a apresentação da
   <strong>empresa</strong> e de cada <strong>estabelecimento</strong>: cores, tipografia, texto de apresentação, contatos
-  públicos, redes sociais e SEO. Ele é a base que os sites e o diretório usarão nas próximas etapas. Nesta etapa você
+  públicos, redes sociais, horário de funcionamento e SEO. Ele é a base que os sites e o diretório usarão nas próximas etapas. Nesta etapa você
   configura e publica o perfil, sem criar sites.
 </p>
 
@@ -48,6 +48,8 @@ palavras-chave: perfil institucional, identidade visual, paleta, cores, tipograf
   <dd>Telefones, WhatsApp e e-mails para divulgação, digitados aqui. <mark>Nunca</mark> vêm do cadastro de Pessoas, do colaborador nem dos contatos operacionais do estabelecimento.</dd>
   <dt>Redes sociais</dt>
   <dd>Um link por rede, sempre com <code>https://</code> e no domínio da própria rede.</dd>
+  <dt>Horário de funcionamento</dt>
+  <dd>Os turnos de cada dia da semana, com a opção de dia fechado ou de atendimento somente com agendamento. Veja a seção abaixo.</dd>
   <dt>SEO padrão</dt>
   <dd>Título (até 70 caracteres) e descrição (até 160).</dd>
   <dt>Logotipo, banners, galeria e equipe</dt>
@@ -69,7 +71,7 @@ palavras-chave: perfil institucional, identidade visual, paleta, cores, tipograf
   <thead><tr><th>Tipo de seção</th><th>Ao salvar</th></tr></thead>
   <tbody>
     <tr><td><strong>Editorial</strong> (paleta, tipografia, sobre, SEO)</td><td>Grava um <strong>rascunho</strong>. O conteúdo publicado só muda quando alguém usa <strong>Publicar alterações</strong>.</td></tr>
-    <tr><td><strong>Operacional</strong> (contatos e redes sociais)</td><td>Vale <strong>na hora</strong> e já aparece nos sites publicados. A tela avisa antes.</td></tr>
+    <tr><td><strong>Operacional</strong> (contatos, redes sociais, horário de funcionamento e exceções de horário)</td><td>Vale <strong>na hora</strong> e já aparece nos sites publicados. A tela avisa antes.</td></tr>
   </tbody>
 </table>
 
@@ -79,6 +81,79 @@ palavras-chave: perfil institucional, identidade visual, paleta, cores, tipograf
   <li>Publicar uma seção da empresa <mark>não toca</mark> as unidades com conteúdo próprio, nem o rascunho delas.</li>
   <li>Voltar a herdar uma seção editorial é primeiro uma mudança de rascunho, até ser publicada.</li>
 </ul>
+
+<h2 id="horario-semanal">Horário de funcionamento</h2>
+
+<p>
+  Para cada dia da semana escolha <strong>Aberto</strong> (com um ou mais turnos), <strong>Fechado</strong> ou
+  <strong>Somente com agendamento</strong>. Neste último, os turnos são opcionais: sem turnos vale o dia todo, e com turnos
+  só dentro deles. Use <strong>Adicionar turno</strong> e <strong>Remover turno</strong>; não há edição manual de dados. Os
+  botões de copiar levam a segunda-feira para terça a sexta ou para todos os dias.
+</p>
+
+<ul class="list-unstyled">
+  <li>A hora é a <strong>hora local do estabelecimento</strong>. Às 08:00, a unidade abre às 08:00 do relógio dela, em qualquer fuso.</li>
+  <li>O turno vale do início até o fim: às 12:00 de um turno 08:00 a 12:00 a unidade já está fechada.</li>
+  <li>Os turnos ficam em ordem e sem sobreposição, no máximo seis por dia.</li>
+  <li>Um turno <mark>não atravessa a meia-noite</mark>. Para atender depois dela, cadastre um turno até <strong>24:00</strong> num dia e outro a partir de 00:00 no dia seguinte.</li>
+  <li>No estabelecimento, o horário pode ser <strong>herdado</strong> da empresa, <strong>próprio</strong> ou <strong>desativado</strong>. Voltar a herdar usa o horário atual da empresa. Personalizar com todos os dias fechados é uma escolha válida e não herda.</li>
+</ul>
+
+<blockquote class="help-note help-note--warning">
+  <strong class="text-warning">Efeito imediato:</strong> o horário e as exceções são operacionais. Ao salvar, a alteração já
+  aparece nos sites publicados, sem publicação separada.
+</blockquote>
+
+<h2 id="excecoes">Exceções de horário</h2>
+
+<dl class="dl-horizontal">
+  <dt>Feriado</dt>
+  <dd>A unidade fica fechada na data ou no período.</dd>
+  <dt>Fechamento temporário</dt>
+  <dd>A unidade fica fechada no período, com observação pública opcional.</dd>
+  <dt>Horário especial</dt>
+  <dd>Os turnos informados valem no lugar do horário semanal nas datas.</dd>
+</dl>
+
+<ul class="list-unstyled">
+  <li>As datas são de calendário: o primeiro e o <strong>último dia valem inteiros</strong>, no fuso de cada unidade. O período tem até 366 dias.</li>
+  <li>Exceções do mesmo dono não podem se sobrepor. Divida o período para encaixar um feriado dentro de um fechamento.</li>
+  <li>A exceção de uma unidade vale só para ela e prevalece sobre a da empresa. Nunca altera outra unidade nem a empresa.</li>
+  <li>A observação pública é texto simples, com até 160 caracteres.</li>
+</ul>
+
+<h3 id="excecao-da-empresa">Exceção da empresa e unidades com horário próprio</h3>
+
+<p>
+  Uma exceção cadastrada na <strong>empresa</strong> alcança as unidades que <strong>herdam</strong> o horário. As unidades com
+  <strong>horário próprio</strong> não a recebem, a menos que você marque <strong>Aplicar também às unidades com horário
+  próprio</strong>. Nesse caso a tela mostra quais unidades herdam e quais têm horário próprio, e pede a
+  <strong>confirmação</strong> do resumo. O servidor recalcula o alcance ao salvar: se ele tiver mudado, a gravação é recusada e
+  o resumo é mostrado de novo.
+</p>
+
+<blockquote class="help-note help-note--info">
+  <strong class="text-info">Atenção:</strong> a opção é uma regra e não uma lista fixa. Uma unidade que passar a ter horário
+  próprio depois da confirmação também será alcançada enquanto a opção estiver marcada.
+</blockquote>
+
+<h2 id="fuso">Fuso horário</h2>
+
+<p>
+  Cada estabelecimento tem um <strong>fuso IANA</strong> (por exemplo <code>America/Sao_Paulo</code>, <code>America/Manaus</code>
+  ou <code>America/New_York</code>), com padrão <code>America/Sao_Paulo</code>. Uma empresa pode ter unidades em fusos
+  diferentes. O fuso define a hora local dos horários, o horário de verão e a data de hoje usada na vigência das lotações dos
+  colaboradores. Trocar o fuso <mark>não altera</mark> nenhuma data gravada. Siglas como EST e deslocamentos como -03:00 não são aceitos.
+</p>
+
+<h2 id="aberto-agora">Aberto agora</h2>
+
+<p>
+  A situação da unidade (<em>Aberto agora</em>, <em>Fechado agora</em>, <em>Atendimento sob agendamento</em>, <em>Horário
+  não informado</em>) é <strong>calculada a cada consulta</strong> com a data e a hora locais da unidade, os turnos, as
+  exceções e a situação ativa. Ela nunca é gravada e, nos sites, não ficará no conteúdo guardado em cache. Na empresa, a
+  lista <strong>Unidades agora</strong> mostra a situação de cada uma e se herda o horário ou tem o próprio.
+</p>
 
 <h2 id="endereco">Exibir endereço</h2>
 
@@ -98,6 +173,9 @@ palavras-chave: perfil institucional, identidade visual, paleta, cores, tipograf
 <ul class="list-unstyled">
   <li><strong>Seção indisponível:</strong> depende de uma etapa futura (mídia ou perfil público).</li>
   <li><strong>Contraste insuficiente:</strong> ajuste o texto, o fundo ou a cor principal.</li>
+  <li><strong>Turno inválido:</strong> confira a ordem, a sobreposição e se o turno não atravessa a meia-noite.</li>
+  <li><strong>Já existe uma exceção neste período:</strong> ajuste as datas ou edite a exceção existente.</li>
+  <li><strong>O alcance mudou:</strong> revise o resumo e confirme de novo.</li>
   <li><strong>Empresa ou unidade inativa:</strong> a tela abre só para consulta.</li>
   <li><strong>Inspeção somente leitura:</strong> a plataforma consulta, mas não grava.</li>
 </ul>

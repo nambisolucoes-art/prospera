@@ -42,6 +42,7 @@ final readonly class ListEmployeeAssignmentsQuery
             ->select('employee_assignments.*')
             ->selectRaw('establishments.code as establishment_code')
             ->selectRaw('establishments.name as establishment_name')
+            ->selectRaw('establishments.timezone as establishment_timezone')
             ->selectRaw('departments.name as department_name')
             ->selectRaw('job_titles.name as job_title_name');
 

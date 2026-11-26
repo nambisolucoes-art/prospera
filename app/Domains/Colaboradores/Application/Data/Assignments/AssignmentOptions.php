@@ -12,7 +12,7 @@ final readonly class AssignmentOptions
 {
     /**
      * @param  array<string,int>  $establishmentIds  código da unidade para o identificador
-     * @param  list<array{code: string, name: string}>  $establishments
+     * @param  list<array{code: string, name: string, today: string}>  $establishments
      * @param  list<array{id: int, name: string}>  $departments
      * @param  list<array{id: int, name: string}>  $jobTitles
      */
@@ -33,7 +33,7 @@ final readonly class AssignmentOptions
         return in_array($id, array_column($this->jobTitles, 'id'), true);
     }
 
-    /** @return array{establishments: list<array{code: string, name: string}>, departments: list<array{id: int, name: string}>, job_titles: list<array{id: int, name: string}>} */
+    /** @return array{establishments: list<array{code: string, name: string, today: string}>, departments: list<array{id: int, name: string}>, job_titles: list<array{id: int, name: string}>} */
     public function toArray(): array
     {
         return [

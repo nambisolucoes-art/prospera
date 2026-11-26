@@ -5,7 +5,8 @@ import FormField from '@/components/FormField/FormField';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import Modal from '@/components/Modal/Modal';
 import TextArea from '@/components/TextArea/TextArea';
-import type { ProfileFont, ProfileNetwork, ProfileOwner, ProfileSection } from './InstitutionalProfile.types';
+import InstitutionalHoursFields from './InstitutionalHoursFields';
+import type { HoursValue, ProfileFont, ProfileNetwork, ProfileOwner, ProfileSection } from './InstitutionalProfile.types';
 import { ownerBase } from './InstitutionalProfile.types';
 import './Institutional.css';
 
@@ -127,6 +128,8 @@ function Fields({ section, value, errors, fonts, networks }: {
         </>
       );
     }
+    case 'hours_weekly':
+      return <InstitutionalHoursFields value={value as unknown as HoursValue} errors={errors} />;
     case 'seo_defaults':
       return (
         <>

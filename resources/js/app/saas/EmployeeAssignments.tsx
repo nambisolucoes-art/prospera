@@ -27,11 +27,14 @@ export type AssignmentRow = {
   contacts: { email: string | null; phone: string | null; whatsapp: string | null };
   effective_contacts: { email: string | null; phone: string | null; whatsapp: string | null; source: 'inherit' | 'override' | 'none' };
   status: 'current' | 'future' | 'ended';
+  // Data civil de hoje no fuso da unidade da lotação.
+  today: string;
   can_manage: boolean;
 };
 
 export type AssignmentOptions = {
-  establishments: { code: string; name: string }[];
+  // `today` é a data civil de hoje no fuso da unidade.
+  establishments: { code: string; name: string; today: string }[];
   departments: { id: number; name: string }[];
   job_titles: { id: number; name: string }[];
 };
@@ -65,7 +68,7 @@ const titles: Record<Mode, string> = {
 };
 
 // Lotações de um vínculo: períodos por estabelecimento, com função e departamento do período e a principal marcada.
-export default function EmployeeAssignments({ personId, link, today, writable, onClose }: {
+export default function EmployeeAssignments({ personId, link, writable, onClose }: {
   personId: number;
   onClose: () => void;
   link: {
@@ -77,7 +80,6 @@ export default function EmployeeAssignments({ personId, link, today, writable, o
     assignments: AssignmentRow[];
     assignment_options: AssignmentOptions | null;
   };
-  today: string;
   writable: boolean;
 }) {
   const [dialog, setDialog] = useState<Dialog>();
@@ -97,7 +99,7 @@ export default function EmployeeAssignments({ personId, link, today, writable, o
   if (dialog && options) {
     return (
       <Modal open bootstrap manageFocus size="large" title={`${titles[dialog.mode]} em ${link.company_name}`} onClose={onClose}>
-        <AssignmentDialog dialog={dialog} base={base} options={options} today={today} siblings={link.assignments}
+        <AssignmentDialog dialog={dialog} base={base} options={options} siblings={link.assignments}
           onClose={() => setDialog(undefined)} />
       </Modal>
     );
@@ -202,16 +204,17 @@ export default function EmployeeAssignments({ personId, link, today, writable, o
   );
 }
 
-function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
+function AssignmentDialog({ dialog, base, options, siblings, onClose }: {
   dialog: Dialog;
   base: string;
   options: AssignmentOptions;
-  today: string;
   siblings: AssignmentRow[];
   onClose: () => void;
 }) {
   const { mode, assignment } = dialog;
   const [establishment, setEstablishment] = useState(options.establishments[0]?.code ?? '');
+  // "Hoje" é a data civil do fuso da unidade: a da lotação em edição ou a da unidade escolhida numa nova.
+  const today = assignment?.today ?? options.establishments.find((item) => item.code === establishment)?.today ?? '';
   const [department, setDepartment] = useState(String(assignment?.department_id ?? ''));
   const [jobTitle, setJobTitle] = useState(String(assignment?.job_title_id ?? ''));
   const [heir, setHeir] = useState('');
@@ -265,7 +268,7 @@ function AssignmentDialog({ dialog, base, options, today, siblings, onClose }: {
                     options={options.establishments.map((item) => ({ value: item.code, label: item.name }))} />
                   {catalogs}
                   <BusinessFormRow>
-                    <Field label="Início" name="starts_on" type="date" defaultValue={today} required error={errors.starts_on} />
+                    <Field key={`starts-${establishment}`} label="Início" name="starts_on" type="date" defaultValue={today} required error={errors.starts_on} />
                     <Field label="Fim" name="ends_on" type="date" error={errors.ends_on}
                       info="Último dia de vigência, inclusive. Deixe em branco para sem data final." />
                   </BusinessFormRow>

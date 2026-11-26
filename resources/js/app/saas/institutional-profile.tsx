@@ -7,11 +7,12 @@ import ChoiceControl from '@/components/ChoiceControl/ChoiceControl';
 import { useApiForm } from '@/hooks/useApiForm';
 import { useApiPage } from '@/hooks/useApiPage';
 import type { SessionProps } from '@/types/Session.types';
+import InstitutionalHoursPanel from './InstitutionalHoursPanel';
 import InstitutionalPublishModal from './InstitutionalPublishModal';
 import InstitutionalSectionModal from './InstitutionalSectionModal';
 import InstitutionalSectionSummary from './InstitutionalSectionSummary';
 import {
-  originText, ownerBase, type ProfileFont, type ProfileNetwork, type ProfileOwner, type ProfileSection,
+  originText, ownerBase, type HoursOverview, type ProfileFont, type ProfileNetwork, type ProfileOwner, type ProfileSection,
 } from './InstitutionalProfile.types';
 import SaasLayout from './SaasLayout';
 import './ContactFields.css';
@@ -20,11 +21,12 @@ import './Institutional.css';
 type Unit = { code: string; name: string; active: boolean; primary: boolean };
 
 // Perfil institucional de uma empresa ou de um estabelecimento (S06): valor efetivo, origem, rascunho e publicação.
-export default function InstitutionalProfile({ owner, canUpdate, canPublish, sections, fonts, networks, units }: {
+export default function InstitutionalProfile({ owner, canUpdate, canPublish, sections, hours, fonts, networks, units }: {
   owner: ProfileOwner;
   canUpdate: boolean;
   canPublish: boolean;
   sections: ProfileSection[];
+  hours: HoursOverview;
   fonts: ProfileFont[];
   networks: ProfileNetwork[];
   units: Unit[];
@@ -143,6 +145,8 @@ export default function InstitutionalProfile({ owner, canUpdate, canPublish, sec
           </CardBox>
         ))}
       </div>
+
+      <InstitutionalHoursPanel owner={owner} hours={hours} writable={writable && canUpdate} units={units} />
 
       {establishment && (
         <CardBox>

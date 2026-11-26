@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace App\Domains\Colaboradores\Application\Queries\Violations;
 
+use App\Domains\Colaboradores\Application\Queries\Assignments\LocalDatePredicate;
+use App\Domains\Institucional\Application\Data\Profile\Sections\HoursWeeklyValue;
 use App\Domains\Institucional\Domain\Enums\ProfileSectionType;
-use App\Support\BusinessDate;
+use App\Domains\Institucional\Domain\Exceptions\InvalidHourException;
+use App\Domains\Institucional\Domain\ValueObjects\Hours\Shifts;
+use App\Domains\Organizacao\Application\Queries\Establishments\ListTimezoneDatesQuery;
+use App\Support\IanaTimezone;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Invariantes das lotações que dependem de várias linhas e que o banco não garante sozinho (seção 10.3.1).
@@ -14,10 +20,11 @@ use Illuminate\Support\Facades\DB;
  */
 final readonly class ListInstitutionalViolationsQuery
 {
+    public function __construct(private ListTimezoneDatesQuery $timezoneDates) {}
+
     /** @return list<string> */
     public function execute(): array
     {
-        $today = BusinessDate::today();
         $violations = [];
 
         $overlaps = DB::table('employee_assignments as a')
@@ -95,10 +102,11 @@ final readonly class ListInstitutionalViolationsQuery
 
         $inactive = DB::table('employee_assignments as a')
             ->join('employees as e', 'e.id', '=', 'a.employee_id')
-            ->where('e.active', false)
-            ->where('a.starts_on', '<=', $today)
-            ->where(fn ($query) => $query->whereNull('a.ends_on')->orWhere('a.ends_on', '>', $today))
-            ->pluck('a.id');
+            ->where('e.active', false);
+
+        // "Vigente" é a data civil do fuso da unidade de cada lotação (PD2-08).
+        LocalDatePredicate::apply($inactive, LocalDatePredicate::OPEN, $this->timezoneDates->execute(), 'a.');
+        $inactive = $inactive->pluck('a.id');
 
         foreach ($inactive as $id) {
             $violations[] = "Lotação {$id} segue vigente com o vínculo do colaborador inativo.";
@@ -130,6 +138,57 @@ final readonly class ListInstitutionalViolationsQuery
             if (! $workCoherent || ! $publishedCoherent) {
                 $violations[] = "Seção de perfil {$row->id} tem modo incoerente com o valor gravado.";
             }
+        }
+
+        // Horários (S07): valor semanal válido nos dois pares, fuso IANA e exceções coerentes e sem cruzamento por dono.
+        foreach ($sections as $row) {
+            if ($row->section !== ProfileSectionType::HoursWeekly->value) {
+                continue;
+            }
+
+            foreach (['value', 'published_value'] as $column) {
+                if ($row->{$column} === null) {
+                    continue;
+                }
+
+                try {
+                    HoursWeeklyValue::fromInput(json_decode((string) $row->{$column}, true) ?: [], []);
+                } catch (ValidationException) {
+                    $violations[] = "Seção de perfil {$row->id} tem horário semanal inválido ({$column}).";
+                }
+            }
+        }
+
+        $zones = DB::table('establishments')->select('id', 'timezone')->get();
+
+        foreach ($zones as $unit) {
+            if (! IanaTimezone::isValid((string) $unit->timezone)) {
+                $violations[] = "Estabelecimento {$unit->id} tem o fuso {$unit->timezone}, que não é um identificador IANA.";
+            }
+        }
+
+        $exceptions = DB::table('hour_exceptions')->orderBy('company_id')->orderBy('establishment_id')->orderBy('starts_on')->orderBy('id')
+            ->get(['id', 'company_id', 'establishment_id', 'kind', 'starts_on', 'ends_on', 'shifts', 'applies_to_overrides']);
+
+        $previous = null;
+
+        foreach ($exceptions as $exception) {
+            if ($exception->kind === 'special_hours') {
+                try {
+                    Shifts::from(json_decode((string) $exception->shifts, true) ?: []);
+                } catch (InvalidHourException) {
+                    $violations[] = "Exceção de horário {$exception->id} tem turnos inválidos.";
+                }
+            }
+
+            if ($previous !== null
+                && $previous->company_id === $exception->company_id
+                && $previous->establishment_id === $exception->establishment_id
+                && substr((string) $previous->ends_on, 0, 10) >= substr((string) $exception->starts_on, 0, 10)) {
+                $violations[] = "Exceções de horário {$previous->id} e {$exception->id} do mesmo dono se sobrepõem.";
+            }
+
+            $previous = $exception;
         }
 
         return $violations;

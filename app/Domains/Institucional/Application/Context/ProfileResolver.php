@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\DB;
  */
 final class ProfileResolver
 {
+    private const COLUMNS = ['section', 'establishment_id', 'mode', 'value', 'published_mode', 'published_value'];
+
     /** @var array<string, array{company: array<string, \stdClass>, establishment: array<string, \stdClass>}> */
     private array $loaded = [];
 
@@ -65,7 +67,45 @@ final class ProfileResolver
         return $result;
     }
 
-    /** Descarta a memória do dono depois de uma gravação na mesma requisição. */
+    /**
+     * Carrega numa única consulta as seções da empresa e de várias unidades, para resolver muitas unidades sem N+1.
+     * Depois dela, `resolve` de cada dono já encontra os dados na memória.
+     *
+     * @param  list<int>  $establishmentIds
+     */
+    public function warm(int $accountId, int $companyId, array $establishmentIds): void
+    {
+        $company = [];
+        $units = [];
+
+        $query = DB::table('profile_sections')
+            ->where('account_id', $accountId)
+            ->where('company_id', $companyId)
+            ->where(fn ($scope) => $scope->whereNull('establishment_id')
+                ->orWhereIn('establishment_id', $establishmentIds));
+
+        foreach ($query->get(self::COLUMNS) as $row) {
+            if ($row->establishment_id === null) {
+                $company[$row->section] = $row;
+
+                continue;
+            }
+
+            $units[(int) $row->establishment_id][$row->section] = $row;
+        }
+
+        $this->loaded[ProfileOwner::company($accountId, $companyId)->key()] = ['company' => $company, 'establishment' => []];
+
+        foreach ($establishmentIds as $id) {
+            $owner = ProfileOwner::establishment($accountId, $companyId, $id);
+            $this->loaded[$owner->key()] = ['company' => $company, 'establishment' => $units[$id] ?? []];
+        }
+    }
+
+    /**
+     * Descarta a memória depois de uma gravação na mesma requisição. Gravar a empresa também invalida as unidades,
+     * que guardam uma cópia das seções da empresa; gravar uma unidade invalida só ela.
+     */
     public function forget(?ProfileOwner $owner = null): void
     {
         if ($owner === null) {
@@ -74,7 +114,19 @@ final class ProfileResolver
             return;
         }
 
-        unset($this->loaded[$owner->key()]);
+        if ($owner->isEstablishment()) {
+            unset($this->loaded[$owner->key()]);
+
+            return;
+        }
+
+        $prefix = $owner->accountId.':'.$owner->companyId.':';
+
+        foreach (array_keys($this->loaded) as $key) {
+            if (str_starts_with($key, $prefix)) {
+                unset($this->loaded[$key]);
+            }
+        }
     }
 
     /** @param array{mode: string, value: array<string,mixed>|null}|null $company */
@@ -131,7 +183,7 @@ final class ProfileResolver
 
         $rows = ['company' => [], 'establishment' => []];
 
-        foreach ($query->get(['section', 'establishment_id', 'mode', 'value', 'published_mode', 'published_value']) as $row) {
+        foreach ($query->get(self::COLUMNS) as $row) {
             $rows[$row->establishment_id === null ? 'company' : 'establishment'][$row->section] = $row;
         }
 
