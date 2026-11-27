@@ -1,7 +1,8 @@
+import Button from '@/components/Button/Button';
+import CompactButton from '@/components/CompactButton/CompactButton';
 import { useState } from 'react';
 import ApiForm from '@/components/ApiForm/ApiForm';
 import { Select } from '@/components/BusinessForm/BusinessFormFields';
-import Button from '@/components/Button/Button';
 import CardBox from '@/components/CardBox/CardBox';
 import InfoTooltip from '@/components/InfoTooltip/InfoTooltip';
 import Label, { type LabelVariant } from '@/components/Label/Label';
@@ -64,14 +65,8 @@ function ExceptionRow({ item, source, canEdit, onEdit, onDelete }: {
       </div>
       {canEdit && source === 'own' && (
         <div className="institutional__actions">
-          <button type="button" className="contact-fields__add waves-effect waves-light" aria-haspopup="dialog"
-            aria-label={`Editar ${kindLabel(item.kind).toLowerCase()} de ${formatPeriod(item)}`} onClick={onEdit}>
-            <span aria-hidden="true"><i className="fa fa-pencil" /></span>Editar
-          </button>
-          <button type="button" className="contact-fields__add waves-effect waves-light" aria-haspopup="dialog"
-            aria-label={`Excluir ${kindLabel(item.kind).toLowerCase()} de ${formatPeriod(item)}`} onClick={onDelete}>
-            <span aria-hidden="true"><i className="fa fa-trash" /></span>Excluir
-          </button>
+          <CompactButton icon="fa-pencil" aria-haspopup="dialog" aria-label={`Editar ${kindLabel(item.kind).toLowerCase()} de ${formatPeriod(item)}`} onClick={onEdit}>Editar</CompactButton>
+          <CompactButton icon="fa-trash" aria-haspopup="dialog" aria-label={`Excluir ${kindLabel(item.kind).toLowerCase()} de ${formatPeriod(item)}`} onClick={onDelete}>Excluir</CompactButton>
         </div>
       )}
     </li>
@@ -133,10 +128,7 @@ export default function InstitutionalHoursPanel({ owner, hours, writable, units 
         )}
         {writable && (
           <div className="institutional__actions">
-            <button type="button" className="contact-fields__add waves-effect waves-light" aria-haspopup="dialog"
-              data-tour="hours-add-exception" onClick={() => setEditing('new')}>
-              <span aria-hidden="true"><i className="fa fa-plus" /></span>Cadastrar exceção
-            </button>
+            <span data-tour="hours-add-exception"><CompactButton icon="fa-plus" aria-haspopup="dialog" onClick={() => setEditing('new')}>Cadastrar exceção</CompactButton></span>
           </div>
         )}
 

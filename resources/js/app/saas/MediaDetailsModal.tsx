@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import ApiForm from '@/components/ApiForm/ApiForm';
+import '@/components/BusinessForm/BusinessForm.css';
 import { Field } from '@/components/BusinessForm/BusinessFormFields';
 import Button from '@/components/Button/Button';
+import Table from '@/components/Table/Table';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import Label from '@/components/Label/Label';
 import Modal from '@/components/Modal/Modal';
@@ -56,23 +58,23 @@ export default function MediaDetailsModal({ owner, item, writable, onClose }: {
         </dl>
 
         <h4 className="institutional__subtitle">Variantes otimizadas</h4>
-        <table className="table table-sm media__variants" data-tour="media-variants">
+        <Table condensed className="media__variants" data-tour="media-variants">
           <thead><tr><th>Tipo</th><th>Dimensões</th><th>Tamanho</th></tr></thead>
           <tbody>
             {item.variants.map((variant) => (
               <tr key={variant.kind}><td>{variant.kind}</td><td>{variant.width} x {variant.height}</td><td>{formatBytes(variant.bytes)}</td></tr>
             ))}
           </tbody>
-        </table>
+        </Table>
 
         {item.can_update && writable ? (
-          <ApiForm action={base} method="patch" onSuccess={onClose} options={{ preserveScroll: true }}>
+          <ApiForm className="business-form" action={base} method="patch" onSuccess={onClose} options={{ preserveScroll: true }}>
             {({ errors, processing }) => (
               <>
                 <Field label="Texto alternativo" name="alt_text" defaultValue={item.alt_text ?? ''} maxLength={300} error={errors.alt_text}
                   info="Descreva a imagem. Obrigatório quando ela for conteúdo de página; uma imagem decorativa exige marcação explícita no uso." />
                 <Field label="Licença ou crédito" name="license_note" defaultValue={item.license_note ?? ''} maxLength={300} error={errors.license_note} />
-                <div className="business-form__actions-inline">
+                <div className="business-form__actions-inline business-form__control-start">
                   <Button tone="white" onClick={onClose}>Cancelar</Button>
                   <Button type="submit" tone="success" disabled={processing}>Salvar</Button>
                 </div>

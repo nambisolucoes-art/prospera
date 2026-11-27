@@ -47,3 +47,16 @@ export function isValidDatePrefix(value: string): boolean {
   }
   return true;
 }
+
+/**
+ * Completa uma data parcial só para o calendário acompanhar a digitação: com o dia (2 dígitos) já marca o dia, e o que
+ * falta do mês e do ano vem de `today`. Vazio quando o texto não permite uma data real.
+ */
+export function previewDate(value: string, today = new Date()): string {
+  const [day = '', month = '', year = ''] = value.split('/');
+  if (day.length !== 2) return '';
+  const fullMonth = month.length === 2 ? month : String(today.getMonth() + 1).padStart(2, '0');
+  const fullYear = year.length === 4 ? year : String(today.getFullYear());
+  const candidate = `${day}/${fullMonth}/${fullYear}`;
+  return isoDate(candidate) ? candidate : '';
+}

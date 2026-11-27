@@ -1,4 +1,7 @@
+import CompactButton from '@/components/CompactButton/CompactButton';
 import ChoiceControl from '@/components/ChoiceControl/ChoiceControl';
+import ClockPicker from '@/components/ClockPicker/ClockPicker';
+import './ContactFields.css';
 import type { HoursShift } from './InstitutionalProfile.types';
 
 export const blankShift = (): HoursShift => ({ start: '08:00', end: '12:00' });
@@ -12,20 +15,21 @@ function ShiftRow({ name, idPrefix, shift, error, onChange, onRemove }: {
 
   return (
     <div className="institutional__shift">
-      <label className="institutional__shift-field">
+      <div className="institutional__shift-field">
         <span className="institutional__shift-label">Das</span>
-        <input type="time" className="textInput" aria-label={`${name}: início`} value={shift.start}
-          onChange={(event) => onChange({ ...shift, start: event.target.value })} />
-      </label>
-      <label className="institutional__shift-field">
+        <ClockPicker id={`${idPrefix}-start`} label={`${name}: início`} value={shift.start}
+          onChange={(start) => onChange({ ...shift, start })} />
+      </div>
+      <div className="institutional__shift-field">
         <span className="institutional__shift-label">às</span>
-        <input type="time" className="textInput" aria-label={`${name}: término`} value={endOfDay ? '' : shift.end}
-          disabled={endOfDay} onChange={(event) => onChange({ ...shift, end: event.target.value })} />
-      </label>
+        <ClockPicker id={`${idPrefix}-end`} label={`${name}: término`} value={endOfDay ? '' : shift.end} disabled={endOfDay}
+          onChange={(end) => onChange({ ...shift, end })} />
+      </div>
       <ChoiceControl type="checkbox" tone="primary" id={`${idPrefix}-end-of-day`} label="Até o fim do dia (24:00)"
         checked={endOfDay} onChange={(checked) => onChange({ ...shift, end: checked ? '24:00' : '12:00' })} />
-      <button type="button" className="contact-fields__add waves-effect waves-light" aria-label={`Remover ${name}`} onClick={onRemove}>
-        <span aria-hidden="true"><i className="fa fa-trash" /></span>Remover turno
+      <button type="button" className="inputGroup__button contact-fields__remove waves-effect waves-light"
+        aria-label={`Remover ${name}`} title="Remover turno" onClick={onRemove}>
+        <i className="fa fa-times" aria-hidden="true" />
       </button>
       {error && <p className="formField__error institutional__shift-error" role="alert">{error}</p>}
     </div>
@@ -60,10 +64,7 @@ export default function InstitutionalShiftsEditor({ label, idPrefix, fieldName, 
           onRemove={() => onChange(shifts.filter((_, at) => at !== index))} />
       ))}
       {shifts.length < maxShifts && (
-        <button type="button" className="contact-fields__add waves-effect waves-light" aria-label={`Adicionar turno em ${label}`}
-          onClick={() => onChange([...shifts, blankShift()])}>
-          <span aria-hidden="true"><i className="fa fa-plus" /></span>Adicionar turno
-        </button>
+        <CompactButton icon="fa-plus" aria-label={`Adicionar turno em ${label}`} onClick={() => onChange([...shifts, blankShift()])}>Adicionar turno</CompactButton>
       )}
     </>
   );

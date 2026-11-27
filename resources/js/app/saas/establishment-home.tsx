@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ApiLink from '@/components/ApiLink/ApiLink';
 import Button from '@/components/Button/Button';
+import CardBox from '@/components/CardBox/CardBox';
 import { useApiPage } from '@/hooks/useApiPage';
 import { workspaceUrl } from '@/utils/organizationContext';
 import type { ContextEstablishment, SessionProps } from '@/types/Session.types';
@@ -24,7 +25,7 @@ export default function EstablishmentHome({ establishment, workspace, destinatio
     const suffix = destination ? `/${destination}` : '';
     return (
       <SaasLayout tenant title="Área de trabalho" breadcrumb={[{ label: 'Área de trabalho' }]}>
-        <div className="card-box" data-tour="establishment-home-summary">
+        <CardBox data-tour="establishment-home-summary">
           <h2>{destination ? 'Escolha o estabelecimento' : 'Estabelecimentos selecionados'}</h2>
           {destination && (
             <p data-tour="establishment-home-destination">
@@ -44,7 +45,7 @@ export default function EstablishmentHome({ establishment, workspace, destinatio
           <p data-tour="establishment-home-tabs">
             A seleção vale para esta aba. Abra um estabelecimento para operar nele.
           </p>
-        </div>
+        </CardBox>
       </SaasLayout>
     );
   }
@@ -89,7 +90,7 @@ function SingleEstablishment({ establishment }: { establishment: Establishment }
         </>
       }
     >
-      <div className="card-box establishment-home account-preview" data-tour="establishment-home-summary">
+      <CardBox className="establishment-home account-preview" data-tour="establishment-home-summary">
         <PreviewSection title="Estabelecimento atual">
           <dt>Estabelecimento</dt>
           <dd>{establishment.name}</dd>
@@ -104,7 +105,7 @@ function SingleEstablishment({ establishment }: { establishment: Establishment }
           <i className="fa fa-info-circle" aria-hidden="true" /> A unidade escolhida vale somente para esta aba.
           Outras abas continuam na unidade em que foram abertas, e cada operação é conferida pelo servidor.
         </p>
-      </div>
+      </CardBox>
       {preview && (
         <EstablishmentPreview
           establishment={{ id: establishment.id, name: establishment.name }}

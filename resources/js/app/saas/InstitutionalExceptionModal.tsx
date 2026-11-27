@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import BusinessForm, { BusinessFormActions, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
-import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
+import { DateField, Field, Select } from '@/components/BusinessForm/BusinessFormFields';
 import ChoiceControl from '@/components/ChoiceControl/ChoiceControl';
 import FormField from '@/components/FormField/FormField';
 import FormHelp from '@/components/FormHelp/FormHelp';
@@ -68,10 +68,9 @@ export default function InstitutionalExceptionModal({ owner, exception, onClose 
                 <p className="institutional__note">Esta alteração vale ao salvar e já aparece nos sites publicados.</p>
                 <Select label="Tipo" name="kind" value={kind} onChange={(value) => setKind(value as HourExceptionKind)}
                   error={errors.kind} options={exceptionKinds} />
-                <Field label="Primeiro dia" name="starts_on" type="date" value={startsOn} required error={errors.starts_on}
-                  onChange={(event) => setStartsOn(event.target.value)} />
-                <Field label="Último dia" name="ends_on" type="date" value={endsOn} error={errors.ends_on}
-                  onChange={(event) => setEndsOn(event.target.value)} info="Deixe em branco para uma data só. O último dia vale inteiro." />
+                <DateField label="Primeiro dia" name="starts_on" value={startsOn} required error={errors.starts_on} onChange={setStartsOn} />
+                <DateField label="Último dia" name="ends_on" value={endsOn} error={errors.ends_on} min={startsOn || undefined}
+                  onChange={setEndsOn} info="Deixe em branco para uma data só. O último dia vale inteiro." />
                 {kind === 'special_hours' && (
                   <FormField id="exception-shifts" label="Turnos" error={errors.shifts} layout="horizontal">
                     <div className="institutional__exception-shifts">

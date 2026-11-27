@@ -3,32 +3,6 @@
   margin-inline-start: 10px;
 }
 
-.contact-fields__add.waves-effect {
-  display: inline-flex;
-  align-items: stretch;
-  gap: 8px;
-  padding: 0 5px 0 0;
-  border: 1px solid #efefef;
-  border-radius: var(--bold-radius);
-  background: #efefef;
-  color: #797979;
-  font: 400 12px/20px var(--bold-font-body);
-  cursor: pointer;
-  transition: var(--bold-button-press-transition);
-}
-
-.contact-fields__add span {
-  display: inline-grid;
-  width: 39px;
-  place-items: center;
-  border-radius: var(--bold-radius) 0 0 var(--bold-radius);
-  background: rgba(0, 0, 0, .05);
-}
-
-.contact-fields__add:enabled:active { box-shadow: var(--bold-button-pressed-shadow); }
-.contact-fields__add:focus-visible { outline: 2px solid var(--bold-color-primary); outline-offset: 1px; }
-.contact-fields__add:disabled { opacity: .65; cursor: not-allowed; }
-
 .inputGroup__button.contact-fields__remove {
   width: 37px;
   border-color: #dc3545;

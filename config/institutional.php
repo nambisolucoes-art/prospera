@@ -2,17 +2,11 @@
 
 return [
     /*
-     * S06: catálogo fechado de fontes da identidade visual. Nenhuma URL de fonte nem CSS é aceito (seção 09.4).
+     * S06: catálogo fechado de fontes da identidade visual, as mesmas duas que o tema Bold carrega (globals.css). Nenhuma URL de fonte nem CSS é aceito (seção 09.4).
      */
     'fonts' => [
         'noto-sans' => 'Noto Sans',
         'source-sans-pro' => 'Source Sans Pro',
-        'open-sans' => 'Open Sans',
-        'roboto' => 'Roboto',
-        'lato' => 'Lato',
-        'montserrat' => 'Montserrat',
-        'merriweather' => 'Merriweather',
-        'playfair-display' => 'Playfair Display',
     ],
 
     // Redes sociais aceitas e os domínios permitidos para o link de cada uma.

@@ -1,3 +1,4 @@
+import CompactButton from '@/components/CompactButton/CompactButton';
 import { useState } from 'react';
 import { Select } from '@/components/BusinessForm/BusinessFormFields';
 import FormHelp from '@/components/FormHelp/FormHelp';
@@ -37,14 +38,8 @@ export default function InstitutionalHoursFields({ value, errors }: { value: Hou
         atender depois dela, use um turno até 24:00 num dia e outro a partir de 00:00 no dia seguinte.
       </FormHelp>
       <div className="institutional__hours-tools" data-tour="hours-copy">
-        <button type="button" className="contact-fields__add waves-effect waves-light"
-          onClick={() => copyMonday(['tue', 'wed', 'thu', 'fri'])}>
-          <span aria-hidden="true"><i className="fa fa-copy" /></span>Copiar segunda-feira para terça a sexta
-        </button>
-        <button type="button" className="contact-fields__add waves-effect waves-light"
-          onClick={() => copyMonday(['tue', 'wed', 'thu', 'fri', 'sat', 'sun'])}>
-          <span aria-hidden="true"><i className="fa fa-copy" /></span>Copiar segunda-feira para todos os dias
-        </button>
+        <CompactButton icon="fa-copy" onClick={() => copyMonday(['tue', 'wed', 'thu', 'fri'])}>Copiar segunda-feira para terça a sexta</CompactButton>
+        <CompactButton icon="fa-copy" onClick={() => copyMonday(['tue', 'wed', 'thu', 'fri', 'sat', 'sun'])}>Copiar segunda-feira para todos os dias</CompactButton>
       </div>
 
       {weekdays.map(({ key, label }) => {

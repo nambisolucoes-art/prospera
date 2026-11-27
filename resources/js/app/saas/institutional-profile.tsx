@@ -1,5 +1,6 @@
-import { useState } from 'react';
 import Button from '@/components/Button/Button';
+import CompactButton from '@/components/CompactButton/CompactButton';
+import { useState } from 'react';
 import CardBox from '@/components/CardBox/CardBox';
 import Label from '@/components/Label/Label';
 import InfoTooltip from '@/components/InfoTooltip/InfoTooltip';
@@ -115,27 +116,15 @@ export default function InstitutionalProfile({ owner, canUpdate, canPublish, sec
                   <InstitutionalSectionSummary sectionKey={section.key} resolved={section.draft} fonts={fonts} networks={networks} />
                   {writable && canUpdate && (
                     <div className="institutional__actions">
-                      <button type="button" className="contact-fields__add waves-effect waves-light" aria-haspopup="dialog"
-                        aria-label={`Editar ${section.label.toLowerCase()}`} onClick={() => setEditing(section)}>
-                        <span aria-hidden="true"><i className="fa fa-pencil" /></span>Editar
-                      </button>
+                      <CompactButton icon="fa-pencil" aria-haspopup="dialog" aria-label={`Editar ${section.label.toLowerCase()}`} onClick={() => setEditing(section)}>Editar</CompactButton>
                       {establishment && section.draft.mode === 'override' && !section.establishment_only && (
-                        <button type="button" className="contact-fields__add waves-effect waves-light" disabled={form.processing}
-                          aria-label={`Voltar a herdar ${section.label.toLowerCase()}`} onClick={() => changeMode(section, 'inherit')}>
-                          <span aria-hidden="true"><i className="fa fa-undo" /></span>Voltar a herdar
-                        </button>
+                        <CompactButton icon="fa-undo" disabled={form.processing} aria-label={`Voltar a herdar ${section.label.toLowerCase()}`} onClick={() => changeMode(section, 'inherit')}>Voltar a herdar</CompactButton>
                       )}
                       {establishment && section.can_disable && section.draft.mode !== 'disabled' && (
-                        <button type="button" className="contact-fields__add waves-effect waves-light" disabled={form.processing}
-                          aria-label={`Desativar ${section.label.toLowerCase()}`} onClick={() => changeMode(section, 'disabled')}>
-                          <span aria-hidden="true"><i className="fa fa-ban" /></span>Desativar
-                        </button>
+                        <CompactButton icon="fa-ban" disabled={form.processing} aria-label={`Desativar ${section.label.toLowerCase()}`} onClick={() => changeMode(section, 'disabled')}>Desativar</CompactButton>
                       )}
                       {establishment && section.draft.mode === 'disabled' && (
-                        <button type="button" className="contact-fields__add waves-effect waves-light" disabled={form.processing}
-                          aria-label={`Reativar ${section.label.toLowerCase()}`} onClick={() => changeMode(section, 'inherit')}>
-                          <span aria-hidden="true"><i className="fa fa-check" /></span>Reativar herdando
-                        </button>
+                        <CompactButton icon="fa-check" disabled={form.processing} aria-label={`Reativar ${section.label.toLowerCase()}`} onClick={() => changeMode(section, 'inherit')}>Reativar herdando</CompactButton>
                       )}
                     </div>
                   )}

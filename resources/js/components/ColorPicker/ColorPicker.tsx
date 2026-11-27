@@ -10,14 +10,29 @@ interface Picker {
   on: (event: string, callback: () => void) => Picker;
   off: (event: string) => Picker;
 }
+const hexColor = /^#[0-9a-f]{6}$/i;
+
+/**
+ * Seletor de cor hexadecimal do tema Bold. Aceita o campo vazio quando `required` é falso. O nome enviado ao servidor é
+ * `name` (padrão `color`) e o valor é sempre o texto do campo, no formato `#rrggbb`.
+ */
 export default function ColorPicker({
   defaultValue,
   error,
+  label = 'Cor',
+  name = 'color',
+  required = true,
+  id: givenId,
 }: {
   defaultValue: string;
   error?: string;
+  label?: string;
+  name?: string;
+  required?: boolean;
+  id?: string;
 }) {
-  const id = useId();
+  const generatedId = useId();
+  const id = givenId ?? generatedId;
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const instance = useRef<Picker | null>(null);
@@ -50,7 +65,7 @@ export default function ColorPicker({
       instance.current = $(root.current);
       instance.current.colorpicker({
         format: 'hex',
-        color: defaultValue,
+        ...(hexColor.test(defaultValue) ? { color: defaultValue } : {}),
         container: root.current,
         component: '.color-picker__button',
       });
@@ -76,10 +91,10 @@ export default function ColorPicker({
   return (
     <FormField
       id={id}
-      label="Cor"
+      label={label}
       layout="horizontal"
       error={error}
-      requiredIndicator
+      requiredIndicator={required}
     >
       <div
         ref={root}
@@ -100,15 +115,15 @@ export default function ColorPicker({
             <button
               type="button"
               className="inputGroup__button color-picker__button"
-              aria-label="Selecionar cor"
+              aria-label={`Selecionar cor: ${label}`}
               title="Selecionar cor"
               aria-haspopup="dialog"
             >
               <i
                 style={{
-                  backgroundColor: /^#[0-9a-f]{6}$/i.test(color)
+                  backgroundColor: hexColor.test(color)
                     ? color
-                    : defaultValue,
+                    : hexColor.test(defaultValue) ? defaultValue : 'transparent',
                 }}
               />
             </button>
@@ -117,10 +132,11 @@ export default function ColorPicker({
           <TextInput
             ref={input}
             id={id}
-            name="color"
+            name={name}
             defaultValue={defaultValue}
             maxLength={7}
-            required
+            placeholder="#rrggbb"
+            required={required}
             invalid={Boolean(error)}
             aria-describedby={error ? `${id}-error` : undefined}
             onChange={(event) => setColor(event.target.value)}

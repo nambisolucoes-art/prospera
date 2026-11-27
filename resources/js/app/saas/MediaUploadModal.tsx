@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import '@/components/BusinessForm/BusinessForm.css';
 import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
 import Button from '@/components/Button/Button';
 import FileDropzone from '@/components/FileDropzone/FileDropzone';
@@ -27,7 +28,7 @@ export default function MediaUploadModal({ owner, purposes, limits, onClose }: {
 
   return (
     <Modal open bootstrap manageFocus size="large" title="Enviar imagem" onClose={onClose}>
-      <div className="media__upload">
+      <div className="media__upload business-form">
         <p className="institutional__note">
           Tipos aceitos: {limits.types.join(', ')}. Até {limits.max_mb} MB e {limits.max_megapixels} megapixels. A imagem é otimizada
           ao enviar e fica na biblioteca de {owner.name}; enviar não publica nada.
@@ -46,7 +47,7 @@ export default function MediaUploadModal({ owner, purposes, limits, onClose }: {
         </div>
         {error && <p className="formField__error" role="alert">{error}</p>}
         <FormHelp>O texto alternativo e a licença podem ser editados depois, em Detalhes.</FormHelp>
-        <div className="business-form__actions-inline">
+        <div className="business-form__actions-inline business-form__control-start">
           <Button tone="white" onClick={onClose}>Cancelar</Button>
           <Button tone="success" disabled={!hasFile || sending} onClick={() => { setSending(true); setError(undefined); dropzone.current?.submit(); }}>Salvar</Button>
         </div>

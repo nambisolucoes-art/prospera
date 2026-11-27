@@ -1,7 +1,8 @@
+import Button from '@/components/Button/Button';
+import CompactButton from '@/components/CompactButton/CompactButton';
 import { useState } from 'react';
 import BusinessForm, { BusinessFormActions, BusinessFormRow, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
-import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
-import Button from '@/components/Button/Button';
+import { DateField, Field, Select } from '@/components/BusinessForm/BusinessFormFields';
 import ChoiceControl from '@/components/ChoiceControl/ChoiceControl';
 import FormField from '@/components/FormField/FormField';
 import FormHelp from '@/components/FormHelp/FormHelp';
@@ -150,30 +151,14 @@ export default function EmployeeAssignments({ personId, link, writable, onClose 
                     <div className="employees__assignment-actions">
                       {assignment.status !== 'ended' && link.active && (
                         <>
-                          <button type="button" className="employees__icon-button" title="Alterar função ou departamento"
-                            aria-label={`Alterar função ou departamento em ${assignment.establishment_name}`}
-                            onClick={() => setDialog({ mode: 'change', assignment })}>
-                            <i className="fa fa-exchange" aria-hidden="true" />
-                          </button>
+                          <button type="button" className="employees__icon-button" title="Alterar função ou departamento" aria-label={`Alterar função ou departamento em ${assignment.establishment_name}`} onClick={() => setDialog({ mode: 'change', assignment })}><i className="fa fa-exchange" aria-hidden="true" /></button>
                           {!assignment.is_primary && (
-                            <button type="button" className="employees__icon-button" title="Tornar principal"
-                            aria-label={`Tornar principal a lotação em ${assignment.establishment_name}`}
-                            onClick={() => setDialog({ mode: 'primary', assignment })}>
-                            <i className="fa fa-flag" aria-hidden="true" />
-                          </button>
+                            <button type="button" className="employees__icon-button" title="Tornar principal" aria-label={`Tornar principal a lotação em ${assignment.establishment_name}`} onClick={() => setDialog({ mode: 'primary', assignment })}><i className="fa fa-flag" aria-hidden="true" /></button>
                           )}
-                          <button type="button" className="employees__icon-button employees__icon-button--danger" title="Encerrar lotação"
-                            aria-label={`Encerrar a lotação em ${assignment.establishment_name}`}
-                            onClick={() => setDialog({ mode: 'end', assignment })}>
-                            <i className="fa fa-times" aria-hidden="true" />
-                          </button>
+                          <button type="button" className="employees__icon-button employees__icon-button--danger" title="Encerrar lotação" aria-label={`Encerrar a lotação em ${assignment.establishment_name}`} onClick={() => setDialog({ mode: 'end', assignment })}><i className="fa fa-times" aria-hidden="true" /></button>
                         </>
                       )}
-                      <button type="button" className="employees__icon-button" title="Corrigir lotação"
-                            aria-label={`Corrigir a lotação em ${assignment.establishment_name}`}
-                            onClick={() => setDialog({ mode: 'edit', assignment })}>
-                            <i className="fa fa-pencil" aria-hidden="true" />
-                          </button>
+                      <button type="button" className="employees__icon-button" title="Corrigir lotação" aria-label={`Corrigir a lotação em ${assignment.establishment_name}`} onClick={() => setDialog({ mode: 'edit', assignment })}><i className="fa fa-pencil" aria-hidden="true" /></button>
                     </div>
                   )}
                 </li>
@@ -182,17 +167,10 @@ export default function EmployeeAssignments({ personId, link, writable, onClose 
           )}
           <div className="employees__assignment-footer">
             {canAdd && (
-              <button type="button" className="contact-fields__add waves-effect waves-light" aria-haspopup="dialog"
-                aria-label="Adicionar lotação" onClick={() => setDialog({ mode: 'create' })}>
-                <span aria-hidden="true"><i className="fa fa-plus" /></span>Lotação
-              </button>
+              <CompactButton icon="fa-plus" aria-haspopup="dialog" aria-label="Adicionar lotação" onClick={() => setDialog({ mode: 'create' })}>Lotação</CompactButton>
             )}
             {ended.length > 0 && (
-              <button type="button" className="contact-fields__add waves-effect waves-light" aria-pressed={history}
-                onClick={() => setHistory((value) => !value)}>
-                <span aria-hidden="true"><i className="fa fa-history" /></span>
-                {history ? 'Ocultar histórico' : `Histórico (${ended.length})`}
-              </button>
+              <CompactButton icon="fa-history" aria-pressed={history} onClick={() => setHistory((value) => !value)}>{history ? 'Ocultar histórico' : `Histórico (${ended.length})`}</CompactButton>
             )}
           </div>
         </BusinessFormSection>
@@ -268,8 +246,8 @@ function AssignmentDialog({ dialog, base, options, siblings, onClose }: {
                     options={options.establishments.map((item) => ({ value: item.code, label: item.name }))} />
                   {catalogs}
                   <BusinessFormRow>
-                    <Field key={`starts-${establishment}`} label="Início" name="starts_on" type="date" defaultValue={today} required error={errors.starts_on} />
-                    <Field label="Fim" name="ends_on" type="date" error={errors.ends_on}
+                    <DateField key={`starts-${establishment}`} label="Início" name="starts_on" defaultValue={today} required error={errors.starts_on} />
+                    <DateField label="Fim" name="ends_on" error={errors.ends_on}
                       info="Último dia de vigência, inclusive. Deixe em branco para sem data final." />
                   </BusinessFormRow>
                   <FormField id="assignment-primary" label="Principal" passiveLabel layout="horizontal" error={errors.is_primary}>
@@ -285,9 +263,9 @@ function AssignmentDialog({ dialog, base, options, siblings, onClose }: {
                     info="A unidade de uma lotação não muda. Encerre a lotação e cadastre outra." />
                   {catalogs}
                   <BusinessFormRow>
-                    <Field label="Início" name="starts_on" type="date" defaultValue={assignment.starts_on} required
+                    <DateField label="Início" name="starts_on" defaultValue={assignment.starts_on} required
                       error={errors.starts_on} />
-                    <Field label="Fim" name="ends_on" type="date" defaultValue={assignment.ends_on ?? ''} error={errors.ends_on} />
+                    <DateField label="Fim" name="ends_on" defaultValue={assignment.ends_on ?? ''} error={errors.ends_on} />
                   </BusinessFormRow>
                   {contactFields(errors, processing)}
                   <FormHelp className="business-form__control-start">
@@ -299,14 +277,14 @@ function AssignmentDialog({ dialog, base, options, siblings, onClose }: {
               {mode === 'change' && assignment && (
                 <>
                   {catalogs}
-                  <Field label="A partir de" name="effective_on" type="date" defaultValue={today > assignment.starts_on ? today : assignment.starts_on}
+                  <DateField label="A partir de" name="effective_on" defaultValue={today > assignment.starts_on ? today : assignment.starts_on}
                     required error={errors.effective_on}
                     info="O período atual termina no dia anterior e o novo começa nesta data. Se o período atual começa nesta data, ele é corrigido." />
                 </>
               )}
               {mode === 'end' && assignment && (
                 <>
-                  <Field label="Último dia" name="ends_on" type="date" defaultValue={today > assignment.starts_on ? today : assignment.starts_on}
+                  <DateField label="Último dia" name="ends_on" defaultValue={today > assignment.starts_on ? today : assignment.starts_on}
                     required error={errors.ends_on} info="A lotação vale até o fim deste dia." />
                   {!needsHeir && errors.new_primary_id && (
                     <p className="formField__error" role="alert">{errors.new_primary_id}</p>

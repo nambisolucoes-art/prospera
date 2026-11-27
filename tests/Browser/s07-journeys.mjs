@@ -39,6 +39,14 @@ const choose = async (scope, page, label) => {
   await scope.getByRole('combobox').first().click();
   await page.getByRole('option', { name: label, exact: true }).last().click();
 };
+// Seletores do tema Bold (ClockPicker e DatePicker), no lugar de input type=time e type=date: o texto digitado é 24 h e DD/MM/AAAA.
+const clocks = (scope) => scope.locator('.clockPicker input');
+const typeTime = async (field, value) => { await field.fill(value); await field.blur(); };
+const typeDate = async (scope, label, iso) => {
+  const [y, m, d] = iso.split('-');
+  const field = scope.getByRole('textbox', { name: label, exact: true });
+  await field.fill(`${d}/${m}/${y}`); await field.blur();
+};
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
 // 1. Empresa: horário semanal, copiar dias, turno até 24:00 e validação por campo -----------------------------------
@@ -51,18 +59,18 @@ await page.waitForTimeout(600);
 const mon = page.locator('[data-day=mon]');
 await choose(mon, page, 'Aberto');
 await mon.getByRole('button', { name: 'Adicionar turno em Segunda-feira' }).click();
-let times = mon.locator('input[type=time]');
-await times.nth(0).fill('10:00'); await times.nth(1).fill('09:00'); // fim antes do início: erro do servidor por campo
+let times = clocks(mon);
+await typeTime(times.nth(0), '10:00'); await typeTime(times.nth(1), '09:00'); // fim antes do início: erro do servidor por campo
 await page.getByRole('dialog').getByRole('button', { name: 'Salvar' }).click();
 await page.waitForTimeout(800);
 check(await page.locator('[data-day=mon] .formField__error').count() > 0, 'turno invertido mostra erro no campo do turno');
-await times.nth(0).fill('08:00'); await times.nth(1).fill('12:00');
-await times.nth(2).fill('14:00'); await times.nth(3).fill('18:00');
+await typeTime(times.nth(0), '08:00'); await typeTime(times.nth(1), '12:00');
+await typeTime(times.nth(2), '14:00'); await typeTime(times.nth(3), '18:00');
 await page.getByRole('button', { name: 'Copiar segunda-feira para terça a sexta' }).click();
 const sat = page.locator('[data-day=sat]');
 await choose(sat, page, 'Aberto');
-times = sat.locator('input[type=time]');
-await times.nth(0).fill('08:00'); await times.nth(1).fill('12:00');
+times = clocks(sat);
+await typeTime(times.nth(0), '08:00'); await typeTime(times.nth(1), '12:00');
 await page.getByRole('dialog').getByRole('button', { name: 'Salvar' }).click();
 await settle(page);
 const week = await page.locator('[data-testid=hours-week]').innerText();
@@ -79,8 +87,8 @@ await choose(page.locator('.modalLayer__dialog').last().locator('.formField').fi
 await page.waitForSelector('[data-tour=hours-editor]');
 await page.waitForTimeout(300);
 const gMon = page.locator('[data-day=mon]');
-const gTimes = gMon.locator('input[type=time]');
-await gTimes.nth(0).fill('09:00'); await gTimes.nth(1).fill('13:00');
+const gTimes = clocks(gMon);
+await typeTime(gTimes.nth(0), '09:00'); await typeTime(gTimes.nth(1), '13:00');
 await page.getByRole('dialog').getByRole('button', { name: 'Salvar' }).click();
 await settle(page);
 check(/Informação própria/.test(await page.locator('[data-section=hours_weekly]').innerText()), 'unidade personalizada mostra horário próprio');
@@ -93,7 +101,7 @@ await page.getByRole('button', { name: 'Cadastrar exceção' }).click();
 await page.waitForSelector('[data-tour=hours-impact]');
 await page.waitForTimeout(500);
 const dialog = page.locator('.modalLayer__dialog').last();
-await dialog.locator('input[name=starts_on]').fill('2099-12-25');
+await typeDate(dialog, 'Primeiro dia', '2099-12-25');
 await page.waitForTimeout(900);
 check(/herdam o horário da empresa/.test(await dialog.locator('[data-tour=hours-impact]').innerText()), 'resumo lista as unidades que herdam');
 check(/Guanambi/.test(await dialog.locator('[data-tour=hours-impact]').innerText()), 'resumo nomeia a unidade com horário próprio');
@@ -117,10 +125,10 @@ await page.getByRole('button', { name: 'Cadastrar exceção' }).click();
 await page.waitForTimeout(600);
 let d = page.locator('.modalLayer__dialog').last();
 await choose(d.locator('.formField').first(), page, 'Horário especial');
-await d.locator('input[name=starts_on]').fill('2099-12-31');
+await typeDate(d, 'Primeiro dia', '2099-12-31');
 await d.locator('input[name=note]').fill('Véspera de ano novo');
-times = d.locator('input[type=time]');
-await times.nth(0).fill('08:00'); await times.nth(1).fill('13:00');
+times = clocks(d);
+await typeTime(times.nth(0), '08:00'); await typeTime(times.nth(1), '13:00');
 await d.getByRole('button', { name: 'Salvar' }).click();
 await settle(page);
 let list = await page.locator('[data-tour=hours-exceptions]').innerText();
@@ -128,7 +136,7 @@ check(/Horário especial\s+31\/12\/2099: 08:00 às 13:00/.test(list) && list.inc
 await page.getByRole('button', { name: /Editar horário especial de 31\/12\/2099/ }).click();
 await page.waitForTimeout(600);
 d = page.locator('.modalLayer__dialog').last();
-await d.locator('input[name=ends_on]').fill('2099-12-30');
+await typeDate(d, 'Último dia', '2099-12-30');
 await d.getByRole('button', { name: 'Salvar' }).click();
 await page.waitForTimeout(800);
 check(await d.locator('.formField__error').count() > 0, 'último dia antes do primeiro é recusado no campo');

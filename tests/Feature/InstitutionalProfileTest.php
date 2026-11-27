@@ -175,7 +175,7 @@ class InstitutionalProfileTest extends TestCase
     {
         $this->saveCompany('about', ['title' => 'Sobre nós']);
         $this->saveCompany('seo_defaults', ['title' => 'Gartan', 'description' => 'Loja de roupas.']);
-        $this->saveCompany('typography', ['heading' => 'roboto']);
+        $this->saveCompany('typography', ['heading' => 'source-sans-pro']);
 
         $this->publish($this->companyUrl('', '/publicar'), ['about', 'seo_defaults', 'typography'])->assertNoContent();
 
@@ -529,7 +529,7 @@ class InstitutionalProfileTest extends TestCase
     public function test_a_failed_publication_leaves_no_partial_state(): void
     {
         $this->saveCompany('about', ['title' => 'Sobre']);
-        $this->saveCompany('typography', ['heading' => 'lato']);
+        $this->saveCompany('typography', ['heading' => 'source-sans-pro']);
 
         // A segunda gravação de seção falha depois de a primeira já ter sido executada na transação.
         $updates = 0;

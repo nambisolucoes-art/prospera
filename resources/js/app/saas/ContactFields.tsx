@@ -1,3 +1,4 @@
+import CompactButton from '@/components/CompactButton/CompactButton';
 import { useRef, useState } from 'react';
 import { BusinessFormRow, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
 import { Field, type Errors } from '@/components/BusinessForm/BusinessFormFields';
@@ -42,10 +43,7 @@ export function AdditionalContacts({ kind, initial = [], errors, namePrefix = 'd
           : <Field key={id} {...props} type="email" leadingIcon="fa fa-envelope-o" />;
       })}
       <div className="contact-fields__actions">
-        <button type="button" className="contact-fields__add waves-effect waves-light" aria-label={`Adicionar ${label.toLowerCase()}`}
-          disabled={rows.length >= 20} onClick={add}>
-          <span aria-hidden="true"><i className="fa fa-plus" /></span>{label}
-        </button>
+        <CompactButton icon="fa-plus" aria-label={`Adicionar ${label.toLowerCase()}`} disabled={rows.length>= 20} onClick={add}>{label}</CompactButton>
         {errors[errorName] && <span className="formField__error" role="alert">{errors[errorName]}</span>}
       </div>
     </>

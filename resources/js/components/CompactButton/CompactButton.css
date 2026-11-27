@@ -1,0 +1,25 @@
+.compact-button.waves-effect {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 0 5px 0 0;
+  border: 1px solid #efefef;
+  border-radius: var(--bold-radius);
+  background: #efefef;
+  color: #797979;
+  font: 400 12px/20px var(--bold-font-body);
+  cursor: pointer;
+  transition: var(--bold-button-press-transition);
+}
+
+.compact-button span {
+  display: inline-grid;
+  width: 39px;
+  place-items: center;
+  border-radius: var(--bold-radius) 0 0 var(--bold-radius);
+  background: rgba(0, 0, 0, .05);
+}
+
+.compact-button:enabled:active { box-shadow: var(--bold-button-pressed-shadow); }
+.compact-button:focus-visible { outline: 2px solid var(--bold-color-primary); outline-offset: 1px; }
+.compact-button:disabled { opacity: .65; cursor: not-allowed; }

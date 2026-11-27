@@ -3,7 +3,7 @@ import InputGroup from '@/components/InputGroup/InputGroup';
 import TextInput from '@/components/TextInput/TextInput';
 import { loadExternalScript } from '@/utils/loadExternalScript';
 import { loadExternalStylesheet } from '@/utils/loadExternalStylesheet';
-import { dateCaret, displayDate, isoDate, isValidDatePrefix, maskDate } from './DatePicker.utils';
+import { dateCaret, previewDate, displayDate, isoDate, isValidDatePrefix, maskDate } from './DatePicker.utils';
 import './DatePicker.css';
 
 type DatePickerCollection = {
@@ -60,6 +60,8 @@ export default function DatePicker({
   const emitted = useRef(value);
   const syncing = useRef(false);
   const pendingCaret = useRef<number | null>(null);
+  const viewBase = useRef(new Date());
+  const displayRef = useRef(display);
 
   function emit(next: string) {
     if (next === emitted.current) return;
@@ -89,11 +91,40 @@ export default function DatePicker({
     setInvalidEntry(false);
   }, [value]);
 
+  // O calendário acompanha a digitação desde o dia: o que falta (mês ou ano) vem do último mês e ano já digitados (no
+  // início, de hoje), só para marcar e navegar. O texto do campo não muda e o valor só é emitido com a data completa.
+  function previewTyped() {
+    const field = input.current;
+    if (!field) return;
+    const typed = displayRef.current;
+    const [, typedMonth = '', typedYear = ''] = typed.split('/');
+    if (/^(0[1-9]|1[0-2])$/.test(typedMonth)) viewBase.current.setMonth(Number(typedMonth) - 1, 1);
+    if (typedYear.length === 4) viewBase.current.setFullYear(Number(typedYear));
+    const candidate = previewDate(typed, viewBase.current);
+    if (candidate && candidate !== typed) field.value = candidate;
+    try {
+      syncing.current = true;
+      instance.current?.datepicker('update');
+    } finally {
+      syncing.current = false;
+      if (field.value !== typed) field.value = typed;
+    }
+  }
+  const previewRef = useRef(previewTyped);
+  previewRef.current = previewTyped;
+  displayRef.current = display;
+
+  useEffect(() => { previewRef.current(); }, [display]);
+
   useEffect(() => {
-    syncing.current = true;
-    instance.current?.datepicker('update');
-    syncing.current = false;
-  }, [display]);
+    // O plugin relê o texto parcial a cada tecla e apagaria a seleção, o que piscava o calendário antes da prévia. A
+    // digitação (teclas que mudam o texto) não chega a ele: a prévia acima já cuida do calendário.
+    const field = input.current;
+    const navigation = ['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Tab', ' '];
+    const block = (event: KeyboardEvent) => { if (!navigation.includes(event.key)) event.stopImmediatePropagation(); };
+    field?.addEventListener('keyup', block, true);
+    return () => field?.removeEventListener('keyup', block, true);
+  }, []);
 
   useEffect(() => {
     instance.current?.datepicker('setStartDate', min ? displayDate(min) : '');
@@ -115,6 +146,7 @@ export default function DatePicker({
         format: 'dd/mm/yyyy',
         autoclose: true,
         todayHighlight: true,
+        orientation: 'top auto', // no plugin, "top" abre o calendário abaixo do campo
         forceParse: false,
         clearBtn: true,
         startDate: min ? displayDate(min) : undefined,
@@ -153,7 +185,7 @@ export default function DatePicker({
           <i className="fa fa-calendar" aria-hidden="true" />
         </button>
       }>
-        <TextInput ref={input} id={id} name={name} value={display} placeholder={placeholder} required={required}
+        <TextInput ref={input} id={id} value={display} placeholder={placeholder} required={required}
           disabled={disabled} invalid={invalid || invalidEntry} inputMode="numeric" autoComplete="off"
           aria-label={label} aria-describedby={description}
           onChange={(event) => edit(event.target.value, event.target.selectionStart ?? event.target.value.length)}
@@ -175,6 +207,8 @@ export default function DatePicker({
             }
           }} />
       </InputGroup>
+      {/* O campo visível mostra DD/MM/AAAA; o formulário recebe sempre AAAA-MM-DD, só quando a data está completa. */}
+      {name && <input type="hidden" name={name} value={value} />}
       {invalidEntry && <span id={`${id}-date-error`} role="alert" className="datePicker__error">Informe uma data real no formato DD/MM/AAAA.</span>}
       {loadFailed && <span id={`${id}-picker-error`} role="alert" className="datePicker__error">Não foi possível carregar o calendário. Digite a data no formato DD/MM/AAAA.</span>}
     </div>

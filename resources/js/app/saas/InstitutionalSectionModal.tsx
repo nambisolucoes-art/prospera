@@ -1,6 +1,6 @@
 import { useId, useState } from 'react';
 import BusinessForm, { BusinessFormActions, BusinessFormSection } from '@/components/BusinessForm/BusinessForm';
-import { Field, Select } from '@/components/BusinessForm/BusinessFormFields';
+import { ColorField, Field, Select } from '@/components/BusinessForm/BusinessFormFields';
 import FormField from '@/components/FormField/FormField';
 import FormHelp from '@/components/FormHelp/FormHelp';
 import Modal from '@/components/Modal/Modal';
@@ -48,18 +48,6 @@ function TextAreaField({ label, name, initial, errors, rows = 3, maxLength }: {
   );
 }
 
-function ColorField({ label, name, initial, errors }: { label: string; name: string; initial: string; errors: Errors }) {
-  const [color, setColor] = useState(initial);
-  const valid = /^#[0-9a-fA-F]{6}$/.test(color);
-
-  return (
-    <Field label={label} name={`value[${name}]`} value={color} maxLength={7} error={errors[`value.${name}`]}
-      onChange={(event) => setColor(event.target.value)} placeholder="#rrggbb"
-      controlAside={<span className="institutional__swatch institutional__swatch--field" aria-hidden="true"
-        style={{ background: valid ? color : 'transparent' }} />} />
-  );
-}
-
 function Fields({ section, value, errors, fonts, networks }: {
   section: ProfileSection; value: Value; errors: Errors; fonts: ProfileFont[]; networks: ProfileNetwork[];
 }) {
@@ -74,7 +62,7 @@ function Fields({ section, value, errors, fonts, networks }: {
           <FormHelp className="business-form__control-start">
             O texto precisa ter contraste de pelo menos 4,5 para 1 com o fundo, e a cor principal de pelo menos 3 para 1.
           </FormHelp>
-          {colors.map(([name, label]) => <ColorField key={name} label={label} name={name} initial={str(value[name])} errors={errors} />)}
+          {colors.map(([name, label]) => <ColorField key={name} label={label} name={`value[${name}]`} defaultValue={str(value[name])} error={errors[`value.${name}`]} />)}
         </>
       );
     }
