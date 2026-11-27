@@ -2,11 +2,26 @@ import { useEffect, useRef, type RefObject, type MutableRefObject } from 'react'
 import { loadExternalScript } from '@/utils/loadExternalScript';
 import type { DropzoneConstructor, DropzoneInstance, FileDropzoneProps } from './FileDropzone.types';
 
+// Cabeçalhos do envio para a API do Laravel: sessão com proteção CSRF e respostas em JSON.
+function uploadHeaders(): Record<string, string> {
+  const cookie = document.cookie.split('; ').find((item) => item.startsWith('XSRF-TOKEN='));
+  return { Accept: 'application/json', ...(cookie ? { 'X-XSRF-TOKEN': decodeURIComponent(cookie.slice('XSRF-TOKEN='.length)) } : {}) };
+}
+
+// A mensagem de erro útil: a do campo `file` da validação do Laravel, a mensagem geral ou o texto do Dropzone.
+function responseMessage(message: unknown): string {
+  if (message && typeof message === 'object') {
+    const body = message as { errors?: { file?: string[] }; message?: string; error?: string };
+    return body.errors?.file?.[0] ?? body.message ?? body.error ?? 'Não foi possível enviar o arquivo.';
+  }
+  return String(message);
+}
+
 export function useFileDropzone(host: RefObject<HTMLDivElement | null>, props: FileDropzoneProps): MutableRefObject<DropzoneInstance | undefined> {
   const instance = useRef<DropzoneInstance | undefined>(undefined);
   const callbacks = useRef(props);
   callbacks.current = props;
-  const { uploadUrl, maxFileSizeMb = 256, acceptedFiles } = props;
+  const { uploadUrl, maxFileSizeMb = 256, acceptedFiles, autoProcess = true, maxFiles } = props;
   useEffect(() => {
     let cancelled = false;
     let element: HTMLDivElement | undefined;
@@ -23,7 +38,8 @@ export function useFileDropzone(host: RefObject<HTMLDivElement | null>, props: F
       host.current.append(element);
       const dropzone = new Dropzone(element, {
         url: uploadUrl ?? '#', maxFilesize: maxFileSizeMb, acceptedFiles,
-        autoProcessQueue: Boolean(uploadUrl),
+        autoProcessQueue: Boolean(uploadUrl) && autoProcess,
+        maxFiles, withCredentials: true, headers: uploadHeaders(),
         dictDefaultMessage: 'Solte arquivos para enviar',
         dictFallbackMessage: 'Seu navegador não suporta arrastar arquivos.',
         dictFallbackText: 'Selecione os arquivos para enviar.',
@@ -38,16 +54,21 @@ export function useFileDropzone(host: RefObject<HTMLDivElement | null>, props: F
       element.addEventListener('keydown', (event: KeyboardEvent) => {
         if (event.target === element && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); element?.click(); }
       });
+      dropzone.on('sending', (_file, _xhr, formData) => {
+        for (const [name, value] of Object.entries(callbacks.current.params ?? {})) (formData as FormData).append(name, value);
+      });
       dropzone.on('addedfile', () => callbacks.current.onFilesChange?.([...dropzone.files]));
       dropzone.on('removedfile', () => callbacks.current.onFilesChange?.([...dropzone.files]));
       dropzone.on('success', (file, response) => callbacks.current.onSuccess?.(file as File, response));
       dropzone.on('error', (file, message) => {
-        const text = message && typeof message === 'object' && 'error' in message ? String(message.error) : String(message);
+        const text = responseMessage(message);
         callbacks.current.onError?.(file as File, text);
+        // Arquivo recusado (tipo, tamanho ou servidor) sai da fila: a pessoa escolhe outro sem ficar com a seleção travada.
+        if (callbacks.current.removeOnError) dropzone.removeFile(file as File);
       });
     }
     void initialize().catch((error: unknown) => console.error('Não foi possível carregar o upload de arquivos.', error));
     return () => { cancelled = true; instance.current?.destroy(); instance.current = undefined; element?.remove(); };
-  }, [host, uploadUrl, maxFileSizeMb, acceptedFiles]);
+  }, [host, uploadUrl, maxFileSizeMb, acceptedFiles, autoProcess, maxFiles]);
   return instance;
 }

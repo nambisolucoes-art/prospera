@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Documento | Plano oficial de execução da frente Institucional, Equipe e Sites White Label |
-| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **S01 a S07 estão concluídas e homologadas tecnicamente** (seções 28 a 33; as seções 28 a 31 preservam a classificação original de revisão). **S07 concluída e homologada tecnicamente em 26/11/2026** (seção 34). S08 a S15 não foram iniciadas |
+| Situação do documento | **Contrato institucional formalizado (S02 concluída em 24/11/2026), com decisões aprovadas e pendências explícitas.** Revisão 3 executou a S02 (seção 27) sobre a investigação da S01 (seção 26). **S01 a S08 estão concluídas e homologadas tecnicamente** (seções 28 a 33; as seções 28 a 31 preservam a classificação original de revisão). **S07 concluída e homologada tecnicamente em 26/11/2026** (seção 34). **S08 concluída e homologada tecnicamente em 27/11/2026** (seção 35); S09 a S15 não foram iniciadas |
 | Base de código auditada | Branch `feat/pagina-inicial`, commit `33fd8df`, árvore de trabalho limpa |
 | Data da auditoria | 24/11/2026 |
 | Antecessor | Briefing `prospera_plano_institucional_white_label.md` (fora do repositório) e a análise aprovada na sessão de 24/11/2026 |
@@ -1578,7 +1578,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 
 ## 25. Quadro de acompanhamento
 
-**Estado geral (atualizado na seção 34): S01 a S07 concluídas e homologadas tecnicamente.** O texto original deste quadro registrava S01 e S02 concluídas e as etapas S03 a S15 ainda não iniciadas, e o histórico segue nas seções 26 a 32. A S07 foi autorizada e executada em 26/11/2026 (seção 34); as etapas S08 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
+**Estado geral (atualizado na seção 35): S01 a S08 concluídas e homologadas tecnicamente.** O texto original deste quadro registrava S01 e S02 concluídas e as etapas S03 a S15 ainda não iniciadas, e o histórico segue nas seções 26 a 32. A S07 foi autorizada e executada em 26/11/2026 (seção 34); as etapas S08 a S15 não foram autorizadas nem iniciadas. A S01 foi uma verificação e a S02 é exclusivamente documental: nenhum código, migration, rota, tela, seed, asset, dependência, permissão real, Docker ou dado da aplicação foi alterado. Os artefatos versionáveis alterados estão listados na seção 27.1.
 
 | Etapa | Nome | Estado | Referência |
 | --- | --- | --- | --- |
@@ -1589,7 +1589,7 @@ S14: worker e agendador (PD2-14), H5 e PD2-02, PD2-11
 | S05 | Lotações e histórico (com o complemento de contatos por lotação) | **Concluída e homologada tecnicamente, inclusive o complemento** (aprovação do responsável registrada na seção 33). Implementação registrada em 26/11/2026; commits `c8a272e` e `b0d14b5` | Seções 30, 31 e 33 |
 | S06 | Perfil institucional e herança | **Concluída e homologada tecnicamente** (registrada em 26/11/2026). Commit `458d147` | Seções 32 e 33 |
 | S07 | Horários e exceções | **Concluída e homologada tecnicamente em 26/11/2026**, após a revisão dirigida da seção 34.9. Implementada sobre a `main` em `a41c83b` (validação em 34.4) | Seção 34 |
-| S08 | Biblioteca de mídia | Pendente | |
+| S08 | Biblioteca de mídia | **Concluída e homologada tecnicamente em 27/11/2026.** Processamento síncrono comprovado por medição; PD2-05 (armazenamento e CDN de produção) segue pendente | Seção 35 |
 | S09 | Perfil público do colaborador | Pendente | |
 | S10 | Sites, páginas, blocos e revisões (somente retaguarda) | Pendente | |
 | S11 | Publicação em subdomínio gerenciado (primeira superfície pública) | Pendente | |
@@ -2222,3 +2222,137 @@ A aprovação para revisão final pediu três verificações. Todas passaram; ne
 **Resultado final.** Suíte PHP **451 testes, 6.132 asserções** (os 448 anteriores mais 3 desta revisão: `24:00`, exceção corporativa posterior e o caso de dado `fim 24:01`), 56 testes de S05 e fusos em separado, PHPStan sem erros, Pint limpo, `npm run check` e 20 testes de frontend sem erros, Chromium sem erro de JavaScript nem 5xx. As provas de PostgreSQL, concorrência e FrankenPHP da seção 34.4 não dependem do que mudou nesta revisão (testes e texto) e valem como estão.
 
 **Situação: S07 concluída e homologada tecnicamente em 26/11/2026.** S08 não iniciada. A integração e a implantação dependem de autorização própria.
+
+## 35. Registro da S08: Biblioteca de mídia
+
+**Estado: S08 concluída e homologada tecnicamente em 27/11/2026**, após o fechamento da prova comparativa de EXIF e do limite prático de memória (35.7, 35.6 e 35.16). Commit local exclusivo da S08; sem push nem merge. A S09 não foi iniciada.
+
+### 35.1 Estado inicial do Git
+
+`main` em `198b076` (S01 a S07 homologadas). Branch `feat/s08-biblioteca-midia`. Nenhuma migration oficial, container oficial, Compose, `Dockerfile` ou dependência foi alterada.
+
+### 35.2 Decisão central: o processamento permaneceu **síncrono**
+
+A medição (35.9) reprovou a hipótese de que 25 ms bastassem, mas **aprovou o síncrono** com o conjunto real de variantes: o pior caso aceito (JPEG de 18 MP, 3 variantes) leva cerca de 650 ms em média (p95 737 ms) com pico de 104 MB sob `memory_limit` de 128 MB, bem abaixo do orçamento de tempo de 5 s. Imagem que não cabe é recusada com 422 **antes** de decodificar. Por isso não há fila, worker, agendador, Redis nem alteração de Compose (PD2-14 não é acionada). Não existe estado `processing` nem `failed` na interface.
+
+### 35.3 Arquitetura e modelo de dados
+
+Domínio `app/Domains/Midia` (Domain, Application, Infrastructure, UI), no padrão do projeto: Create e Update separados, Data valida formato, Model decide (`register`/`revise`), Actions `final readonly` com `Gate::authorize` literal e `AuditLog::transaction()`.
+
+- Actions: `UploadMediaAction`, `GenerateMediaVariantsAction`, `WriteMediaFilesAction`, `DiscardMediaFilesAction`, `UpdateMediaAction`, `DeleteMediaAction`, `RemoveUnusedMediaAction`, `PurgeMediaResiduesAction`, `LockMediaOwnerAction`. Queries: `ListMediaQuery`, `FindMediaQuery`, `MediaIsInUseQuery`, `ListMediaResiduesQuery`.
+- Contratos (o domínio não conhece disco nem fornecedor): `MediaStorage`, `ImageInspector`, `ImageVariantFactory`, `MediaUsageChecker`, `MediaPipelineProbe` (pontos de falha para teste). Implementações: `DiskMediaStorage`, `GdImageInspector`, `GdVariantFactory`, `ExifOrientationReader`.
+- `media_assets` (`account_id`, `company_id`, `establishment_id` opcional, `purpose`, `original_path`, `mime`, `bytes`, `width`, `height`, `sha256`, `alt_text`, `license_note`, `status`, `uploaded_by`) e `media_variants` (`media_asset_id`, `company_id`, `kind`, `public_path`, `mime`, `bytes`, `width`, `height`). **Sem tabela polimórfica.**
+- Banco (PostgreSQL 18): FK composta `(company_id, account_id)` para empresas, `(establishment_id, company_id)` para estabelecimentos e `(media_asset_id, company_id)` para variantes; `UNIQUE (id, company_id)`; `UNIQUE (original_path)`; CHECK de `purpose`, `status` (`ready`, `removal_requested`), `mime` (JPEG, PNG, WebP), dimensões e bytes positivos e `sha256` de 64 caracteres; índice `(company_id, establishment_id, created_at)`; todas as FKs `RESTRICT`.
+- Catálogo de usos fechado (`logo`, `banner`, `gallery`, `employee_photo`, `og_image`) e de larguras por uso, **só em `config/media.php`**. O cliente nunca envia dimensões. Dono (empresa e unidade) e uso não mudam por edição.
+
+### 35.4 Discos, privacidade e distinção processado x publicável
+
+Originais em `media-originals` (`storage/app/private/media`) e derivados em `media-variants`, ambos privados e fora de `public/`. Todo arquivo sai por rota autenticada e autorizada (`.../midia/{id}/variantes/{tipo}` com `account.media.list`; `.../original` só com `account.media.update`, como anexo, porque o original pode ter EXIF e GPS). Cabeçalhos: `nosniff`, `Cache-Control: private, no-store`, CSP `default-src 'none'; sandbox`. Caminhos opacos (ULID), nunca em resposta ou tela. **Derivado processado não é derivado autorizado para exposição pública:** nenhuma URL pública é devolvida, inclusive para `employee_photo`; a exposição pública nasce com a publicação (S11) e o consentimento (S09). **PD2-05 (armazenamento e CDN de produção) continua pendente:** o disco local atende o laboratório e a interface `MediaStorage` permite trocá-lo sem tocar nas Actions.
+
+### 35.5 Upload e validações
+
+Barreiras nesta ordem, cada uma recusando com 422 e mensagem clara: bytes (5 MB), tipo pelo **conteúdo** (nome, extensão e `Content-Type` do navegador são ignorados), dimensões do cabeçalho (lado máximo 12.000 px e 20 MP), estimativa de memória; só então decodifica. Recusados: SVG, HTML disfarçado, GIF, WebP animado, PNG animado, truncado, malformado, 48 MP, 900 MP em 0,8 MB. Nome do cliente nunca chega ao disco. Não há busca por URL (sem SSRF).
+
+### 35.6 Orçamento de memória e de tempo (medidos)
+
+Ambiente de referência: `memory_limit` 128 MB, `upload_max_filesize` 5 MB, `post_max_size` 6 MB. Estimativa = `largura x altura x 4 bytes x 1,0 + bytes do arquivo + 40 MB` de base (framework e variantes maiores) contra 90% do `memory_limit` (115,2 MiB). Tudo em `config/media.php`; a conta do limite prático existe **uma só vez**, em `GdImageInspector::effectiveMegapixels()`, e é usada na mensagem de recusa e na tela de envio (`limits.max_megapixels`, com `limits.nominal_megapixels` ao lado), que não repetem o número.
+
+**Teto nominal 20 MP x limite prático 18 MP.** O teto nominal (`media.limits.max_megapixels`, 20) é a barreira 3 e vale em qualquer ambiente. O limite prático é o que a memória comporta: com 128 MB sobram `115,2 - 40 - 5 (arquivo máximo) = 70,2 MiB` para os pixels, ou seja, 18,4 MP, que a tela e as mensagens anunciam como **18**. Com `memory_limit` de 256 MB o limite prático volta ao teto de 20. Como a estimativa soma os bytes reais do arquivo, uma imagem pequena em bytes pode passar de 18: medido, 19,5 MP com 0,3 MB é aceito (estimativa 114,7 MB, **pico real 110 MB**) e 19,7 MP é recusado. Os 18 MP são o que se garante para qualquer arquivo permitido, não um corte rígido. Todas as barreiras, inclusive a de memória, rodam **antes de decodificar**: a recusa de 20 MP, 21 MP e 48 MP tem pico de 31 MB (o da requisição sem imagem). A memória do PHP **não foi aumentada** e nenhuma infraestrutura foi alterada para aceitar imagens maiores. Orçamento de tempo de parede: 5 s por envio; estourar aborta antes de gravar.
+
+Mensagens na interface (conferidas no Chromium): 20 MP, "A imagem tem 20,0 megapixels e é grande demais para ser processada neste servidor, que garante o processamento seguro de até 18 megapixels. Reduza as dimensões e envie de novo."; 21 MP e 48 MP, "A imagem tem 48,0 megapixels. O máximo é 18 megapixels."; o modal de envio mostra "Até 5 MB e 18 megapixels"; a ajuda explica a diferença para o teto de 20. Testes: `test_the_practical_megapixel_limit_is_central_applied_before_decoding_and_told_to_the_user` (128 MB dá 18, 256 MB dá 20, 16 MP e 18 MP exatos aceitos, 20 MP e 21 MP recusados sem decodificar, tela e recusa com o mesmo número).
+
+### 35.7 EXIF, GPS e orientação (PD2-13): prova comparativa
+
+Os derivados são recodificados pelo GD, sem nenhum metadado. O original privado mantém os bytes enviados, com EXIF e GPS, e só sai por rota autorizada.
+
+**Decisão: leitura mínima da orientação em PHP puro** (`ExifOrientationReader`: até 64 KB, valida cada deslocamento, nunca lê GPS, devolve 1 se algo estiver malformado) mais rotação e espelhamento no GD, aplicados sobre a variante já reduzida. A extensão `exif` **não é necessária** e o `Dockerfile` não foi alterado.
+
+**Comparação medida** (`tests/Performance/s08-exif-compare.php`, corpus `s08-corpus.php`: 400x300, quadrantes vermelho, verde, azul e amarelo mais um marcador, com EXIF de câmera, data e GPS; PHP 8.5.13, GD `bundled (2.1.0 compatible)`, extensão `exif` ausente). "Esperado" é a definição da especificação EXIF para cada orientação, escrita de forma independente do código sob teste. Cada letra é a cor lida no centro de cada quadrante da imagem exibida (topo esquerdo, topo direito, base esquerda, base direita):
+
+```
+PHP 8.5.13, GD bundled (2.1.0 compatible), extensão exif: ausente
+
+EXIF esperado  | GD sem correção      | processamento atual (maior variante) | metadados nos derivados | tempo/pico
+1   400x300 RGBY | 400x300 RGBY OK        | 400x300 RGBY (w400) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 8 ms, 31 MB
+2   400x300 GRYB | 400x300 RGBY ERRADO    | 400x300 GRYB (w400) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 7 ms, 31 MB
+3   400x300 YBGR | 400x300 RGBY ERRADO    | 400x300 YBGR (w400) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 9 ms, 31 MB
+4   400x300 BYRG | 400x300 RGBY ERRADO    | 400x300 BYRG (w400) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 22 ms, 31 MB
+5   300x400 RBGY | 400x300 RGBY ERRADO    | 160x213 RBGY (w160) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 12 ms, 31 MB
+6   300x400 BRYG | 400x300 RGBY ERRADO    | 160x213 BRYG (w160) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 18 ms, 31 MB
+7   300x400 YGBR | 400x300 RGBY ERRADO    | 160x213 YGBR (w160) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 17 ms, 31 MB
+8   300x400 GYRB | 400x300 RGBY ERRADO    | 160x213 GYRB (w160) OK         | sem APP1/APP13/COM, sem EXIF/GPS | 5 ms, 31 MB
+
+GD sem correção: 1 de 8 orientações corretas (esperado: apenas a 1). Processamento atual: 8 de 8 corretas e limpas.
+```
+
+Leitura: o **GD sem correção acerta apenas a orientação 1** (7 de 8 erradas: nas orientações 2 a 4 espelha ou gira o conteúdo; nas 5 a 8 ainda entrega 400x300 em vez de retrato). O **processamento atual acerta as 8**: conteúdo na posição correta, eixos trocados em 5 a 8 (retrato, proporção 3:4 conferida) e, como as variantes nunca ampliam, a largura de 300 px de origem produz 160x213. Em **todas as variantes** de **todas as orientações** não há segmento APP1, APP13 nem comentário que não seja a assinatura `CREATOR: gd-jpeg` do próprio GD (versão e qualidade, sem dado da câmera ou do usuário), e as cadeias `Exif`, `GPS`, `CameraMaker`, `Model-S08` e a data não aparecem. Tempo de 5 a 17 ms e pico de 31 MB por imagem. Compatibilidade: `imagecreatefromjpeg`, `imageflip` e `imagerotate` do GD empacotado do contêiner bastam; EXIF malformado é ignorado sem erro (teste dedicado).
+
+**Testes automatizados:** `test_gd_without_correction_fails_orientations_2_to_8_and_the_current_pipeline_fixes_all_eight_without_metadata` (1000x800, 3 variantes por orientação: a linha de base do GD só acerta a 1; as 24 variantes têm quadrantes, formato, proporção e dimensões cadastradas corretos, nenhum segmento de metadados e o original idêntico ao enviado), `test_all_eight_exif_orientations_produce_the_correctly_oriented_derivative`, `test_derivatives_drop_exif_and_gps_while_the_private_original_keeps_its_bytes` e `test_malformed_exif_is_ignored_safely`. Limitação mantida: só o JPEG carrega orientação nesta solução; PNG e WebP seguem sem rotação, como o formato os define.
+
+### 35.8 Atomicidade, exclusão conservadora e resíduos
+
+Ordem: valida e gera os derivados em memória, grava arquivos (originais e derivados), abre a transação (trava do dono), grava linhas e auditoria. Se qualquer passo falhar, `DiscardMediaFilesAction` compensa e remove o que foi gravado. Pontos de falha controlados provados: antes de gravar, na escrita de uma variante, no insert do banco, antes do commit e por estouro de tempo. Mídia incompleta nunca fica visível: a linha só existe depois dos arquivos. Interrupção abrupta do processo é tratada por `php artisan media:purge`, que só olha os discos e prefixos gerenciados, respeita 60 minutos de carência para não tocar em envio em andamento, tem `--dry-run` realmente somente leitura, é idempotente e não é agendado. Exclusão: sem uso, remove tudo (arquivos e linhas); em uso, a mídia fica `removal_requested` (auditado) e sai quando deixar de ser usada (`RemoveUnusedMediaAction`, reutilizável pelos eventos de publicação das etapas S10 e S11). O contrato de uso é `MediaUsageChecker` (hoje sem consumidores, sem tabelas fictícias). Falha de remoção ou arquivo já ausente não deixa estado inconsistente.
+
+### 35.9 Desempenho medido (corpus reproduzível `tests/Performance/s08-corpus.php`, 8 repetições, processo novo, 128 MB)
+
+| Caso | Resultado | Média ms | p95 ms | Pico MB | Original | Derivados |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| JPEG 1600x1200 | aceito, 3 variantes | 153 | 159 | 42 | 0,55 MB | 713 KB |
+| JPEG 12 MP | aceito | 377 | 400 | 80 | 3,45 MB | 613 KB |
+| JPEG 12 MP progressivo | aceito | 405 | 427 | 80 | 2,11 MB | 613 KB |
+| JPEG 17 MP | aceito | 611 | 672 | 100 | 3,64 MB | 882 KB |
+| JPEG 18 MP | aceito | 647 | 737 | 104 | 3,68 MB | 928 KB |
+| JPEG 20 MP | recusado (orçamento de memória; mensagem do limite de 18 MP) | 17 | 59 | 31 | 4,09 MB | n/a |
+| JPEG 19,5 MP, 0,3 MB (borda) | aceito, 3 variantes | 489 | n/a | 110 | 0,31 MB | 45 KB |
+| JPEG 19,7 MP, 0,3 MB (borda) | recusado (orçamento de memória) | n/a | n/a | 31 | 0,31 MB | n/a |
+| JPEG 21 MP | recusado (20 MP) | 8 | 11 | 31 | 4,29 MB | n/a |
+| JPEG 48 MP | recusado (20 MP), sem erro fatal | 7 | 9 | 31 | 0,74 MB | n/a |
+| PNG 30000x30000, 0,8 MB | recusado (lado máximo) | 6 | 6 | 31 | 0,83 MB | n/a |
+| PNG 8 MP | aceito | 395 | 409 | 85 | 0,06 MB | 64 KB |
+| WebP 12 MP | aceito | 565 | 617 | 87 | 0,15 MB | 50 KB |
+| PNG com alfa | aceito | 67 | 82 | 34 | 0,01 MB | 4 KB |
+| JPEG com EXIF 6 e EXIF malformado | aceitos | 6 e 149 | 7 e 163 | 31 e 42 | n/a | n/a |
+| SVG, HTML, GIF, PNG e WebP animados, truncados | recusados | 5 a 7 | 6 a 8 | 24 a 31 | n/a | n/a |
+
+Nenhum caso gerou erro fatal nem resíduo. Pior caso aceito: 104 MB de 128 MB e 0,74 s de 5 s.
+
+### 35.10 PostgreSQL 18, concorrência e FrankenPHP
+
+Laboratório descartável `tests/Performance/s08-lab.sh` (PostgreSQL 18 em tmpfs, rede interna, FrankenPHP com 1 e 2 workers, volume e rede com rótulo `s08`).
+
+- **Banco** (`s08-sql.sh`, `s08-sql-fk.sh`): migration, rollback e reaplicação; SQL direto inválido recusado por CHECK (uso, MIME, status, dimensão, `sha256`), FK composta (empresa de outra conta, unidade de outra empresa, variante de outra empresa), `UNIQUE` de caminho e `RESTRICT` na exclusão; consulta por empresa e por unidade usa `media_assets_owner_created_index`.
+- **Concorrência real** (`s08-race.sh`, processos PHP independentes sobre PostgreSQL): 8 envios simultâneos do mesmo arquivo (8 linhas, 8 caminhos próprios, sem deduplicação entre linhas); 6 arquivos diferentes (pico até 104 MB cada); contas A e B em paralelo (cada uma com as suas linhas); envio, edição e exclusão da mesma mídia (a exclusão vence, as edições tardias recebem 404 limpo, sem variante órfã); falhas misturadas a válidos (só as válidas gravam); `media:purge` em paralelo com 4 envios (nenhum envio perdido). Em todas: arquivos no disco = linhas de `media_assets` + `media_variants` (22 = 22; 93 = 93), nenhum temporário e nenhuma variante sem pai. "Edição durante o processamento" não se aplica: o processamento é síncrono e a linha só existe depois dele. Falha de variante em envio paralelo foi coberta por falha controlada (35.8), não por uma corrida real.
+- **FrankenPHP HTTP** (`s08-http.php`, 22 requisições por rodada): 2 workers, 60 rodadas (cerca de 1.300 requisições) e 3 clientes em paralelo; 1 worker, 40 rodadas (cerca de 880). Alterna contas, empresas, unidades e usuários (administrador, consulta, editor, gestor de unidade, conta B), envios válidos e inválidos, edições e exclusões. Esperado e obtido: 204 nos permitidos, 403 ou 404 nos negados, 422 nas recusas, sem caminho interno em nenhuma resposta, sem dado da conta A na listagem da B. Envio: média 166 ms, p95 174 a 187 ms. Memória dos processos: 304 para 313 MB em 60 rodadas com 2 workers e 270 para 301 MB com 1 worker, com platô (sem crescimento linear). Zero ocorrências de erro fatal ou falta de memória nos logs. Nas execuções paralelas, os 404 de exclusão são os clientes disputando a mesma mídia, esperado.
+
+### 35.11 Chromium (`tests/Browser/s08-journeys.mjs`, 1440, 1024, 768, 390 e 320 px)
+
+49 verificações, 0 falhas, sem erro de JavaScript nem resposta 5xx (a rodada final incluiu 20 MP recusado com a mensagem do limite de 18 MP e o modal anunciando "Até 5 MB e 18 megapixels"): estado vazio, envio com uso, texto alternativo e licença, miniatura autorizada carregando, recusas com mensagem (48 MP, HTML disfarçado, truncado no servidor; SVG e GIF já no seletor) e **Salvar volta a ficar desabilitado**, detalhes com variantes sem caminho privado, edição, filtro, exclusão, biblioteca da unidade com a corporativa só para consulta, outra unidade indisponível, usuário de consulta sem Enviar, teclado (Enter abre, foco entra no modal, Escape fecha), ausência de rolagem horizontal e modais dentro da tela nas cinco larguras, botão Tutorial desta tela e artigo da Central de Ajuda. Capturas conferidas por inspeção (320 e 390 px).
+
+### 35.12 Defeitos encontrados nas provas e corrigidos
+
+1. **`<img>` e download recebiam o HTML inicial da aplicação** (a rota de arquivo passava pela regra "GET sem JSON devolve o shell"): `ResolveOrganizationContext` agora deixa as rotas de variante e original seguirem para a autorização. Teste de regressão com `Accept` de navegador (falha sem a correção, provado).
+2. **Artigo de ajuda de mídia retornava 404** por falta de entrada em `HelpCatalog` e de `account.media.*` em `visibleSlugsFor`. Corrigido, com teste.
+3. **Dropzone mantinha Salvar habilitado com arquivo recusado e não deixava trocar de arquivo.** Nova opção `removeOnError` no `FileDropzone` (padrão inalterado) e o modal só limpa a mensagem quando há novo arquivo.
+4. Mensagem do Dropzone com linhas sobrepostas em telas estreitas (ajuste em `Media.css`).
+5. A recusa por memória não informava o limite e a tela anunciava 20 MP, quando o prático é 18: o cálculo foi centralizado em `effectiveMegapixels()` e passou a alimentar a recusa, a tela e a ajuda.
+6. Os testes de entrega de arquivo usavam `Accept` de API e por isso não viram o defeito 1.
+
+### 35.13 Regressão
+
+Suíte PHP, PHPStan, Pint, `permissions:sync` (108 permissões), `audit:check` (21 modelos), `organization:check`, `institutional:check`, `npm run check`, build e 20 testes de frontend: ver 35.14. A única falha da suíte no contêiner de desenvolvimento (`ProfileUpdateTest`, e-mail) depende de `MAIL_MAILER` e passa com `MAIL_MAILER=array`, como já registrado nas etapas anteriores; não é da S08.
+
+### 35.14 Resultado final da verificação
+
+Suíte PHP: **490 testes, 6.855 asserções, todos verdes** (com `MAIL_MAILER=array`; a última referência, da S07, era 451 e 6.132; `MediaLibraryTest` tem 39 testes). PHPStan sem erros, Pint limpo (663 arquivos), `permissions:sync` (108), `audit:check` (21 modelos), `organization:check` e `institutional:check` sem violações, `npm run check` e build sem erros, 20 testes de frontend, PostgreSQL 18, concorrência, FrankenPHP e Chromium (49 verificações) conforme 35.10 e 35.11, repetidos depois da última alteração de código. Laboratório removido ao fim (nenhum container `s08` ativo).
+
+### 35.15 Pendências e decisões que exigem o responsável
+
+- **PD2-05 (armazenamento e CDN de produção): pendente.** O laboratório usa disco local.
+- O limite prático de 18 MP depende do `memory_limit` (35.6). Aumentar o limite do PHP é decisão de infraestrutura e não foi feito.
+- Integração da biblioteca com o Perfil Institucional (logo, banners, galeria, compartilhamento) não foi feita: o contrato de uso (`MediaUsageChecker`) e a exclusão conservadora estão prontos para as S10 e S11; nenhuma imagem é publicada.
+- Texto alternativo obrigatório e marca de decorativa serão exigidos no uso (S10); a S08 guarda o campo e avisa na biblioteca.
+- Push e merge da S08 (o commit local foi autorizado; push e merge seguem dependendo do responsável).
+
+### 35.16 Fechamento e homologação técnica (27/11/2026)
+
+Lacunas fechadas: prova comparativa de EXIF (35.7) e limite prático de memória (35.6). Conferências finais, todas no laboratório descartável: `tests/Performance/s08-public-probe.sh` (nenhuma rota estática, caminho do armazenamento ou `public/` entrega imagem: 403 ou 404 nos caminhos adivinhados, 302 para o login nas rotas de arquivo sem sessão; nenhum arquivo de mídia sob `public/`; diretórios de armazenamento com modo 700; nenhum temporário; arquivos no disco = linhas de `media_assets` + `media_variants`, 215 = 215; `media:purge --dry-run` sem resíduos). Concorrência (`s08-race.sh`), HTTP no FrankenPHP (330 requisições) e Chromium refeitos depois da última alteração. **Dependências de infraestrutura:** nenhuma nova; PD2-05 (armazenamento e CDN de produção) permanece pendente e **não** foi resolvida. Commit local exclusivo da S08, sem push, sem merge, sem deploy e sem migrations em bases oficiais.

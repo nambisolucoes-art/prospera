@@ -9,6 +9,7 @@ use App\Domains\Institucional\Application\Data\Profile\Sections\HoursWeeklyValue
 use App\Domains\Institucional\Domain\Enums\ProfileSectionType;
 use App\Domains\Institucional\Domain\Exceptions\InvalidHourException;
 use App\Domains\Institucional\Domain\ValueObjects\Hours\Shifts;
+use App\Domains\Midia\Application\Queries\ListMediaResiduesQuery;
 use App\Domains\Organizacao\Application\Queries\Establishments\ListTimezoneDatesQuery;
 use App\Support\IanaTimezone;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,10 @@ use Illuminate\Validation\ValidationException;
  */
 final readonly class ListInstitutionalViolationsQuery
 {
-    public function __construct(private ListTimezoneDatesQuery $timezoneDates) {}
+    public function __construct(
+        private ListTimezoneDatesQuery $timezoneDates,
+        private ListMediaResiduesQuery $mediaResidues,
+    ) {}
 
     /** @return list<string> */
     public function execute(): array
@@ -189,6 +193,25 @@ final readonly class ListInstitutionalViolationsQuery
             }
 
             $previous = $exception;
+        }
+
+        // Mídia (S08): arquivos sem linha, linhas sem arquivo e ativos sem variantes. O `media:purge` remove os resíduos.
+        $media = $this->mediaResidues->execute((int) config('media.orphan_grace_minutes'));
+
+        foreach ($media['orphan_originals'] as $path) {
+            $violations[] = "Resíduo de mídia: original {$path} no armazenamento sem linha no banco (use media:purge).";
+        }
+
+        foreach ($media['orphan_variants'] as $path) {
+            $violations[] = "Resíduo de mídia: derivado {$path} no armazenamento sem linha no banco (use media:purge).";
+        }
+
+        foreach ($media['missing_files'] as $id) {
+            $violations[] = "Mídia {$id} tem arquivo ausente no armazenamento.";
+        }
+
+        foreach ($media['without_variants'] as $id) {
+            $violations[] = "Mídia {$id} está sem variantes: não pode ficar utilizável.";
         }
 
         return $violations;

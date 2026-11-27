@@ -30,7 +30,10 @@ final readonly class ResolveOrganizationContext
 
         // A abertura direta só entrega o HTML inicial, sem dados. A aplicação pede a página em JSON,
         // passa por esta validação e mostra a orientação quando a unidade não está disponível.
-        if ($request->isMethodSafe() && ! $request->expectsJson()) {
+        // Arquivos de mídia são lidos por <img> e download, que não pedem JSON: seguem direto para a autorização da rota.
+        $file = $request->routeIs('account.*.media.variant', 'account.*.media.original');
+
+        if ($request->isMethodSafe() && ! $request->expectsJson() && ! $file) {
             $shell = ApiPage::respond();
 
             return $shell instanceof Response ? $shell : response($shell);
