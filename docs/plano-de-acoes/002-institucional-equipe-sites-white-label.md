@@ -2356,3 +2356,89 @@ Suíte PHP: **490 testes, 6.855 asserções, todos verdes** (com `MAIL_MAILER=ar
 ### 35.16 Fechamento e homologação técnica (27/11/2026)
 
 Lacunas fechadas: prova comparativa de EXIF (35.7) e limite prático de memória (35.6). Conferências finais, todas no laboratório descartável: `tests/Performance/s08-public-probe.sh` (nenhuma rota estática, caminho do armazenamento ou `public/` entrega imagem: 403 ou 404 nos caminhos adivinhados, 302 para o login nas rotas de arquivo sem sessão; nenhum arquivo de mídia sob `public/`; diretórios de armazenamento com modo 700; nenhum temporário; arquivos no disco = linhas de `media_assets` + `media_variants`, 215 = 215; `media:purge --dry-run` sem resíduos). Concorrência (`s08-race.sh`), HTTP no FrankenPHP (330 requisições) e Chromium refeitos depois da última alteração. **Dependências de infraestrutura:** nenhuma nova; PD2-05 (armazenamento e CDN de produção) permanece pendente e **não** foi resolvida. Commit local exclusivo da S08, sem push, sem merge, sem deploy e sem migrations em bases oficiais.
+
+## 36. S09: Perfil público do colaborador (27/11/2026)
+
+**Estado: S09 bloqueada por decisão PD2-07.** Nenhum código, migration, permissão ou tela foi criado. A S10 não foi iniciada. Registro documental versionado só na branch local `docs/pd2-07-proposta`, sem push, merge ou deploy.
+
+### 36.1 Gate de início
+
+- A PD2-07 continua **pendente** (seção 23, linha da PD2-07). Foram pesquisados o plano, `docs/convencoes/`, `docs/entregas/` e o histórico do Git: não existe decisão posterior aprovada, texto de consentimento, base legal nem política de retenção.
+- Os campos técnicos de consentimento previstos (`photo_consent_at`, `consent_text_version`, `consent_recorded_by`) não substituem essa decisão.
+- Git na conferência: `origin/main` em `73dc951` (merge da S08); a cópia local estava na branch `fix/componentes-padrao-bold` (correções de componentes, já publicada), fora da `main`. A branch `feat/s09-perfil-publico-colaborador` **não foi criada**, porque o gate não está satisfeito.
+- Constatação sobre o código: `employee_photo`, `team_display` e as quatro permissões da S09 (`edit-profile`, `publish-profile`, `consent`, `select-team`) existem só nas convenções (`institucional.md` e `permissoes.md`), não no código. A última migration é a da S08 (`2026_11_29_000001_create_media_library`).
+
+### 36.2 Registro para decisão do responsável (PD2-07)
+
+As propostas abaixo são **minutas sujeitas a revisão jurídica**. Nada foi aprovado.
+
+| # | Ponto | Proposta | Decisão |
+| --- | --- | --- | --- |
+| 1 | Finalidades | F1: exibir nome público e função no site da empresa. F2: exibir departamento. F3: exibir e-mail e telefone **profissionais** da lotação. F4: exibir foto. F5: apresentar o colaborador na equipe de uma unidade. Cada finalidade corresponde a uma flag `show_*` ou à foto, e nada é público por padrão | Pendente |
+| 2 | Fundamento jurídico | Proposta de partida: consentimento (LGPD, art. 7º, I) para foto, por ser imagem de pessoa natural, com revogação a qualquer tempo. Para nome, função e contato profissional, avaliar se bastam legítimo interesse do controlador, com teste de balanceamento, ou se também exigem consentimento. **A escolha é jurídica e não foi feita** | Pendente |
+| 3 | Texto ao colaborador | Texto curto por finalidade, em português claro, com: quem expõe, o quê, onde (sites da empresa), por quanto tempo, como revogar e a consequência da revogação. Redação a cargo do responsável e da revisão jurídica | Pendente |
+| 4 | Forma e evidência | Opções: (a) termo assinado, digitalizado e guardado na biblioteca de mídia com propósito próprio; (b) registro assistido, em que a pessoa autorizada declara ter recebido a manifestação, com identificação de quem declarou e referência do documento. O esquema atual não tem campo para "manifestado por" nem referência de evidência | Pendente |
+| 5 | Versão imutável | `consent_text_version` aponta para um texto versionado e imutável (arquivo versionado em `docs/` ou tabela de versões somente de inclusão). Alterar o texto cria versão nova; não reescreve a anterior | Pendente |
+| 6 | Quem registra | `consent_recorded_by` é a *membership* do operador, com `account.employees.consent` (só `company`). Precisa decidir como constar **em nome de quem**: o próprio colaborador, ou representante com poderes | Pendente |
+| 7 | Revogação | Pedida pelo colaborador ao responsável da empresa, que executa `RevokePhotoConsentAction` na hora (síncrona). Define-se o canal e o prazo máximo de atendimento | Pendente |
+| 8 | Retenção | Prazo de guarda do registro do consentimento e da evidência após revogação ou desligamento; destino do arquivo original da foto e dos derivados (hoje a S08 apaga derivados na revogação e mantém a exclusão conservadora do original) | Pendente |
+| 9 | Troca de foto | Se o consentimento cobre qualquer foto da pessoa para a finalidade, ou só aquela imagem. Proposta conservadora: **nova foto exige novo registro** | Pendente |
+| 10 | Responsabilidades | Quem na empresa autoriza a exposição, responde pelo texto apresentado e atende pedidos de revogação (controlador, operador e encarregado) | Pendente |
+
+### 36.3 Divergências a resolver antes de implementar
+
+1. **Efeito da revogação nos demais campos.** `institucional.md` diz que sem consentimento o colaborador "perde a publicação por política" (exposição opt-in, linha de elegibilidade), mas a regra de elegibilidade e o DA2-20 exigem consentimento só **para foto**. Decidir se revogar a foto despublica o perfil inteiro ou retira só a foto. Em qualquer caso a foto revogada nunca é servida.
+2. **Escopo do título da PD2-07.** O título fala em "foto **e contato**", mas o plano só prevê consentimento de foto. Decidir se a exposição de contato profissional também exige registro.
+3. **Histórico de consentimentos.** O esquema guarda um único par `photo_consent_at` e `photo_consent_revoked_at` por perfil. Um segundo consentimento depois de uma revogação sobrescreveria o primeiro. O histórico ficaria só no `AuditLog`. Decidir se isso basta como evidência ou se é preciso uma tabela de registros somente de inclusão (mudaria o modelo previsto).
+4. **Evidência.** Sem campo para "manifestado por" e referência da evidência (item 4 acima), o modelo não permite distinguir o operador de quem consentiu.
+
+### 36.4 Análise técnica já feita (sem implementação)
+
+- **Reaproveitável:** permissões `company`/`establishment` e `permissions:sync`, `AuditLog::transaction()`, `ProfileResolver` e a seção `team_display`, a S05 (contato efetivo por lotação, modo `inherit`/`override`), a S07 (data civil do fuso IANA) e a S08 (propósito `employee_photo`, derivados controlados, exclusão conservadora).
+- **A criar depois da aprovação:** migration `employee_public_profiles` conforme a seção 09.7 (FK composta `(employee_id, company_id)` e `(photo_media_id, company_id)`, único por `employee_id`, constraints de estado), `EmployeePublicProfile`, `EmployeeEligibilityQuery`, `PublicEmployeeResource` com allowlist, as Actions de salvar, publicar, despublicar, registrar e revogar consentimento e `SaveUnitTeamSelectionAction`.
+- **Contrato da revogação (falhar fechado):** primeiro gravar `photo_consent_revoked_at` e desvincular a foto na transação; só depois apagar derivados. A rota de mídia deve consultar a revogação antes de entregar o arquivo, para que um erro na limpeza física nunca reabra o acesso. A S11 consumirá a invalidação por `content_version`, ainda inexistente.
+- **Não habilitar:** coleta de consentimento, publicação de dado pessoal e qualquer acesso público.
+
+### 36.5 Decisões necessárias do responsável
+
+1. Aprovar ou ajustar os itens 1 a 10 da seção 36.2, com a revisão jurídica.
+2. Resolver as divergências 1 a 4 da seção 36.3.
+3. Informar o texto aprovado, sua versão e a data. Com isso, registro a PD2-07 como aprovada e executo a S09 completa (banco, concorrência, FrankenPHP, Chromium e regressão).
+4. Dizer se a branch `fix/componentes-padrao-bold` entra na `main` antes, para a S09 partir dela.
+
+### 36.6 Deliberação preliminar da PD2-07 (27/11/2026): proposta, não aprovada
+
+**A PD2-07 continua pendente.** Esta seção registra as direções de arquitetura propostas ao responsável. Nenhuma foi aprovada juridicamente, e a S09 não foi iniciada.
+
+**Direção proposta para as divergências da seção 36.3**
+
+| Divergência | Direção proposta (aguarda aprovação) |
+| --- | --- |
+| 1. Efeito da revogação | A **revogação da foto** retira só a foto: remove da exposição, desvincula a referência publicável e impede nova entrega, na hora. Os demais campos continuam elegíveis **somente** se tiverem fundamento jurídico e autorização de exposição independentes. **Revogar o perfil inteiro** é outra operação, com despublicação integral |
+| 2. Contato profissional | E-mail e telefone profissionais são **finalidades específicas**, com controles independentes e desligados por padrão. Preencher o contato na lotação não autoriza a divulgação. A base legal será definida na revisão jurídica |
+| 3. Histórico | Histórico **imutável** de manifestações (concessões, revogações, versões do texto, evidências). Os campos de estado atual em `employee_public_profiles` servem à leitura operacional e não substituem o histórico |
+| 4. Titular e operador | Registrar **separadamente** o titular que manifestou a vontade e o usuário que lançou no sistema, com canal, data, finalidade, versão do texto e referência privada da evidência. Lançamento do operador não equivale a consentimento do titular |
+
+**Estrutura em estudo: `employee_public_consent_events` (append-only)**
+
+Campos conceituais: id; conta, empresa e colaborador; finalidade específica; evento (concessão ou revogação); data e hora; versão do texto; hash ou referência da versão integral; identidade do titular; representante, quando legalmente aplicável; *membership* de quem registrou; canal; referência privada da evidência; operação de auditoria.
+
+- Leitura, retenção e exclusão seguem a política jurídica aprovada.
+- Sem duplicar documentos pessoais e sem devolver comprovantes nas respostas da aplicação.
+- Isso **altera o modelo previsto** na seção 09.7 e no DA2-20 (acrescenta uma tabela e finalidades por campo). Se aprovada, exige emenda formal ao plano antes da migration.
+
+**Minuta DRAFT-01: NÃO APROVADA, aguardando revisão jurídica (elaborada em 27/11/2026)**
+
+> **Autorização de uso de imagem profissional.** Autorizo, de forma opcional, a utilização da minha fotografia profissional por [CONTROLADOR], exclusivamente para minha identificação e apresentação no perfil institucional e nas páginas públicas da organização, conforme as finalidades descritas no aviso de privacidade disponibilizado.
+>
+> Estou ciente de que posso solicitar a retirada da fotografia pelos canais informados por [CONTROLADOR], sem prejuízo das demais informações profissionais que possuam fundamento próprio para divulgação.
+>
+> A fotografia não será publicada antes do registro válido desta autorização e da publicação expressa do perfil.
+
+Esta minuta não define base legal, controlador, retenção, compartilhamentos, efeito da negativa nem procedimento de revogação. **Não usar em produção nem como formulário de consentimento válido.** A exposição de contatos profissionais terá comunicação própria, com finalidade e fundamento aprovados.
+
+**Revisão necessária.** Submeter ao responsável jurídico ou encarregado designado, pedindo validação expressa de: texto, base legal por finalidade, procedimento de manifestação, evidências, efeitos da negativa, retenção e responsabilidades de controlador e operador. Só depois registrar a versão aprovada, a data efetiva, a identidade do aprovador e o documento de evidência. Ao registrar, a PD2-07 muda de "Pendente" para "Aprovada" na seção 23.
+
+**Branch de componentes.** `fix/componentes-padrao-bold` está **um commit à frente** da `main`, sem divergência (`ded549a`, conferido em 27/11/2026). Reúne as correções dos componentes visuais e formulários. Recomendada a integração **antes e independente** da S09, depois de revisar o diff e rodar as regressões pertinentes, sem alterar contratos de dados, autorização nem testes homologados. **Merge não realizado:** depende de autorização operacional.
+
+**Estado:** S01 a S08 preservadas; S09 não iniciada; nenhum consentimento coletado; nenhum perfil exposto; nenhum deploy nem migration oficial. Pendente: versão final da minuta, aprovada pelo responsável, antes de liberar a implementação.
