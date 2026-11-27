@@ -12,6 +12,7 @@ use App\Domains\Colaboradores\UI\Controllers\JobTitleController;
 use App\Domains\Etiquetas\UI\Controllers\TagController;
 use App\Domains\Institucional\UI\Controllers\InstitutionalHoursController;
 use App\Domains\Institucional\UI\Controllers\InstitutionalProfileController;
+use App\Domains\Midia\UI\Controllers\MediaController;
 use App\Domains\Organizacao\Domain\ValueObjects\OrganizationCode;
 use App\Domains\Organizacao\UI\Controllers\CompanyController;
 use App\Domains\Organizacao\UI\Controllers\EstablishmentContextController;
@@ -295,6 +296,9 @@ Route::middleware(['auth', 'verified', 'account'])
         Route::get('institucional', [InstitutionalProfileController::class, 'index'])
             ->name('institutional.index');
 
+        // S08: entrada da biblioteca de mídia: as empresas e unidades que o acesso alcança.
+        Route::get('midia', [MediaController::class, 'owners'])->name('media.owners');
+
         // S04: colaboradores de todas as empresas do acesso, numa só tela, com uma linha por pessoa. Cada operação
         // confere a permissão sobre a empresa do vínculo ou sobre as empresas escolhidas no cadastro.
         Route::get('colaboradores', [EmployeeController::class, 'index'])
@@ -400,6 +404,14 @@ Route::middleware(['auth', 'verified', 'account'])
                     ->name('institutional.exceptions.destroy');
                 Route::patch('institucional/fuso', [InstitutionalHoursController::class, 'setTimezone'])
                     ->name('institutional.timezone');
+                // S08: biblioteca de mídia. Os arquivos só saem por estas rotas autenticadas e autorizadas.
+                Route::get('midia', [MediaController::class, 'index'])->name('media.index');
+                Route::post('midia', [MediaController::class, 'store'])->name('media.store');
+                Route::get('midia/{midia}', [MediaController::class, 'show'])->name('media.show');
+                Route::patch('midia/{midia}', [MediaController::class, 'update'])->name('media.update');
+                Route::delete('midia/{midia}', [MediaController::class, 'destroy'])->name('media.destroy');
+                Route::get('midia/{midia}/variantes/{variante}', [MediaController::class, 'variant'])->name('media.variant');
+                Route::get('midia/{midia}/original', [MediaController::class, 'original'])->name('media.original');
             });
 
         // E07: escritas comerciais nomeiam a empresa responsável; nunca há empresa escolhida pelo sistema.
@@ -457,5 +469,13 @@ Route::middleware(['auth', 'verified', 'account'])
                     ->name('institutional.exceptions.destroy');
                 Route::get('institucional/excecoes/impacto', [InstitutionalHoursController::class, 'impact'])
                     ->name('institutional.exceptions.impact');
+                // S08: biblioteca de mídia. Os arquivos só saem por estas rotas autenticadas e autorizadas.
+                Route::get('midia', [MediaController::class, 'index'])->name('media.index');
+                Route::post('midia', [MediaController::class, 'store'])->name('media.store');
+                Route::get('midia/{midia}', [MediaController::class, 'show'])->name('media.show');
+                Route::patch('midia/{midia}', [MediaController::class, 'update'])->name('media.update');
+                Route::delete('midia/{midia}', [MediaController::class, 'destroy'])->name('media.destroy');
+                Route::get('midia/{midia}/variantes/{variante}', [MediaController::class, 'variant'])->name('media.variant');
+                Route::get('midia/{midia}/original', [MediaController::class, 'original'])->name('media.original');
             });
     });

@@ -229,6 +229,44 @@ export function tourFor(
         ? [at('institutional-address', 'Exibir endereço', 'O endereço é o do cadastro do estabelecimento e nunca é copiado. Por padrão não é público. Ligue a opção só se quiser exibi-lo.')]
         : [at('hours-units', 'Unidades agora', 'Cada unidade mostra se está aberta, fechada ou com horário não informado agora, e se herda o horário da empresa ou tem o próprio.')]),
     ];
+  } else if (path === '/conta/midia') {
+    title = 'Mídia';
+    help = 'midia';
+    steps = [
+      at(
+        'media-owners',
+        'Empresas e estabelecimentos',
+        'A lista traz as empresas e os estabelecimentos cuja biblioteca de imagens o seu acesso alcança. Abra a biblioteca da empresa (corporativa e locais) ou a de uma unidade.',
+      ),
+    ];
+  } else if (/^\/conta\/(empresa|estabelecimento)\/[a-z0-9][a-z0-9-]{1,39}\/midia$/.test(path)) {
+    const unit = path.startsWith('/conta/estabelecimento/');
+    title = 'Mídia';
+    help = 'midia';
+    steps = [
+      at(
+        'media-upload',
+        'Enviar imagem',
+        'Envie JPEG, PNG ou WebP de até 5 MB. O tipo é conferido pelo conteúdo e a imagem é otimizada durante o envio, sem metadados. Enviar não publica nada: a imagem só fica na biblioteca.',
+      ),
+      at(
+        'media-filters',
+        'Filtros',
+        'Filtre por uso (logotipo, banner, galeria, foto profissional e imagem de compartilhamento), por biblioteca (corporativa ou local) e busque no texto alternativo.',
+      ),
+      at(
+        'media-grid',
+        'Imagens da biblioteca',
+        unit
+          ? 'Cada cartão abre os detalhes: texto alternativo, licença, variantes e exclusão. A biblioteca corporativa da empresa aparece só para consulta; a biblioteca local é da unidade. Imagens sem texto alternativo trazem um aviso.'
+          : 'Cada cartão abre os detalhes: texto alternativo, licença, variantes, download do original e exclusão. A empresa gerencia a biblioteca corporativa e as bibliotecas locais. Imagem em uso não é apagada: a exclusão fica solicitada.',
+      ),
+      at(
+        'media-empty',
+        'Biblioteca vazia',
+        'Sem imagens, use Enviar imagem para incluir a primeira. Nada é publicado automaticamente.',
+      ),
+    ];
   } else if (path === '/conta/colaboradores') {
     title = 'Colaboradores';
     help = 'colaboradores';

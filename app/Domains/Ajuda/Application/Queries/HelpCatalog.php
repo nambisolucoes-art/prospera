@@ -82,6 +82,7 @@ final class HelpCatalog
             'fornecedores' => ! $user->is_saas_admin && $can('account.suppliers'),
             'etiquetas' => ! $user->is_saas_admin && $can('account.tags'),
             'perfil-institucional' => ! $user->is_saas_admin && $can('account.institutional'),
+            'midia' => ! $user->is_saas_admin && $can('account.media'),
             'colaboradores' => ! $user->is_saas_admin && $can('account.employees'),
             'departamentos-funcoes' => ! $user->is_saas_admin
                 && ($can('account.departments') || $can('account.job-titles')),

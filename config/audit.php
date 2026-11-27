@@ -2,6 +2,7 @@
 
 use App\Domains\Acessos\Domain\Models\Permission;
 use App\Domains\Auditoria\Domain\Models\AuditRecord;
+use App\Domains\Midia\Domain\Models\MediaVariant;
 use App\Domains\Organizacao\Domain\Models\Company;
 use App\Domains\Plataforma\Domain\Enums\AccountInspectionMode;
 
@@ -28,6 +29,7 @@ return [
         'employee-assignment' => 'Lotação',
         'profile-section' => 'Seção do perfil institucional',
         'hour-exception' => 'Exceção de horário',
+        'media-asset' => 'Mídia',
         'public-category' => 'Categoria pública',
         'permission-catalog' => 'Catálogo de permissões',
     ],
@@ -96,6 +98,10 @@ return [
             'mode' => ['inherit' => 'Herdar', 'override' => 'Personalizado', 'disabled' => 'Desativado'],
             'published_mode' => ['inherit' => 'Herdar', 'override' => 'Personalizado', 'disabled' => 'Desativado'],
         ],
+        'media-asset' => [
+            'purpose' => ['logo' => 'Logotipo', 'banner' => 'Banner', 'gallery' => 'Imagem de galeria', 'employee_photo' => 'Foto profissional', 'og_image' => 'Imagem de compartilhamento'],
+            'status' => ['ready' => 'Pronta', 'removal_requested' => 'Exclusão solicitada'],
+        ],
         'hour-exception' => [
             'kind' => ['holiday' => 'Feriado', 'temporary_closure' => 'Fechamento temporário', 'special_hours' => 'Horário especial'],
         ],
@@ -106,6 +112,7 @@ return [
         ],
     ],
     'excluded_models' => [
+        MediaVariant::class => 'Derivado técnico de uma mídia: a auditoria é a do ativo (media-asset), que o contém.',
         AuditRecord::class => 'Histórico imutável, sem auditoria recursiva.',
         Permission::class => 'Catálogo gerado pelo código, auditado por SyncPermissionsAction.',
     ],

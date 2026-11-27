@@ -47,6 +47,24 @@ return [
             'report' => false,
         ],
 
+        // S08: originais privados e derivados processados. Nenhum dos dois fica sob `public/`: derivado processado não é
+        // derivado autorizado para exposição pública, que só existirá com a publicação (S11).
+        'media-originals' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/media'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
+        'media-variants' => [
+            'driver' => 'local',
+            'root' => storage_path('app/media-variants'),
+            'visibility' => 'private',
+            'throw' => true,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

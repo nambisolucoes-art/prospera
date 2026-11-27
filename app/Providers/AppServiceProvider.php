@@ -12,6 +12,14 @@ use App\Domains\Auditoria\Application\Actions\AuditContext;
 use App\Domains\Auditoria\Application\Actions\AuditLog;
 use App\Domains\Institucional\Application\Context\HoursResolver;
 use App\Domains\Institucional\Application\Context\ProfileResolver;
+use App\Domains\Midia\Domain\Contracts\ImageInspector;
+use App\Domains\Midia\Domain\Contracts\ImageVariantFactory;
+use App\Domains\Midia\Domain\Contracts\MediaPipelineProbe;
+use App\Domains\Midia\Domain\Contracts\MediaStorage;
+use App\Domains\Midia\Infrastructure\Imaging\GdImageInspector;
+use App\Domains\Midia\Infrastructure\Imaging\GdVariantFactory;
+use App\Domains\Midia\Infrastructure\Storage\DiskMediaStorage;
+use App\Domains\Midia\Infrastructure\Storage\NullMediaPipelineProbe;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
@@ -39,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(OrganizationContext::class);
         $this->app->scoped(ProfileResolver::class);
         $this->app->scoped(HoursResolver::class);
+        $this->app->bind(MediaStorage::class, DiskMediaStorage::class);
+        $this->app->bind(ImageInspector::class, GdImageInspector::class);
+        $this->app->bind(ImageVariantFactory::class, GdVariantFactory::class);
+        $this->app->bind(MediaPipelineProbe::class, NullMediaPipelineProbe::class);
     }
 
     /**

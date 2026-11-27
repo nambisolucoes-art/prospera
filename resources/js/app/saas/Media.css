@@ -1,0 +1,108 @@
+.media__filters {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) minmax(200px, 2fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.media__search {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+
+.media__search-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.media__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.media__card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid var(--bold-color-border, #e5e7eb);
+}
+
+.media__thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  padding: 0;
+  overflow: hidden;
+  background: #f3f4f6;
+  border: 0;
+  cursor: pointer;
+}
+
+.media__thumb img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.media__nothumb {
+  color: var(--bold-color-text-muted);
+  font-size: 12px;
+}
+
+.media__meta {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px 10px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.media__pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.media__preview {
+  display: block;
+  max-width: 100%;
+  max-height: 320px;
+  margin: 0 auto 12px;
+  object-fit: contain;
+  background: #f3f4f6;
+}
+
+.media__variants {
+  width: 100%;
+}
+
+.media__upload .fileDropzone {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .media__filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .media__grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+}
+
+/* A mensagem do Dropzone herda uma altura de linha menor que a fonte e as linhas se sobrepõem em telas estreitas. */
+.media__upload .dropzone .dz-message {
+  line-height: 1.4;
+  margin: 2.5rem 1rem;
+}

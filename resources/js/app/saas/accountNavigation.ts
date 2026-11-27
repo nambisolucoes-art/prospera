@@ -80,6 +80,9 @@ export function accountNavigation(
     ...(permissions.includes('account.institutional.view')
       ? [{ key: 'institutional', label: 'Perfil institucional', href: '@/institucional', iconClass: 'ti-brush-alt' }]
       : []),
+    ...(permissions.includes('account.media.list')
+      ? [{ key: 'media', label: 'Mídia', href: '@/midia', iconClass: 'ti-image' }]
+      : []),
     ...entry(permissions, 'employees', { key: 'employees', label: 'Colaboradores', href: '@/colaboradores', iconClass: 'ti-notepad' }, '@/colaboradores/cadastrar'),
     ...entry(permissions, 'departments', { key: 'departments', label: 'Departamentos', href: '@/departamentos', iconClass: 'ti-layout-accordion-list' }),
     ...entry(permissions, 'job-titles', { key: 'job-titles', label: 'Funções', href: '@/funcoes', iconClass: 'ti-bookmark-alt' }),
