@@ -6,11 +6,11 @@ O workflow `.github/workflows/ci.yml` roda as verificações essenciais em todo 
 
 | Check | O que roda | Equivale localmente a |
 | --- | --- | --- |
-| **Backend / PHP** | `composer install` pelo `composer.lock`, Pint, PHPStan, `php artisan test` (SQLite em memória) | `composer test` (mesmas três etapas, separadas para mostrar qual falhou) |
+| **Backend / PHP** | `composer install` pelo `composer.lock`, `npm ci` e `vite build` (as views exigem o manifesto), Pint, PHPStan, `php artisan test` (SQLite em memória) | `composer test` (mesmas três etapas, separadas para mostrar qual falhou) |
 | **Frontend / TypeScript e build** | `npm ci`, `npm run check`, `npm run test:frontend`, `vite build` | `npm run check && npm run test:frontend && npm run build` |
-| **Banco / PostgreSQL 18 e verificações** | migrations em banco limpo, `permissions:sync`, `audit:check`, `organization:check`, `institutional:check`, rollback completo e nova aplicação, nenhuma migration pendente | os mesmos comandos num PostgreSQL 18 descartável |
+| **Banco / PostgreSQL 18 e verificações** | migrations em banco limpo, `permissions:sync`, `audit:check`, `organization:check`, `institutional:check`, rollback da última migration e nova aplicação, nenhuma migration pendente | os mesmos comandos num PostgreSQL 18 descartável |
 
-Os três rodam em paralelo. O frontend roda `vite build` direto porque `npm run build` repetiria o `npm run check` da etapa anterior.
+O rollback completo não é possível por projeto: `2026_11_20_000008_remove_single_role_from_users` é irreversível e exige cópia anterior. Os três jobs rodam em paralelo. O frontend roda `vite build` direto porque `npm run build` repetiria o `npm run check` da etapa anterior.
 
 ## Ambiente
 

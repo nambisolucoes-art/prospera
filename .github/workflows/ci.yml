@@ -59,6 +59,17 @@ jobs:
       - name: Composer install (composer.lock)
         run: .github/ci/php.sh composer install --no-interaction --prefer-dist --no-progress
 
+      # As views exigem o manifesto do Vite (public/build, ignorado pelo Git); sem ele, ErrorScreensTest falha.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assets que as views exigem (npm ci e vite build)
+        run: |
+          npm ci --no-audit --no-fund
+          npx vite build
+
       - name: Pint (composer lint:check)
         run: .github/ci/php.sh composer lint:check
 
@@ -165,9 +176,11 @@ jobs:
       - name: institutional:check
         run: .github/ci/php.sh php artisan institutional:check --no-interaction
 
-      - name: Rollback completo e nova aplicação das migrations
+      # Um rollback completo não é possível por projeto: `2026_11_20_000008_remove_single_role_from_users` é irreversível
+      # (exige cópia anterior). Prova-se o rollback da migration mais recente e a reaplicação dela.
+      - name: Rollback da última migration e nova aplicação
         run: |
-          .github/ci/php.sh php artisan migrate:rollback --force --no-interaction
+          .github/ci/php.sh php artisan migrate:rollback --step=1 --force --no-interaction
           .github/ci/php.sh php artisan migrate --force --no-interaction
 
       - name: Nenhuma migration pendente
