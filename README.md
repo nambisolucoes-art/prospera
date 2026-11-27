@@ -54,6 +54,7 @@ A raiz encaminha para o login ou para o painel correspondente ao usuário. O cad
 - Telas de empresa e de estabelecimento usam o código na URL (`/contas/{conta}/estabelecimento/{codigo}`). Na barra superior, a área de trabalho permite selecionar uma ou várias unidades navegáveis e salvar um padrão pessoal por conta. Aplicar a seleção muda apenas a aba atual. Endereços `~/` em `ApiLink`, `ApiForm` e `useContextUrl` são resolvidos no contexto da página. Veja [Contexto organizacional](docs/convencoes/contexto-organizacional.md).
 - `npm run check` valida a arquitetura e os tipos. `npm run build` também gera a distribuição do frontend.
 - `npm run test:frontend` executa os testes de contrato do frontend (`tests/Frontend`) com o `node --test` nativo.
+- Todo Pull Request para a `main` roda o CI no GitHub Actions (backend, frontend e PostgreSQL 18). Detalhes e como reproduzir localmente em [docs/convencoes/ci.md](docs/convencoes/ci.md).
 - As rotas de tela retornam HTML no acesso direto pelo navegador e dados quando a aplicação solicita `Accept: application/json`. As requisições de escrita usam a sessão e a proteção CSRF do Laravel. Erros de validação retornam HTTP 422 com mensagens por campo.
 - O catálogo em `resources/data/municipios-ibge.json` guarda códigos, nomes e UFs do snapshot de novembro de 2026 da API de Localidades do IBGE. O seletor consulta esse arquivo pelo endpoint interno `/api/localidades/municipios`. [Fonte do catálogo](https://servicodados.ibge.gov.br/api/docs/localidades)
 

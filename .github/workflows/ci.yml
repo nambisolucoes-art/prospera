@@ -1,0 +1,187 @@
+# Integração contínua do Prospera. Documentação: docs/convencoes/ci.md.
+# Só lê o repositório: sem secrets, sem deploy, sem banco ou recurso de produção.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Um commit novo no mesmo PR cancela a execução anterior desse PR. Outras branches e a `main` não se cancelam.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI_IMAGE: prospera-ci:dev
+
+jobs:
+  backend:
+    name: Backend / PHP
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Imagem de desenvolvimento (PHP 8.5, FrankenPHP)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: dev
+          load: true
+          push: false
+          tags: ${{ env.CI_IMAGE }}
+          cache-from: type=gha,scope=php-dev
+          cache-to: type=gha,scope=php-dev,mode=max
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/composer-cache
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Chave da aplicação (efêmera)
+        run: echo "APP_KEY=base64:$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
+      - name: Composer install (composer.lock)
+        run: .github/ci/php.sh composer install --no-interaction --prefer-dist --no-progress
+
+      # As views exigem o manifesto do Vite (public/build, ignorado pelo Git); sem ele, ErrorScreensTest falha.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assets que as views exigem (npm ci e vite build)
+        run: |
+          npm ci --no-audit --no-fund
+          npx vite build
+
+      - name: Pint (composer lint:check)
+        run: .github/ci/php.sh composer lint:check
+
+      - name: PHPStan (composer types:check)
+        run: .github/ci/php.sh composer types:check
+
+      - name: Testes PHP (artisan test, SQLite em memória)
+        run: .github/ci/php.sh php artisan test --compact
+
+      - name: Nenhum arquivo versionado foi alterado pela execução
+        run: git diff --exit-code
+
+  frontend:
+    name: Frontend / TypeScript e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: npm ci (package-lock.json)
+        run: npm ci --no-audit --no-fund
+
+      - name: Arquitetura e tipos (npm run check)
+        run: npm run check
+
+      - name: Testes frontend (npm run test:frontend)
+        run: npm run test:frontend
+
+      # `npm run build` repetiria o `npm run check` acima; aqui roda só a geração dos assets.
+      - name: Build (vite build)
+        run: npx vite build
+
+      - name: Nenhum arquivo versionado foi alterado pela execução
+        run: git diff --exit-code
+
+  database:
+    name: Banco / PostgreSQL 18 e verificações
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: prospera_ci
+          POSTGRES_PASSWORD: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d prospera_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      CI_DB_HOST: 127.0.0.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Imagem de desenvolvimento (PHP 8.5, FrankenPHP)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: dev
+          load: true
+          push: false
+          tags: ${{ env.CI_IMAGE }}
+          cache-from: type=gha,scope=php-dev
+          cache-to: type=gha,scope=php-dev,mode=max
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/composer-cache
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Chave da aplicação (efêmera)
+        run: echo "APP_KEY=base64:$(openssl rand -base64 32)" >> "$GITHUB_ENV"
+
+      - name: Composer install (composer.lock)
+        run: .github/ci/php.sh composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Migrations em banco limpo
+        run: .github/ci/php.sh php artisan migrate --force --no-interaction
+
+      - name: permissions:sync
+        run: .github/ci/php.sh php artisan permissions:sync --no-interaction
+
+      - name: audit:check
+        run: .github/ci/php.sh php artisan audit:check --no-interaction
+
+      - name: organization:check
+        run: .github/ci/php.sh php artisan organization:check --no-interaction
+
+      - name: institutional:check
+        run: .github/ci/php.sh php artisan institutional:check --no-interaction
+
+      # Um rollback completo não é possível por projeto: `2026_11_20_000008_remove_single_role_from_users` é irreversível
+      # (exige cópia anterior). Prova-se o rollback da migration mais recente e a reaplicação dela.
+      - name: Rollback da última migration e nova aplicação
+        run: |
+          .github/ci/php.sh php artisan migrate:rollback --step=1 --force --no-interaction
+          .github/ci/php.sh php artisan migrate --force --no-interaction
+
+      - name: Nenhuma migration pendente
+        run: .github/ci/php.sh php artisan migrate:status --pending --no-interaction

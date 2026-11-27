@@ -18,6 +18,7 @@ Leia só a linha que corresponde à tarefa. Do plano 001 ou 002, só a seção d
 | Pessoas, contatos, endereços, clientes e fornecedores | [Pessoas e contatos](docs/convencoes/pessoas-e-contatos.md) |
 | Colaboradores, departamentos, funções, lotações, perfil institucional, horários, mídia, sites, diretório e domínios | [Institucional, equipe e sites](docs/convencoes/institucional.md) e, se a tarefa for de uma etapa, o [plano 002](docs/plano-de-acoes/002-institucional-equipe-sites-white-label.md) |
 | Consultas, serviços com estado, cache, jobs e índices | [Performance](docs/convencoes/performance.md) |
+| Workflow do GitHub Actions, checks de Pull Request e proteção da `main` | [Integração contínua](docs/convencoes/ci.md) |
 
 Registros históricos de entregas ficam em `docs/entregas/`: não são convenção e só se leem quando a tarefa pedir.
 
